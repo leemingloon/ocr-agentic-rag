@@ -1,0 +1,37 @@
+```
+
+Save this file as `Dockerfile` in your project root.
+
+---
+
+### **Step 3: Create .dockerignore**
+
+Create a `.dockerignore` file to exclude unnecessary files:
+```
+# .dockerignore
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+dist
+build
+.env
+.venv
+venv/
+ENV/
+models/cache/
+*.db
+.pytest_cache
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.vscode/
+*.md
+README.md

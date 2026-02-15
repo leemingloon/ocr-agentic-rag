@@ -67,6 +67,7 @@ dependencies = [
     "langgraph (>=1.0.8,<2.0.0)",
     "torch (>=2.0.0,<3.0.0)",        # ✅ ADD THIS
     "torchvision (>=0.15.0,<1.0.0)", # ✅ ADD THIS
+    "ray[default] (>=2.53.0,<3.0.0)",
 ]
 
 

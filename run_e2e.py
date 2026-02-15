@@ -49,17 +49,17 @@ from examples.full_e2e_demo import run_full_e2e_demo
 from evaluation import credit_risk_eval
 
 
-def run_demo(mode: str, s3_bucket: str = None):
+def run_demo(mode: str, s3_bucket: str = None, dry_run: bool = False):
     """Run single sample demo"""
     print("\n" + "="*70)
     print("Running Single Sample Demo")
     print("="*70)
     
     from examples.full_e2e_demo import run_full_e2e_demo
-    run_full_e2e_demo(mode=mode, s3_bucket=s3_bucket)
+    run_full_e2e_demo(mode=mode, s3_bucket=s3_bucket, dry_run=dry_run)
 
 
-def run_evaluation(mode: str, s3_bucket: str = None):
+def run_evaluation(mode: str, s3_bucket: str = None, dry_run: bool = False):
     """Run full evaluation suite"""
     print("\n" + "="*70)
     print(f"Running Full Evaluation Suite - {mode.upper()} Mode")
@@ -105,7 +105,7 @@ def run_evaluation(mode: str, s3_bucket: str = None):
         except Exception as e:
             print(f"⚠ Could not upload to S3: {e}")
 
-def run_evaluation_sagemaker(s3_bucket: str):
+def run_evaluation_sagemaker(s3_bucket: str, dry_run: bool = False):
     """Run evaluation with S3 integration"""
     
     print("="*60)
@@ -201,7 +201,6 @@ Examples:
         help="S3 bucket for SageMaker mode"
     )
     
-    # NEW: Dry-run mode
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -210,9 +209,8 @@ Examples:
     
     args = parser.parse_args()
     
-    # Set environment variable for dry-run mode
+    # Print dry-run status
     if args.dry_run:
-        os.environ["DRY_RUN_MODE"] = "true"
         print("🧪 DRY-RUN MODE: No API calls will be made (testing pipeline only)")
         print("="*70)
     
@@ -224,7 +222,7 @@ Examples:
     
     # Run
     if args.mode == "sagemaker":
-        run_evaluation_sagemaker(s3_bucket=args.s3_bucket)
+        run_evaluation_sagemaker(s3_bucket=args.s3_bucket, dry_run=args.dry_run)
     else:
         from examples.full_e2e_demo import run_full_e2e_demo
         run_full_e2e_demo(mode=args.mode, dry_run=args.dry_run)
