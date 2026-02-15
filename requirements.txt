@@ -1,0 +1,76 @@
+# Core Python
+python-dotenv
+
+# OCR
+opencv-python
+pytesseract
+paddleocr
+onnxruntime
+
+# Multimodal Vision
+anthropic
+
+# RAG - Embeddings
+sentence-transformers
+FlagEmbedding
+
+# RAG - Retrieval
+llama-index
+llama-index-core
+faiss-cpu
+rank-bm25
+
+# RAG - Agentic
+langgraph
+langchain
+langchain-anthropic
+
+# Credit Risk - ML Models (NEW)
+xgboost
+scikit-learn
+lightgbm
+
+# Credit Risk - NLP (NEW)
+transformers
+torch
+
+# Credit Risk - Explainability (NEW)
+shap
+
+# Credit Risk - Monitoring (NEW)
+scipy
+evidently
+
+# Data Processing
+pandas
+numpy
+pillow
+
+# Evaluation
+datasets
+ragas
+rouge-score
+
+# Monitoring
+opentelemetry-api
+opentelemetry-sdk
+prometheus-client
+
+# Utilities
+tqdm
+pyyaml
+
+# SageMaker Integration (NEW)
+boto3
+sagemaker
+
+# Database
+sqlalchemy
+
+# Testing
+pytest
+pytest-cov
+
+# Optional: Jupyter for SageMaker
+jupyter
+notebook

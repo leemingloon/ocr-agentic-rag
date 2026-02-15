@@ -1,0 +1,63 @@
+from setuptools import setup, find_packages
+
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
+setup(
+    name="ocr-agentic-rag",
+    version="1.0.0",
+    author="Lee Ming Loon",
+    author_email="your.email@example.com",
+    description="End-to-end OCR and Agentic RAG pipeline for financial documents",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/yourusername/ocr-agentic-rag",
+    packages=find_packages(),
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+    ],
+    python_requires=">=3.10",
+    install_requires=[
+        "python-dotenv>=1.0.1",
+        "opencv-python>=4.9.0",
+        "pillow>=10.2.0",
+        "pytesseract>=0.3.10",
+        "pdf2image>=1.17.0",
+        "torch>=2.1.2",
+        "torchvision>=0.16.2",
+        "onnxruntime>=1.17.0",
+        "paddlepaddle>=2.6.0",
+        "paddleocr>=2.7.3",
+        "sentence-transformers>=2.3.1",
+        "transformers>=4.37.2",
+        "FlagEmbedding>=1.2.5",
+        "llama-index>=0.9.48",
+        "faiss-cpu>=1.7.4",
+        "rank-bm25>=0.2.2",
+        "langgraph>=0.0.26",
+        "langchain>=0.1.6",
+        "anthropic>=0.18.1",
+        "datasets>=2.16.1",
+        "ragas>=0.1.5",
+        "pandas>=2.2.0",
+        "numpy>=1.26.3",
+        "pydantic>=2.5.3",
+        "opentelemetry-api>=1.22.0",
+        "tqdm>=4.66.1",
+    ],
+    extras_require={
+        "dev": [
+            "pytest>=7.4.0",
+            "pytest-cov>=4.1.0",
+            "black>=23.7.0",
+            "flake8>=6.1.0",
+            "mypy>=1.5.0",
+        ],
+    },
+)
