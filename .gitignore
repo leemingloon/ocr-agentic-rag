@@ -132,7 +132,7 @@ __pycache__/
 
 
 # Ignore all data by default
-/data/**
+# /data/**
 
 # Except small datasets you want to keep (force add)
 # !data/data_structure.txt

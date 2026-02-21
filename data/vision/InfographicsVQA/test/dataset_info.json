@@ -1,0 +1,124 @@
+{
+  "builder_name": "parquet",
+  "citation": "",
+  "config_name": "InfographicVQA",
+  "dataset_name": "doc_vqa",
+  "dataset_size": 3613961669,
+  "description": "",
+  "download_checksums": {
+    "hf://datasets/lmms-lab/DocVQA@539088ef8a8ada01ac8e2e6d4e372586748a265e/InfographicVQA/validation-00000-of-00004.parquet": {
+      "num_bytes": 63414360,
+      "checksum": null
+    },
+    "hf://datasets/lmms-lab/DocVQA@539088ef8a8ada01ac8e2e6d4e372586748a265e/InfographicVQA/validation-00001-of-00004.parquet": {
+      "num_bytes": 72073153,
+      "checksum": null
+    },
+    "hf://datasets/lmms-lab/DocVQA@539088ef8a8ada01ac8e2e6d4e372586748a265e/InfographicVQA/validation-00002-of-00004.parquet": {
+      "num_bytes": 57944291,
+      "checksum": null
+    },
+    "hf://datasets/lmms-lab/DocVQA@539088ef8a8ada01ac8e2e6d4e372586748a265e/InfographicVQA/validation-00003-of-00004.parquet": {
+      "num_bytes": 73025844,
+      "checksum": null
+    },
+    "hf://datasets/lmms-lab/DocVQA@539088ef8a8ada01ac8e2e6d4e372586748a265e/InfographicVQA/test-00000-of-00004.parquet": {
+      "num_bytes": 61666878,
+      "checksum": null
+    },
+    "hf://datasets/lmms-lab/DocVQA@539088ef8a8ada01ac8e2e6d4e372586748a265e/InfographicVQA/test-00001-of-00004.parquet": {
+      "num_bytes": 81462058,
+      "checksum": null
+    },
+    "hf://datasets/lmms-lab/DocVQA@539088ef8a8ada01ac8e2e6d4e372586748a265e/InfographicVQA/test-00002-of-00004.parquet": {
+      "num_bytes": 73056068,
+      "checksum": null
+    },
+    "hf://datasets/lmms-lab/DocVQA@539088ef8a8ada01ac8e2e6d4e372586748a265e/InfographicVQA/test-00003-of-00004.parquet": {
+      "num_bytes": 80997771,
+      "checksum": null
+    }
+  },
+  "download_size": 563640423,
+  "features": {
+    "questionId": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "question": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "answers": {
+      "feature": {
+        "dtype": "string",
+        "_type": "Value"
+      },
+      "_type": "List"
+    },
+    "answer_type": {
+      "feature": {
+        "dtype": "string",
+        "_type": "Value"
+      },
+      "_type": "List"
+    },
+    "image": {
+      "_type": "Image"
+    },
+    "image_url": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "operation/reasoning": {
+      "feature": {
+        "dtype": "string",
+        "_type": "Value"
+      },
+      "_type": "List"
+    },
+    "ocr": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "data_split": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 4177602092,
+  "splits": {
+    "validation": {
+      "name": "validation",
+      "num_bytes": 1707333336,
+      "num_examples": 2801,
+      "shard_lengths": [
+        700,
+        901,
+        1000,
+        200
+      ],
+      "dataset_name": "doc_vqa"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 1906628333,
+      "num_examples": 3288,
+      "shard_lengths": [
+        922,
+        922,
+        922,
+        522
+      ],
+      "dataset_name": "doc_vqa"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

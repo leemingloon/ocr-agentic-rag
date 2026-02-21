@@ -1,0 +1,56 @@
+{
+  "builder_name": "parquet",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "financial_phrasebank",
+  "dataset_size": 329431,
+  "description": "",
+  "download_checksums": {
+    "hf://datasets/FinanceMTEB/financial_phrasebank@14efe6ac2635395e768682e0b91ce794b50c7ff3/data/train-00000-of-00001.parquet": {
+      "num_bytes": 104087,
+      "checksum": null
+    },
+    "hf://datasets/FinanceMTEB/financial_phrasebank@14efe6ac2635395e768682e0b91ce794b50c7ff3/data/test-00000-of-00001.parquet": {
+      "num_bytes": 80229,
+      "checksum": null
+    }
+  },
+  "download_size": 184316,
+  "features": {
+    "text": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "label_text": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "label": {
+      "dtype": "int64",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 513747,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 183446,
+      "num_examples": 1264,
+      "dataset_name": "financial_phrasebank"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 145985,
+      "num_examples": 1000,
+      "dataset_name": "financial_phrasebank"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

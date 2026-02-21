@@ -1,0 +1,195 @@
+data_structure.json - 0.03 MB
+extract_folder_structure.py - 0.01 MB
+__pycache__/
+    extract_folder_structure.cpython-311.pyc - 0.01 MB
+credit_risk/
+    prompts.db - 0.02 MB
+    README.md - 0.01 MB
+    ECTSum/
+        dataset_dict.json - 0.00 MB
+        test/
+            data-00000-of-00001.arrow - 8.43 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        train/
+            data-00000-of-00001.arrow - 29.09 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+    FiQA/
+        dataset_dict.json - 0.00 MB
+        test/
+            data-00000-of-00001.arrow - 0.03 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        train/
+            data-00000-of-00001.arrow - 0.12 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        valid/
+            data-00000-of-00001.arrow - 0.02 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+    FinanceBench/
+        dataset_dict.json - 0.00 MB
+        train/
+            data-00000-of-00001.arrow - 0.83 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+    LendingClub/
+        LoanStats3a.csv - 40.44 MB
+        LendingClub.zip - 9.18 MB
+ocr/
+    FUNSD/
+        testing_data/
+            .DS_Store - 0.01 MB
+            annotations/
+                87528380.json - 0.14 MB
+                87594142_87594144.json - 0.13 MB
+                91814768_91814769.json - 0.11 MB
+                47 files, total 2.54 MB
+            images/
+                85240939.png - 0.17 MB
+                87137840.png - 0.15 MB
+                87528380.png - 0.14 MB
+                47 files, total 3.62 MB
+        training_data/
+            .DS_Store - 0.01 MB
+            annotations/
+                0000999294.json - 0.15 MB
+                91161344_91161347.json - 0.12 MB
+                13149651.json - 0.10 MB
+                146 files, total 7.61 MB
+            images/
+                00922237.png - 0.19 MB
+                11508234.png - 0.14 MB
+                88547278_88547279.png - 0.13 MB
+                146 files, total 11.03 MB
+    SROIE/
+        SROIE2019/
+            test/
+                box/
+                    X51007846283.txt - 0.01 MB
+                    X51008042787.txt - 0.01 MB
+                    X51006912976.txt - 0.00 MB
+                    344 files, total 0.82 MB
+                entities/
+                    X51006334742.txt - 0.00 MB
+                    X51006828201.txt - 0.00 MB
+                    X51006619869.txt - 0.00 MB
+                    344 files, total 0.06 MB
+                img/
+                    X51007846358.jpg - 4.06 MB
+                    X51007846283.jpg - 3.15 MB
+                    X51006913018.jpg - 3.12 MB
+                    344 files, total 185.89 MB
+            train/
+                box/
+                    X51005663297.txt - 0.01 MB
+                    X51007846368.txt - 0.01 MB
+                    X51006414713.txt - 0.01 MB
+                    623 files, total 1.47 MB
+                entities/
+                    X51006387813.txt - 0.00 MB
+                    X51008123586.txt - 0.00 MB
+                    X51008114284.txt - 0.00 MB
+                    623 files, total 0.11 MB
+                img/
+                    X51007846305.jpg - 3.46 MB
+                    X51006913019.jpg - 3.22 MB
+                    X51007846301.jpg - 3.16 MB
+                    623 files, total 328.53 MB
+proof/
+    ocr_FUNSDAdapter.json - 0.00 MB
+    ocr_SROIEAdapter.json - 0.00 MB
+    vision_DocVQAAdapter.json - 0.00 MB
+rag/
+    FinQA/
+        dataset_dict.json - 0.00 MB
+        train/
+            data-00000-of-00001.arrow - 0.19 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+    HotpotQA/
+        dataset_dict.json - 0.00 MB
+        test/
+            data-00000-of-00001.arrow - 43.88 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        train/
+            data-00001-of-00002.arrow - 264.09 MB
+            data-00000-of-00002.arrow - 263.34 MB
+            dataset_info.json - 0.00 MB
+            1 files, total 0.00 MB
+        validation/
+            data-00000-of-00001.arrow - 44.69 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+    TAT-QA/
+        tatqa_dataset_train.json - 12.25 MB
+        tatqa_dataset_test_gold.json - 2.07 MB
+        tatqa_dataset_dev.json - 1.56 MB
+        1 files, total 1.09 MB
+vision/
+    AI2D/
+        dataset_dict.json - 0.00 MB
+        test/
+            data-00001-of-00002.arrow - 289.68 MB
+            data-00000-of-00002.arrow - 243.67 MB
+            dataset_info.json - 0.00 MB
+            1 files, total 0.00 MB
+    ChartQA/
+        dataset_dict.json - 0.00 MB
+        test/
+            data-00000-of-00001.arrow - 102.12 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        train/
+            data-00002-of-00003.arrow - 411.44 MB
+            data-00001-of-00003.arrow - 406.52 MB
+            data-00000-of-00003.arrow - 380.56 MB
+            2 files, total 0.00 MB
+        val/
+            data-00000-of-00001.arrow - 80.32 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+    DUDE/
+        DUDE_sample_OCR.tar.gz - 30.65 MB
+        DUDE_binaries.tar.gz - 4.81 MB
+        DUDE_sample_dataset.json - 0.20 MB
+        2 files, total 0.00 MB
+    DocVQA/
+        train_v1.0_withQT.json - 11.03 MB
+        val_v1.0_withQT.json - 1.52 MB
+        test_v1.0.json - 1.10 MB
+        1 files, total 0.00 MB
+        test/
+            data-00007-of-00008.arrow - 613.08 MB
+            data-00003-of-00008.arrow - 494.93 MB
+            data-00006-of-00008.arrow - 488.28 MB
+            7 files, total 1893.65 MB
+        validation/
+            data-00003-of-00008.arrow - 571.29 MB
+            data-00007-of-00008.arrow - 523.92 MB
+            data-00006-of-00008.arrow - 501.93 MB
+            7 files, total 1816.13 MB
+    InfographicsVQA/
+        infographicsVQA_train_v1.0.json - 7.68 MB
+        infographicsVQA_val_v1.0_withQT.json - 1.21 MB
+        infographicsVQA_test_v1.0.json - 1.06 MB
+        1 files, total 0.00 MB
+        test/
+            data-00003-of-00004.arrow - 514.10 MB
+            data-00001-of-00004.arrow - 457.10 MB
+            data-00000-of-00004.arrow - 424.16 MB
+            3 files, total 423.00 MB
+        validation/
+            data-00000-of-00004.arrow - 480.23 MB
+            data-00003-of-00004.arrow - 409.17 MB
+            data-00001-of-00004.arrow - 384.25 MB
+            3 files, total 354.64 MB
+    OmniDocBench/
+        dataset_dict.json - 0.00 MB
+        train/
+            data-00000-of-00001.arrow - 19.23 MB
+            dataset_info.json - 0.01 MB
+            state.json - 0.00 MB

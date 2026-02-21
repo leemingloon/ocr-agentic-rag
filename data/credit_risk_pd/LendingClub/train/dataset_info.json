@@ -1,0 +1,77 @@
+{
+  "builder_name": "parquet",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "lendingclub-benchmark",
+  "dataset_size": 10146224,
+  "description": "",
+  "download_checksums": {
+    "hf://datasets/TheFinAI/lendingclub-benchmark@00a0b8b3c5a7b68bb3a2ec26c1c49a92b4554355/data/train-00000-of-00001.parquet": {
+      "num_bytes": 1164929,
+      "checksum": null
+    },
+    "hf://datasets/TheFinAI/lendingclub-benchmark@00a0b8b3c5a7b68bb3a2ec26c1c49a92b4554355/data/valid-00000-of-00001.parquet": {
+      "num_bytes": 169029,
+      "checksum": null
+    },
+    "hf://datasets/TheFinAI/lendingclub-benchmark@00a0b8b3c5a7b68bb3a2ec26c1c49a92b4554355/data/test-00000-of-00001.parquet": {
+      "num_bytes": 333599,
+      "checksum": null
+    }
+  },
+  "download_size": 1667557,
+  "features": {
+    "id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "query": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "answer": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "choices": {
+      "feature": {
+        "dtype": "string",
+        "_type": "Value"
+      },
+      "_type": "List"
+    },
+    "gold": {
+      "dtype": "int64",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 11813781,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 7102504,
+      "num_examples": 9417,
+      "dataset_name": "lendingclub-benchmark"
+    },
+    "valid": {
+      "name": "valid",
+      "num_bytes": 1014447,
+      "num_examples": 1345,
+      "dataset_name": "lendingclub-benchmark"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 2029273,
+      "num_examples": 2691,
+      "dataset_name": "lendingclub-benchmark"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

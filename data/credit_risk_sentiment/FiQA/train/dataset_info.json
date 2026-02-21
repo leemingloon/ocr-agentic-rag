@@ -1,0 +1,78 @@
+{
+  "builder_name": "parquet",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "fiqa-sentiment-classification",
+  "dataset_size": 170627,
+  "description": "",
+  "download_checksums": {
+    "hf://datasets/TheFinAI/fiqa-sentiment-classification@b669064ceb406dfc33a86a8ddce203b7395a0fa1/data/train-00000-of-00001-aeefa1eadf5be10b.parquet": {
+      "num_bytes": 61772,
+      "checksum": null
+    },
+    "hf://datasets/TheFinAI/fiqa-sentiment-classification@b669064ceb406dfc33a86a8ddce203b7395a0fa1/data/test-00000-of-00001-0fb9f3a47c7d0fce.parquet": {
+      "num_bytes": 26836,
+      "checksum": null
+    },
+    "hf://datasets/TheFinAI/fiqa-sentiment-classification@b669064ceb406dfc33a86a8ddce203b7395a0fa1/data/valid-00000-of-00001-51867fe1ac59af78.parquet": {
+      "num_bytes": 13617,
+      "checksum": null
+    }
+  },
+  "download_size": 102225,
+  "features": {
+    "_id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "sentence": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "target": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "aspect": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "score": {
+      "dtype": "float64",
+      "_type": "Value"
+    },
+    "type": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 272852,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 119670,
+      "num_examples": 822,
+      "dataset_name": "fiqa-sentiment-classification"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 33758,
+      "num_examples": 234,
+      "dataset_name": "fiqa-sentiment-classification"
+    },
+    "valid": {
+      "name": "valid",
+      "num_bytes": 17199,
+      "num_examples": 117,
+      "dataset_name": "fiqa-sentiment-classification"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

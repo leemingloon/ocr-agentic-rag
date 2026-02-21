@@ -1,0 +1,111 @@
+{
+  "builder_name": "json",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "financebench",
+  "dataset_size": 868946,
+  "description": "",
+  "download_checksums": {
+    "hf://datasets/PatronusAI/financebench@e04404e3a97f69f79c14d42f24981a1c9c3bcd18/financebench_merged.jsonl": {
+      "num_bytes": 958087,
+      "checksum": null
+    }
+  },
+  "download_size": 958087,
+  "features": {
+    "financebench_id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "company": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "doc_name": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "question_type": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "question_reasoning": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "domain_question_num": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "question": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "answer": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "justification": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "dataset_subset_label": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "evidence": {
+      "feature": {
+        "evidence_text": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "doc_name": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "evidence_page_num": {
+          "dtype": "int64",
+          "_type": "Value"
+        },
+        "evidence_text_full_page": {
+          "dtype": "string",
+          "_type": "Value"
+        }
+      },
+      "_type": "List"
+    },
+    "gics_sector": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "doc_type": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "doc_period": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "doc_link": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 1827033,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 868946,
+      "num_examples": 150,
+      "dataset_name": "financebench"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

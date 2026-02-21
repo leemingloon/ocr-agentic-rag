@@ -1,0 +1,111 @@
+{
+  "builder_name": "parquet",
+  "citation": "",
+  "config_name": "Finance",
+  "dataset_name": "mmmu",
+  "dataset_size": 13457136,
+  "description": "",
+  "download_checksums": {
+    "hf://datasets/MMMU/MMMU@21d1d90a93c7450d30bddb579d7b510c00b8a9ab/Finance/dev-00000-of-00001.parquet": {
+      "num_bytes": 306446,
+      "checksum": null
+    },
+    "hf://datasets/MMMU/MMMU@21d1d90a93c7450d30bddb579d7b510c00b8a9ab/Finance/validation-00000-of-00001.parquet": {
+      "num_bytes": 1002833,
+      "checksum": null
+    },
+    "hf://datasets/MMMU/MMMU@21d1d90a93c7450d30bddb579d7b510c00b8a9ab/Finance/test-00000-of-00001.parquet": {
+      "num_bytes": 11589188,
+      "checksum": null
+    }
+  },
+  "download_size": 12898467,
+  "features": {
+    "id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "question": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "options": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "explanation": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "image_1": {
+      "_type": "Image"
+    },
+    "image_2": {
+      "_type": "Image"
+    },
+    "image_3": {
+      "_type": "Image"
+    },
+    "image_4": {
+      "_type": "Image"
+    },
+    "image_5": {
+      "_type": "Image"
+    },
+    "image_6": {
+      "_type": "Image"
+    },
+    "image_7": {
+      "_type": "Image"
+    },
+    "img_type": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "answer": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "topic_difficulty": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "question_type": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "subfield": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 26355603,
+  "splits": {
+    "dev": {
+      "name": "dev",
+      "num_bytes": 296364,
+      "num_examples": 5,
+      "dataset_name": "mmmu"
+    },
+    "validation": {
+      "name": "validation",
+      "num_bytes": 1072721,
+      "num_examples": 30,
+      "dataset_name": "mmmu"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 12088051,
+      "num_examples": 355,
+      "dataset_name": "mmmu"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}
