@@ -129,3 +129,31 @@ temp_conversion/
 __pycache__/
 # Ray runtime
 .ray/
+
+
+# Ignore all data by default
+/data/**
+
+# Except small datasets you want to keep (force add)
+# !data/data_structure.txt
+# !data/ocr/FUNSD/testing_data
+# !data/ocr/SROIE/SROIE2019/train/box/**
+# !data/ocr/SROIE/SROIE2019/train/entities/**
+# !data/ocr/SROIE/SROIE2019/test/box/**
+# !data/ocr/SROIE/SROIE2019/test/entities/**
+
+# !data/vision/ChartQA/**
+# !data/vision/DocVQA/**
+# !data/vision/InfographicsVQA/**
+# !data/vision/OmniDocBench/**
+# !data/vision/OmniDocBench/**
+
+# !data/rag/FinQA/**
+# !data/rag/TAT-QA/**
+
+# !data/credit_risk/FiQA/**
+# !data/credit_risk/FinanceBench/**
+
+# Ignore local evaluation related artifacts
+/local_eval/
+mini.py

@@ -34,7 +34,7 @@ try:
 except ImportError:
     ONNX_AVAILABLE = False
     ort = None
-    print("⚠ onnxruntime not available (ONNX mode disabled)")
+    print("onnxruntime not available (ONNX mode disabled)")
 
 try:
     from paddleocr import PaddleOCR
@@ -42,7 +42,7 @@ try:
 except ImportError:
     PADDLEOCR_AVAILABLE = False
     PaddleOCR = None
-    print("⚠ PaddleOCR not available")
+    print("PaddleOCR not available")
 
 
 class PaddleOCRDetector:
@@ -103,7 +103,7 @@ class PaddleOCRDetector:
                 print("✓ PaddleOCR ONNX loaded (12x faster)")
                 return
             except Exception as e:
-                print(f"⚠ ONNX load failed: {e}")
+                print(f"ONNX load failed: {e}")
         
         # Priority 2: Try Microservice
         if self.service_url:
@@ -112,7 +112,7 @@ class PaddleOCRDetector:
                 print(f"✓ PaddleOCR microservice connected: {self.service_url}")
                 return
             else:
-                print(f"⚠ PaddleOCR microservice unavailable at {self.service_url}")
+                print(f"PaddleOCR microservice unavailable at {self.service_url}")
         
         # Priority 3: Try Native PaddleOCR
         if PADDLEOCR_AVAILABLE:
@@ -218,11 +218,11 @@ class PaddleOCRDetector:
                 boxes = [(b['x'], b['y'], b['w'], b['h']) for b in data['boxes']]
                 return boxes
             else:
-                print(f"⚠ Microservice returned status {response.status_code}")
+                print(f"Microservice returned status {response.status_code}")
                 return []
         
         except Exception as e:
-            print(f"⚠ Microservice call failed: {e}")
+            print(f"Microservice call failed: {e}")
             # Fallback: try native if available
             if self.paddle_detector:
                 print("  Falling back to native PaddleOCR...")
@@ -264,7 +264,7 @@ class PaddleOCRDetector:
             return boxes
             
         except Exception as e:
-            print(f"⚠ PaddleOCR detection failed: {e}")
+            print(f"PaddleOCR detection failed: {e}")
             return []
     
     # ========================================

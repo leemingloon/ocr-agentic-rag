@@ -4,13 +4,18 @@ Tesseract OCR Wrapper
 Wrapper around Tesseract with confidence scoring
 and financial document optimization
 """
-
+from email.mime import text
+import os
 import cv2
 import numpy as np
 import pytesseract
 from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
 
+# On local, set tesseract_cmd if environment variable is provided
+tesseract_path = os.environ.get("TESSERACT_CMD")
+if tesseract_path:
+    pytesseract.pytesseract.tesseract_cmd = tesseract_path
 
 @dataclass
 class OCRResult:
@@ -99,7 +104,9 @@ class TesseractOCR:
             config=self.config,
             output_type=pytesseract.Output.DICT
         )
-        
+        if not data['text'][0].strip():
+            print(f"Warning: OCR returned empty text for {preprocessed}")
+
         # Extract text and confidences
         text_parts = []
         word_confidences = []
