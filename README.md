@@ -3,7 +3,7 @@ markdown# OCR→Agentic RAG→Credit Risk Platform
 
 **Complete Document Intelligence + Credit Risk System**  
 **Author:** Lee Ming Loon  
-**Status:** Deployed to AWS Sagemaker. Generating valuation scores on Local PC (in progress). Finally, Production-ready prototype.
+**Status:** Deployed to AWS Sagemaker. Evaluating models on Local PC (in progress on evaluate_on_local branch). Finally, Production-ready prototype.
 
 ---
 
