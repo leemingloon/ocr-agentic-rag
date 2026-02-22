@@ -182,12 +182,12 @@ __pycache__/
 # !data/vision/MMMU_Finance/**
 # !data/vision/MMMU_Math/**
 
-!data/rag/FinQA/**
-!data/rag/TAT-QA/**
+# !data/rag/FinQA/**
+# !data/rag/TAT-QA/**
 
-!data/credit_risk_memo_generator/**
-!data/credit_risk_pd/**
-!data/credit_risk_sentiment/**
+# !data/credit_risk_memo_generator/**
+# !data/credit_risk_pd/**
+# !data/credit_risk_sentiment/**
 
 # Ignore local evaluation related artifacts
 /local_eval/
