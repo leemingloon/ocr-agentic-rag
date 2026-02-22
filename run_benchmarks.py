@@ -9,12 +9,13 @@ Logic preserved:
 - Delete datasets only if automated
 - Supports quick-run via command-line argument
 """
-
 import os
+import io
 import sys
 import cv2
 import time
 import json
+import argparse
 import pytesseract
 import numpy as np
 from PIL import Image
@@ -29,7 +30,10 @@ from dataset_adapters import (
     ChartQAAdapter,
     InfographicsVQAAdapter,
     OmniDocBenchAdapter,
-    MMMUAdapter,
+    MMMUAccountingAdapter,
+    MMMUEconomicsAdapter,
+    MMMUFinanceAdapter,
+    MMMUMathAdapter,
 
     FinQAAdapter,
     TATQAAdapter,
@@ -45,19 +49,13 @@ from dataset_adapters import (
 # ------------------------
 # Tesseract setup
 # ------------------------
-# On local, set tesseract_cmd if environment variable is provided
+# Set tesseract_cmd, if TESSERACT_CMD environment variable is provided
 tesseract_path = os.environ.get("TESSERACT_CMD")
 if tesseract_path:
     pytesseract.pytesseract.tesseract_cmd = tesseract_path
     print("✅ Using Tesseract at:", tesseract_path)
 else:
     print("⚠️ Tesseract executable not found in environment variable 'TESSERACT_CMD'. Make sure to set it if Tesseract is not in your system PATH.")
-# tesseract_path = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-# if os.path.exists(tesseract_path):
-#     pytesseract.pytesseract.tesseract_cmd = tesseract_path
-#     print("✅ Using Tesseract at:", tesseract_path)
-# else:
-#     print("⚠️ Tesseract executable not found at:", tesseract_path)
 
 print("RUNNING FILE:", __file__)
 
@@ -66,8 +64,8 @@ print("RUNNING FILE:", __file__)
 # ------------------------
 AUTO_DATASETS = {
     "ocr": [ # Tesseract 5.x, PaddleOCR (PP-OCRv3 / PP-OCRv4) ONNX optimized
-        ("SROIE", "manual", None, None),
-        ("FUNSD", "manual", None, None),
+        ("SROIE", "hf", "jsdnrs/ICDAR2019-SROIE", None),
+        ("FUNSD", "hf", "nielsr/funsd", None),
     ],
 
     "vision": [ # Claude 3.5 Sonnet
@@ -75,16 +73,19 @@ AUTO_DATASETS = {
         ("ChartQA", "hf", "HuggingFaceM4/ChartQA", "vis-nlp/ChartQA"),
         ("InfographicsVQA", "hf", "lmms-lab/DocVQA", "InfographicVQA"),
         ("OmniDocBench", "hf", "Quivr/OmniDocBench", "full_dataset"),
-        ("MMMU", "hf", "MMMU/MMMU", ["Finance", "Economics", "Accounting", "Math"]),  # manual selection of subjects
+        ("MMMU_Accounting", "hf", "MMMU/MMMU", "Accounting"),
+        ("MMMU_Economics", "hf", "MMMU/MMMU", "Economics"),
+        ("MMMU_Finance", "hf", "MMMU/MMMU", "Finance"),
+        ("MMMU_Math", "hf", "MMMU/MMMU", "Math"),
     ],
 
     "rag": [ # LangGraph, BM25 + BGE-M3
         ("FinQA", "hf", "FinanceMTEB/FinQA", None),
-        ("TAT-QA", "manual", None, None),
+        ("TATQA", "hf", None, None), # "next-tat/TAT-QA"
     ],
 
     "credit_risk_PD": [ # XGBoost
-        ("LendingClub", "manual", None, None),
+        ("LendingClub", "hf", "TheFinAI/lendingclub-benchmark", None),
     ],
 
     "credit_risk_sentiment": [ # FinBERT
@@ -105,10 +106,13 @@ ADAPTER_REGISTRY = {
     "ChartQA": ChartQAAdapter,
     "InfographicsVQA": InfographicsVQAAdapter,
     "OmniDocBench": OmniDocBenchAdapter,
-    "MMMU" : MMMUAdapter,
+    "MMMU_Accounting": MMMUAccountingAdapter,
+    "MMMU_Economics": MMMUEconomicsAdapter,
+    "MMMU_Finance": MMMUFinanceAdapter,
+    "MMMU_Math": MMMUMathAdapter,
 
     "FinQA": FinQAAdapter,
-    "TAT-QA": TATQAAdapter,
+    "TATQA": TATQAAdapter,
 
     "LendingClub": LendingClubAdapter,
     
@@ -127,11 +131,11 @@ from rag_system import HybridRetriever, BGEReranker, AgenticRAG
 from credit_risk import RatioBuilder,TrendEngine, PDModel, NLPSignalExtractor, CounterfactualAnalyzer, RiskMemoGenerator, PromptRegistry, SafetyFilter, DataDriftDetector, PredictionDriftDetector
 
 classical_detector = ClassicalDetector(
-    # min_box_width = 50,
-    # min_box_height = 20,
+    min_box_width = 10, # 50
+    min_box_height = 5, # 20
     # max_box_width = 2000,
     # max_box_height = 500,
-    # morphology_kernel_size = (50, 1),
+    morphology_kernel_size = (20, 1), # (50, 1)
 )
 # hybrid_ocr_pipeline = HybridOCR( # Tesseract 5.5
 #     # tesseract_threshold = 85.0,
@@ -182,6 +186,14 @@ classical_detector = ClassicalDetector(
 #     # local_model_dir = "models/pd"
 # )
 
+EMPTY_OCR_PREDICTION = {
+    "model_output": {
+        "words": [],
+        "bboxes": [],  # [[x1, y1, x2, y2], ...]
+        "confidence": 0.0
+    }
+}
+
 # ------------------------
 # Classical CV + Tesseract OCR
 # ------------------------
@@ -229,55 +241,35 @@ def detect_and_recognize_image(classical_detector, image, template_type="invoice
 # ------------------------
 # Helpers
 # ------------------------
-def extract_image(data, base_dir=None):
-    import cv2
-    import numpy as np
+def extract_image(sample):
+    img = sample.get("image")
+    if hasattr(img, "shape"):
+        return img
     from PIL import Image
-    import io
-
-    img_path = data.get("image") if isinstance(data, dict) else data
-    if isinstance(img_path, Path) and img_path.exists():
-        return cv2.imread(str(img_path))
-    elif isinstance(img_path, Image.Image):
-        return cv2.cvtColor(np.array(img_path), cv2.COLOR_RGB2BGR)
-    else:
-        print(f"[WARN] File not found or unreadable: {img_path}")
-        return None
-
-    if hasattr(data, "shape"):
-        return data
-    if isinstance(data, Image.Image):
-        return np.array(data)
-    if isinstance(data, dict):
-        if "image_path" in data:
-            data = data["image_path"]
-        elif "bytes" in data and data["bytes"] is not None:
-            return np.array(Image.open(io.BytesIO(data["bytes"])))
-        else:
-            for v in data.values():
-                img = extract_image(v, base_dir)
-                if img is not None:
-                    return img
-    if isinstance(data, str):
-        candidates = [data]
-        if base_dir:
-            candidates.insert(0, os.path.join(base_dir, data))
-        for path in candidates:
-            if os.path.exists(path):
-                img = cv2.imread(path)
-                if img is not None:
-                    return img
-            name, ext = os.path.splitext(path)
-            if not ext:
-                for ext_try in [".jpg", ".png", ".jpeg", ".png"]:
-                    trial = name + ext_try
-                    if os.path.exists(trial):
-                        img = cv2.imread(trial)
-                        if img is not None:
-                            return img
-        print(f"[WARN] File not found or unreadable: {data}")
+    import numpy as np
+    if isinstance(img, Image.Image):
+        return cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+    if isinstance(img, str) and os.path.exists(img):
+        return cv2.imread(img)
+    print(f"[WARN] Cannot extract image for sample {sample.get('metadata', {}).get('sample_id')}")
     return None
 
+def run_classical_ocr(image):
+    if image is None:
+        return EMPTY_OCR_PREDICTION
+    det_res = classical_detector.detect(image, template_type="invoice")
+    words, bboxes = [], []
+    if det_res and det_res.boxes:
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if len(image.shape)==3 else image
+        for x, y, w, h in det_res.boxes:
+            crop = gray[y:y+h, x:x+w]
+            text = pytesseract.image_to_string(crop).strip()
+            if text:
+                words.append(text)
+                bboxes.append([int(x), int(y), int(x+w), int(y+h)])
+    for idx, (text, b) in enumerate(zip(words, bboxes)):
+        print(f"Box {idx}: {b} -> '{text}'")
+    return {"model_output": {"words": words, "bboxes": bboxes, "confidence": det_res.confidence if det_res else 0.0}}
 
 def run_model(sample, category, adapter=None):
     base_dir = getattr(adapter, "root_dir", None)
@@ -286,24 +278,64 @@ def run_model(sample, category, adapter=None):
     model_input = sample.get("model_input") if isinstance(sample, dict) else sample
 
     if category == "ocr":
-        image = extract_image(sample, base_dir)
+        image = extract_image(sample)
         if image is None:
-            return None
+            return EMPTY_OCR_PREDICTION
 
         # Auto-classical OCR for SROIE / FUNSD
         if adapter and getattr(adapter, "dataset_name", "").upper() in ["SROIE", "FUNSD"]:
-            ocr_result = detect_and_recognize_image(classical_detector, image, template_type="invoice")
-            return {
-                "model_output": ocr_result
-            }
+            ocr_result = run_classical_ocr(image)
+
+            # Optional: print each detected box
+            words = ocr_result.get("model_output", {}).get("words", [])
+            bboxes = ocr_result.get("model_output", {}).get("bboxes", [])
+            for idx, (text, b) in enumerate(zip(words, bboxes)):
+                print(f"Box {idx}: {b} -> '{text}'")
+
+            return ocr_result
+            # detection_result = classical_detector.detect(image, template_type="invoice")
+            # print(detection_result.boxes)
+            # words, bboxes = [], []
+
+            # if detection_result and detection_result.boxes:
+            #     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            #     for box in detection_result.boxes:
+            #         x, y, w, h = box
+            #         crop = gray[y:y+h, x:x+w]
+            #         text = pytesseract.image_to_string(crop).strip()
+            #         if text:
+            #             words.append(text)
+            #             bboxes.append([int(x), int(y), int(x+w), int(y+h)])
+
+            # return {
+            #     "model_output": {
+            #         "words": words,
+            #         "bboxes": bboxes,
+            #         "confidence": detection_result.confidence if detection_result else 0.0
+            #     }
+            # }
             
-        ocr_result = hybrid_ocr_pipeline.process_document(image)
-        return {
-            "model_output": ocr_result
-        }
+        #     ocr_result = detect_and_recognize_image(
+        #         classical_detector, 
+        #         image, 
+        #         template_type="invoice"
+        #     ) or {}
+
+        #     return {
+        #         "model_output": {
+        #             "results": ocr_result.get("results", []),
+        #             "confidence": ocr_result.get("confidence", 0.0),
+        #             "metadata": ocr_result.get("metadata", {})
+        #         }
+        #     }
+            
+        # ocr_result = hybrid_ocr_pipeline.process_document(image)
+        # return {
+        #     "model_output": ocr_result
+        # }
 
     elif category == "vision":
-        image = extract_image(sample, base_dir)
+        image = extract_image(sample)
         if image is None:
             return None
 
@@ -313,7 +345,7 @@ def run_model(sample, category, adapter=None):
         }
 
     elif category == "rag":
-        image = extract_image(sample, base_dir)
+        image = extract_image(sample)
         text_ctx = hybrid_ocr_pipeline.process_document(image) if image is not None else None
         visual_ctx = vision_pipeline.recognize(image) if image is not None else None
             
@@ -342,7 +374,6 @@ def run_model(sample, category, adapter=None):
 
     return {"model_output": str(model_input)}
 
-
 def evaluate_dataset(
     adapter,
     category,
@@ -353,7 +384,7 @@ def evaluate_dataset(
         adapter.download()
 
     dataset = adapter.load_split(
-        dataset_split="train", 
+        dataset_split=None, 
         max_samples_per_split=max_samples_per_split, 
         max_samples_per_category=max_samples_per_category
     )
@@ -376,35 +407,37 @@ def evaluate_dataset(
     for i, sample in enumerate(dataset):
         result = run_model(sample, category, adapter=adapter)
         print("Result type:", type(result))
-        if result is None:
-            continue
         print(type(adapter))
         print(type(adapter).__name__)
+        
         # ================= OCR SPECIAL CASE =================
         if category == "ocr" and isinstance(adapter, OCRDatasetAdapter):
-            # Convert HybridOCR output → unified regions
-            pred_regions = []
+            ocr_output = result.get("model_output", {})
 
-            ocr_output = result.get("model_output")
-            if isinstance(ocr_output, dict) and "results" in ocr_output:
-                for r in ocr_output["results"]:
-                    pred_regions.append({
-                        "text": r.get("text", ""),
-                        "bbox": r.get("bbox", None)
-                    })
+            # Directly read universal format fields
+            
 
-            if not pred_regions:
-                print("[WARN] No prediction returned for sample:", sample.get('image'))
-                continue  # skip this sample
-            gt_regions = sample.get("regions", [])
-            print("GT example:", gt_regions[0])
-            print("PRED example:", pred_regions[0])
-            print(len(gt_regions))
-            print(len(pred_regions))
-            metrics = adapter.evaluate_all(gt_regions, pred_regions)
+            gt_tokens = sample.get("ground_truth", {}).get("token_labels", [])
+            gt_regions = [
+                {"text": str(t), "bbox": [0,0,0,0]} for t in gt_tokens
+            ]
 
+            pred_words = ocr_output.get("words", [])
+            pred_bboxes = ocr_output.get("bboxes", [])
+            pred_regions = [
+                {"text": str(t), "bbox": b} for t, b in zip(pred_words, pred_bboxes)
+            ]
+
+            # Token-aligned evaluation
+            metrics = adapter.evaluate_all_ocr_metrics(
+                gt_regions,
+                pred_regions
+            )
             scores.append(metrics)
-            continue
+
+            # Minimal debug
+            print(f"[{i+1}/{total_samples}] GT tokens: {len(gt_tokens)}, Pred tokens: {len(pred_words)}", end="\r")
+            continue  # skip to next sample
             
         # ================= ALL OTHER CATEGORIES =================
         prediction = result.get("model_output", "")
@@ -428,26 +461,36 @@ def evaluate_dataset(
         )
         
     # ================= OCR METRIC AGGREGATION =================
-    if category == "ocr" and scores:
-        avg_precision = np.mean([m["precision"] for m in scores])
-        avg_recall = np.mean([m["recall"] for m in scores])
-        avg_f1 = np.mean([m["f1"] for m in scores])
-        avg_cer = np.mean([m["cer"] for m in scores])
-        avg_wer = np.mean([m["wer"] for m in scores])
+    if category == "ocr":
+        if not scores:
+            final_results = {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "cer": 1.0,
+                "wer": 1.0
+            }
+            print(f"{adapter.dataset_name}: {final_results}")
+            return final_results
+        else:
+            avg_precision = np.mean([m["precision"] for m in scores])
+            avg_recall = np.mean([m["recall"] for m in scores])
+            avg_f1 = np.mean([m["f1"] for m in scores])
+            avg_cer = np.mean([m["cer"] for m in scores])
+            avg_wer = np.mean([m["wer"] for m in scores])
 
-        final_results = {
-            "precision": avg_precision,
-            "recall": avg_recall,
-            "f1": avg_f1,
-            "cer": avg_cer,
-            "wer": avg_wer
-        }
+            final_results = {
+                "precision": avg_precision,
+                "recall": avg_recall,
+                "f1": avg_f1,
+                "cer": avg_cer,
+                "wer": avg_wer
+            }
 
-        print(f"{adapter.dataset_name}: {final_results}")
-
-        return final_results
-
-    print()
+            print(f"{adapter.dataset_name}: {final_results}")
+            return final_results
+    
+    # ================= OTHER CATEGORIES FINAL =================
     weighted_avg = sum(scores)/len(scores) if scores else 0.0
     print(
         f"{type(adapter).__name__}: "
@@ -466,12 +509,20 @@ def evaluate_dataset(
     return weighted_avg
 
 
-def main(max_samples_per_split=None, max_samples_per_category=None):
+def main(max_samples_per_split=None, max_samples_per_category=None, run_category=None, run_dataset=None):
     for category, datasets in AUTO_DATASETS.items():
+        # Skip category if a specific category/dataset was chosen
+        if run_category and category.lower() != run_category.lower():
+            continue
+
         print(f"\n=== CATEGORY: {category.upper()} ===")
         category_scores = []
 
         for dataset_name, data_source_from_hf_or_manual, hf_repo_name, hf_repo_variant in datasets:
+            # Skip dataset if a specific dataset was chosen
+            if run_dataset and dataset_name.lower() != run_dataset.lower():
+                continue
+
             adapter_cls = ADAPTER_REGISTRY.get(dataset_name)
             if not adapter_cls:
                 print(f"⚠️ Adapter class not found for {dataset_name}, skipping")
@@ -512,21 +563,17 @@ def main(max_samples_per_split=None, max_samples_per_category=None):
 # Run script
 # ------------------------
 if __name__ == "__main__":
-    max_samples_per_split = None
-    max_samples_per_category = None
+    parser = argparse.ArgumentParser(description="Unified evaluation runner for OCR/Vision/RAG/Credit Risk")
+    parser.add_argument("--max_split", type=int, default=None, help="Maximum samples per dataset split")
+    parser.add_argument("--max_category", type=int, default=None, help="Maximum samples per category")
+    parser.add_argument("--category", type=str, default=None, help="Only run this category")
+    parser.add_argument("--dataset", type=str, default=None, help="Only run this dataset")
 
-    if len(sys.argv) >= 2:
-        try:
-            max_samples_per_split = int(sys.argv[1])
-            print(f"⚡ max_samples_per_split = {max_samples_per_split}")
-        except:
-            pass
+    args = parser.parse_args()
 
-    if len(sys.argv) >= 3:
-        try:
-            max_samples_per_category = int(sys.argv[2])
-            print(f"⚡ max_samples_per_category = {max_samples_per_category}")
-        except:
-            pass
-
-    main(max_samples_per_split, max_samples_per_category)
+    main(
+        max_samples_per_split=args.max_split,
+        max_samples_per_category=args.max_category,
+        run_category=args.category,
+        run_dataset=args.dataset
+    )

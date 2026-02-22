@@ -2,19 +2,29 @@ data_structure.json - 0.03 MB
 extract_folder_structure.py - 0.01 MB
 __pycache__/
     extract_folder_structure.cpython-311.pyc - 0.01 MB
-credit_risk/
-    prompts.db - 0.02 MB
-    README.md - 0.01 MB
-    ECTSum/
+credit_risk_memo_generator/
+    FinanceBench/
+        dataset_dict.json - 0.00 MB
+        train/
+            data-00000-of-00001.arrow - 0.83 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+credit_risk_pd/
+    LendingClub/
         dataset_dict.json - 0.00 MB
         test/
-            data-00000-of-00001.arrow - 8.43 MB
+            data-00000-of-00001.arrow - 1.94 MB
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
         train/
-            data-00000-of-00001.arrow - 29.09 MB
+            data-00000-of-00001.arrow - 6.78 MB
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
+        valid/
+            data-00000-of-00001.arrow - 0.97 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+credit_risk_sentiment/
     FiQA/
         dataset_dict.json - 0.00 MB
         test/
@@ -29,17 +39,23 @@ credit_risk/
             data-00000-of-00001.arrow - 0.02 MB
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
-    FinanceBench/
+    FinancialPhraseBank/
         dataset_dict.json - 0.00 MB
-        train/
-            data-00000-of-00001.arrow - 0.83 MB
+        test/
+            data-00000-of-00001.arrow - 0.14 MB
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
-    LendingClub/
-        LoanStats3a.csv - 40.44 MB
-        LendingClub.zip - 9.18 MB
+        train/
+            data-00000-of-00001.arrow - 0.18 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
 ocr/
     FUNSD/
+        dataset_dict.json - 0.00 MB
+        test/
+            data-00000-of-00001.arrow - 4.54 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
         testing_data/
             .DS_Store - 0.01 MB
             annotations/
@@ -52,6 +68,10 @@ ocr/
                 87137840.png - 0.15 MB
                 87528380.png - 0.14 MB
                 47 files, total 3.62 MB
+        train/
+            data-00000-of-00001.arrow - 12.60 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
         training_data/
             .DS_Store - 0.01 MB
             annotations/
@@ -65,6 +85,7 @@ ocr/
                 88547278_88547279.png - 0.13 MB
                 146 files, total 11.03 MB
     SROIE/
+        dataset_dict.json - 0.00 MB
         SROIE2019/
             test/
                 box/
@@ -98,10 +119,19 @@ ocr/
                     X51006913019.jpg - 3.22 MB
                     X51007846301.jpg - 3.16 MB
                     623 files, total 328.53 MB
+        test/
+            data-00000-of-00001.arrow - 206.51 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        train/
+            data-00000-of-00001.arrow - 340.09 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
 proof/
     ocr_FUNSDAdapter.json - 0.00 MB
     ocr_SROIEAdapter.json - 0.00 MB
-    vision_DocVQAAdapter.json - 0.00 MB
+    vision_ChartQAAdapter.json - 0.00 MB
+    2 files, total 0.00 MB
 rag/
     FinQA/
         dataset_dict.json - 0.00 MB
@@ -109,34 +139,20 @@ rag/
             data-00000-of-00001.arrow - 0.19 MB
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
-    HotpotQA/
-        dataset_dict.json - 0.00 MB
-        test/
-            data-00000-of-00001.arrow - 43.88 MB
-            dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
-        train/
-            data-00001-of-00002.arrow - 264.09 MB
-            data-00000-of-00002.arrow - 263.34 MB
-            dataset_info.json - 0.00 MB
-            1 files, total 0.00 MB
-        validation/
-            data-00000-of-00001.arrow - 44.69 MB
-            dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
     TAT-QA/
         tatqa_dataset_train.json - 12.25 MB
         tatqa_dataset_test_gold.json - 2.07 MB
         tatqa_dataset_dev.json - 1.56 MB
-        1 files, total 1.09 MB
-vision/
-    AI2D/
-        dataset_dict.json - 0.00 MB
+        2 files, total 1.09 MB
         test/
-            data-00001-of-00002.arrow - 289.68 MB
-            data-00000-of-00002.arrow - 243.67 MB
+            data-00000-of-00001.arrow - 4.54 MB
             dataset_info.json - 0.00 MB
-            1 files, total 0.00 MB
+            state.json - 0.00 MB
+        train/
+            data-00000-of-00001.arrow - 12.60 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+vision/
     ChartQA/
         dataset_dict.json - 0.00 MB
         test/
@@ -152,11 +168,6 @@ vision/
             data-00000-of-00001.arrow - 80.32 MB
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
-    DUDE/
-        DUDE_sample_OCR.tar.gz - 30.65 MB
-        DUDE_binaries.tar.gz - 4.81 MB
-        DUDE_sample_dataset.json - 0.20 MB
-        2 files, total 0.00 MB
     DocVQA/
         train_v1.0_withQT.json - 11.03 MB
         val_v1.0_withQT.json - 1.52 MB
@@ -187,6 +198,62 @@ vision/
             data-00003-of-00004.arrow - 409.17 MB
             data-00001-of-00004.arrow - 384.25 MB
             3 files, total 354.64 MB
+    MMMU_Accounting/
+        dataset_dict.json - 0.00 MB
+        dev/
+            data-00000-of-00001.arrow - 0.25 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        test/
+            data-00000-of-00001.arrow - 21.15 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        validation/
+            data-00000-of-00001.arrow - 1.53 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+    MMMU_Economics/
+        dataset_dict.json - 0.00 MB
+        dev/
+            data-00000-of-00001.arrow - 0.17 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        test/
+            data-00000-of-00001.arrow - 11.33 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        validation/
+            data-00000-of-00001.arrow - 1.42 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+    MMMU_Finance/
+        dataset_dict.json - 0.00 MB
+        dev/
+            data-00000-of-00001.arrow - 0.29 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        test/
+            data-00000-of-00001.arrow - 11.54 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        validation/
+            data-00000-of-00001.arrow - 1.03 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+    MMMU_Math/
+        dataset_dict.json - 0.00 MB
+        dev/
+            data-00000-of-00001.arrow - 0.17 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        test/
+            data-00000-of-00001.arrow - 26.56 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        validation/
+            data-00000-of-00001.arrow - 1.38 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
     OmniDocBench/
         dataset_dict.json - 0.00 MB
         train/

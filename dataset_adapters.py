@@ -6,24 +6,18 @@ The BaseDatasetAdapter defines the common interface and utilities for all datase
 while each specific dataset adapter (e.g., SROIEAdapter, FUNSDAdapter) implements 
 the dataset-specific directory path, file type loading, and parsing data schema logic.
 """
-
 import os
+import io
 import json
 import shutil
-import pytesseract
 import numpy as np
+from PIL import Image
 from pathlib import Path
-from typing import List, Dict
+from typing import List
+import pyarrow.parquet as pq
+from collections import defaultdict
 from datasets import load_dataset, load_from_disk
 from scipy.optimize import linear_sum_assignment
-
-BASE_DIR = os.path.join(os.getcwd(), "data")
-
-DATA_STRUCTURE_JSON = os.path.join(BASE_DIR, "data_structure.json")
-
-# generate data/data_structure.json mapping dataset_name -> {split_name: path_to_split}
-from data.extract_folder_structure import extract_splits
-extract_splits(BASE_DIR, output_json=DATA_STRUCTURE_JSON)
 
 # ======================================================
 # Base Adapter
@@ -123,6 +117,36 @@ class BaseDatasetAdapter:
             })
         return samples
     
+    # -----------------------------------------
+    # Generic helper: load Arrow folder
+    # -----------------------------------------
+    def _load_arrow_folder(self, folder_path: Path, max_samples_per_split=None, max_samples_per_category=None):
+        """
+        Load HuggingFace Arrow shards inside a folder.
+
+        Returns:
+            List of raw samples (dict) without decoding images (prevents MemoryError)
+        """
+        if not folder_path.exists():
+            raise FileNotFoundError(f"Folder not found: {folder_path}")
+
+        dataset = load_from_disk(str(folder_path))
+
+        # Apply max_samples_per_split if specified
+        if max_samples_per_split:
+            dataset = dataset.select(range(min(len(dataset), max_samples_per_split)))
+
+        # Apply max_samples_per_category if specified
+        if max_samples_per_category:
+            dataset = dataset.select(range(min(len(dataset), max_samples_per_category)))
+
+        # --- ADDITIVE CHANGE ---
+        # Convert to dicts per row to keep downstream code compatible
+        # Avoid loading images into memory by setting format to "numpy" for images or keep "arrow" for everything else
+        dataset = dataset.with_format("python")  # <-- returns dicts instead of pyarrow.Table
+
+        return list(dataset)
+    
     @classmethod
     def load_dataset_splits(cls, data_dir=None, json_file="data_structure.json"):
         """Load precomputed dataset splits from JSON"""
@@ -140,44 +164,59 @@ class BaseDatasetAdapter:
         all_splits = self.load_dataset_splits()
         return all_splits.get(self.dataset_name, {})
     
-    # def evaluate_ocr(self, gt_regions, pred_regions, iou_threshold=0.5):
-    #     """
-    #     Deprecated: use evaluate_all() instead for comprehensive evaluation.
-    #     IoU-based text matching evaluation.
-    #     """
+    def _arrow_row_stream(self, folder_path: Path, max_samples: int = None):
+        """
+        Yield one row at a time from Arrow shards.
+        Skips non-Parquet files and supports max_samples limit.
+        """
+        count = 0
 
-    #     def iou(boxA, boxB):
-    #         xA = max(boxA[0], boxB[0])
-    #         yA = max(boxA[1], boxB[1])
-    #         xB = min(boxA[2], boxB[2])
-    #         yB = min(boxA[3], boxB[3])
+        if not folder_path.exists():
+            raise FileNotFoundError(f"Folder not found: {folder_path}")
 
-    #         inter_area = max(0, xB - xA) * max(0, yB - yA)
+        for arrow_file in folder_path.glob("*.parquet"): # *.parquet *.[ap][r][c][e][t] *.parquet
+            try:
+                table = pq.ParquetFile(str(arrow_file))
+            except Exception as e:
+                print(f"⚠️ Skipping file {arrow_file}: {e}")
+                continue
 
-    #         boxA_area = (boxA[2] - boxA[0]) * (boxA[3] - boxA[1])
-    #         boxB_area = (boxB[2] - boxB[0]) * (boxB[3] - boxB[1])
+            for batch in table.iter_batches(batch_size=1):
+                row = batch.to_pydict()
+                row = {k: v[0] for k, v in row.items()}
 
-    #         union = boxA_area + boxB_area - inter_area
+                print("Row 0 image type:", type(row["image"]))
+                # --- PIL conversion logic ---
+                img_field = row.get("image")
+                if isinstance(img_field, dict):
+                    print("DEBUG: image dict keys:", list(img_field.keys()))
+                    # case 1: bytes inside the dict
+                    if "bytes" in img_field and img_field["bytes"] is not None:
+                        print("DEBUG: img_field['bytes'][:5]:", list(img_field['bytes'][:5]))
+                        try:
+                            row["image"] = Image.open(io.BytesIO(img_field["bytes"])).convert("RGB")
+                        except Exception as e:
+                            print(f"[WARN] Failed to convert bytes to image for row {row.get('id')}: {e}")
+                        print("DEBUG: type after converting bytes to image:", type(row["image"]))
+                    # case 2: path to image file
+                    elif "path" in img_field and img_field["path"] is not None:
+                        print("DEBUG: img_field['path']:", list(img_field['path']))
+                        row["image"] = Image.open(img_field["path"]).convert("RGB")
+                    else:
+                        row["image"] = None
+                elif isinstance(img_field, bytes):
+                    row["image"] = Image.open(io.BytesIO(img_field)).convert("RGB")
+                elif isinstance(img_field, Image.Image):
+                    # already PIL, do nothing
+                    pass
+                else:
+                    row["image"] = None  # fallback for unexpected types
+                
+                yield row
 
-    #         return inter_area / union if union > 0 else 0
-
-    #     matched = 0
-
-    #     for gt in gt_regions:
-    #         for pred in pred_regions:
-    #             if gt["text"] == pred["text"]:
-    #                 if gt["bbox"] and pred["bbox"]:
-    #                     if iou(gt["bbox"], pred["bbox"]) >= iou_threshold:
-    #                         matched += 1
-    #                         break
-
-    #     precision = matched / len(pred_regions) if pred_regions else 0
-    #     recall = matched / len(gt_regions) if gt_regions else 0
-
-    #     return {
-    #         "precision": precision,
-    #         "recall": recall
-    #     }
+                count += 1
+                if max_samples is not None and count >= max_samples:
+                    return
 
 """
 FILE_MAPPING template for all leaf-level dataset adapter subclasses.
@@ -292,49 +331,6 @@ class OCRDatasetAdapter(BaseDatasetAdapter):
         self.hf_repo_name = hf_repo_name
         self.hf_repo_variant = hf_repo_variant
         self.dataset_split = dataset_split
-    # -----------------------------
-    # Utility: Normalize Text
-    # -----------------------------
-    # def pytesseract_to_regions(
-    #         image: np.ndarray, 
-    #         ocr_engine: pytesseract
-    #     ) -> List[Dict]:
-    #     """
-    #     Convert a page image to a unified 'regions' format using PyTesseract OCR.
-        
-    #     Args:
-    #         image: np.ndarray, grayscale or BGR
-    #         ocr_engine: instance of TesseractOCR
-
-    #     Returns:
-    #         List[Dict] with keys: 'text', 'bbox', 'confidence'
-    #     """
-    #     # Run Tesseract OCR with full page
-    #     ocr_result = ocr_engine.recognize(image)
-
-    #     # Extract word-level data using image_to_data
-    #     data = pytesseract.image_to_data(
-    #         ocr_engine._preprocess_roi(image),
-    #         lang=ocr_engine.lang,
-    #         config=ocr_engine.config,
-    #         output_type=pytesseract.Output.DICT
-    #     )
-
-    #     regions = []
-    #     for i, word in enumerate(data['text']):
-    #         conf = float(data['conf'][i])
-    #         if not word.strip() or conf <= 0:
-    #             continue
-
-    #         x, y, w, h = int(data['left'][i]), int(data['top'][i]), int(data['width'][i]), int(data['height'][i])
-    #         region = {
-    #             "text": word.strip(),
-    #             "bbox": [x, y, x + w, y + h],
-    #             "confidence": conf
-    #         }
-    #         regions.append(region)
-
-    #     return regions
 
     # -----------------------------------------
     # Detection + Recognition Evaluation
@@ -426,7 +422,7 @@ class OCRDatasetAdapter(BaseDatasetAdapter):
 
         return {"wer": wer}
     
-    def evaluate_all(self, gt_regions, pred_regions):
+    def evaluate_all_ocr_metrics(self, gt_regions, pred_regions):
         results = {}
         results.update(
             self.evaluate_detection_recognition(gt_regions, pred_regions)
@@ -438,7 +434,7 @@ class OCRDatasetAdapter(BaseDatasetAdapter):
     def evaluate_sample(self, gt_regions, pred_regions):
         return self.evaluate_all(gt_regions, pred_regions)
 
-    def evaluate_dataset(self, gt_samples, pred_samples):
+    def evaluate_ocr_regions(self, gt_samples, pred_samples):
         metrics_list = []
 
         for gt, pred in zip(gt_samples, pred_samples):
@@ -633,7 +629,7 @@ class OCRDatasetAdapter(BaseDatasetAdapter):
         Returns:
             List of samples in universal OCR format
         """
-        if split not in file_mapping:
+        if split not in list(file_mapping.keys()):
             raise ValueError(f"Split '{split}' not in FILE_MAPPING")
 
         split_info = file_mapping[split]
@@ -660,97 +656,323 @@ class OCRDatasetAdapter(BaseDatasetAdapter):
 
         else:
             raise NotImplementedError(f"Unsupported dataset format: {split_info['format']}")
+    
+    def _arrow_row_to_token_ocr(self, row):
+        """
+        Extract token-level OCR info from Arrow row.
+        Works for SROIE, FUNSD, and similar datasets.
+        """
+        words = row.get("words", [])
+        bboxes = row.get("bboxes", [])
+
+        if not words or not bboxes:
+            return None
+
+        # Normalize bboxes if needed
+        norm_bboxes = []
+        for box in bboxes:
+            if isinstance(box, (list, tuple)):
+                if len(box) == 4:
+                    norm_bboxes.append(box)
+                elif len(box) == 8:
+                    xs = box[0::2]
+                    ys = box[1::2]
+                    norm_bboxes.append(
+                        [min(xs), min(ys), max(xs), max(ys)]
+                    )
+                else:
+                    # fallback to zero-box
+                    norm_bboxes.append([0, 0, 0, 0])
+            else:
+                norm_bboxes.append([0, 0, 0, 0])
+
+        # If words and bboxes count mismatch, truncate to shorter length
+        n_tokens = min(len(words), len(norm_bboxes))
+        tokens = [{"text": str(words[i]), "bbox": norm_bboxes[i]} for i in range(n_tokens)]
+        return tokens
+    
+    def _build_universal_ocr_sample(
+        self,
+        image,
+        ocr_tokens,
+        split: str,
+        sample_id: str,
+        token_labels=None,
+        document_entities=None,
+    ):
+        words = ocr_tokens.get("words", []) if isinstance(ocr_tokens, dict) else [t["text"] for t in ocr_tokens]
+        bboxes = ocr_tokens.get("bboxes", []) if isinstance(ocr_tokens, dict) else [t["bbox"] for t in ocr_tokens]
+
+        return {
+            "id": sample_id,
+            "category": self.category,
+            "image": image,  # PIL.Image
+            "tokens": ocr_tokens,  # list of {"text": ..., "bbox": ...}
+            "words": [t["text"] for t in ocr_tokens],
+            "bboxes": [t["bbox"] for t in ocr_tokens],
+            "token_labels": token_labels,
+            "document_entities": document_entities,
+            "split": split
+        }
+
+        # return {
+        #     "input": {
+        #         "image": image,
+        #         "ocr": {
+        #             "words": words,
+        #             "bboxes": bboxes
+        #         }
+        #     },
+        #     "ground_truth": {
+        #         "token_labels": token_labels or [],
+        #         "document_entities": document_entities
+        #     },
+        #     "metadata": {
+        #         "dataset": self.category,
+        #         "split": split,
+        #         "sample_id": sample_id
+        #     }
+        # }
+    
+    def evaluate_token_ner(self, gt_labels, pred_labels):
+        """
+        Simple token-level NER accuracy.
+        """
+        if not gt_labels or not pred_labels:
+            return {"accuracy": 0.0}
+
+        n = min(len(gt_labels), len(pred_labels))
+        correct = sum(
+            1 for i in range(n)
+            if gt_labels[i] == pred_labels[i]
+        )
+
+        return {"accuracy": correct / n}
+
+    def evaluate_document_kie(self, gt_entities, pred_entities):
+        """
+        Exact-match document-level KIE evaluation.
+        """
+        if not gt_entities:
+            return {"f1": 0.0}
+
+        tp = sum(
+            1 for k, v in gt_entities.items()
+            if pred_entities.get(k) == v
+        )
+
+        precision = tp / len(pred_entities) if pred_entities else 0
+        recall = tp / len(gt_entities)
+        f1 = (
+            2 * precision * recall / (precision + recall)
+            if (precision + recall) else 0
+        )
+
+        return {
+            "precision": precision,
+            "recall": recall,
+            "f1": f1
+        }
+    
+    def _arrow_folder_samples(
+        self,
+        folder_path: Path,
+        split: str,
+        max_samples_per_split=None
+    ):
+        """
+        Generator yielding universal OCR samples from Arrow folder
+        """
+        for idx, row in enumerate(self._arrow_row_stream(folder_path, max_samples_per_split)):
+            ocr_tokens = self._arrow_row_to_token_ocr(row)
+            if ocr_tokens is None:
+                continue
+
+            sample_id = row.get("id") or row.get("key") or f"{split}_{idx}"
+            yield self._build_universal_ocr_sample(
+                image=row.get("image"),  # lazy-loaded PIL object
+                ocr_tokens=ocr_tokens,
+                token_labels=row.get("ner_tags"),  # FUNSD only
+                document_entities=row.get("entities"),  # SROIE only
+                split=split,
+                sample_id=sample_id
+            )
 
 # ------------------------
 # OCR Adapters
 # ------------------------
 """
 universal_format_for_OCR_datasets = {
-    "image": Path,
-    "regions": [
-        {
-            "text": str,
-            "bbox": [x1, y1, x2, y2] | None,
-            "label": str | None
+    "input": {
+        "image": PIL.Image,
+
+        # Always token-aligned OCR
+        "ocr": {
+            "words": List[str],
+            "bboxes": List[List[int]]  # [x1, y1, x2, y2]
         }
-    ]
+    },
+
+    "ground_truth": {
+        # Token-level labels (FUNSD)
+        # None for datasets like SROIE
+        "token_labels": Optional[List[str]],
+
+        # Document-level labels (SROIE)
+        # None for datasets like FUNSD
+        "document_entities": Optional[Dict[str, str]]
+    },
+
+    "metadata": {
+        "dataset": str,      # "SROIE" | "FUNSD"
+        "split": str,        # "train" | "test"
+        "sample_id": str     # key / id / index
+    }
 }
+
+BaseDatasetAdapter
+- Load Arrow shards
+- Return raw Arrow rows
+
+SROIEAdapter / FUNSDAdapter (leaf adapters)
+- Interpret Arrow schema
+- Convert Arrow row → universal OCR format
+- Decide what ground truth exists
+
+OCRDatasetAdapter
+- Evaluate OCR outputs after conversion
+- Provide generic OCR metrics
 """
 class SROIEAdapter(OCRDatasetAdapter):
     """
-    data/ocr/SROIE/SROIE2019/train/box/X00016469612.txt
+    data/ocr/SROIE/train/data-00000-of-00001.arrow,
+    is the only arrow shard file in train/ sub-folder.
     
-    72,25,326,25,326,64,72,64,TAN WOON YANN
-    50,82,440,82,440,121,50,121,BOOK TA .K(TAMAN DAYA) SDN BND
-    205,121,285,121,285,139,205,139,789417-W
-    110,144,383,144,383,163,110,163,NO.53 55,57 & 59, JALAN SAGU 18,
-    192,169,299,169,299,187,192,187,TAMAN DAYA,
-    162,193,334,193,334,211,162,211,81100 JOHOR BAHRU,
-    217,216,275,216,275,233,217,233,JOHOR.
-    50,342,279,342,279,359,50,359,DOCUMENT NO : TD01167104
-    50,372,96,372,96,390,50,390,DATE:
-    165,372,342,372,342,389,165,389,25/12/2018 8:13:39 PM
-    48,396,117,396,117,415,48,415,CASHIER:
-    164,397,215,397,215,413,164,413,MANIS
-    49,423,122,423,122,440,49,440,MEMBER:
-    191,460,298,460,298,476,191,476,CASH BILL
-    30,508,121,508,121,523,30,523,CODE/DESC
-    200,507,247,507,247,521,200,521,PRICE
-    276,506,306,506,306,522,276,522,DISC
-    374,507,441,507,441,521,374,521,AMOUNT
-    69,531,102,531,102,550,69,550,QTY
-    221,531,247,531,247,545,221,545,RM
-    420,529,443,529,443,547,420,547,RM
-    27,570,137,570,137,583,27,583,9556939040116
-    159,570,396,570,396,584,159,584,KF MODELLING CLAY KIDDY FISH
-    77,598,113,598,113,613,77,613,1 PC
-    138,597,148,597,148,607,138,607,*
-    202,597,245,597,245,612,202,612,9.000
-    275,598,309,598,309,612,275,612,0.00
-    411,596,443,596,443,613,411,613,9.00
-    245,639,293,639,293,658,245,658,TOTAL:
-    118,671,291,671,291,687,118,687,ROUR DING ADJUSTMENT:
-    408,669,443,669,443,684,408,684,0.00
-    86,704,292,704,292,723,86,723,ROUND D TOTAL (RM):
-    401,703,443,703,443,719,401,719,9.00
-    205,744,243,744,243,765,205,765,CASH
-    402,748,441,748,441,763,402,763,10.00
-    205,770,271,770,271,788,205,788,CHANGE
-    412,772,443,772,443,786,412,786,1.00
-    97,845,401,845,401,860,97,860,GOODS SOLD ARE NOT RETURNABLE OR
-    190,864,309,864,309,880,190,880,EXCHANGEABLE
-    142,883,353,883,353,901,142,901,***
-    137,903,351,903,351,920,137,920,***
-    202,942,292,942,292,959,202,959,THANK YOU
-    163,962,330,962,330,977,163,977,PLEASE COME AGAIN !
-    412,639,442,639,442,654,412,654,9.00
-    
-    data/ocr/SROIE/SROIE2019/train/entities/X00016469612.txt, 
-    same file name and file type but under entities/ sub-folder, full raw data in X00016469612.txt:
+    === Dataset object ===
+    Dataset({
+        features: ['image', 'key', 'image_size', 'entities', 'words', 'bboxes'],
+        num_rows: 626
+    })
 
-    {
-        "company": "BOOK TA .K (TAMAN DAYA) SDN BHD",
-        "date": "25/12/2018",
-        "address": "NO.53 55,57 & 59, JALAN SAGU 18, TAMAN DAYA, 81100 JOHOR BAHRU, JOHOR.",
-        "total": "9.00"
-    }
+    === Dataset features ===
+    {'bboxes': List(List(Value('int64'))),
+    'entities': {'address': Value('string'),
+                'company': Value('string'),
+                'date': Value('string'),
+                'total': Value('string')},
+    'image': Image(mode=None, decode=True),
+    'image_size': {'height': Value('int64'), 'width': Value('int64')},
+    'key': Value('string'),
+    'words': List(Value('string'))}
 
-    data/ocr/SROIE/SROIE2019/train/img/X00016469612.jpg,
-    same file name but under entities sub-folder and as jpg file type.
+    === First 1 sample ===
+    {'bboxes': [[72, 25, 326, 64],
+                [50, 82, 440, 121],
+                [205, 121, 285, 139],
+                [110, 144, 383, 163],
+                [192, 169, 299, 187],
+                [162, 193, 334, 211],
+                [217, 216, 275, 233],
+                [50, 342, 279, 359],
+                [50, 372, 96, 390],
+                [165, 372, 342, 389],
+                [48, 396, 117, 415],
+                [164, 397, 215, 413],
+                [49, 423, 122, 440],
+                [191, 460, 298, 476],
+                [30, 508, 121, 523],
+                [200, 507, 247, 521],
+                [276, 506, 306, 522],
+                [374, 507, 441, 521],
+                [69, 531, 102, 550],
+                [221, 531, 247, 545],
+                [420, 529, 443, 547],
+                [27, 570, 137, 583],
+                [159, 570, 396, 584],
+                [77, 598, 113, 613],
+                [138, 597, 148, 607],
+                [202, 597, 245, 612],
+                [275, 598, 309, 612],
+                [411, 596, 443, 613],
+                [245, 639, 293, 658],
+                [118, 671, 291, 687],
+                [408, 669, 443, 684],
+                [86, 704, 292, 723],
+                [401, 703, 443, 719],
+                [205, 744, 243, 765],
+                [402, 748, 441, 763],
+                [205, 770, 271, 788],
+                [412, 772, 443, 786],
+                [97, 845, 401, 860],
+                [190, 864, 309, 880],
+                [142, 883, 353, 901],
+                [137, 903, 351, 920],
+                [202, 942, 292, 959],
+                [163, 962, 330, 977],
+                [412, 639, 442, 654]],
+    'entities': {'address': 'NO.53 55,57 & 59, JALAN SAGU 18, TAMAN DAYA, 81100 '
+                            'JOHOR BAHRU, JOHOR.',
+                'company': 'BOOK TA .K (TAMAN DAYA) SDN BHD',
+                'date': '25/12/2018',
+                'total': '9.00'},
+    'image': <PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=463x1013 at 0x2197EF66CD0>,
+    'image_size': {'height': 1013, 'width': 463},
+    'key': 'X00016469612',
+    'words': ['TAN WOON YANN',
+            'BOOK TA .K(TAMAN DAYA) SDN BND',
+            '789417-W',
+            'NO.53 55',
+            'TAMAN DAYA',
+            '81100 JOHOR BAHRU',
+            'JOHOR.',
+            'DOCUMENT NO : TD01167104',
+            'DATE:',
+            '25/12/2018 8:13:39 PM',
+            'CASHIER:',
+            'MANIS',
+            'MEMBER:',
+            'CASH BILL',
+            'CODE/DESC',
+            'PRICE',
+            'DISC',
+            'AMOUNT',
+            'QTY',
+            'RM',
+            'RM',
+            '9556939040116',
+            'KF MODELLING CLAY KIDDY FISH',
+            '1 PC',
+            '*',
+            '9.000',
+            '0.00',
+            '9.00',
+            'TOTAL:',
+            'ROUR DING ADJUSTMENT:',
+            '0.00',
+            'ROUND D TOTAL (RM):',
+            '9.00',
+            'CASH',
+            '10.00',
+            'CHANGE',
+            '1.00',
+            'GOODS SOLD ARE NOT RETURNABLE OR',
+            'EXCHANGEABLE',
+            '***',
+            '***',
+            'THANK YOU',
+            'PLEASE COME AGAIN !',
+            '9.00']}
 
-    data/ocr/SROIE/SROIE2019/train/img/X00016469619.jpg is the next jpg file in the same img sub-folder,
-    and so on for all samples in train/ and test/ sub-folders.
+    data/ocr/SROIE/test/data-00000-of-00001.arrow,
+    is the only arrow shard files in test/ sub-folder.
+
     The sub-folder structure is consistent across train and test split:
-    data/ocr/SROIE/SROIE2019/test/box
-    data/ocr/SROIE/SROIE2019/test/entities
-    data/ocr/SROIE/SROIE2019/test/img
-    data/ocr/SROIE/SROIE2019/train/box
-    data/ocr/SROIE/SROIE2019/train/entities
-    data/ocr/SROIE/SROIE2019/train/img
+    data/ocr/SROIE/test/
+    data/ocr/SROIE/train/
 
     FILE_MAPPING below only serves to provide the path right down to the split level.
     For each split, the actual loading logic in load_split() must handle the pathing,
-    down to the individual sample level under img/, box/, and entities/ folders.
+    down to the individual sample level under test/, and train/ folders.
     as well as as the pathing down to the individual sample level.
     The parsing logic for each sample is implemented in the _parse_sroie_sample() function, 
     which is called by the generic _load_images_and_labels() helper,
@@ -760,15 +982,15 @@ class SROIEAdapter(OCRDatasetAdapter):
     FILE_MAPPING = {
         "train": {
             "format": "folder",
-            "dataset_path": "data/ocr/SROIE/SROIE2019/train",
+            "dataset_path": "data/ocr/SROIE/train",
             "ground_truth_path": None,
-            "notes": "Images in img/, OCR boxes in box/, entities in entities/"
+            "notes": "Train folder containing 1 Arrow shard file"
         },
         "test": {
             "format": "folder",
-            "dataset_path": "data/ocr/SROIE/SROIE2019/test",
+            "dataset_path": "data/ocr/SROIE/test",
             "ground_truth_path": None,
-            "notes": "Images in img/, OCR boxes in box/, entities in entities/"
+            "notes": "Test folder containing 1 Arrow shard file"
         }
     }
 
@@ -777,7 +999,7 @@ class SROIEAdapter(OCRDatasetAdapter):
         category: str = "ocr",
         dataset_name: str = "SROIE",
         data_source_from_hf_or_manual: str = "manual",
-        hf_repo_name: str = None,
+        hf_repo_name: str = "jsdnrs/ICDAR2019-SROIE",
         hf_repo_variant: str = None,
         dataset_split=None
     ):
@@ -796,168 +1018,105 @@ class SROIEAdapter(OCRDatasetAdapter):
         self.dataset_split = dataset_split
         self.FILE_MAPPING = self.FILE_MAPPING # <- assign class-level mapping to instance
 
-    def load_split(self, dataset_split=None, max_samples_per_split=None, max_samples_per_category=None):
+        
+    def load_split(
+        self,
+        dataset_split=None,
+        max_samples_per_split=None,
+        max_samples_per_category=None
+    ):
         """Load one split or all splits if dataset_split is None."""
-        splits_to_load = [dataset_split or self.dataset_split] if dataset_split or self.dataset_split else list(self.FILE_MAPPING.keys())
+        splits_to_load = (
+            [dataset_split or self.dataset_split]
+            if (dataset_split or self.dataset_split)
+            else list(self.FILE_MAPPING.keys())
+        )
+
         all_samples = []
 
         for split in splits_to_load:
             if split not in self.FILE_MAPPING:
-                raise ValueError(f"SROIE supports splits: {list(self.FILE_MAPPING.keys())}")
+                raise ValueError(
+                    f"SROIE supports splits: {list(self.FILE_MAPPING.keys())}"
+                )
 
-            split_info = self.FILE_MAPPING[split]
-            base_dir = Path.cwd() / split_info["dataset_path"]
-            img_dir = base_dir / "img"
-            box_dir = base_dir / "box"
-            entity_dir = base_dir / "entities"
+            split_path = Path().cwd() / self.FILE_MAPPING[split]["dataset_path"]
 
-            for d in [img_dir, box_dir, entity_dir]:
-                if not d.exists():
-                    raise FileNotFoundError(d)
+            # Load arrow shards
+            rows = self._arrow_row_stream(split_path, max_samples=max_samples_per_split)
 
-            samples = self._load_images_and_labels(
-                img_folder=img_dir,
-                box_folder=box_dir,
-                entity_folder=entity_dir,
-                parse_sample_fn=self._parse_sroie_sample,
-                max_samples_per_split=max_samples_per_split
-            )
-            all_samples.extend(samples)
+            for idx, row in enumerate(rows):
+                # --- PIL in-memory conversion ---
+                img_field = row.get("image")
+                if isinstance(img_field, bytes):
+                    row["image"] = Image.open(io.BytesIO(img_field)).convert("RGB")
+
+                ocr_tokens = self._arrow_row_to_token_ocr(row)
+
+                if ocr_tokens is None:
+                    continue
+
+                sample = self._build_universal_ocr_sample(
+                    image=row.get("image"),
+                    ocr_tokens=ocr_tokens,
+                    token_labels=None,  # SROIE has no token-level labels
+                    document_entities=row.get("entities"),
+                    split=split,
+                    sample_id=row.get("key", f"{split}_{idx}")
+                )
+
+                all_samples.append(sample)
 
         if max_samples_per_category:
             all_samples = all_samples[:max_samples_per_category]
 
         return all_samples
-    
-    def _parse_sroie_sample(self, box_file, entity_file):
-        """
-        Parse SROIE sample for OCR evaluation.
-        Ignores entities JSON (document-level labels).
-        """
-
-        regions = []
-
-        if not box_file or not Path(box_file).exists():
-            raise FileNotFoundError(f"Box file missing: {box_file}")
-
-        with open(box_file, "r", encoding="utf-8") as f:
-            lines = f.readlines()
-
-        for line in lines:
-            parts = line.strip().split(",")
-
-            if len(parts) < 9:
-                continue
-
-            coords = list(map(int, parts[:8]))
-            text = ",".join(parts[8:]).strip()
-
-            xs = coords[0::2]
-            ys = coords[1::2]
-
-            bbox = [min(xs), min(ys), max(xs), max(ys)]
-
-            regions.append({
-                "text": text,
-                "bbox": bbox,
-                "label": None
-            })
-
-        return regions
 
 class FUNSDAdapter(OCRDatasetAdapter):
     """
-    below are 2 samples of the content in data/ocr/FUNSD/training_data/annotations/00040534.json:
+    data/ocr/FUNSD/train/data-00000-of-00001.arrow,
+    is the only arrow shard file in train/ sub-folder.
     
-    {
-        "form": [
-            {
-                "box": [
-                    84,
-                    109,
-                    136,
-                    119
-                ],
-                "text": "COMPOUND",
-                "label": "question",
-                "words": [
-                    {
-                        "box": [
-                            84,
-                            109,
-                            136,
-                            119
-                        ],
-                        "text": "COMPOUND"
-                    }
-                ],
-                "linking": [
-                    [
-                        0,
-                        37
-                    ]
-                ],
-                "id": 0
-            },
-            {
-                "box": [
-                    85,
-                    141,
-                    119,
-                    152
-                ],
-                "text": "SOURCE",
-                "label": "question",
-                "words": [
-                    {
-                        "box": [
-                            85,
-                            141,
-                            119,
-                            152
-                        ],
-                        "text": "SOURCE"
-                    }
-                ],
-                "linking": [
-                    [
-                        1,
-                        38
-                    ]
-                ],
-                "id": 1
-            },
-    
-    data/ocr/FUNSD/training_data/images/00040534.png,
-    same file name but under images sub-folder and as png file type.
+    === Dataset object ===
+    Dataset({
+        features: ['id', 'words', 'bboxes', 'ner_tags', 'image'],
+        num_rows: 149
+    })
 
-    data/ocr/FUNSD/training_data/images/00070353.png is the next png file in the same images/ sub-folder,
-    and so on for all samples in training_data/ and testing_data/ sub-folders.
-    The sub-folder structure is consistent across train and test splits:
-    data/ocr/FUNSD/training_data/annotations
-    data/ocr/FUNSD/training_data/images
-    data/ocr/FUNSD/testing_data/annotations
-    data/ocr/FUNSD/testing_data/images
+    === Dataset features ===
+    {'bboxes': List(List(Value('int64'))),
+    'id': Value('string'),
+    'image': Image(mode=None, decode=True),
+    'ner_tags': List(ClassLabel(names=['O', 'B-HEADER', 'I-HEADER', 'B-QUESTION', 'I-QUESTION', 'B-ANSWER', 'I-ANSWER'])),
+    'words': List(Value('string'))}
+    
+    data/ocr/FUNSD/test/data-00000-of-00001.arrow,
+    is the only arrow shard files in test/ sub-folder.
+
+    The sub-folder structure is consistent across train and test split:
+    data/ocr/FUNSD/test/
+    data/ocr/FUNSD/train/
 
     FILE_MAPPING below only serves to provide the path right down to the split level.
     For each split, the actual loading logic in load_split() must handle the pathing,
-    down to the individual sample level under annotations/ and images/ folders.
-    The parsing logic for each sample is implemented in the _parse_funsd_annotation() function,
+    down to the individual sample level under test/, and train/ folders.
+    as well as as the pathing down to the individual sample level.
+    The parsing logic for each sample is implemented in the _parse_funsd_annotation() function, 
     which is called by the generic _load_images_and_labels() helper,
     and serves to extract structured data based on a schema shared across all samples within the same file type.
     """
     FILE_MAPPING = {
         "train": {
             "format": "folder",
-            "dataset_path": "data/ocr/FUNSD/training_data",
+            "dataset_path": "data/ocr/FUNSD/train",
             "ground_truth_path": None,
-            "notes": "Images in images/, annotations in annotations/"
+            "notes": "Train folder containing 1 Arrow shard file"
         },
         "test": {
             "format": "folder",
-            "dataset_path": "data/ocr/FUNSD/testing_data",
+            "dataset_path": "data/ocr/FUNSD/test",
             "ground_truth_path": None,
-            "notes": "Images in images/, annotations in annotations/"
+            "notes": "Test folder containing 1 Arrow shard file"
         }
     }
 
@@ -966,7 +1125,7 @@ class FUNSDAdapter(OCRDatasetAdapter):
         category: str = "ocr",
         dataset_name: str = "FUNSD",
         data_source_from_hf_or_manual: str = "manual",
-        hf_repo_name: str = None,
+        hf_repo_name: str = "nielsr/funsd",
         hf_repo_variant: str = None,
         dataset_split=None
     ):
@@ -984,10 +1143,127 @@ class FUNSDAdapter(OCRDatasetAdapter):
         self.hf_repo_variant = hf_repo_variant
         self.dataset_split = dataset_split
         self.FILE_MAPPING = self.FILE_MAPPING
+        self.id2label = {
+            0: "O",
+            1: "B-HEADER",
+            2: "I-HEADER",
+            3: "B-QUESTION",
+            4: "I-QUESTION",
+            5: "B-ANSWER",
+            6: "I-ANSWER",
+        }
 
-    def load_split(self, dataset_split=None, max_samples_per_split=None, max_samples_per_category=None):
-        """Load one split or all splits if dataset_split is None."""
-        splits_to_load = [dataset_split or self.dataset_split] if dataset_split or self.dataset_split else list(self.FILE_MAPPING.keys())
+    def compute_ner_f1(self, pred_labels, gold_labels, mask_o=True):
+        """
+        Token-level NER evaluation.
+        Returns micro + macro precision/recall/F1.
+        """
+
+        assert len(pred_labels) == len(gold_labels)
+
+        tp = defaultdict(int)
+        fp = defaultdict(int)
+        fn = defaultdict(int)
+
+        label_set = set()
+
+        for pred, gold in zip(pred_labels, gold_labels):
+            if mask_o and gold == "O":
+                continue
+
+            label_set.add(gold)
+            label_set.add(pred)
+
+            if pred == gold:
+                tp[gold] += 1
+            else:
+                fp[pred] += 1
+                fn[gold] += 1
+
+        # ---- micro ----
+        micro_tp = sum(tp.values())
+        micro_fp = sum(fp.values())
+        micro_fn = sum(fn.values())
+
+        micro_precision = micro_tp / (micro_tp + micro_fp + 1e-9)
+        micro_recall = micro_tp / (micro_tp + micro_fn + 1e-9)
+        micro_f1 = 2 * micro_precision * micro_recall / (micro_precision + micro_recall + 1e-9)
+
+        # ---- macro ----
+        per_label_f1 = []
+        for label in label_set:
+            if mask_o and label == "O":
+                continue
+
+            l_tp = tp[label]
+            l_fp = fp[label]
+            l_fn = fn[label]
+
+            p = l_tp / (l_tp + l_fp + 1e-9)
+            r = l_tp / (l_tp + l_fn + 1e-9)
+            f1 = 2 * p * r / (p + r + 1e-9)
+
+            per_label_f1.append(f1)
+
+        macro_f1 = sum(per_label_f1) / max(len(per_label_f1), 1)
+
+        return {
+            "micro_precision": micro_precision,
+            "micro_recall": micro_recall,
+            "micro_f1": micro_f1,
+            "macro_f1": macro_f1
+        }
+
+    def evaluate_sample(self, sample, prediction):
+        gold_ids = sample.get("token_labels", [])
+        pred_ids = prediction.get("token_labels", [])
+
+        if not gold_ids or not pred_ids:
+            return {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "macro_f1": 0.0
+            }
+
+        gold_labels = [self.id2label[i] for i in gold_ids]
+        pred_labels = [self.id2label[i] for i in pred_ids]
+
+        metrics = self.compute_ner_f1(
+            pred_labels=pred_labels,
+            gold_labels=gold_labels,
+            mask_o=True
+        )
+
+        return {
+            "precision": metrics["micro_precision"],
+            "recall": metrics["micro_recall"],
+            "f1": metrics["micro_f1"],
+            "macro_f1": metrics["macro_f1"]
+        }
+    
+    def evaluate_ocr_regions(self, *args, **kwargs):
+        return None
+
+    def load_split(self, 
+        dataset_split=None, 
+        max_samples_per_split=None, 
+        max_samples_per_category=None
+    ):
+        """
+        Load one split or all splits if dataset_split is None.
+
+        FUNSD is Arrow-based:
+        - Each split folder contains one or more .arrow shard files
+        - Parsing is row-based and handled by OCRDatasetAdapter helpers
+        """
+        splits_to_load = (
+            [dataset_split or self.dataset_split]
+            if (dataset_split or self.dataset_split)
+            else list(self.FILE_MAPPING.keys())
+        )
+        print(f"splits_to_load: {splits_to_load}")
+
         all_samples = []
 
         for split in splits_to_load:
@@ -995,49 +1271,49 @@ class FUNSDAdapter(OCRDatasetAdapter):
                 raise ValueError(f"FUNSD supports splits: {list(self.FILE_MAPPING.keys())}")
 
             split_info = self.FILE_MAPPING[split]
-            base_dir = Path.cwd() / split_info["dataset_path"]
-            annotations_dir = base_dir / "annotations"
-            images_dir = base_dir / "images"
+            split_dir = Path().cwd() / split_info["dataset_path"]
+            print(split_dir)
+            if not split_dir.exists():
+                raise FileNotFoundError(f"Missing split directory: {split_dir}")
 
-            for d in [annotations_dir, images_dir]:
-                if not d.exists():
-                    raise FileNotFoundError(f"Missing {d}")
+            for sample in self._arrow_folder_samples(split_dir, split, max_samples_per_split):
+                all_samples.append(sample)
 
-            samples = self._load_images_and_labels(
-                img_folder=images_dir,
-                box_folder=annotations_dir,
-                entity_folder=None,
-                parse_sample_fn=self._parse_funsd_annotation,
-                max_samples_per_split=max_samples_per_split,
-                file_ext=".json"
-            )
-            all_samples.extend(samples)
+            # # Load arrow shards
+            # rows = self._arrow_row_stream(split_dir, max_samples=max_samples_per_split)
+            # split_samples = []
+
+            # for idx, row in enumerate(rows):
+            #     # --- PIL in-memory conversion ---
+            #     img_field = row.get("image")
+            #     if isinstance(img_field, bytes):
+            #         row["image"] = Image.open(io.BytesIO(img_field)).convert("RGB")
+
+            #     ocr_tokens = self._arrow_row_to_token_ocr(row)
+            #     sample = self._build_universal_ocr_sample(
+            #         # row=row,
+            #         # dataset_name=self.dataset_name,
+            #         # split=split,
+            #         # task_type="document_kie",  
+
+            #         image=row.get("image"), # PIL Image object
+            #         ocr_tokens=ocr_tokens,
+            #         token_labels=row.get("ner_tags"), # FUNSD supports NER + document KIE
+            #         document_entities=None,
+            #         split=split,
+            #         sample_id=row.get("id", f"{split}_{idx}")
+            #     )
+            #     split_samples.append(sample)
+
+            #     if max_samples_per_split and len(split_samples) >= max_samples_per_split:
+            #         break
+
+            # all_samples.extend(split_samples)
 
         if max_samples_per_category:
             all_samples = all_samples[:max_samples_per_category]
 
         return all_samples
-
-    def _parse_funsd_annotation(self, annotation_file, _=None):
-        data = self._load_json(annotation_file)
-        regions = []
-
-        for item in data.get("form", []):
-            label = item.get("label")
-            for word in item.get("words", []):
-                text = word.get("text", "").strip()
-                box = word.get("box", [])
-                if not text or not box:
-                    continue
-
-                x1, y1, x2, y2 = box
-                regions.append({
-                    "text": text,
-                    "bbox": [x1, y1, x2, y2],
-                    "label": label
-                })
-
-        return regions
 
 # ===============================
 # VisionDatasetAdapter (Intermediate Vision class)
@@ -1085,28 +1361,6 @@ class VisionDatasetAdapter(BaseDatasetAdapter):
             raise FileNotFoundError(f"JSON file not found: {file_path}")
         with open(file_path, "r", encoding="utf-8") as f:
             return json.load(f)
-
-    # -----------------------------------------
-    # Generic helper: load Arrow folder
-    # -----------------------------------------
-    def _load_arrow_folder(self, folder_path: Path, max_samples_per_split=None, max_samples_per_category=None):
-        """
-        Load HuggingFace Arrow shards inside a folder.
-
-        Returns:
-            List of raw samples (dict)
-        """
-        if not folder_path.exists():
-            raise FileNotFoundError(f"Folder not found: {folder_path}")
-
-        from datasets import load_from_disk
-
-        dataset = load_from_disk(str(folder_path))
-
-        if max_samples_per_split:
-            dataset = dataset.select(range(min(len(dataset), max_samples_per_split)))
-
-        return list(dataset)
 
     # -----------------------------------------
     # Generic helper: merge dataset JSON + GT JSON
@@ -1157,7 +1411,7 @@ class VisionDatasetAdapter(BaseDatasetAdapter):
             - json_with_gt
         """
 
-        if split not in file_mapping:
+        if split not in file_mapping.keys():
             raise ValueError(f"Split '{split}' not in FILE_MAPPING")
 
         split_info = file_mapping[split]
@@ -1218,29 +1472,56 @@ class VisionDatasetAdapter(BaseDatasetAdapter):
 # Vision Adapters
 # ------------------------
 """
-universal_format_for_vision_datasets = {
-    "input": ...,
-    "ground_truth": ...,
+universal_vision_sample = {
+    "input": {  # everything that serves as model input
+        "image": <PIL.Image.Image> or List[<PIL.Image.Image>],  # single image or multiple images (e.g., MMMU datasets)
+        "question": str or None,  # question/prompt associated with the image, if available
+        "other_modalities": dict  # optional additional fields, e.g., OCR, reasoning info
+    },
+    "ground_truth": Any,  # label/answer, could be:
+        # - string (DocVQA, InfographicsVQA, MMMU datasets)
+        # - list of strings (ChartQA)
+        # - None (OmniDocBench)
     "metadata": {
-        "dataset": ...,
-        "sample_id": ...
+        "dataset": str,  # dataset name, e.g., "DocVQA"
+        "split": str,  # split name, e.g., "test", "train", "validation"
+        "sample_id": int,  # zero-based index
+        "additional_info": dict  # optional, e.g., docId, ucsf_document_id, human_or_machine, page_info, subfield, img_type
     }
-}
-{
-    "image": image_path_or_bytes_or_id,
-    "question": str or None,
-    "answer": str or None,
-    "metadata": dict (optional)
 }
 """
 class DocVQAAdapter(VisionDatasetAdapter):
     """
     data/vision/DocVQA/test/data-00000-of-00008.arrow
     
-    Schema or file content not available yet..
-    we need to load it once and print out the first 5 rows/set of samples to
-    inspect the actual structure to implement the parsing logic in _parse_docvqa_annotation().
-    
+    === Dataset object ===
+    Dataset({
+        features: ['questionId', 'question', 'question_types', 'image', 'docId', 'ucsf_document_id', 'ucsf_document_page_no', 'answers', 'data_split'],
+        num_rows: 649
+    })
+
+    === Dataset features ===
+    {'answers': List(Value('string')),
+    'data_split': Value('string'),
+    'docId': Value('int64'),
+    'image': Image(mode=None, decode=True),
+    'question': Value('string'),
+    'questionId': Value('string'),
+    'question_types': List(Value('string')),
+    'ucsf_document_id': Value('string'),
+    'ucsf_document_page_no': Value('string')}
+
+    === First 1 sample ===
+    {'answers': None,
+    'data_split': 'test',
+    'docId': 4720,
+    'image': <PIL.PngImagePlugin.PngImageFile image mode=L size=1653x2339 at 0x20A409A6850>,
+    'question': 'What is the dividend payout in 2012?',
+    'questionId': '57344',
+    'question_types': None,
+    'ucsf_document_id': 'rnbx0223',
+    'ucsf_document_page_no': '193'}
+
     data/vision/DocVQA/test/data-00001-of-00008.arrow,
     data/vision/DocVQA/test/data-00002-of-00008.arrow,
     data/vision/DocVQA/test/data-00003-of-00008.arrow,
@@ -1291,8 +1572,8 @@ class DocVQAAdapter(VisionDatasetAdapter):
         category: str = "vision",
         dataset_name: str = "DocVQA",
         data_source_from_hf_or_manual: str = "manual",
-        hf_repo_name: str = None,
-        hf_repo_variant: str = None,
+        hf_repo_name: str = "lmms-lab/DocVQA",
+        hf_repo_variant: str = "DocVQA",
         dataset_split=None
     ):
         super().__init__(
@@ -1328,13 +1609,32 @@ class DocVQAAdapter(VisionDatasetAdapter):
                     "metadata": {"dataset": "DocVQA", "sample_id": idx}
                 })
 
+        if max_samples_per_category:
+            all_samples = all_samples[:max_samples_per_category]
+
         return all_samples
 
 class InfographicsVQAAdapter(VisionDatasetAdapter):
     """
     data/vision/InfographicsVQA/test/data-00000-of-00004.arrow
     
-    Schema or file content not available yet.. 
+    === Dataset object ===
+    Dataset({
+        features: ['questionId', 'question', 'answers', 'answer_type', 'image', 'image_url', 'operation/reasoning', 'ocr', 'data_split'],
+        num_rows: 822
+    })
+
+    === Dataset features ===
+    {'answer_type': List(Value('string')),
+    'answers': List(Value('string')),
+    'data_split': Value('string'),
+    'image': Image(mode=None, decode=True),
+    'image_url': Value('string'),
+    'ocr': Value('string'),
+    'operation/reasoning': List(Value('string')),
+    'question': Value('string'),
+    'questionId': Value('string')}
+    
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_infographicsvqa_annotation().
     
@@ -1381,8 +1681,8 @@ class InfographicsVQAAdapter(VisionDatasetAdapter):
         category: str = "vision",
         dataset_name: str = "InfographicsVQA",
         data_source_from_hf_or_manual: str = "manual",
-        hf_repo_name: str = None,
-        hf_repo_variant: str = None,
+        hf_repo_name: str = "lmms-lab/DocVQA",
+        hf_repo_variant: str = "InfographicVQA",
         dataset_split=None
     ):
         super().__init__(
@@ -1417,6 +1717,9 @@ class InfographicsVQAAdapter(VisionDatasetAdapter):
                     "metadata": {"dataset": "InfographicsVQA", "sample_id": idx}
                 })
 
+        if max_samples_per_category:
+            all_samples = all_samples[:max_samples_per_category]
+
         return all_samples
 
 class ChartQAAdapter(VisionDatasetAdapter):
@@ -1424,8 +1727,33 @@ class ChartQAAdapter(VisionDatasetAdapter):
     data/vision/ChartQA/test/data-00000-of-00001.arrow,
     is the only arrow shard file in test/ sub-folder.
     
-    Schema or file content not available yet.. 
-    we need to load it once and print out the first 5 rows/set of samples to
+    === Dataset object ===
+    Dataset({
+        features: ['image', 'query', 'label', 'human_or_machine'],
+        num_rows: 2500
+    })
+
+    === Dataset features ===
+    {'human_or_machine': ClassLabel(names=['human', 'machine']),
+    'image': Image(mode=None, decode=True),
+    'label': List(Value('string')),
+    'query': Value('string')}
+
+    === First 2 samples ===
+    --- Sample 0 ---
+    {'human_or_machine': 0,
+    'image': <PIL.PngImagePlugin.PngImageFile image mode=RGBA size=850x600 at 0x1DA8E53BE50>,
+    'label': ['14'],
+    'query': 'How many food item is shown in the bar graph?'}
+
+    --- Sample 1 ---
+    {'human_or_machine': 0,
+    'image': <PIL.PngImagePlugin.PngImageFile image mode=RGBA size=850x600 at 0x1DA4DE0ED90>,
+    'label': ['0.57'],
+    'query': 'What is the difference in value between Lamb and Corn?'}
+
+
+    we need to load it once and print out the first 3 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_chartqa_annotation().
     
     data/vision/ChartQA/train/data-00000-of-00003.arrow,
@@ -1475,8 +1803,8 @@ class ChartQAAdapter(VisionDatasetAdapter):
         category: str = "vision",
         dataset_name: str = "ChartQA",
         data_source_from_hf_or_manual: str = "hf",
-        hf_repo_name: str = None,
-        hf_repo_variant: str = None,
+        hf_repo_name: str = "HuggingFaceM4/ChartQA",
+        hf_repo_variant: str = "vis-nlp/ChartQA",
         dataset_split=None
     ):
         super().__init__(
@@ -1508,6 +1836,9 @@ class ChartQAAdapter(VisionDatasetAdapter):
                     "metadata": {"dataset": "ChartQA", "sample_id": idx}
                 })
 
+        if max_samples_per_category:
+            all_samples = all_samples[:max_samples_per_category]
+
         return all_samples
 
 class OmniDocBenchAdapter(VisionDatasetAdapter):
@@ -1515,10 +1846,29 @@ class OmniDocBenchAdapter(VisionDatasetAdapter):
     data/vision/OmniDocBench/train/data-00000-of-00001.arrow,
     is the only arrow shard file in train/ sub-folder.
     
-    Schema or file content not available yet.. 
+    === Dataset object ===
+    Dataset({
+        features: ['layout_dets', 'extra', 'page_info'],
+        num_rows: 981
+    })
+
+    === Dataset features ===
+    {'extra': {'relation': List({'relation_type': Value('string'), 'source_anno_id': Value('int64'), 'target_anno_id': Value('int64')})},
+    'layout_dets': List({'anno_id': Value('int64'), 'attribute': {'formula_type': Value('string'), 'include_background': Value('bool'), 'include_equation': Value('bool'), 'include_photo': Value('bool'), 'language': Value('string'), 'line': Value('string'), 'table_layout': Value('string'), 'text_background': Value('string'), 'text_language': Value('string'), 'text_rotate': Value('string'), 'with_span': Value('bool'), 'with_structured_text': Value('bool')}, 'category_type': Value('string'), 'html': Value('string'), 'ignore': Value('bool'), 'latex': Value('string'), 'line_with_spans': List({'category_type': Value('string'), 'latex': Value('string'), 'poly': List(Value('float64')), 'text': Value('string')}), 'merge_list': List({'anno_id': Value('int64'), 'attribute': {'formula_type': Value('string'), 'text_background': Value('string'), 'text_language': Value('string'), 'text_rotate': 
+    Value('string')}, 'category_type': Value('string'), 'ignore': Value('bool'), 'latex': Value('string'), 'line_with_spans': List({'category_type': Value('string'), 'latex': Value('string'), 'poly': List(Value('float64')), 'text': Value('string')}), 'order': Value('int64'), 'poly': List(Value('float64')), 'text': Value('string')}), 'order': Value('int64'), 
+    'poly': List(Value('float64')), 'table_edit_status': Value('string'), 'text': Value('string')}),
+    'page_info': {'height': Value('int64'),
+                'image_path': Value('string'),
+                'page_attribute': {'data_source': Value('string'),
+                                    'language': Value('string'),
+                                    'layout': Value('string'),
+                                    'special_issue': List(Value('string'))},
+                'page_no': Value('int64'),
+                'width': Value('int64')}}
+
+                
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_omnidocbench_annotation().
-
         
     FILE_MAPPING below only serves to provide the path right down to the split level.
     For each split, the actual loading logic in load_split() must handle the pathing,
@@ -1541,8 +1891,8 @@ class OmniDocBenchAdapter(VisionDatasetAdapter):
         category: str = "vision",
         dataset_name: str = "OmniDocBench",
         data_source_from_hf_or_manual: str = "hf",
-        hf_repo_name: str = None,
-        hf_repo_variant: str = None,
+        hf_repo_name: str = "Quivr/OmniDocBench",
+        hf_repo_variant: str = "full_dataset",
         dataset_split=None
     ):
         super().__init__(
@@ -1572,6 +1922,10 @@ class OmniDocBenchAdapter(VisionDatasetAdapter):
                 "ground_truth": None,
                 "metadata": {"dataset": "OmniDocBench", "sample_id": idx}
             })
+        
+        if max_samples_per_category:
+            standardized = standardized[:max_samples_per_category]
+
         return standardized
 
 class MMMUAccountingAdapter(VisionDatasetAdapter):
@@ -1579,7 +1933,51 @@ class MMMUAccountingAdapter(VisionDatasetAdapter):
     data/vision/MMMU_Accounting/dev/data-00000-of-00001.arrow,
     is the only arrow shard file in dev/ sub-folder.
     
-    Schema or file content not available yet.. 
+    === Dataset object ===
+    Dataset({
+        features: ['id', 'question', 'options', 'explanation', 'image_1', 'image_2', 'image_3', 'image_4', 'image_5', 'image_6', 'image_7', 'img_type', 'answer', 'topic_difficulty', 
+    'question_type', 'subfield'],
+        num_rows: 5
+    })
+
+    === Dataset features ===
+    {'answer': Value('string'),
+    'explanation': Value('string'),
+    'id': Value('string'),
+    'image_1': Image(mode=None, decode=True),
+    'image_2': Image(mode=None, decode=True),
+    'image_3': Image(mode=None, decode=True),
+    'image_4': Image(mode=None, decode=True),
+    'image_5': Image(mode=None, decode=True),
+    'image_6': Image(mode=None, decode=True),
+    'image_7': Image(mode=None, decode=True),
+    'img_type': Value('string'),
+    'options': Value('string'),
+    'question': Value('string'),
+    'question_type': Value('string'),
+    'subfield': Value('string'),
+    'topic_difficulty': Value('string')}
+
+    === First 1 sample ===
+    {'answer': 'D',
+    'explanation': '',
+    'id': 'dev_Accounting_1',
+    'image_1': <PIL.PngImagePlugin.PngImageFile image mode=RGBA size=1234x289 at 0x29A53A84FD0>,
+    'image_2': None,
+    'image_3': None,
+    'image_4': None,
+    'image_5': None,
+    'image_6': None,
+    'image_7': None,
+    'img_type': "['Tables']",
+    'options': "['$63,020', '$58,410', '$71,320', '$77,490']",
+    'question': 'Each of the following situations relates to a different company. '
+                '<image 1> For company B, find the missing amounts.',
+    'question_type': 'multiple-choice',
+    'subfield': 'Financial Accounting',
+    'topic_difficulty': 'Easy'}
+
+
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_mmmu_accounting_annotation().
     
@@ -1621,6 +2019,29 @@ class MMMUAccountingAdapter(VisionDatasetAdapter):
             "notes": "Validation folder containing 1 Arrow shard file"
         },
     }
+    def __init__(
+        self,
+        category: str = "vision",
+        dataset_name: str = "MMMU_Accounting",
+        data_source_from_hf_or_manual: str = "hf",
+        hf_repo_name: str = "MMMU/MMMU",
+        hf_repo_variant: str = "Accounting",
+        dataset_split=None
+    ):
+        super().__init__(
+            category=category,
+            dataset_name=dataset_name,
+            data_source_from_hf_or_manual=data_source_from_hf_or_manual,
+            hf_repo_name=hf_repo_name,
+            hf_repo_variant=hf_repo_variant
+        )
+        self.category = category
+        self.dataset_name = dataset_name
+        self.data_source_from_hf_or_manual = data_source_from_hf_or_manual
+        self.hf_repo_name = hf_repo_name
+        self.hf_repo_variant = hf_repo_variant
+        self.dataset_split = dataset_split
+        self.FILE_MAPPING = self.FILE_MAPPING
     pass
 
 class MMMUEconomicsAdapter(VisionDatasetAdapter):
@@ -1628,7 +2049,52 @@ class MMMUEconomicsAdapter(VisionDatasetAdapter):
     data/vision/MMMU_Economics/dev/data-00000-of-00001.arrow,
     is the only arrow shard file in dev/ sub-folder.
     
-    Schema or file content not available yet..
+    === Dataset object ===
+    Dataset({
+        features: ['id', 'question', 'options', 'explanation', 'image_1', 'image_2', 'image_3', 'image_4', 'image_5', 'image_6', 'image_7', 'img_type', 'answer', 'topic_difficulty', 
+    'question_type', 'subfield'],
+        num_rows: 5
+    })
+
+    === Dataset features ===
+    {'answer': Value('string'),
+    'explanation': Value('string'),
+    'id': Value('string'),
+    'image_1': Image(mode=None, decode=True),
+    'image_2': Image(mode=None, decode=True),
+    'image_3': Image(mode=None, decode=True),
+    'image_4': Image(mode=None, decode=True),
+    'image_5': Image(mode=None, decode=True),
+    'image_6': Image(mode=None, decode=True),
+    'image_7': Image(mode=None, decode=True),
+    'img_type': Value('string'),
+    'options': Value('string'),
+    'question': Value('string'),
+    'question_type': Value('string'),
+    'subfield': Value('string'),
+    'topic_difficulty': Value('string')}
+
+    === First 1 samples ===
+    {'answer': 'D',
+    'explanation': '',
+    'id': 'dev_Economics_1',
+    'image_1': <PIL.PngImagePlugin.PngImageFile image mode=RGBA size=497x474 at 0x2310CFAABD0>,
+    'image_2': None,
+    'image_3': None,
+    'image_4': None,
+    'image_5': None,
+    'image_6': None,
+    'image_7': None,
+    'img_type': "['Plots and Charts']",
+    'options': "['500', '450', '400', '600']",
+    'question': 'The graph below shows the AD-AS diagram for Spain. All numbers '
+                'are in billions. <image 1> What is the price level in the '
+                'short-run equilibrium?',
+    'question_type': 'multiple-choice',
+    'subfield': 'Macroeconomics',
+    'topic_difficulty': 'Easy'}
+
+ 
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_mmmu_economics_annotation().
     
@@ -1670,6 +2136,29 @@ class MMMUEconomicsAdapter(VisionDatasetAdapter):
             "notes": "Validation folder containing 1 Arrow shard file"
         },
     }
+    def __init__(
+        self,
+        category: str = "vision",
+        dataset_name: str = "MMMU_Economics",
+        data_source_from_hf_or_manual: str = "hf",
+        hf_repo_name: str = "MMMU/MMMU",
+        hf_repo_variant: str = "Economics",
+        dataset_split=None
+    ):
+        super().__init__(
+            category=category,
+            dataset_name=dataset_name,
+            data_source_from_hf_or_manual=data_source_from_hf_or_manual,
+            hf_repo_name=hf_repo_name,
+            hf_repo_variant=hf_repo_variant
+        )
+        self.category = category
+        self.dataset_name = dataset_name
+        self.data_source_from_hf_or_manual = data_source_from_hf_or_manual
+        self.hf_repo_name = hf_repo_name
+        self.hf_repo_variant = hf_repo_variant
+        self.dataset_split = dataset_split
+        self.FILE_MAPPING = self.FILE_MAPPING
     pass
 
 class MMMUFinanceAdapter(VisionDatasetAdapter):
@@ -1677,7 +2166,53 @@ class MMMUFinanceAdapter(VisionDatasetAdapter):
     data/vision/MMMU_Finance/dev/data-00000-of-00001.arrow,
     is the only arrow shard file in dev/ sub-folder.
     
-    Schema or file content not available yet.. 
+    === Dataset object ===
+    Dataset({
+        features: ['id', 'question', 'options', 'explanation', 'image_1', 'image_2', 'image_3', 'image_4', 'image_5', 'image_6', 'image_7', 'img_type', 'answer', 'topic_difficulty', 
+    'question_type', 'subfield'],
+        num_rows: 5
+    })
+
+    === Dataset features ===
+    {'answer': Value('string'),
+    'explanation': Value('string'),
+    'id': Value('string'),
+    'image_1': Image(mode=None, decode=True),
+    'image_2': Image(mode=None, decode=True),
+    'image_3': Image(mode=None, decode=True),
+    'image_4': Image(mode=None, decode=True),
+    'image_5': Image(mode=None, decode=True),
+    'image_6': Image(mode=None, decode=True),
+    'image_7': Image(mode=None, decode=True),
+    'img_type': Value('string'),
+    'options': Value('string'),
+    'question': Value('string'),
+    'question_type': Value('string'),
+    'subfield': Value('string'),
+    'topic_difficulty': Value('string')}
+
+    === First 1 samples ===
+    {'answer': '0.8638',
+    'explanation': '',
+    'id': 'dev_Finance_1',
+    'image_1': <PIL.PngImagePlugin.PngImageFile image mode=RGB size=577x219 at 0x1B7FA2A51D0>,
+    'image_2': None,
+    'image_3': None,
+    'image_4': None,
+    'image_5': None,
+    'image_6': None,
+    'image_7': None,
+    'img_type': "['Tables']",
+    'options': '[]',
+    'question': 'Without referring to the preprogrammed function on your '
+                'financial calculator, use the basic formula for present value, '
+                'along with the given opportunity cost, r, and the number of '
+                'periods, n, to calculate the present value of $1 in case C shown '
+                'in the following table. <image 1>',
+    'question_type': 'open',
+    'subfield': 'Managerial Finance',
+    'topic_difficulty': 'Easy'}
+
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_mmmu_finance_annotation().
     
@@ -1719,6 +2254,29 @@ class MMMUFinanceAdapter(VisionDatasetAdapter):
             "notes": "Validation folder containing 1 Arrow shard file"
         },
     }
+    def __init__(
+        self,
+        category: str = "vision",
+        dataset_name: str = "MMMU_Finance",
+        data_source_from_hf_or_manual: str = "hf",
+        hf_repo_name: str = "MMMU/MMMU",
+        hf_repo_variant: str = "Finance",
+        dataset_split=None
+    ):
+        super().__init__(
+            category=category,
+            dataset_name=dataset_name,
+            data_source_from_hf_or_manual=data_source_from_hf_or_manual,
+            hf_repo_name=hf_repo_name,
+            hf_repo_variant=hf_repo_variant
+        )
+        self.category = category
+        self.dataset_name = dataset_name
+        self.data_source_from_hf_or_manual = data_source_from_hf_or_manual
+        self.hf_repo_name = hf_repo_name
+        self.hf_repo_variant = hf_repo_variant
+        self.dataset_split = dataset_split
+        self.FILE_MAPPING = self.FILE_MAPPING
     pass
 
 class MMMUMathAdapter(VisionDatasetAdapter):
@@ -1726,7 +2284,55 @@ class MMMUMathAdapter(VisionDatasetAdapter):
     data/vision/MMMU_Math/dev/data-00000-of-00001.arrow,
     is the only arrow shard file in dev/ sub-folder.
     
-    Schema or file content not available yet.. 
+    === Dataset object ===
+    Dataset({
+        features: ['id', 'question', 'options', 'explanation', 'image_1', 'image_2', 'image_3', 'image_4', 'image_5', 'image_6', 'image_7', 'img_type', 'answer', 'topic_difficulty', 
+    'question_type', 'subfield'],
+        num_rows: 5
+    })
+
+    === Dataset features ===
+    {'answer': Value('string'),
+    'explanation': Value('string'),
+    'id': Value('string'),
+    'image_1': Image(mode=None, decode=True),
+    'image_2': Image(mode=None, decode=True),
+    'image_3': Image(mode=None, decode=True),
+    'image_4': Image(mode=None, decode=True),
+    'image_5': Image(mode=None, decode=True),
+    'image_6': Image(mode=None, decode=True),
+    'image_7': Image(mode=None, decode=True),
+    'img_type': Value('string'),
+    'options': Value('string'),
+    'question': Value('string'),
+    'question_type': Value('string'),
+    'subfield': Value('string'),
+    'topic_difficulty': Value('string')}
+
+    === First 1 samples ===
+    {'answer': '4',
+    'explanation': '',
+    'id': 'dev_Math_1',
+    'image_1': <PIL.PngImagePlugin.PngImageFile image mode=RGB size=744x261 at 0x2A41F365010>,
+    'image_2': None,
+    'image_3': None,
+    'image_4': None,
+    'image_5': None,
+    'image_6': None,
+    'image_7': None,
+    'img_type': "['Tables']",
+    'options': '[]',
+    'question': 'Each of seven students has chosen three courses from ten '
+                'options, and must sit an exam for each of his or her three '
+                'choices. Two students sitting the same exam must do so at the '
+                'same time, but no student can sit more than one exam in the same '
+                'day. The table of choices is given in <image 1>. Find the '
+                'smallest number of days required to schedule the exams. Return '
+                'only the number of days.',
+    'question_type': 'open',
+    'subfield': 'Graph Theory',
+    'topic_difficulty': 'Easy'}
+
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_mmmu_math_annotation().
     
@@ -1768,170 +2374,30 @@ class MMMUMathAdapter(VisionDatasetAdapter):
             "notes": "Validation folder containing 1 Arrow shard file"
         },
     }
+    def __init__(
+        self,
+        category: str = "vision",
+        dataset_name: str = "MMMU_Math",
+        data_source_from_hf_or_manual: str = "hf",
+        hf_repo_name: str = "MMMU/MMMU",
+        hf_repo_variant: str = "Math",
+        dataset_split=None
+    ):
+        super().__init__(
+            category=category,
+            dataset_name=dataset_name,
+            data_source_from_hf_or_manual=data_source_from_hf_or_manual,
+            hf_repo_name=hf_repo_name,
+            hf_repo_variant=hf_repo_variant
+        )
+        self.category = category
+        self.dataset_name = dataset_name
+        self.data_source_from_hf_or_manual = data_source_from_hf_or_manual
+        self.hf_repo_name = hf_repo_name
+        self.hf_repo_variant = hf_repo_variant
+        self.dataset_split = dataset_split
+        self.FILE_MAPPING = self.FILE_MAPPING
     pass
-
-# class DUDEAdapter(VisionDatasetAdapter):
-#     FILE_MAPPING = {
-#         "default": {
-#             "format": "json_with_gt",
-#             "dataset_path": "data/vision/DUDE/DUDE_sample_dataset.json",
-#             "ground_truth_path": "data/vision/DUDE/DUDE_dataset-sample_gt.json",
-#             "notes": "No standard splits; evaluation dataset + ground truth file"
-#         }
-#     }
-
-#     def __init__(
-#         self,
-#         category: str = "vision",
-#         dataset_name: str = "DUDE",
-#         data_source_from_hf_or_manual: str = "manual",
-#         hf_repo_name: str = None,
-#         hf_repo_variant: str = None,
-#         dataset_split=None
-#     ):
-#         super().__init__(
-#             category=category,
-#             dataset_name=dataset_name,
-#             data_source_from_hf_or_manual=data_source_from_hf_or_manual,
-#             hf_repo_name=hf_repo_name,
-#             hf_repo_variant=hf_repo_variant
-#         )
-#         self.category = category
-#         self.dataset_name = dataset_name
-#         self.data_source_from_hf_or_manual = data_source_from_hf_or_manual
-#         self.hf_repo_name = hf_repo_name
-#         self.hf_repo_variant = hf_repo_variant
-#         self.dataset_split = dataset_split
-#         self.FILE_MAPPING = self.FILE_MAPPING
-
-#     def load_split(self, dataset_split="val", max_samples_per_split=None, max_samples_per_category=None):
-#         if dataset_split != "val":
-#             raise ValueError("DUDE only supports 'val' for evaluation.")
-
-#         raw_samples = self.vision_dataset_loader("default", self.FILE_MAPPING, max_samples_per_split=max_samples_per_split)
-
-#         standardized = []
-#         for idx, s in enumerate(raw_samples):
-#             standardized.append({
-#                 "input": s,
-#                 "ground_truth": s.get("answer"),
-#                 "metadata": {"dataset": "DUDE", "sample_id": idx}
-#             })
-#         return standardized
-
-# class AI2DAdapter(VisionDatasetAdapter):
-#     FILE_MAPPING = {
-#         "test": {
-#             "format": "folder",
-#             "dataset_path": "data/vision/AI2D/test",
-#             "ground_truth_path": None,
-#             "notes": "Only test split available; contains 2 arrow shard files"
-#         }
-#     }
-
-#     def __init__(
-#         self,
-#         category: str = "vision",
-#         dataset_name: str = "AI2D",
-#         data_source_from_hf_or_manual: str = "hf",
-#         hf_repo_name: str = None,
-#         hf_repo_variant: str = None,
-#         dataset_split=None
-#     ):
-#         super().__init__(
-#             category=category,
-#             dataset_name=dataset_name,
-#             data_source_from_hf_or_manual=data_source_from_hf_or_manual,
-#             hf_repo_name=hf_repo_name,
-#             hf_repo_variant=hf_repo_variant
-#         )
-#         self.category = category
-#         self.dataset_name = dataset_name
-#         self.data_source_from_hf_or_manual = data_source_from_hf_or_manual
-#         self.hf_repo_name = hf_repo_name
-#         self.hf_repo_variant = hf_repo_variant
-#         self.dataset_split = dataset_split
-#         self.FILE_MAPPING = self.FILE_MAPPING
-
-#     def load_split(self, dataset_split=None, max_samples_per_split=None, max_samples_per_category=None):
-#         splits_to_load = [dataset_split or self.dataset_split] if dataset_split or self.dataset_split else list(self.FILE_MAPPING.keys())
-#         all_samples = []
-
-#         for split in splits_to_load:
-#             raw_samples = self.vision_dataset_loader(split, self.FILE_MAPPING, max_samples_per_split=max_samples_per_split)
-
-#             for idx, row in enumerate(raw_samples):
-#                 all_samples.append({
-#                     "input": {"image": row.get("image", row)},
-#                     "ground_truth": row.get("answer"),
-#                     "metadata": {"dataset": "AI2D", "sample_id": idx}
-#                 })
-
-#         return all_samples
-
-# ------------------------
-# RAG Adapters
-# ------------------------
-# class HotpotQAAdapter(BaseDatasetAdapter):
-#     FILE_MAPPING = {
-#         "train": {
-#             "format": "folder",
-#             "dataset_path": "data/rag/HotpotQA/train",
-#             "ground_truth_path": None,
-#             "notes": "2 arrow shard files under 'train' folder"
-#         },
-#         "val": {
-#             "format": "folder",
-#             "dataset_path": "data/rag/HotpotQA/validation",
-#             "ground_truth_path": None,
-#             "notes": "1 arrow file under 'validation' folder"
-#         },
-#         "test": {
-#             "format": "folder",
-#             "dataset_path": "data/rag/HotpotQA/test",
-#             "ground_truth_path": None,
-#             "notes": "1 arrow file under 'test' folder"
-#         }
-#     }
-
-#     def __init__(
-#         self,
-#         category: str = "rag",
-#         dataset_name: str = "HotpotQA",
-#         data_source_from_hf_or_manual: str = "hf",
-#         hf_repo_name: str = None,
-#         hf_repo_variant: str = None,
-#         dataset_split=None
-#     ):
-#         super().__init__(
-#             category=category,
-#             dataset_name=dataset_name,
-#             data_source_from_hf_or_manual=data_source_from_hf_or_manual,
-#             hf_repo_name=hf_repo_name,
-#             hf_repo_variant=hf_repo_variant
-#         )
-#         self.category = category
-#         self.dataset_name = dataset_name
-#         self.data_source_from_hf_or_manual = data_source_from_hf_or_manual
-#         self.hf_repo_name = hf_repo_name
-#         self.hf_repo_variant = hf_repo_variant
-#         self.dataset_split = dataset_split
-#         self.FILE_MAPPING = self.FILE_MAPPING
-
-#     def load_split(self, dataset_split=None, recursive=False, max_samples_per_split=None, max_samples_per_category=None):
-#         dataset_split = dataset_split or self.dataset_split
-#         self.download()
-#         def transform(row):
-#             context = " ".join([" ".join(p[1]) for p in row.get("context", [])])
-#             return {"question": row.get("question"), "context": context}
-#         return self._prepare_samples(
-#             dataset_split_obj=self.dataset_obj.get(dataset_split, []),
-#             dataset_name="HotpotQA",
-#             max_samples_per_split=max_samples_per_split,
-#             input_keys=None,
-#             answer_key="answer",
-#             transform=transform
-#         )
 
 # ------------------------
 # RAG Adapters
@@ -1941,11 +2407,31 @@ class FinQAAdapter(BaseDatasetAdapter):
     data/rag/FinQA/train/data-00000-of-00001.arrow,
     is the only arrow shard file in train/ sub-folder.
     
-    Schema or file content not available yet..
+    === Dataset object ===
+    Dataset({
+        features: ['query-id', 'corpus-id', 'score'],
+        num_rows: 8281
+    })
+
+    === Dataset features ===
+    {'corpus-id': Value('int64'),
+    'query-id': Value('int64'),
+    'score': Value('int64')}
+
+    === First 3 samples ===
+
+    --- Sample 0 ---
+    {'corpus-id': 4344, 'query-id': 0, 'score': 1}
+
+    --- Sample 1 ---
+    {'corpus-id': 5191, 'query-id': 1, 'score': 1}
+
+    --- Sample 2 ---
+    {'corpus-id': 4918, 'query-id': 2, 'score': 1}
+
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_finqa_annotation().
 
-    
     FILE_MAPPING below only serves to provide the path right down to the split level.
     For each split, the actual loading logic in load_split() must handle the pathing,
     down to the individual sample level under train/ folder.
@@ -1967,7 +2453,7 @@ class FinQAAdapter(BaseDatasetAdapter):
         category: str = "rag",
         dataset_name: str = "FinQA",
         data_source_from_hf_or_manual: str = "hf",
-        hf_repo_name: str = None,
+        hf_repo_name: str = "FinanceMTEB/FinQA",
         hf_repo_variant: str = None,
         dataset_split=None
     ):
@@ -2191,8 +2677,8 @@ class TATQAAdapter(BaseDatasetAdapter):
         self,
         category: str = "rag",
         dataset_name: str = "TATQA",
-        data_source_from_hf_or_manual: str = "manual",
-        hf_repo_name: str = None,
+        data_source_from_hf_or_manual: str = "hf",
+        hf_repo_name: str = None, # "next-tat/TAT-QA"
         hf_repo_variant: str = None,
         dataset_split=None
     ):
@@ -2246,7 +2732,38 @@ class LendingClubAdapter(BaseDatasetAdapter):
     data/credit_risk_pd/LendingClub/test/data-00000-of-00001.arrow,
     is the only arrow shard file in test/ sub-folder.
     
-    Schema or file content not available yet.. 
+    === Dataset object ===
+    Dataset({
+        features: ['id', 'query', 'answer', 'choices', 'gold'],
+        num_rows: 2691
+    })
+
+    === Dataset features ===
+    {'answer': Value('string'),
+    'choices': List(Value('string')),
+    'gold': Value('int64'),
+    'id': Value('string'),
+    'query': Value('string')}
+
+    === First 1 sample ===
+    {'answer': 'fullypaid',
+    'choices': ['fullypaid', 'chargedoff'],
+    'gold': 0,
+    'id': 'ex_000001',
+    'query': 'Predict the loan status using the features below. Directly respond '
+            "with 'fullypaid' if the loan is fully repaid or 'chargeoff' if the "
+            'loan is charged off.\n'
+            "Text: ' addressState: ga, annualIncome: 66400.00, "
+            'delinquencyIn2Years: 2.00, employmentLength: 10+Years, '
+            'ficoRangeHigh: 669.00, ficoRangeLow: 665.00, grade: f, '
+            'homeOwnership: mortgage, inquiriesIn6Months: 1.00, installment: '
+            '267.07, interestRate: 24.08, lastPaymentAmount: 267.02, loanAmount: '
+            '6800.00, loanApplicationType: individual, loanPurpose: other, '
+            'mortgageAccounts: 4.00, openAccounts: 14.00, revolvingBalance: '
+            '17607.00, revolvingUtilizationRate: 91.70, totalAccounts: 22.00, '
+            "verificationStatus: notVerified '.\n"
+            'Answer:'}
+
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_lendingclub_annotation().
     
@@ -2290,10 +2807,10 @@ class LendingClubAdapter(BaseDatasetAdapter):
     }
     def __init__(
         self,
-        category: str = "credit_risk",
+        category: str = "credit_risk_pd",
         dataset_name: str = "LendingClub",
-        data_source_from_hf_or_manual: str = "manual",
-        hf_repo_name: str = None,
+        data_source_from_hf_or_manual: str = "hf",
+        hf_repo_name: str = "TheFinAI/lendingclub-benchmark",
         hf_repo_variant: str = None,
         dataset_split=None
     ):
@@ -2342,7 +2859,23 @@ class FinancialPhraseBankAdapter(BaseDatasetAdapter):
     data/credit_risk_sentiment/FinancialPhraseBank/test/data-00000-of-00001.arrow,
     is the only arrow shard file in test/ sub-folder.
     
-    Schema or file content not available yet..
+    === Dataset features ===
+    {'label': Value('int64'),
+    'label_text': Value('string'),
+    'text': Value('string')}
+
+    === First 2 samples ===
+    {'label': 2,
+    'label_text': 'positive',
+    'text': 'Rautaruukki said construction group YIT has awarded it a 2.5 mln eur '
+            'contract to supply the steel structures for a new bridge spanning '
+            'the Kemijoki river in Northern Finland .'}
+
+    --- Sample 1 ---
+    {'label': 1,
+    'label_text': 'neutral',
+    'text': 'Finnish Raute Precision that supplies weighing and dosing systems '
+            'and plants is changing its name to Lahti Precision .'}
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_financial_phrase_bank_annotation().
     
@@ -2374,6 +2907,29 @@ class FinancialPhraseBankAdapter(BaseDatasetAdapter):
             "notes": "Train folder containing 1 Arrow shard file"
         },
     }
+    def __init__(
+        self,
+        category: str = "credit_risk_sentiment",
+        dataset_name: str = "FinancialPhraseBank",
+        data_source_from_hf_or_manual: str = "hf",
+        hf_repo_name: str = "takala/financial_phrasebank",
+        hf_repo_variant: str = "sentences_allagree",
+        dataset_split=None
+    ):
+        super().__init__(
+            category=category,
+            dataset_name=dataset_name,
+            data_source_from_hf_or_manual=data_source_from_hf_or_manual,
+            hf_repo_name=hf_repo_name,
+            hf_repo_variant=hf_repo_variant
+        )
+        self.category = category
+        self.dataset_name = dataset_name
+        self.data_source_from_hf_or_manual = data_source_from_hf_or_manual
+        self.hf_repo_name = hf_repo_name
+        self.hf_repo_variant = hf_repo_variant
+        self.dataset_split = dataset_split
+        self.FILE_MAPPING = self.FILE_MAPPING
     pass
 
 class FiQAAdapter(BaseDatasetAdapter):
@@ -2381,7 +2937,28 @@ class FiQAAdapter(BaseDatasetAdapter):
     data/credit_risk_sentiment/FiQA/test/data-00000-of-00001.arrow,
     is the only arrow shard file in test/ sub-folder.
     
-    Schema or file content not available yet.. 
+    === Dataset object ===
+    Dataset({
+        features: ['_id', 'sentence', 'target', 'aspect', 'score', 'type'],
+        num_rows: 234
+    })
+
+    === Dataset features ===
+    {'_id': Value('string'),
+    'aspect': Value('string'),
+    'score': Value('float64'),
+    'sentence': Value('string'),
+    'target': Value('string'),
+    'type': Value('string')}
+
+    === First 1 sample ===
+    {'_id': '645',
+    'aspect': 'Stock/Price Action',
+    'score': 0.329,
+    'sentence': "Britain's FTSE steadies, supported by Dixons Carphone",
+    'target': 'Dixons Carphone',
+    'type': 'headline'}
+
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_fiqa_annotation().
     
@@ -2425,10 +3002,10 @@ class FiQAAdapter(BaseDatasetAdapter):
     }
     def __init__(
         self,
-        category: str = "credit_risk",
+        category: str = "credit_risk_sentiment",
         dataset_name: str = "FiQA",
         data_source_from_hf_or_manual: str = "hf",
-        hf_repo_name: str = None,
+        hf_repo_name: str = "TheFinAI/fiqa-sentiment-classification",
         hf_repo_variant: str = None,
         dataset_split=None
     ):
@@ -2467,11 +3044,32 @@ class FinanceBenchAdapter(BaseDatasetAdapter):
     data/credit_risk_memo_generator/FinanceBench/train/data-00000-of-00001.arrow,
     is the only arrow shard file in train/ sub-folder.
     
-    Schema or file content not available yet.. 
+    === Dataset object ===
+    Dataset({
+        features: ['financebench_id', 'company', 'doc_name', 'question_type', 'question_reasoning', 'domain_question_num', 'question', 'answer', 'justification', 'dataset_subset_label', 'evidence', 'gics_sector', 'doc_type', 'doc_period', 'doc_link'],
+        num_rows: 150
+    })
+
+    === Dataset features ===
+    {'answer': Value('string'),
+    'company': Value('string'),
+    'dataset_subset_label': Value('string'),
+    'doc_link': Value('string'),
+    'doc_name': Value('string'),
+    'doc_period': Value('int64'),
+    'doc_type': Value('string'),
+    'domain_question_num': Value('string'),
+    'evidence': List({'evidence_text': Value('string'), 'doc_name': Value('string'), 'evidence_page_num': Value('int64'), 'evidence_text_full_page': Value('string')}),
+    'financebench_id': Value('string'),
+    'gics_sector': Value('string'),
+    'justification': Value('string'),
+    'question': Value('string'),
+    'question_reasoning': Value('string'),
+    'question_type': Value('string')}
+    
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_financebench_annotation().
 
-        
     FILE_MAPPING below only serves to provide the path right down to the split level.
     For each split, the actual loading logic in load_split() must handle the pathing,
     down to the individual sample level under train/ folder.
@@ -2489,10 +3087,10 @@ class FinanceBenchAdapter(BaseDatasetAdapter):
     }
     def __init__(
         self,
-        category: str = "credit_risk",
+        category: str = "credit_risk_memo_generator",
         dataset_name: str = "FinanceBench",
         data_source_from_hf_or_manual: str = "hf",
-        hf_repo_name: str = None,
+        hf_repo_name: str = "PatronusAI/financebench",
         hf_repo_variant: str = None,
         dataset_split=None
     ):
@@ -2521,39 +3119,3 @@ class FinanceBenchAdapter(BaseDatasetAdapter):
             input_keys=["question", "context"],
             answer_key="answer"
         )
-
-# class ECTSumAdapter(BaseDatasetAdapter):
-#     def __init__(
-#         self,
-#         category: str = "credit_risk",
-#         dataset_name: str = "ECTSum",
-#         data_source_from_hf_or_manual: str = "hf",
-#         hf_repo_name: str = None,
-#         hf_repo_variant: str = None,
-#         dataset_split=None
-#     ):
-#         super().__init__(
-#             category=category,
-#             dataset_name=dataset_name,
-#             data_source_from_hf_or_manual=data_source_from_hf_or_manual,
-#             hf_repo_name=hf_repo_name,
-#             hf_repo_variant=hf_repo_variant
-#         )
-#         self.category = category
-#         self.dataset_name = dataset_name
-#         self.data_source_from_hf_or_manual = data_source_from_hf_or_manual
-#         self.hf_repo_name = hf_repo_name
-#         self.hf_repo_variant = hf_repo_variant
-#         self.dataset_split = dataset_split
-#         self.FILE_MAPPING = self.FILE_MAPPING
-
-#     def load_split(self, dataset_split=None, recursive=False, max_samples_per_split=None, max_samples_per_category=None):
-#         dataset_split = dataset_split or self.dataset_split
-#         self.download()
-#         return self._prepare_samples(
-#             dataset_split_obj=self.dataset_obj.get(dataset_split, []),
-#             dataset_name="ECTSum",
-#             max_samples_per_split=max_samples_per_split,
-#             input_keys=["transcript"],
-#             answer_key="summary"
-#         )

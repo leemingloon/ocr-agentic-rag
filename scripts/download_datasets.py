@@ -32,8 +32,8 @@ print("✓ Created folder structure under data/")
 # OCR datasets
 ########################################
 OCR_DATASETS = [
-    ("SROIE", None, None),  # manual / Kaggle
-    ("FUNSD", None, None),  # manual
+    ("SROIE", "jsdnrs/ICDAR2019-SROIE", None),  # Kaggle
+    ("FUNSD", "nielsr/funsd", None),
 ]
 
 print("\n=== Downloading OCR datasets ===")
@@ -42,7 +42,7 @@ for name, hf_name, hf_config in OCR_DATASETS:
     os.makedirs(folder, exist_ok=True)
     if hf_name:
         print(f"Downloading {name} from HuggingFace...")
-        ds = load_dataset(hf_name, hf_config) if hf_config else load_dataset(hf_name)
+        ds = load_dataset(hf_name, hf_config, download_mode="force_redownload") if hf_config else load_dataset(hf_name, download_mode="force_redownload")
         ds.save_to_disk(folder)
         print(f"Saved {name} to {folder}")
     else:
@@ -64,21 +64,6 @@ print(get_dataset_config_names("MMMU/MMMU"))
 # 'Energy_and_Power', 'Finance', 'Geography', 'History', 'Literature', 
 # 'Manage', 'Marketing', 'Materials', 'Math', 'Mechanical_Engineering', 
 # 'Music', 'Pharmacy', 'Physics', 'Psychology', 'Public_Health', 'Sociology']
-MMMU_SUBJECTS = [
-    "Finance",
-    "Economics",
-    "Math",
-    "Accounting",
-]
-print("\n--- MMMU (Selected Subjects) ---")
-for subject in MMMU_SUBJECTS:
-    folder = os.path.join(BASE_DIR, "vision", f"MMMU_{subject}")
-    os.makedirs(folder, exist_ok=True)
-    print(f"Downloading MMMU subject: {subject} ...")
-
-    ds = load_dataset("MMMU/MMMU", subject)
-    ds.save_to_disk(folder)
-    print(f"Saved MMMU-{subject} to {folder}")
 
 VISION_DATASETS = [
     # ("MathVista", "AI4Math/MathVista", None),
@@ -92,6 +77,10 @@ VISION_DATASETS = [
     # ("DUDE", None, None),  # manual
     ("OmniDocBench", "Quivr/OmniDocBench", "full_dataset"),
     # ("PlotQA", "achang/plot_qa", None),
+    ("MMMU_Accounting", "MMMU/MMMU", "Accounting"),
+    ("MMMU_Economics", "MMMU/MMMU", "Economics"),
+    ("MMMU_Finance", "MMMU/MMMU", "Finance"),
+    ("MMMU_Math", "MMMU/MMMU", "Math"),
 ]
 
 print("\n=== Downloading Vision / Multimodal datasets ===")
@@ -114,7 +103,7 @@ for name, hf_name, hf_config in VISION_DATASETS:
             print(f"Done extracting TextVQA images to {folder}")
     elif hf_name:  # HuggingFace datasets
         print(f"Downloading {name} from HuggingFace...")
-        ds = load_dataset(hf_name, hf_config) if hf_config else load_dataset(hf_name)
+        ds = load_dataset(hf_name, hf_config, download_mode="force_redownload") if hf_config else load_dataset(hf_name, download_mode="force_redownload")
         ds.save_to_disk(folder)
         print(f"Saved {name} to {folder}")
     else:
@@ -126,7 +115,8 @@ for name, hf_name, hf_config in VISION_DATASETS:
 RAG_DATASETS = [
     # ("HotpotQA", "hotpot_qa", "fullwiki"),
     ("FinQA", "FinanceMTEB/FinQA", None),
-    ("TAT-QA", None, None),  # manual
+    ("TAT-QA", None, None),  # manual from github
+    # ("TAT-QA", "next-tat/TAT-QA", None),
     # ("BIRD-SQL", "domyn/FINCH", None),
 ]
 
@@ -136,7 +126,7 @@ for name, hf_name, hf_config in RAG_DATASETS:
     os.makedirs(folder, exist_ok=True)
     if hf_name:
         print(f"Downloading {name} from HuggingFace...")
-        ds = load_dataset(hf_name, hf_config) if hf_config else load_dataset(hf_name)
+        ds = load_dataset(hf_name, hf_config, download_mode="force_redownload") if hf_config else load_dataset(hf_name, download_mode="force_redownload")
         ds.save_to_disk(folder)
         print(f"Saved {name} to {folder}")
     else:
@@ -164,7 +154,7 @@ for name, source in CREDIT_RISK_PD_DATASETS:
         print(f"Done extracting {name} to {folder}")
     else:  # HuggingFace datasets
         print(f"Downloading {name} from HuggingFace...")
-        ds = load_dataset(source)
+        ds = load_dataset(source, download_mode="force_redownload")
         ds.save_to_disk(folder)
         print(f"Saved {name} to {folder}")
 
@@ -192,7 +182,7 @@ for name, source, hf_config in CREDIT_RISK_SENTIMENT_DATASETS:
         print(f"Done extracting {name} to {folder}")
     else:  # HuggingFace datasets
         print(f"Downloading {name} from HuggingFace...")
-        ds = load_dataset(source, hf_config) if hf_config else load_dataset(source)
+        ds = load_dataset(source, hf_config, download_mode="force_redownload") if hf_config else load_dataset(source, download_mode="force_redownload")
         ds.save_to_disk(folder)
         print(f"Saved {name} to {folder}")
 
@@ -218,7 +208,7 @@ for name, source in CREDIT_RISK_MEMO_GENERATOR_DATASETS:
         print(f"Done extracting {name} to {folder}")
     else:  # HuggingFace datasets
         print(f"Downloading {name} from HuggingFace...")
-        ds = load_dataset(source)
+        ds = load_dataset(source, download_mode="force_redownload")
         ds.save_to_disk(folder)
         print(f"Saved {name} to {folder}")
 
