@@ -184,7 +184,8 @@ class BaseDatasetAdapter:
             for batch in table.iter_batches(batch_size=1):
                 row = batch.to_pydict()
                 row = {k: v[0] for k, v in row.items()}
-
+                
+                print("DEBUG row bboxes:", row.get("bboxes"))
                 print("Row 0 image type:", type(row["image"]))
                 # --- PIL conversion logic ---
                 img_field = row.get("image")
@@ -671,6 +672,7 @@ class OCRDatasetAdapter(BaseDatasetAdapter):
         # Normalize bboxes if needed
         norm_bboxes = []
         for box in bboxes:
+            print(f"DEBUG box[{i}]:", box, type(box))
             if isinstance(box, (list, tuple)):
                 if len(box) == 4:
                     norm_bboxes.append(box)

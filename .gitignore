@@ -149,7 +149,8 @@ __pycache__/
 # !data/ocr/FUNSD/training_data/images/00040534.png
 # !data/ocr/FUNSD/training_data/images/00070353.png
 # !data/ocr/FUNSD/training_data/images/00093726.png
-!data/ocr/FUNSD/**
+!data/ocr/FUNSD/testing_data
+!data/ocr/FUNSD/training_data
 
 # !data/ocr/SROIE/SROIE2019/test/box/X00016469670.txt
 # !data/ocr/SROIE/SROIE2019/test/box/X00016469671.txt
@@ -175,11 +176,11 @@ __pycache__/
 # !data/vision/ChartQA/** # Large arrow files, download by scripts/download_datasets.py
 # !data/vision/DocVQA/** # Large arrow files, download by scripts/download_datasets.py
 # !data/vision/InfographicsVQA/** # Large arrow files, download by scripts/download_datasets.py
-!data/vision/OmniDocBench/**
-!data/vision/MMMU_Accounting/**
-!data/vision/MMMU_Economics/**
-!data/vision/MMMU_Finance/**
-!data/vision/MMMU_Math/**
+# !data/vision/OmniDocBench/**
+# !data/vision/MMMU_Accounting/**
+# !data/vision/MMMU_Economics/**
+# !data/vision/MMMU_Finance/**
+# !data/vision/MMMU_Math/**
 
 !data/rag/FinQA/**
 !data/rag/TAT-QA/**
