@@ -1,9 +1,8 @@
-📁 FILE 16/20: README.md (UPDATED with Credit Risk)
-markdown# OCR→Agentic RAG→Credit Risk Platform
+OCR→Agentic RAG→Credit Risk Platform
 
 **Complete Document Intelligence + Credit Risk System**  
 **Author:** Lee Ming Loon  
-**Status:** Production-ready prototype
+**Status:** Deployed to AWS Sagemaker. Evaluating models on Local PC (in progress on evaluate_on_local branch). Finally, Production-ready prototype.
 
 ---
 
@@ -436,4 +435,3 @@ MIT License
 ---
 
 **Contact:** Lee Ming Loon | Singapore  
-**For OCBC AI Labs Application**
