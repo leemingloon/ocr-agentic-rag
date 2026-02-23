@@ -132,36 +132,37 @@ __pycache__/
 
 
 # Ignore all data by default
-/data/**
+data/**
 
 # Except small datasets you want to keep (force add)
+!data/**/
+!data/**/first_5_rows.json
 !data/data_structure.txt
-!data/ocr/FUNSD/testing_data/annotations/82092117.json
-!data/ocr/FUNSD/testing_data/annotations/82200067_0069.json
-!data/ocr/FUNSD/testing_data/annotations/82250337_0338.json
-!data/ocr/FUNSD/testing_data/images/82092117.png
-!data/ocr/FUNSD/testing_data/images/82200067_0069.png
-!data/ocr/FUNSD/testing_data/images/82250337_0338.png
 
-!data/ocr/FUNSD/training_data/annotations/00040534.json
-!data/ocr/FUNSD/training_data/annotations/00070353.json
-!data/ocr/FUNSD/training_data/annotations/00093726.json
-!data/ocr/FUNSD/training_data/images/00040534.png
-!data/ocr/FUNSD/training_data/images/00070353.png
-!data/ocr/FUNSD/training_data/images/00093726.png
+# !data/ocr/FUNSD/testing_data/annotations/82092117.json
+# !data/ocr/FUNSD/testing_data/annotations/82200067_0069.json
+# !data/ocr/FUNSD/testing_data/annotations/82250337_0338.json
+# !data/ocr/FUNSD/testing_data/images/82092117.png
+# !data/ocr/FUNSD/testing_data/images/82200067_0069.png
+# !data/ocr/FUNSD/testing_data/images/82250337_0338.png
+
+# !data/ocr/FUNSD/training_data/annotations/00040534.json
+# !data/ocr/FUNSD/training_data/annotations/00070353.json
+# !data/ocr/FUNSD/training_data/annotations/00093726.json
+# !data/ocr/FUNSD/training_data/images/00040534.png
+# !data/ocr/FUNSD/training_data/images/00070353.png
+# !data/ocr/FUNSD/training_data/images/00093726.png
 # !data/ocr/FUNSD/testing_data
 # !data/ocr/FUNSD/training_data
-!data/ocr/FUNSD/train/first_5_rows.json
-!data/ocr/FUNSD/test/first_5_rows.json
 
 # !data/ocr/SROIE/SROIE2019/test/box/X00016469670.txt
 # !data/ocr/SROIE/SROIE2019/test/box/X00016469671.txt
 # !data/ocr/SROIE/SROIE2019/test/entities/X00016469670.txt
 # !data/ocr/SROIE/SROIE2019/test/entities/X00016469671.txt
-!data/ocr/SROIE/SROIE2019/test/box/**
-!data/ocr/SROIE/SROIE2019/test/entities/**
-!data/ocr/SROIE/SROIE2019/test/img/X00016469670.jpg
-!data/ocr/SROIE/SROIE2019/test/img/X00016469671.jpg
+# !data/ocr/SROIE/SROIE2019/test/box/**
+# !data/ocr/SROIE/SROIE2019/test/entities/**
+# !data/ocr/SROIE/SROIE2019/test/img/X00016469670.jpg
+# !data/ocr/SROIE/SROIE2019/test/img/X00016469671.jpg
 
 # !data/ocr/SROIE/SROIE2019/train/box/X00016469612.txt
 # !data/ocr/SROIE/SROIE2019/train/box/X00016469619.txt
@@ -169,11 +170,11 @@ __pycache__/
 # !data/ocr/SROIE/SROIE2019/train/entities/X00016469612.txt
 # !data/ocr/SROIE/SROIE2019/train/entities/X00016469619.txt
 # !data/ocr/SROIE/SROIE2019/train/entities/X00016469620.txt
-!data/ocr/SROIE/SROIE2019/train/box/**
-!data/ocr/SROIE/SROIE2019/train/entities/**
-!data/ocr/SROIE/SROIE2019/train/img/X00016469612.jpg
-!data/ocr/SROIE/SROIE2019/train/img/X00016469619.jpg
-!data/ocr/SROIE/SROIE2019/train/img/X00016469620.jpg
+# !data/ocr/SROIE/SROIE2019/train/box/**
+# !data/ocr/SROIE/SROIE2019/train/entities/**
+# !data/ocr/SROIE/SROIE2019/train/img/X00016469612.jpg
+# !data/ocr/SROIE/SROIE2019/train/img/X00016469619.jpg
+# !data/ocr/SROIE/SROIE2019/train/img/X00016469620.jpg
 
 # !data/vision/ChartQA/** # Large arrow files, download by scripts/download_datasets.py
 # !data/vision/DocVQA/** # Large arrow files, download by scripts/download_datasets.py
