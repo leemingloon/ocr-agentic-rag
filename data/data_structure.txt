@@ -2,6 +2,8 @@ data_structure.json - 0.03 MB
 extract_folder_structure.py - 0.01 MB
 __pycache__/
     extract_folder_structure.cpython-311.pyc - 0.01 MB
+credit_risk/
+    prompts.db - 0.02 MB
 credit_risk_memo_generator/
     FinanceBench/
         dataset_dict.json - 0.00 MB
@@ -17,7 +19,6 @@ credit_risk_pd/
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
         train/
-            data-00000-of-00001.arrow - 6.78 MB
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
         valid/
@@ -49,13 +50,16 @@ credit_risk_sentiment/
             data-00000-of-00001.arrow - 0.18 MB
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
+drift_cache/
+    reference_data_upload.csv - 0.05 MB
 ocr/
     FUNSD/
         dataset_dict.json - 0.00 MB
         test/
             data-00000-of-00001.arrow - 4.54 MB
-            dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
+            data-00000-of-00001.parquet - 4.18 MB
+            first_5_rows.json - 0.09 MB
+            2 files, total 0.00 MB
         testing_data/
             .DS_Store - 0.01 MB
             annotations/
@@ -70,8 +74,9 @@ ocr/
                 47 files, total 3.62 MB
         train/
             data-00000-of-00001.arrow - 12.60 MB
-            dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
+            data-00000-of-00001.parquet - 11.68 MB
+            first_5_rows.json - 0.09 MB
+            2 files, total 0.00 MB
         training_data/
             .DS_Store - 0.01 MB
             annotations/
@@ -86,47 +91,16 @@ ocr/
                 146 files, total 11.03 MB
     SROIE/
         dataset_dict.json - 0.00 MB
-        SROIE2019/
-            test/
-                box/
-                    X51007846283.txt - 0.01 MB
-                    X51008042787.txt - 0.01 MB
-                    X51006912976.txt - 0.00 MB
-                    344 files, total 0.82 MB
-                entities/
-                    X51006334742.txt - 0.00 MB
-                    X51006828201.txt - 0.00 MB
-                    X51006619869.txt - 0.00 MB
-                    344 files, total 0.06 MB
-                img/
-                    X51007846358.jpg - 4.06 MB
-                    X51007846283.jpg - 3.15 MB
-                    X51006913018.jpg - 3.12 MB
-                    344 files, total 185.89 MB
-            train/
-                box/
-                    X51005663297.txt - 0.01 MB
-                    X51007846368.txt - 0.01 MB
-                    X51006414713.txt - 0.01 MB
-                    623 files, total 1.47 MB
-                entities/
-                    X51006387813.txt - 0.00 MB
-                    X51008123586.txt - 0.00 MB
-                    X51008114284.txt - 0.00 MB
-                    623 files, total 0.11 MB
-                img/
-                    X51007846305.jpg - 3.46 MB
-                    X51006913019.jpg - 3.22 MB
-                    X51007846301.jpg - 3.16 MB
-                    623 files, total 328.53 MB
         test/
             data-00000-of-00001.arrow - 206.51 MB
+            data-00000-of-00001.parquet - 183.07 MB
             dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
+            1 files, total 0.00 MB
         train/
             data-00000-of-00001.arrow - 340.09 MB
+            data-00000-of-00001.parquet - 304.73 MB
             dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
+            1 files, total 0.00 MB
 proof/
     ocr_FUNSDAdapter.json - 0.00 MB
     ocr_SROIEAdapter.json - 0.00 MB
@@ -140,18 +114,11 @@ rag/
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
     TAT-QA/
-        tatqa_dataset_train.json - 12.25 MB
         tatqa_dataset_test_gold.json - 2.07 MB
         tatqa_dataset_dev.json - 1.56 MB
-        2 files, total 1.09 MB
-        test/
-            data-00000-of-00001.arrow - 4.54 MB
-            dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
-        train/
-            data-00000-of-00001.arrow - 12.60 MB
-            dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
+        tatqa_dataset_test.json - 1.09 MB
+        1 files, total 0.00 MB
+risk_memos/
 vision/
     ChartQA/
         dataset_dict.json - 0.00 MB
@@ -212,20 +179,6 @@ vision/
             data-00000-of-00001.arrow - 1.53 MB
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
-    MMMU_Economics/
-        dataset_dict.json - 0.00 MB
-        dev/
-            data-00000-of-00001.arrow - 0.17 MB
-            dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
-        test/
-            data-00000-of-00001.arrow - 11.33 MB
-            dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
-        validation/
-            data-00000-of-00001.arrow - 1.42 MB
-            dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
     MMMU_Finance/
         dataset_dict.json - 0.00 MB
         dev/
@@ -238,20 +191,6 @@ vision/
             state.json - 0.00 MB
         validation/
             data-00000-of-00001.arrow - 1.03 MB
-            dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
-    MMMU_Math/
-        dataset_dict.json - 0.00 MB
-        dev/
-            data-00000-of-00001.arrow - 0.17 MB
-            dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
-        test/
-            data-00000-of-00001.arrow - 26.56 MB
-            dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
-        validation/
-            data-00000-of-00001.arrow - 1.38 MB
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
     OmniDocBench/

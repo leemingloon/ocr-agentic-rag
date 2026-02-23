@@ -151,6 +151,8 @@ __pycache__/
 !data/ocr/FUNSD/training_data/images/00093726.png
 # !data/ocr/FUNSD/testing_data
 # !data/ocr/FUNSD/training_data
+!data/ocr/FUNSD/train/first_5_rows.json
+!data/ocr/FUNSD/test/first_5_rows.json
 
 # !data/ocr/SROIE/SROIE2019/test/box/X00016469670.txt
 # !data/ocr/SROIE/SROIE2019/test/box/X00016469671.txt

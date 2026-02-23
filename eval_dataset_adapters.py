@@ -8,7 +8,9 @@ the dataset-specific directory path, file type loading, and parsing data schema 
 """
 import os
 import io
+import re
 import json
+import numpy as np
 import shutil
 import numpy as np
 from PIL import Image
@@ -16,6 +18,7 @@ from pathlib import Path
 from typing import List
 import pyarrow.parquet as pq
 from collections import defaultdict
+from difflib import SequenceMatcher
 from datasets import load_dataset, load_from_disk
 from scipy.optimize import linear_sum_assignment
 
@@ -70,7 +73,7 @@ class BaseDatasetAdapter:
             print(f"✅ HF dataset {self.dataset_name} loaded")
 
     def cleanup(self):
-        """Delete downloaded dataset folder, only if data_source_from_hf_or_manual=True."""
+        """Delete downloaded dataset folder, only if data_source_from_hf_or_manual="hf"."""
         if self.data_source_from_hf_or_manual == "hf" and os.path.exists(self.root_dir):
             shutil.rmtree(self.root_dir)
             print(f"[INFO] Cleaned up dataset {self.dataset_name}")
@@ -118,11 +121,11 @@ class BaseDatasetAdapter:
         return samples
     
     # -----------------------------------------
-    # Generic helper: load Arrow folder
+    # Generic helper: load Parquet folder
     # -----------------------------------------
     def _load_arrow_folder(self, folder_path: Path, max_samples_per_split=None, max_samples_per_category=None):
         """
-        Load HuggingFace Arrow shards inside a folder.
+        Load HuggingFace Parquet shards inside a folder.
 
         Returns:
             List of raw samples (dict) without decoding images (prevents MemoryError)
@@ -142,7 +145,7 @@ class BaseDatasetAdapter:
 
         # --- ADDITIVE CHANGE ---
         # Convert to dicts per row to keep downstream code compatible
-        # Avoid loading images into memory by setting format to "numpy" for images or keep "arrow" for everything else
+        # Avoid loading images into memory by setting format to "numpy" for images or keep "parquet" for everything else
         dataset = dataset.with_format("python")  # <-- returns dicts instead of pyarrow.Table
 
         return list(dataset)
@@ -166,7 +169,7 @@ class BaseDatasetAdapter:
     
     def _arrow_row_stream(self, folder_path: Path, max_samples: int = None):
         """
-        Yield one row at a time from Arrow shards.
+        Yield one row at a time from Parquet shards.
         Skips non-Parquet files and supports max_samples limit.
         """
         count = 0
@@ -246,19 +249,19 @@ FILE_MAPPING = {
         "format": "folder",
         "dataset_path": "data/vision/ChartQA/train/",
         "ground_truth_path": None,
-        "notes": "Arrow shard files under 'train' folder"
+        "notes": "Parquet shard files under 'train' folder"
     },
     "val": {
         "format": "folder",
         "dataset_path": "data/vision/ChartQA/val",
         "ground_truth_path": None,
-        "notes": "Arrow shard files under 'val' folder"
+        "notes": "Parquet shard files under 'val' folder"
     },
     "test": {
         "format": "folder",
         "dataset_path": "data/vision/ChartQA/test",
         "ground_truth_path": None,
-        "notes": "Arrow shard files under 'test' folder"
+        "notes": "Parquet shard files under 'test' folder"
     },
 }
 
@@ -290,12 +293,12 @@ FILE_MAPPING = {
             "format": "folder",
             "dataset_path": "data/vision/OmniDocBench/train/",
             "ground_truth_path": None,
-            "notes": "1 arrow shard file under 'train' folder"
+            "notes": "1 parquet shard file under 'train' folder"
     },
 }
 
 Loading logic should dynamically handle:
-- 'folder': load all arrow/Parquet files under the folder
+- 'folder': load all parquet/Parquet files under the folder
 - 'json': load JSON as dataset
 - 'json_with_gt': load JSON as dataset and merge with ground truth
 """
@@ -660,7 +663,7 @@ class OCRDatasetAdapter(BaseDatasetAdapter):
     
     def _arrow_row_to_token_ocr(self, row):
         """
-        Extract token-level OCR info from Arrow row.
+        Extract token-level OCR info from Parquet row.
         Works for SROIE, FUNSD, and similar datasets.
         """
         words = row.get("words", [])
@@ -669,10 +672,12 @@ class OCRDatasetAdapter(BaseDatasetAdapter):
         if not words or not bboxes:
             return None
 
+        for i, box in enumerate(bboxes):
+            print(f"DEBUG box[{i}]:", box, type(box))
+
         # Normalize bboxes if needed
         norm_bboxes = []
         for box in bboxes:
-            print(f"DEBUG box[{i}]:", box, type(box))
             if isinstance(box, (list, tuple)):
                 if len(box) == 4:
                     norm_bboxes.append(box)
@@ -702,19 +707,32 @@ class OCRDatasetAdapter(BaseDatasetAdapter):
         token_labels=None,
         document_entities=None,
     ):
-        words = ocr_tokens.get("words", []) if isinstance(ocr_tokens, dict) else [t["text"] for t in ocr_tokens]
-        bboxes = ocr_tokens.get("bboxes", []) if isinstance(ocr_tokens, dict) else [t["bbox"] for t in ocr_tokens]
+        # words = ocr_tokens.get("words", []) if isinstance(ocr_tokens, dict) else [t["text"] for t in ocr_tokens]
+        # bboxes = ocr_tokens.get("bboxes", []) if isinstance(ocr_tokens, dict) else [t["bbox"] for t in ocr_tokens]
+
+        words = [t["text"] for t in ocr_tokens]
+        bboxes = [t["bbox"] for t in ocr_tokens]
+
+        for idx, (text, b) in enumerate(zip(words, bboxes)):
+            print(f"[DEBUG OCR TOKEN] {idx}: {b} -> '{text}'")
 
         return {
-            "id": sample_id,
-            "category": self.category,
-            "image": image,  # PIL.Image
-            "tokens": ocr_tokens,  # list of {"text": ..., "bbox": ...}
-            "words": [t["text"] for t in ocr_tokens],
-            "bboxes": [t["bbox"] for t in ocr_tokens],
-            "token_labels": token_labels,
-            "document_entities": document_entities,
-            "split": split
+            "input": {
+                "image": image,
+                "ocr": {
+                    "words": words,
+                    "bboxes": bboxes
+                }
+            },
+            "ground_truth": {
+                "token_labels": token_labels,          # FUNSD only
+                "document_entities": document_entities # SROIE only
+            },
+            "metadata": {
+                "dataset": self.dataset_name,
+                "split": split,
+                "sample_id": sample_id
+            }
         }
 
         # return {
@@ -735,6 +753,49 @@ class OCRDatasetAdapter(BaseDatasetAdapter):
         #         "sample_id": sample_id
         #     }
         # }
+    
+    def extract_sroie_entities(self, words):
+        text = " ".join(words)
+        text_upper = text.upper()
+
+        entities = {}
+
+        # ---------- COMPANY ----------
+        company_candidates = []
+        for w in words:
+            w_up = w.upper()
+            if any(k in w_up for k in ["SDN", "BHD", "BND"]):
+                company_candidates.append(w)
+
+        if company_candidates:
+            company = " ".join(company_candidates)
+            company = company.replace("BND", "BHD")
+            company = company.replace("(", " (")
+            company = " ".join(company.split())
+            entities["company"] = company
+
+        # ---------- DATE ----------
+        date_match = re.search(r"\b\d{2}/\d{2}/\d{4}\b", text)
+        if date_match:
+            entities["date"] = date_match.group(0)
+
+        # ---------- TOTAL ----------
+        total_candidates = []
+        for w in words:
+            w_clean = w.replace("RM", "").strip()
+            if re.fullmatch(r"\d+\.\d{2}", w_clean):
+                total_candidates.append(w_clean)
+
+        if total_candidates:
+            # Heuristic: highest monetary value is usually TOTAL
+            entities["total"] = sorted(
+                total_candidates,
+                key=lambda x: float(x),
+                reverse=True
+            )[0]
+
+        print("[DEBUG extracted entities]", entities)
+        return entities
     
     def evaluate_token_ner(self, gt_labels, pred_labels):
         """
@@ -775,7 +836,38 @@ class OCRDatasetAdapter(BaseDatasetAdapter):
             "recall": recall,
             "f1": f1
         }
+        
+    def character_error_rate(self, pred, gt):
+        """
+        CER = edit_distance / len(gt)
+        """
+        if not pred or not gt:
+            return 1.0
+
+        sm = SequenceMatcher(None, pred, gt)
+        edits = sum(triple.size for triple in sm.get_matching_blocks())
+        return 1.0 - edits / max(len(gt), 1)
     
+    def soft_entity_match(self, pred_entities, gt_entities, cer_threshold=0.3):
+        """
+        Returns precision, recall, f1 using CER-based soft matching
+        """
+        tp = 0
+        for k, gt_val in gt_entities.items():
+            pred_val = pred_entities.get(k)
+            if not pred_val:
+                continue
+
+            cer = self.character_error_rate(pred_val.lower(), gt_val.lower())
+            if cer <= cer_threshold:
+                tp += 1
+
+        precision = tp / max(len(pred_entities), 1)
+        recall = tp / max(len(gt_entities), 1)
+        f1 = 2 * precision * recall / max(precision + recall, 1e-6)
+
+        return precision, recall, f1
+
     def _arrow_folder_samples(
         self,
         folder_path: Path,
@@ -783,7 +875,7 @@ class OCRDatasetAdapter(BaseDatasetAdapter):
         max_samples_per_split=None
     ):
         """
-        Generator yielding universal OCR samples from Arrow folder
+        Generator yielding universal OCR samples from Parquet folder
         """
         for idx, row in enumerate(self._arrow_row_stream(folder_path, max_samples_per_split)):
             ocr_tokens = self._arrow_row_to_token_ocr(row)
@@ -833,22 +925,24 @@ universal_format_for_OCR_datasets = {
 }
 
 BaseDatasetAdapter
-- Load Arrow shards
-- Return raw Arrow rows
+- Load Parquet shards
+- Return raw Parquet rows
 
 SROIEAdapter / FUNSDAdapter (leaf adapters)
-- Interpret Arrow schema
-- Convert Arrow row → universal OCR format
-- Decide what ground truth exists
+- Interpret Parquet schema
+- Convert Parquet row → universal OCR format
 
 OCRDatasetAdapter
-- Evaluate OCR outputs after conversion
+- common functions shared by SROIEAdapter / FUNSDAdapter (leaf adapters)
+
+eval_postprocess_utils.py
+- Evaluate OCR outputs after conversion, against ground truth
 - Provide generic OCR metrics
 """
 class SROIEAdapter(OCRDatasetAdapter):
     """
-    data/ocr/SROIE/train/data-00000-of-00001.arrow,
-    is the only arrow shard file in train/ sub-folder.
+    data/ocr/SROIE/train/data-00000-of-00001.parquet,
+    is the only parquet shard file in train/ sub-folder.
     
     === Dataset object ===
     Dataset({
@@ -965,8 +1059,8 @@ class SROIEAdapter(OCRDatasetAdapter):
             'PLEASE COME AGAIN !',
             '9.00']}
 
-    data/ocr/SROIE/test/data-00000-of-00001.arrow,
-    is the only arrow shard files in test/ sub-folder.
+    data/ocr/SROIE/test/data-00000-of-00001.parquet,
+    is the only parquet shard files in test/ sub-folder.
 
     The sub-folder structure is consistent across train and test split:
     data/ocr/SROIE/test/
@@ -986,13 +1080,13 @@ class SROIEAdapter(OCRDatasetAdapter):
             "format": "folder",
             "dataset_path": "data/ocr/SROIE/train",
             "ground_truth_path": None,
-            "notes": "Train folder containing 1 Arrow shard file"
+            "notes": "Train folder containing 1 Parquet shard file"
         },
         "test": {
             "format": "folder",
             "dataset_path": "data/ocr/SROIE/test",
             "ground_truth_path": None,
-            "notes": "Test folder containing 1 Arrow shard file"
+            "notes": "Test folder containing 1 Parquet shard file"
         }
     }
 
@@ -1044,7 +1138,7 @@ class SROIEAdapter(OCRDatasetAdapter):
 
             split_path = Path().cwd() / self.FILE_MAPPING[split]["dataset_path"]
 
-            # Load arrow shards
+            # Load Parquet shards
             rows = self._arrow_row_stream(split_path, max_samples=max_samples_per_split)
 
             for idx, row in enumerate(rows):
@@ -1076,8 +1170,8 @@ class SROIEAdapter(OCRDatasetAdapter):
 
 class FUNSDAdapter(OCRDatasetAdapter):
     """
-    data/ocr/FUNSD/train/data-00000-of-00001.arrow,
-    is the only arrow shard file in train/ sub-folder.
+    data/ocr/FUNSD/train/data-00000-of-00001.parquet,
+    is the only parquet shard file in train/ sub-folder.
     
     === Dataset object ===
     Dataset({
@@ -1092,8 +1186,8 @@ class FUNSDAdapter(OCRDatasetAdapter):
     'ner_tags': List(ClassLabel(names=['O', 'B-HEADER', 'I-HEADER', 'B-QUESTION', 'I-QUESTION', 'B-ANSWER', 'I-ANSWER'])),
     'words': List(Value('string'))}
     
-    data/ocr/FUNSD/test/data-00000-of-00001.arrow,
-    is the only arrow shard files in test/ sub-folder.
+    data/ocr/FUNSD/test/data-00000-of-00001.parquet,
+    is the only parquet shard files in test/ sub-folder.
 
     The sub-folder structure is consistent across train and test split:
     data/ocr/FUNSD/test/
@@ -1112,13 +1206,13 @@ class FUNSDAdapter(OCRDatasetAdapter):
             "format": "folder",
             "dataset_path": "data/ocr/FUNSD/train",
             "ground_truth_path": None,
-            "notes": "Train folder containing 1 Arrow shard file"
+            "notes": "Train folder containing 1 Parquet shard file"
         },
         "test": {
             "format": "folder",
             "dataset_path": "data/ocr/FUNSD/test",
             "ground_truth_path": None,
-            "notes": "Test folder containing 1 Arrow shard file"
+            "notes": "Test folder containing 1 Parquet shard file"
         }
     }
 
@@ -1255,8 +1349,8 @@ class FUNSDAdapter(OCRDatasetAdapter):
         """
         Load one split or all splits if dataset_split is None.
 
-        FUNSD is Arrow-based:
-        - Each split folder contains one or more .arrow shard files
+        FUNSD is Parquet-based:
+        - Each split folder contains one or more .parquet shard files
         - Parsing is row-based and handled by OCRDatasetAdapter helpers
         """
         splits_to_load = (
@@ -1281,7 +1375,7 @@ class FUNSDAdapter(OCRDatasetAdapter):
             for sample in self._arrow_folder_samples(split_dir, split, max_samples_per_split):
                 all_samples.append(sample)
 
-            # # Load arrow shards
+            # # Load Parquet shards
             # rows = self._arrow_row_stream(split_dir, max_samples=max_samples_per_split)
             # split_samples = []
 
@@ -1323,7 +1417,7 @@ class FUNSDAdapter(OCRDatasetAdapter):
 class VisionDatasetAdapter(BaseDatasetAdapter):
     """
     Intermediate Vision adapter with dataset-agnostic loader helpers
-    for folder-based (Arrow) or JSON-based Vision datasets.
+    for folder-based (Parquet) or JSON-based Vision datasets.
 
     All Vision datasets must return a unified sample schema:
 
@@ -1408,7 +1502,7 @@ class VisionDatasetAdapter(BaseDatasetAdapter):
         Central loader for Vision datasets using FILE_MAPPING.
 
         Supports:
-            - folder (Arrow shards)
+            - folder (Parquet shards)
             - json
             - json_with_gt
         """
@@ -1422,7 +1516,7 @@ class VisionDatasetAdapter(BaseDatasetAdapter):
         fmt = split_info["format"]
 
         # -------------------------
-        # Folder-based (Arrow)
+        # Folder-based (Parquet)
         # -------------------------
         if fmt == "folder":
             samples = self._load_arrow_folder(
@@ -1494,7 +1588,7 @@ universal_vision_sample = {
 """
 class DocVQAAdapter(VisionDatasetAdapter):
     """
-    data/vision/DocVQA/test/data-00000-of-00008.arrow
+    data/vision/DocVQA/test/data-00000-of-00008.parquet
     
     === Dataset object ===
     Dataset({
@@ -1524,24 +1618,24 @@ class DocVQAAdapter(VisionDatasetAdapter):
     'ucsf_document_id': 'rnbx0223',
     'ucsf_document_page_no': '193'}
 
-    data/vision/DocVQA/test/data-00001-of-00008.arrow,
-    data/vision/DocVQA/test/data-00002-of-00008.arrow,
-    data/vision/DocVQA/test/data-00003-of-00008.arrow,
-    data/vision/DocVQA/test/data-00004-of-00008.arrow,
-    data/vision/DocVQA/test/data-00005-of-00008.arrow,
-    data/vision/DocVQA/test/data-00006-of-00008.arrow,
-    data/vision/DocVQA/test/data-00007-of-00008.arrow,
-    are the next remaining arrow shard files in the same test/ sub-folder.
+    data/vision/DocVQA/test/data-00001-of-00008.parquet,
+    data/vision/DocVQA/test/data-00002-of-00008.parquet,
+    data/vision/DocVQA/test/data-00003-of-00008.parquet,
+    data/vision/DocVQA/test/data-00004-of-00008.parquet,
+    data/vision/DocVQA/test/data-00005-of-00008.parquet,
+    data/vision/DocVQA/test/data-00006-of-00008.parquet,
+    data/vision/DocVQA/test/data-00007-of-00008.parquet,
+    are the next remaining parquet shard files in the same test/ sub-folder.
 
-    data/vision/DocVQA/validation/data-00000-of-00008.arrow,
-    data/vision/DocVQA/validation/data-00001-of-00008.arrow,
-    data/vision/DocVQA/validation/data-00002-of-00008.arrow,
-    data/vision/DocVQA/validation/data-00003-of-00008.arrow,
-    data/vision/DocVQA/validation/data-00004-of-00008.arrow,
-    data/vision/DocVQA/validation/data-00005-of-00008.arrow,
-    data/vision/DocVQA/validation/data-00006-of-00008.arrow,
-    data/vision/DocVQA/validation/data-00007-of-00008.arrow,
-    are the arrow shard files in the validation/ sub-folder.
+    data/vision/DocVQA/validation/data-00000-of-00008.parquet,
+    data/vision/DocVQA/validation/data-00001-of-00008.parquet,
+    data/vision/DocVQA/validation/data-00002-of-00008.parquet,
+    data/vision/DocVQA/validation/data-00003-of-00008.parquet,
+    data/vision/DocVQA/validation/data-00004-of-00008.parquet,
+    data/vision/DocVQA/validation/data-00005-of-00008.parquet,
+    data/vision/DocVQA/validation/data-00006-of-00008.parquet,
+    data/vision/DocVQA/validation/data-00007-of-00008.parquet,
+    are the parquet shard files in the validation/ sub-folder.
 
     The sub-folder structure is consistent across test and validation splits:
     data/vision/DocVQA/test/
@@ -1559,13 +1653,13 @@ class DocVQAAdapter(VisionDatasetAdapter):
             "format": "folder",
             "dataset_path": "data/vision/DocVQA/test",
             "ground_truth_path": None,
-            "notes": "Test folder containing 8 Arrow shard files"
+            "notes": "Test folder containing 8 Parquet shard files"
         },
         "validation": {
             "format": "folder",
             "dataset_path": "data/vision/DocVQA/validation",
             "ground_truth_path": None,
-            "notes": "Validation folder containing 8 Arrow shard files"
+            "notes": "Validation folder containing 8 Parquet shard files"
         },
     }
 
@@ -1618,7 +1712,7 @@ class DocVQAAdapter(VisionDatasetAdapter):
 
 class InfographicsVQAAdapter(VisionDatasetAdapter):
     """
-    data/vision/InfographicsVQA/test/data-00000-of-00004.arrow
+    data/vision/InfographicsVQA/test/data-00000-of-00004.parquet
     
     === Dataset object ===
     Dataset({
@@ -1640,16 +1734,16 @@ class InfographicsVQAAdapter(VisionDatasetAdapter):
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_infographicsvqa_annotation().
     
-    data/vision/InfographicsVQA/test/data-00001-of-00004.arrow,
-    data/vision/InfographicsVQA/test/data-00002-of-00004.arrow,
-    data/vision/InfographicsVQA/test/data-00003-of-00004.arrow,
-    are the next remaining arrow shard files in the same test/ sub-folder.
+    data/vision/InfographicsVQA/test/data-00001-of-00004.parquet,
+    data/vision/InfographicsVQA/test/data-00002-of-00004.parquet,
+    data/vision/InfographicsVQA/test/data-00003-of-00004.parquet,
+    are the next remaining parquet shard files in the same test/ sub-folder.
 
-    data/vision/InfographicsVQA/validation/data-00000-of-00004.arrow,
-    data/vision/InfographicsVQA/validation/data-00001-of-00004.arrow,
-    data/vision/InfographicsVQA/validation/data-00002-of-00004.arrow,
-    data/vision/InfographicsVQA/validation/data-00003-of-00004.arrow,
-    are the arrow shard files in the validation/ sub-folder.
+    data/vision/InfographicsVQA/validation/data-00000-of-00004.parquet,
+    data/vision/InfographicsVQA/validation/data-00001-of-00004.parquet,
+    data/vision/InfographicsVQA/validation/data-00002-of-00004.parquet,
+    data/vision/InfographicsVQA/validation/data-00003-of-00004.parquet,
+    are the parquet shard files in the validation/ sub-folder.
 
     The sub-folder structure is consistent across test and validation splits:
     data/vision/InfographicsVQA/test/
@@ -1667,13 +1761,13 @@ class InfographicsVQAAdapter(VisionDatasetAdapter):
             "format": "folder",
             "dataset_path": "data/vision/InfographicsVQA/test",
             "ground_truth_path": None,
-            "notes": "Test folder containing 4 Arrow shard files"
+            "notes": "Test folder containing 4 Parquet shard files"
         },
         "validation": {
             "format": "json",
             "dataset_path": "data/vision/InfographicsVQA/validation",
             "ground_truth_path": None,
-            "notes": "Validation folder containing 4 Arrow shard files"
+            "notes": "Validation folder containing 4 Parquet shard files"
         },
     }
 
@@ -1726,8 +1820,8 @@ class InfographicsVQAAdapter(VisionDatasetAdapter):
 
 class ChartQAAdapter(VisionDatasetAdapter):
     """
-    data/vision/ChartQA/test/data-00000-of-00001.arrow,
-    is the only arrow shard file in test/ sub-folder.
+    data/vision/ChartQA/test/data-00000-of-00001.parquet,
+    is the only parquet shard file in test/ sub-folder.
     
     === Dataset object ===
     Dataset({
@@ -1758,13 +1852,13 @@ class ChartQAAdapter(VisionDatasetAdapter):
     we need to load it once and print out the first 3 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_chartqa_annotation().
     
-    data/vision/ChartQA/train/data-00000-of-00003.arrow,
-    data/vision/ChartQA/train/data-00001-of-00003.arrow,
-    data/vision/ChartQA/train/data-00002-of-00003.arrow,
-    are the 3 arrow shard files in train/ sub-folder.
+    data/vision/ChartQA/train/data-00000-of-00003.parquet,
+    data/vision/ChartQA/train/data-00001-of-00003.parquet,
+    data/vision/ChartQA/train/data-00002-of-00003.parquet,
+    are the 3 parquet shard files in train/ sub-folder.
 
-    data/vision/ChartQA/val/data-00000-of-00001.arrow,
-    is the only arrow shard file in val/ sub-folder.
+    data/vision/ChartQA/val/data-00000-of-00001.parquet,
+    is the only parquet shard file in val/ sub-folder.
 
     The sub-folder structure is consistent across test, train, and val splits:
     data/vision/ChartQA/test/
@@ -1783,19 +1877,19 @@ class ChartQAAdapter(VisionDatasetAdapter):
             "format": "folder",
             "dataset_path": "data/vision/ChartQA/test",
             "ground_truth_path": None,
-            "notes": "Test folder containing 1 Arrow shard file"
+            "notes": "Test folder containing 1 Parquet shard file"
         },
         "train": {
             "format": "folder",
             "dataset_path": "data/vision/ChartQA/train",
             "ground_truth_path": None,
-            "notes": "Train folder containing 3 Arrow shard files"
+            "notes": "Train folder containing 3 Parquet shard files"
         },
         "val": {
             "format": "folder",
             "dataset_path": "data/vision/ChartQA/val",
             "ground_truth_path": None,
-            "notes": "Validation folder containing 1 Arrow shard file"
+            "notes": "Validation folder containing 1 Parquet shard file"
         },
     }
 
@@ -1845,8 +1939,8 @@ class ChartQAAdapter(VisionDatasetAdapter):
 
 class OmniDocBenchAdapter(VisionDatasetAdapter):
     """
-    data/vision/OmniDocBench/train/data-00000-of-00001.arrow,
-    is the only arrow shard file in train/ sub-folder.
+    data/vision/OmniDocBench/train/data-00000-of-00001.parquet,
+    is the only parquet shard file in train/ sub-folder.
     
     === Dataset object ===
     Dataset({
@@ -1884,7 +1978,7 @@ class OmniDocBenchAdapter(VisionDatasetAdapter):
             "format": "folder",
             "dataset_path": "data/vision/OmniDocBench/train",
             "ground_truth_path": None,
-            "notes": "Single arrow file under 'train'; no official splits"
+            "notes": "Single parquet file under 'train'; no official splits"
         }
     }
 
@@ -1916,7 +2010,7 @@ class OmniDocBenchAdapter(VisionDatasetAdapter):
         split = dataset_split or self.dataset_split
         raw_samples = self.vision_dataset_loader(split, self.FILE_MAPPING, max_samples_per_split=max_samples_per_split)
 
-        # For OmniDocBench we just return files (Arrow folder)
+        # For OmniDocBench we just return files (Parquet folder)
         standardized = []
         for idx, s in enumerate(raw_samples):
             standardized.append({
@@ -1932,8 +2026,8 @@ class OmniDocBenchAdapter(VisionDatasetAdapter):
 
 class MMMUAccountingAdapter(VisionDatasetAdapter):
     """
-    data/vision/MMMU_Accounting/dev/data-00000-of-00001.arrow,
-    is the only arrow shard file in dev/ sub-folder.
+    data/vision/MMMU_Accounting/dev/data-00000-of-00001.parquet,
+    is the only parquet shard file in dev/ sub-folder.
     
     === Dataset object ===
     Dataset({
@@ -1983,11 +2077,11 @@ class MMMUAccountingAdapter(VisionDatasetAdapter):
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_mmmu_accounting_annotation().
     
-    data/vision/MMMU_Accounting/test/data-00000-of-00001.arrow,
-    is the only arrow shard file in test/ sub-folder.
+    data/vision/MMMU_Accounting/test/data-00000-of-00001.parquet,
+    is the only parquet shard file in test/ sub-folder.
 
-    data/vision/MMMU_Accounting/validation/data-00000-of-00001.arrow,
-    is the only arrow shard file in validation/ sub-folder.
+    data/vision/MMMU_Accounting/validation/data-00000-of-00001.parquet,
+    is the only parquet shard file in validation/ sub-folder.
 
     The sub-folder structure is consistent across dev, test, and validation splits:
     data/vision/MMMU_Accounting/dev/
@@ -2006,19 +2100,19 @@ class MMMUAccountingAdapter(VisionDatasetAdapter):
             "format": "folder",
             "dataset_path": "data/vision/MMMU_Accounting/dev",
             "ground_truth_path": None,
-            "notes": "Dev folder containing 1 Arrow shard file"
+            "notes": "Dev folder containing 1 Parquet shard file"
         },
         "test": {
             "format": "folder",
             "dataset_path": "data/vision/MMMU_Accounting/test",
             "ground_truth_path": None,
-            "notes": "Test folder containing 1 Arrow shard file"
+            "notes": "Test folder containing 1 Parquet shard file"
         },
         "validation": {
             "format": "folder",
             "dataset_path": "data/vision/MMMU_Accounting/validation",
             "ground_truth_path": None,
-            "notes": "Validation folder containing 1 Arrow shard file"
+            "notes": "Validation folder containing 1 Parquet shard file"
         },
     }
     def __init__(
@@ -2048,8 +2142,8 @@ class MMMUAccountingAdapter(VisionDatasetAdapter):
 
 class MMMUEconomicsAdapter(VisionDatasetAdapter):
     """
-    data/vision/MMMU_Economics/dev/data-00000-of-00001.arrow,
-    is the only arrow shard file in dev/ sub-folder.
+    data/vision/MMMU_Economics/dev/data-00000-of-00001.parquet,
+    is the only parquet shard file in dev/ sub-folder.
     
     === Dataset object ===
     Dataset({
@@ -2100,11 +2194,11 @@ class MMMUEconomicsAdapter(VisionDatasetAdapter):
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_mmmu_economics_annotation().
     
-    data/vision/MMMU_Economics/test/data-00000-of-00001.arrow,
-    is the only arrow shard file in test/ sub-folder.
+    data/vision/MMMU_Economics/test/data-00000-of-00001.parquet,
+    is the only parquet shard file in test/ sub-folder.
 
-    data/vision/MMMU_Economics/validation/data-00000-of-00001.arrow,
-    is the only arrow shard file in validation/ sub-folder.
+    data/vision/MMMU_Economics/validation/data-00000-of-00001.parquet,
+    is the only parquet shard file in validation/ sub-folder.
 
     The sub-folder structure is consistent across dev, test, and validation splits:
     data/vision/MMMU_Economics/dev/
@@ -2123,19 +2217,19 @@ class MMMUEconomicsAdapter(VisionDatasetAdapter):
             "format": "folder",
             "dataset_path": "data/vision/MMMU_Economics/dev",
             "ground_truth_path": None,
-            "notes": "Dev folder containing 1 Arrow shard file"
+            "notes": "Dev folder containing 1 Parquet shard file"
         },
         "test": {
             "format": "folder",
             "dataset_path": "data/vision/MMMU_Economics/test",
             "ground_truth_path": None,
-            "notes": "Test folder containing 1 Arrow shard file"
+            "notes": "Test folder containing 1 Parquet shard file"
         },
         "validation": {
             "format": "folder",
             "dataset_path": "data/vision/MMMU_Economics/validation",
             "ground_truth_path": None,
-            "notes": "Validation folder containing 1 Arrow shard file"
+            "notes": "Validation folder containing 1 Parquet shard file"
         },
     }
     def __init__(
@@ -2165,8 +2259,8 @@ class MMMUEconomicsAdapter(VisionDatasetAdapter):
 
 class MMMUFinanceAdapter(VisionDatasetAdapter):
     """
-    data/vision/MMMU_Finance/dev/data-00000-of-00001.arrow,
-    is the only arrow shard file in dev/ sub-folder.
+    data/vision/MMMU_Finance/dev/data-00000-of-00001.parquet,
+    is the only parquet shard file in dev/ sub-folder.
     
     === Dataset object ===
     Dataset({
@@ -2218,11 +2312,11 @@ class MMMUFinanceAdapter(VisionDatasetAdapter):
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_mmmu_finance_annotation().
     
-    data/vision/MMMU_Finance/test/data-00000-of-00001.arrow,
-    is the only arrow shard file in test/ sub-folder.
+    data/vision/MMMU_Finance/test/data-00000-of-00001.parquet,
+    is the only parquet shard file in test/ sub-folder.
 
-    data/vision/MMMU_Finance/validation/data-00000-of-00001.arrow,
-    is the only arrow shard file in validation/ sub-folder.
+    data/vision/MMMU_Finance/validation/data-00000-of-00001.parquet,
+    is the only parquet shard file in validation/ sub-folder.
 
     The sub-folder structure is consistent across dev, test, and validation splits:
     data/vision/MMMU_Finance/dev/
@@ -2241,19 +2335,19 @@ class MMMUFinanceAdapter(VisionDatasetAdapter):
             "format": "folder",
             "dataset_path": "data/vision/MMMU_Finance/dev",
             "ground_truth_path": None,
-            "notes": "Dev folder containing 1 Arrow shard file"
+            "notes": "Dev folder containing 1 Parquet shard file"
         },
         "test": {
             "format": "folder",
             "dataset_path": "data/vision/MMMU_Finance/test",
             "ground_truth_path": None,
-            "notes": "Test folder containing 1 Arrow shard file"
+            "notes": "Test folder containing 1 Parquet shard file"
         },
         "validation": {
             "format": "folder",
             "dataset_path": "data/vision/MMMU_Finance/validation",
             "ground_truth_path": None,
-            "notes": "Validation folder containing 1 Arrow shard file"
+            "notes": "Validation folder containing 1 Parquet shard file"
         },
     }
     def __init__(
@@ -2283,8 +2377,8 @@ class MMMUFinanceAdapter(VisionDatasetAdapter):
 
 class MMMUMathAdapter(VisionDatasetAdapter):
     """
-    data/vision/MMMU_Math/dev/data-00000-of-00001.arrow,
-    is the only arrow shard file in dev/ sub-folder.
+    data/vision/MMMU_Math/dev/data-00000-of-00001.parquet,
+    is the only parquet shard file in dev/ sub-folder.
     
     === Dataset object ===
     Dataset({
@@ -2338,11 +2432,11 @@ class MMMUMathAdapter(VisionDatasetAdapter):
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_mmmu_math_annotation().
     
-    data/vision/MMMU_Math/test/data-00000-of-00001.arrow,
-    is the only arrow shard file in test/ sub-folder.
+    data/vision/MMMU_Math/test/data-00000-of-00001.parquet,
+    is the only parquet shard file in test/ sub-folder.
 
-    data/vision/MMMU_Math/validation/data-00000-of-00001.arrow,
-    is the only arrow shard file in validation/ sub-folder.
+    data/vision/MMMU_Math/validation/data-00000-of-00001.parquet,
+    is the only parquet shard file in validation/ sub-folder.
 
     The sub-folder structure is consistent across dev, test, and validation splits:
     data/vision/MMMU_Math/dev/
@@ -2361,19 +2455,19 @@ class MMMUMathAdapter(VisionDatasetAdapter):
             "format": "folder",
             "dataset_path": "data/vision/MMMU_Math/dev",
             "ground_truth_path": None,
-            "notes": "Dev folder containing 1 Arrow shard file"
+            "notes": "Dev folder containing 1 Parquet shard file"
         },
         "test": {
             "format": "folder",
             "dataset_path": "data/vision/MMMU_Math/test",
             "ground_truth_path": None,
-            "notes": "Test folder containing 1 Arrow shard file"
+            "notes": "Test folder containing 1 Parquet shard file"
         },
         "validation": {
             "format": "folder",
             "dataset_path": "data/vision/MMMU_Math/validation",
             "ground_truth_path": None,
-            "notes": "Validation folder containing 1 Arrow shard file"
+            "notes": "Validation folder containing 1 Parquet shard file"
         },
     }
     def __init__(
@@ -2406,8 +2500,8 @@ class MMMUMathAdapter(VisionDatasetAdapter):
 # ------------------------
 class FinQAAdapter(BaseDatasetAdapter):
     """
-    data/rag/FinQA/train/data-00000-of-00001.arrow,
-    is the only arrow shard file in train/ sub-folder.
+    data/rag/FinQA/train/data-00000-of-00001.parquet,
+    is the only parquet shard file in train/ sub-folder.
     
     === Dataset object ===
     Dataset({
@@ -2446,7 +2540,7 @@ class FinQAAdapter(BaseDatasetAdapter):
             "format": "folder",
             "dataset_path": "data/rag/FinQA/train",
             "ground_truth_path": None,
-            "notes": "1 arrow file under 'train' folder"
+            "notes": "1 parquet file under 'train' folder"
         }
     }
 
@@ -2731,8 +2825,8 @@ class TATQAAdapter(BaseDatasetAdapter):
 # ------------------------
 class LendingClubAdapter(BaseDatasetAdapter):
     """
-    data/credit_risk_pd/LendingClub/test/data-00000-of-00001.arrow,
-    is the only arrow shard file in test/ sub-folder.
+    data/credit_risk_pd/LendingClub/test/data-00000-of-00001.parquet,
+    is the only parquet shard file in test/ sub-folder.
     
     === Dataset object ===
     Dataset({
@@ -2769,11 +2863,11 @@ class LendingClubAdapter(BaseDatasetAdapter):
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_lendingclub_annotation().
     
-    data/credit_risk_pd/LendingClub/train/data-00000-of-00001.arrow,
-    is the only arrow shard file in train/ sub-folder.
+    data/credit_risk_pd/LendingClub/train/data-00000-of-00001.parquet,
+    is the only parquet shard file in train/ sub-folder.
 
-    data/credit_risk_pd/LendingClub/valid/data-00000-of-00001.arrow,
-    is the only arrow shard file in valid/ sub-folder.
+    data/credit_risk_pd/LendingClub/valid/data-00000-of-00001.parquet,
+    is the only parquet shard file in valid/ sub-folder.
 
     The sub-folder structure is consistent across test, train, and valid splits:
     data/credit_risk_pd/LendingClub/test/
@@ -2792,19 +2886,19 @@ class LendingClubAdapter(BaseDatasetAdapter):
             "format": "folder",
             "dataset_path": "data/credit_risk_pd/LendingClub/test",
             "ground_truth_path": None,
-            "notes": "Test folder containing 1 Arrow shard file"
+            "notes": "Test folder containing 1 Parquet shard file"
         },
         "train": {
             "format": "folder",
             "dataset_path": "data/credit_risk_pd/LendingClub/train",
             "ground_truth_path": None,
-            "notes": "Train folder containing 1 Arrow shard file"
+            "notes": "Train folder containing 1 Parquet shard file"
         },
         "valid": {
             "format": "folder",
             "dataset_path": "data/credit_risk_pd/LendingClub/valid",
             "ground_truth_path": None,
-            "notes": "Validation folder containing 1 Arrow shard file"
+            "notes": "Validation folder containing 1 Parquet shard file"
         },
     }
     def __init__(
@@ -2858,8 +2952,8 @@ class LendingClubAdapter(BaseDatasetAdapter):
 
 class FinancialPhraseBankAdapter(BaseDatasetAdapter):
     """
-    data/credit_risk_sentiment/FinancialPhraseBank/test/data-00000-of-00001.arrow,
-    is the only arrow shard file in test/ sub-folder.
+    data/credit_risk_sentiment/FinancialPhraseBank/test/data-00000-of-00001.parquet,
+    is the only parquet shard file in test/ sub-folder.
     
     === Dataset features ===
     {'label': Value('int64'),
@@ -2881,8 +2975,8 @@ class FinancialPhraseBankAdapter(BaseDatasetAdapter):
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_financial_phrase_bank_annotation().
     
-    data/credit_risk_sentiment/FinancialPhraseBank/train/data-00000-of-00001.arrow,
-    is the only arrow shard file in train/ sub-folder.
+    data/credit_risk_sentiment/FinancialPhraseBank/train/data-00000-of-00001.parquet,
+    is the only parquet shard file in train/ sub-folder.
 
     The sub-folder structure is consistent across test and train splits:
     data/credit_risk_sentiment/FinancialPhraseBank/test/
@@ -2900,13 +2994,13 @@ class FinancialPhraseBankAdapter(BaseDatasetAdapter):
             "format": "folder",
             "dataset_path": "data/credit_risk_sentiment/FinancialPhraseBank/test",
             "ground_truth_path": None,
-            "notes": "Test folder containing 1 Arrow shard file"
+            "notes": "Test folder containing 1 Parquet shard file"
         },
         "train": {
             "format": "folder",
             "dataset_path": "data/credit_risk_sentiment/FinancialPhraseBank/train",
             "ground_truth_path": None,
-            "notes": "Train folder containing 1 Arrow shard file"
+            "notes": "Train folder containing 1 Parquet shard file"
         },
     }
     def __init__(
@@ -2936,8 +3030,8 @@ class FinancialPhraseBankAdapter(BaseDatasetAdapter):
 
 class FiQAAdapter(BaseDatasetAdapter):
     """
-    data/credit_risk_sentiment/FiQA/test/data-00000-of-00001.arrow,
-    is the only arrow shard file in test/ sub-folder.
+    data/credit_risk_sentiment/FiQA/test/data-00000-of-00001.parquet,
+    is the only parquet shard file in test/ sub-folder.
     
     === Dataset object ===
     Dataset({
@@ -2964,11 +3058,11 @@ class FiQAAdapter(BaseDatasetAdapter):
     we need to load it once and print out the first 5 rows/set of samples to
     inspect the actual structure to implement the parsing logic in _parse_fiqa_annotation().
     
-    data/credit_risk_sentiment/FiQA/train/data-00000-of-00001.arrow,
-    is the only arrow shard file in train/ sub-folder.
+    data/credit_risk_sentiment/FiQA/train/data-00000-of-00001.parquet,
+    is the only parquet shard file in train/ sub-folder.
 
-    data/credit_risk_sentiment/FiQA/valid/data-00000-of-00001.arrow,
-    is the only arrow shard file in valid/ sub-folder.
+    data/credit_risk_sentiment/FiQA/valid/data-00000-of-00001.parquet,
+    is the only parquet shard file in valid/ sub-folder.
 
     The sub-folder structure is consistent across test, train, and valid splits:
     data/credit_risk_sentiment/FiQA/test/
@@ -2987,19 +3081,19 @@ class FiQAAdapter(BaseDatasetAdapter):
             "format": "folder",
             "dataset_path": "data/credit_risk_sentiment/FiQA/test",
             "ground_truth_path": None,
-            "notes": "Test folder containing 1 Arrow shard file"
+            "notes": "Test folder containing 1 Parquet shard file"
         },
         "train": {
             "format": "folder",
             "dataset_path": "data/credit_risk_sentiment/FiQA/train",
             "ground_truth_path": None,
-            "notes": "Train folder containing 1 Arrow shard file"
+            "notes": "Train folder containing 1 Parquet shard file"
         },
         "valid": {
             "format": "folder",
             "dataset_path": "data/credit_risk_sentiment/FiQA/valid",
             "ground_truth_path": None,
-            "notes": "Validation folder containing 1 Arrow shard file"
+            "notes": "Validation folder containing 1 Parquet shard file"
         },
     }
     def __init__(
@@ -3043,8 +3137,8 @@ class FiQAAdapter(BaseDatasetAdapter):
 
 class FinanceBenchAdapter(BaseDatasetAdapter):
     """
-    data/credit_risk_memo_generator/FinanceBench/train/data-00000-of-00001.arrow,
-    is the only arrow shard file in train/ sub-folder.
+    data/credit_risk_memo_generator/FinanceBench/train/data-00000-of-00001.parquet,
+    is the only parquet shard file in train/ sub-folder.
     
     === Dataset object ===
     Dataset({
@@ -3084,7 +3178,7 @@ class FinanceBenchAdapter(BaseDatasetAdapter):
             "format": "folder",
             "dataset_path": "data/credit_risk_memo_generator/FinanceBench/train",
             "ground_truth_path": None,
-            "notes": "Single arrow file under 'train'; no official splits"
+            "notes": "Single parquet file under 'train'; no official splits"
         }
     }
     def __init__(

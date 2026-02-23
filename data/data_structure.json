@@ -1,4 +1,5 @@
 {
+  "credit_risk": {},
   "credit_risk_memo_generator": {
     "dataset_dict": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\credit_risk_memo_generator\\FinanceBench\\dataset_dict.json",
     "train": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\credit_risk_memo_generator\\FinanceBench\\train"
@@ -17,6 +18,7 @@
     "dataset_info": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\credit_risk_sentiment\\FiQA\\valid\\dataset_info.json",
     "state": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\credit_risk_sentiment\\FiQA\\valid\\state.json"
   },
+  "drift_cache": {},
   "ocr": {
     "dataset_dict": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\ocr\\SROIE\\dataset_dict.json",
     "test": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\ocr\\SROIE\\test",
@@ -230,27 +232,26 @@
   },
   "rag": {
     "dataset_dict": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\rag\\TAT-QA\\dataset_dict.json",
-    "train": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\rag\\TAT-QA\\train",
+    "train": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\rag\\FinQA\\train",
     "tatqa_dataset_dev": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\rag\\TAT-QA\\tatqa_dataset_dev.json",
     "tatqa_dataset_test": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\rag\\TAT-QA\\tatqa_dataset_test.json",
-    "tatqa_dataset_test_gold": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\rag\\TAT-QA\\tatqa_dataset_test_gold.json",
-    "tatqa_dataset_train": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\rag\\TAT-QA\\tatqa_dataset_train.json",
-    "test": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\rag\\TAT-QA\\test"
+    "tatqa_dataset_test_gold": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\rag\\TAT-QA\\tatqa_dataset_test_gold.json"
   },
+  "risk_memos": {},
   "vision": {
     "dataset_dict": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\OmniDocBench\\dataset_dict.json",
-    "test": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\MMMU_Math\\test",
+    "test": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\MMMU_Finance\\test",
     "train": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\OmniDocBench\\train",
     "dataset_info": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\ChartQA\\val\\dataset_info.json",
     "state": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\ChartQA\\val\\state.json",
     "test_v1.0": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\DocVQA\\test_v1.0.json",
     "train_v1.0_withQT": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\DocVQA\\train_v1.0_withQT.json",
     "val_v1.0_withQT": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\DocVQA\\val_v1.0_withQT.json",
-    "validation": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\MMMU_Math\\validation",
+    "validation": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\MMMU_Finance\\validation",
     "infographicsVQA_test_v1.0": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\InfographicsVQA\\infographicsVQA_test_v1.0.json",
     "infographicsVQA_train_v1.0": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\InfographicsVQA\\infographicsVQA_train_v1.0.json",
     "infographicsVQA_val_v1.0_withQT": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\InfographicsVQA\\infographicsVQA_val_v1.0_withQT.json",
-    "dev": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\MMMU_Math\\dev"
+    "dev": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\MMMU_Finance\\dev"
   },
   "__pycache__": {}
 }

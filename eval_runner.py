@@ -278,6 +278,36 @@ def run_model(sample, category, adapter=None):
     model_input = sample.get("model_input") if isinstance(sample, dict) else sample
 
     if category == "ocr":
+        if isinstance(adapter, SROIEAdapter):
+            predicted_entities = adapter.extract_sroie_entities(
+                sample["input"]["ocr"]["words"]
+            )
+            
+            result = {
+                "document_entities": predicted_entities
+            }
+
+            # ---- CER-based soft matching ----
+            # Only do this if GT exists in the sample
+            gt_entities = sample.get("ground_truth", {}).get("document_entities")
+            if gt_entities:
+                # Normalize both sides
+                def normalize_text(s):
+                    return "" if not s else s.lower().replace(" ", "").replace(".", "").replace(",", "")
+                norm_pred = {k: normalize_text(v) for k, v in predicted_entities.items()}
+                norm_gt   = {k: normalize_text(v) for k, v in gt_entities.items()}
+
+                p, r, f1 = adapter.soft_entity_match(norm_pred, norm_gt)
+                result["metrics"] = {
+                    "precision": p,
+                    "recall": r,
+                    "f1": f1,
+                    "f1_soft": f1
+                }
+
+            return result
+            
+
         image = extract_image(sample)
         if image is None:
             return EMPTY_OCR_PREDICTION
@@ -416,11 +446,12 @@ def evaluate_dataset(
 
             # Directly read universal format fields
             
-
-            gt_tokens = sample.get("ground_truth", {}).get("token_labels", [])
-            gt_regions = [
-                {"text": str(t), "bbox": [0,0,0,0]} for t in gt_tokens
-            ]
+            print("GT regions:", sample.get("ground_truth"))
+            # gt_tokens = sample.get("ground_truth", {}).get("token_labels", [])
+            # gt_regions = [
+            #     {"text": str(t), "bbox": [0,0,0,0]} for t in gt_tokens
+            # ]
+            gt_regions = sample.get("ground_truth", {}).get("regions", [])
 
             pred_words = ocr_output.get("words", [])
             pred_bboxes = ocr_output.get("bboxes", [])
@@ -436,7 +467,7 @@ def evaluate_dataset(
             scores.append(metrics)
 
             # Minimal debug
-            print(f"[{i+1}/{total_samples}] GT tokens: {len(gt_tokens)}, Pred tokens: {len(pred_words)}", end="\r")
+            print(f"[{i+1}/{total_samples}] Pred tokens: {len(pred_words)}", end="\r") # GT tokens: {len(gt_tokens)}, 
             continue  # skip to next sample
             
         # ================= ALL OTHER CATEGORIES =================
