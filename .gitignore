@@ -136,21 +136,21 @@ __pycache__/
 
 # Except small datasets you want to keep (force add)
 !data/data_structure.txt
-# !data/ocr/FUNSD/testing_data/annotations/82092117.json
-# !data/ocr/FUNSD/testing_data/annotations/82200067_0069.json
-# !data/ocr/FUNSD/testing_data/annotations/82250337_0338.json
-# !data/ocr/FUNSD/testing_data/images/82092117.png
-# !data/ocr/FUNSD/testing_data/images/82200067_0069.png
-# !data/ocr/FUNSD/testing_data/images/82250337_0338.png
+!data/ocr/FUNSD/testing_data/annotations/82092117.json
+!data/ocr/FUNSD/testing_data/annotations/82200067_0069.json
+!data/ocr/FUNSD/testing_data/annotations/82250337_0338.json
+!data/ocr/FUNSD/testing_data/images/82092117.png
+!data/ocr/FUNSD/testing_data/images/82200067_0069.png
+!data/ocr/FUNSD/testing_data/images/82250337_0338.png
 
-# !data/ocr/FUNSD/training_data/annotations/00040534.json
-# !data/ocr/FUNSD/training_data/annotations/00070353.json
-# !data/ocr/FUNSD/training_data/annotations/00093726.json
-# !data/ocr/FUNSD/training_data/images/00040534.png
-# !data/ocr/FUNSD/training_data/images/00070353.png
-# !data/ocr/FUNSD/training_data/images/00093726.png
-!data/ocr/FUNSD/testing_data
-!data/ocr/FUNSD/training_data
+!data/ocr/FUNSD/training_data/annotations/00040534.json
+!data/ocr/FUNSD/training_data/annotations/00070353.json
+!data/ocr/FUNSD/training_data/annotations/00093726.json
+!data/ocr/FUNSD/training_data/images/00040534.png
+!data/ocr/FUNSD/training_data/images/00070353.png
+!data/ocr/FUNSD/training_data/images/00093726.png
+# !data/ocr/FUNSD/testing_data
+# !data/ocr/FUNSD/training_data
 
 # !data/ocr/SROIE/SROIE2019/test/box/X00016469670.txt
 # !data/ocr/SROIE/SROIE2019/test/box/X00016469671.txt
