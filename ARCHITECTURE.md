@@ -1136,7 +1136,7 @@ result = pipeline.process(...)
 ### Environment Variables
 ```bash
 # API Keys
-ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_API_KEY=
 
 # Database
 DATABASE_URL=postgresql://user:pass@localhost:5432/credit_risk
