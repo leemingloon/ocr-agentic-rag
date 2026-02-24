@@ -116,7 +116,10 @@ class RiskMemoGenerator:
         self.mode = mode
         self.s3_bucket = s3_bucket
         self.s3_memos_prefix = s3_memos_prefix
-        self.local_memos_dir = Path(local_memos_dir)
+        if mode == "sagemaker":
+            self.local_memos_dir = Path("/opt/ml/processing/output/risk_memos")
+        else:
+            self.local_memos_dir = Path(local_memos_dir)
         
         # Create local directory
         self.local_memos_dir.mkdir(parents=True, exist_ok=True)
@@ -179,7 +182,7 @@ class RiskMemoGenerator:
             memo = self._llm_memo(borrower, features, pd, drivers, counterfactuals)
         
         # Auto-save to S3 if enabled (skip in dry-run)
-        if save_to_s3 and self.mode == "sagemaker" and self.s3_client and not self.dry_run:
+        if save_to_s3 and self.mode == "sagemaker" and self.s3_client:
             try:
                 self.save_memo_to_s3(
                     memo=memo,
@@ -189,12 +192,54 @@ class RiskMemoGenerator:
                         "drivers": drivers,
                         "features": {k: float(v) for k, v in features.items()},
                         "generated_at": datetime.now().isoformat(),
+                        "dry_run": self.dry_run,  # ← add this flag so you can see it was dry-run
+                        "note": "Dry-run memo (template only)" if self.dry_run else None
                     }
                 )
             except Exception as e:
                 print(f"⚠ Auto-save to S3 failed: {e}")
         
         return memo
+
+    def upload_risk_memos_to_s3(self):
+        """
+        Upload all generated risk memos to S3 using the RiskMemoGenerator.
+        Only works if s3_bucket is set.
+        """
+        if not getattr(self.risk_memo_generator, "s3_bucket", None):
+            print("⚠️  s3_bucket not set — skipping upload")
+            return
+    
+        try:
+            self.risk_memo_generator.upload_results()  # implement in RiskMemoGenerator
+            print(f"✓ Risk memos uploaded to s3://{self.risk_memo_generator.s3_bucket}/{self.risk_memo_generator.s3_memos_prefix}")
+        except Exception as e:
+            print(f"⚠ Failed to upload risk memos: {e}")
+
+    def upload_results(self):
+        """
+        Upload all generated memos in self.local_output_dir to S3.
+        Requires self.s3_bucket to be set.
+        """
+        if not self.s3_client or not self.s3_bucket:
+            raise ValueError("S3 not configured — cannot upload")
+    
+        local_dir = Path(self.local_memos_dir)
+        
+        uploaded = 0
+        for file_path in local_dir.glob("*"):
+            if file_path.is_file():
+                s3_key = f"{self.s3_memos_prefix}{file_path.name}"
+                try:
+                    self.s3_client.upload_file(str(file_path), self.s3_bucket, s3_key)
+                    uploaded += 1
+                except Exception as e:
+                    print(f"Failed to upload {file_path.name}: {e}")
+        if uploaded > 0:
+            print(f"✓ Uploaded {uploaded} files to s3://{self.s3_bucket}/{self.s3_memos_prefix}")
+        else:
+            print("No files found in local_memos_dir to upload")
+        
     
     def _llm_memo(
         self,
@@ -255,7 +300,7 @@ class RiskMemoGenerator:
         )
         
         return memo_with_metadata
-    
+
     def _register_default_template(self):
         """Register default prompt template"""
         template = """# Credit Risk Memo: {borrower}

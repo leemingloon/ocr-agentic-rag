@@ -102,7 +102,11 @@ class CreditRiskPipeline:
         self.counterfactual = CounterfactualAnalyzer(self.pd_model)
         
         # Governance
-        self.risk_memo_generator = RiskMemoGenerator()
+        self.risk_memo_generator = RiskMemoGenerator(
+            mode = self.mode,
+            s3_bucket=self.s3_bucket,
+            s3_memos_prefix="risk_memos/"  # optional, customize if needed
+        )
         
         # Monitoring
         if reference_data_path:
