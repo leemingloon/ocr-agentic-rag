@@ -35,11 +35,8 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-# Verify API key is set
-if not os.getenv("ANTHROPIC_API_KEY"):
-    print("⚠️  WARNING: ANTHROPIC_API_KEY not set!")
-    print("Create a .env file with: ANTHROPIC_API_KEY=sk-ant-...")
-    sys.exit(1)
+# Get ANTHROPIC_API_KEY
+from utils.secret_manager import export_key_to_os_environ
 
 # Add project root to path
 sys.path.append(str(Path(__file__).parent))
@@ -67,11 +64,18 @@ def run_evaluation(mode: str, s3_bucket: str = None, dry_run: bool = False):
     
     from evaluation.credit_risk_eval import CreditRiskEvaluator
     
-    evaluator = CreditRiskEvaluator(mode=mode)
+    evaluator = CreditRiskEvaluator(
+        mode=mode,
+        s3_bucket=s3_bucket
+    )
     
     start_time = time.time()
     results = evaluator.run_full_evaluation()
     elapsed_time = time.time() - start_time
+
+    # Upload to S3
+    if s3_bucket:
+        evaluator.upload_risk_memos_to_s3()
     
     # Print summary
     print("\n" + "="*70)
@@ -148,8 +152,15 @@ def run_evaluation_sagemaker(s3_bucket: str, dry_run: bool = False):
     print("\n2. Running credit risk evaluation...")
     from evaluation.credit_risk_eval import CreditRiskEvaluator
     
-    evaluator = CreditRiskEvaluator(mode="sagemaker")
+    evaluator = CreditRiskEvaluator(
+        mode="sagemaker",
+        s3_bucket=s3_bucket
+    )
     results = evaluator.run_full_evaluation()
+
+    # Upload to S3
+    if s3_bucket:
+        evaluator.upload_risk_memos_to_s3()
     
     print(f"\n✓ Evaluation complete: {results['summary']['passed']}/{results['summary']['total_tests']} tests passed")
     
@@ -208,6 +219,9 @@ Examples:
     )
     
     args = parser.parse_args()
+
+    # Get and Export ANTHROPIC_API_KEY to environment
+    export_key_to_os_environ("ANTHROPIC_API_KEY", dry_run=args.dry_run, mode=args.mode)
     
     # Print dry-run status
     if args.dry_run:
@@ -219,7 +233,7 @@ Examples:
         print("ERROR: --s3-bucket required for SageMaker mode")
         print("Example: python run_e2e.py --mode sagemaker --s3-bucket my-bucket")
         return
-    
+
     # Run
     if args.mode == "sagemaker":
         run_evaluation_sagemaker(s3_bucket=args.s3_bucket, dry_run=args.dry_run)
