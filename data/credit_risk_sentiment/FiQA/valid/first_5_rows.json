@@ -1,0 +1,42 @@
+[
+  {
+    "_id": "499",
+    "sentence": "S&P downgrades Barclays and RBS on government bailout fears",
+    "target": "RBS",
+    "aspect": "Stock/Coverage/AnalystRatings/downgrade",
+    "score": -0.53,
+    "type": "headline"
+  },
+  {
+    "_id": "502",
+    "sentence": "Irish housebuilder Cairn Homes plans London listing",
+    "target": "Cairn Homes",
+    "aspect": "Stock/IPO",
+    "score": 0.189,
+    "type": "headline"
+  },
+  {
+    "_id": "507",
+    "sentence": "Arm slammed by handset sales outlook",
+    "target": "Arm",
+    "aspect": "Corporate/Sales",
+    "score": -0.41,
+    "type": "headline"
+  },
+  {
+    "_id": "511",
+    "sentence": "CompaniesLSE adds ex-SEC head Schapiro to board",
+    "target": "LSE",
+    "aspect": "Corporate/Appointment",
+    "score": 0.076,
+    "type": "headline"
+  },
+  {
+    "_id": "512",
+    "sentence": "Sales boost for new Morrisons chief David Potts as Tesco turnaround stalls",
+    "target": "Tesco",
+    "aspect": "Corporate/Sales/Sales",
+    "score": -0.41,
+    "type": "headline"
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "ex_000001",
+    "query": "Predict the loan status using the features below. Directly respond with 'fullypaid' if the loan is fully repaid or 'chargeoff' if the loan is charged off.\nText: ' addressState: ny, annualIncome: 21000.00, delinquencyIn2Years: 0.00, employmentLength: 2Years, ficoRangeHigh: 699.00, ficoRangeLow: 695.00, grade: d, homeOwnership: rent, inquiriesIn6Months: 1.00, installment: 177.15, interestRate: 16.55, lastPaymentAmount: 176.97, loanAmount: 5000.00, loanApplicationType: individual, loanPurpose: other, mortgageAccounts: 0.00, openAccounts: 14.00, revolvingBalance: 2333.00, revolvingUtilizationRate: 77.80, totalAccounts: 27.00, verificationStatus: sourceVerified '.\nAnswer:",
+    "answer": "fullypaid",
+    "choices": [
+      "fullypaid",
+      "chargedoff"
+    ],
+    "gold": 0
+  },
+  {
+    "id": "ex_000002",
+    "query": "Predict the loan status using the features below. Directly respond with 'fullypaid' if the loan is fully repaid or 'chargeoff' if the loan is charged off.\nText: ' addressState: wi, annualIncome: 40000.00, delinquencyIn2Years: 0.00, employmentLength: 2Years, ficoRangeHigh: 684.00, ficoRangeLow: 680.00, grade: d, homeOwnership: rent, inquiriesIn6Months: 2.00, installment: 338.66, interestRate: 16.99, lastPaymentAmount: 338.66, loanAmount: 9500.00, loanApplicationType: individual, loanPurpose: debtConsolidation, mortgageAccounts: 0.00, openAccounts: 15.00, revolvingBalance: 7234.00, revolvingUtilizationRate: 39.50, totalAccounts: 17.00, verificationStatus: verified '.\nAnswer:",
+    "answer": "chargedoff",
+    "choices": [
+      "fullypaid",
+      "chargedoff"
+    ],
+    "gold": 1
+  },
+  {
+    "id": "ex_000003",
+    "query": "Predict the loan status using the features below. Directly respond with 'fullypaid' if the loan is fully repaid or 'chargeoff' if the loan is charged off.\nText: ' addressState: ma, annualIncome: 28000.00, delinquencyIn2Years: 0.00, employmentLength: 4Years, ficoRangeHigh: 799.00, ficoRangeLow: 795.00, grade: a, homeOwnership: rent, inquiriesIn6Months: 0.00, installment: 228.27, interestRate: 6.03, lastPaymentAmount: 232.35, loanAmount: 7500.00, loanApplicationType: individual, loanPurpose: creditCard, mortgageAccounts: nan, openAccounts: 9.00, revolvingBalance: 2286.00, revolvingUtilizationRate: 14.40, totalAccounts: 12.00, verificationStatus: notVerified '.\nAnswer:",
+    "answer": "fullypaid",
+    "choices": [
+      "fullypaid",
+      "chargedoff"
+    ],
+    "gold": 0
+  },
+  {
+    "id": "ex_000004",
+    "query": "Predict the loan status using the features below. Directly respond with 'fullypaid' if the loan is fully repaid or 'chargeoff' if the loan is charged off.\nText: ' addressState: ma, annualIncome: 45000.00, delinquencyIn2Years: 0.00, employmentLength: 2Years, ficoRangeHigh: 664.00, ficoRangeLow: 660.00, grade: e, homeOwnership: rent, inquiriesIn6Months: 0.00, installment: 564.88, interestRate: 23.99, lastPaymentAmount: 564.88, loanAmount: 14400.00, loanApplicationType: individual, loanPurpose: debtConsolidation, mortgageAccounts: 0.00, openAccounts: 20.00, revolvingBalance: 13191.00, revolvingUtilizationRate: 38.30, totalAccounts: 35.00, verificationStatus: sourceVerified '.\nAnswer:",
+    "answer": "chargedoff",
+    "choices": [
+      "fullypaid",
+      "chargedoff"
+    ],
+    "gold": 1
+  },
+  {
+    "id": "ex_000005",
+    "query": "Predict the loan status using the features below. Directly respond with 'fullypaid' if the loan is fully repaid or 'chargeoff' if the loan is charged off.\nText: ' addressState: mo, annualIncome: 45000.00, delinquencyIn2Years: 0.00, employmentLength: 10+Years, ficoRangeHigh: 739.00, ficoRangeLow: 735.00, grade: b, homeOwnership: mortgage, inquiriesIn6Months: 0.00, installment: 214.43, interestRate: 10.47, lastPaymentAmount: 6678.20, loanAmount: 6600.00, loanApplicationType: individual, loanPurpose: debtConsolidation, mortgageAccounts: 5.00, openAccounts: 9.00, revolvingBalance: 3716.00, revolvingUtilizationRate: 26.90, totalAccounts: 31.00, verificationStatus: notVerified '.\nAnswer:",
+    "answer": "fullypaid",
+    "choices": [
+      "fullypaid",
+      "chargedoff"
+    ],
+    "gold": 0
+  }
+]

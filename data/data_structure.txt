@@ -1,4 +1,5 @@
 data_structure.json - 0.03 MB
+generate_pq_first_5_rows.py - 0.01 MB
 extract_folder_structure.py - 0.01 MB
 __pycache__/
     extract_folder_structure.cpython-311.pyc - 0.01 MB
@@ -8,58 +9,69 @@ credit_risk_memo_generator/
     FinanceBench/
         dataset_dict.json - 0.00 MB
         train/
-            data-00000-of-00001.arrow - 0.83 MB
+            data-00000-of-00001.parquet - 0.36 MB
+            first_5_rows.json - 0.03 MB
             dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
+            1 files, total 0.00 MB
 credit_risk_pd/
     LendingClub/
+        LoanStats3a.csv - 40.44 MB
         dataset_dict.json - 0.00 MB
         test/
-            data-00000-of-00001.arrow - 1.94 MB
+            data-00000-of-00001.parquet - 0.31 MB
+            first_5_rows.json - 0.00 MB
             dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
+            1 files, total 0.00 MB
         train/
+            data-00000-of-00001.parquet - 1.08 MB
+            first_5_rows.json - 0.00 MB
             dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
+            1 files, total 0.00 MB
         valid/
-            data-00000-of-00001.arrow - 0.97 MB
+            data-00000-of-00001.parquet - 0.16 MB
+            first_5_rows.json - 0.00 MB
             dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
+            1 files, total 0.00 MB
 credit_risk_sentiment/
     FiQA/
         dataset_dict.json - 0.00 MB
         test/
-            data-00000-of-00001.arrow - 0.03 MB
+            data-00000-of-00001.parquet - 0.03 MB
             dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
+            first_5_rows.json - 0.00 MB
+            1 files, total 0.00 MB
         train/
-            data-00000-of-00001.arrow - 0.12 MB
+            data-00000-of-00001.parquet - 0.06 MB
             dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
+            first_5_rows.json - 0.00 MB
+            1 files, total 0.00 MB
         valid/
-            data-00000-of-00001.arrow - 0.02 MB
+            data-00000-of-00001.parquet - 0.01 MB
             dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
+            first_5_rows.json - 0.00 MB
+            1 files, total 0.00 MB
     FinancialPhraseBank/
         dataset_dict.json - 0.00 MB
         test/
-            data-00000-of-00001.arrow - 0.14 MB
+            data-00000-of-00001.parquet - 0.08 MB
             dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
+            first_5_rows.json - 0.00 MB
+            1 files, total 0.00 MB
         train/
-            data-00000-of-00001.arrow - 0.18 MB
+            data-00000-of-00001.parquet - 0.10 MB
             dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
+            first_5_rows.json - 0.00 MB
+            1 files, total 0.00 MB
 drift_cache/
     reference_data_upload.csv - 0.05 MB
 ocr/
     FUNSD/
         dataset_dict.json - 0.00 MB
         test/
-            data-00000-of-00001.arrow - 4.54 MB
             data-00000-of-00001.parquet - 4.18 MB
             first_5_rows.json - 0.09 MB
-            2 files, total 0.00 MB
+            dataset_info.json - 0.00 MB
+            1 files, total 0.00 MB
         testing_data/
             .DS_Store - 0.01 MB
             annotations/
@@ -73,10 +85,10 @@ ocr/
                 87528380.png - 0.14 MB
                 47 files, total 3.62 MB
         train/
-            data-00000-of-00001.arrow - 12.60 MB
             data-00000-of-00001.parquet - 11.68 MB
             first_5_rows.json - 0.09 MB
-            2 files, total 0.00 MB
+            dataset_info.json - 0.00 MB
+            1 files, total 0.00 MB
         training_data/
             .DS_Store - 0.01 MB
             annotations/
@@ -92,13 +104,13 @@ ocr/
     SROIE/
         dataset_dict.json - 0.00 MB
         test/
-            data-00000-of-00001.arrow - 206.51 MB
             data-00000-of-00001.parquet - 183.07 MB
+            first_5_rows.json - 0.03 MB
             dataset_info.json - 0.00 MB
             1 files, total 0.00 MB
         train/
-            data-00000-of-00001.arrow - 340.09 MB
             data-00000-of-00001.parquet - 304.73 MB
+            first_5_rows.json - 0.03 MB
             dataset_info.json - 0.00 MB
             1 files, total 0.00 MB
 proof/
@@ -110,9 +122,10 @@ rag/
     FinQA/
         dataset_dict.json - 0.00 MB
         train/
-            data-00000-of-00001.arrow - 0.19 MB
+            data-00000-of-00001.parquet - 0.09 MB
             dataset_info.json - 0.00 MB
-            state.json - 0.00 MB
+            first_5_rows.json - 0.00 MB
+            1 files, total 0.00 MB
     TAT-QA/
         tatqa_dataset_test_gold.json - 2.07 MB
         tatqa_dataset_dev.json - 1.56 MB
@@ -123,17 +136,16 @@ vision/
     ChartQA/
         dataset_dict.json - 0.00 MB
         test/
-            data-00000-of-00001.arrow - 102.12 MB
             dataset_info.json - 0.00 MB
+            first_5_rows.json - 0.00 MB
             state.json - 0.00 MB
         train/
-            data-00002-of-00003.arrow - 411.44 MB
-            data-00001-of-00003.arrow - 406.52 MB
-            data-00000-of-00003.arrow - 380.56 MB
-            2 files, total 0.00 MB
-        val/
-            data-00000-of-00001.arrow - 80.32 MB
             dataset_info.json - 0.00 MB
+            first_5_rows.json - 0.00 MB
+            state.json - 0.00 MB
+        val/
+            dataset_info.json - 0.00 MB
+            first_5_rows.json - 0.00 MB
             state.json - 0.00 MB
     DocVQA/
         train_v1.0_withQT.json - 11.03 MB
@@ -141,61 +153,85 @@ vision/
         test_v1.0.json - 1.10 MB
         1 files, total 0.00 MB
         test/
-            data-00007-of-00008.arrow - 613.08 MB
-            data-00003-of-00008.arrow - 494.93 MB
-            data-00006-of-00008.arrow - 488.28 MB
-            7 files, total 1893.65 MB
+            dataset_info.json - 0.00 MB
+            first_5_rows.json - 0.00 MB
+            state.json - 0.00 MB
         validation/
-            data-00003-of-00008.arrow - 571.29 MB
-            data-00007-of-00008.arrow - 523.92 MB
-            data-00006-of-00008.arrow - 501.93 MB
-            7 files, total 1816.13 MB
+            dataset_info.json - 0.00 MB
+            first_5_rows.json - 0.00 MB
+            state.json - 0.00 MB
     InfographicsVQA/
         infographicsVQA_train_v1.0.json - 7.68 MB
         infographicsVQA_val_v1.0_withQT.json - 1.21 MB
         infographicsVQA_test_v1.0.json - 1.06 MB
         1 files, total 0.00 MB
         test/
-            data-00003-of-00004.arrow - 514.10 MB
-            data-00001-of-00004.arrow - 457.10 MB
-            data-00000-of-00004.arrow - 424.16 MB
-            3 files, total 423.00 MB
+            first_5_rows.json - 0.63 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
         validation/
-            data-00000-of-00004.arrow - 480.23 MB
-            data-00003-of-00004.arrow - 409.17 MB
-            data-00001-of-00004.arrow - 384.25 MB
-            3 files, total 354.64 MB
+            first_5_rows.json - 0.84 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
     MMMU_Accounting/
         dataset_dict.json - 0.00 MB
         dev/
-            data-00000-of-00001.arrow - 0.25 MB
+            first_5_rows.json - 0.00 MB
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
         test/
-            data-00000-of-00001.arrow - 21.15 MB
+            first_5_rows.json - 0.00 MB
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
         validation/
-            data-00000-of-00001.arrow - 1.53 MB
+            first_5_rows.json - 0.00 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+    MMMU_Economics/
+        dataset_dict.json - 0.00 MB
+        dev/
+            first_5_rows.json - 0.00 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        test/
+            first_5_rows.json - 0.00 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        validation/
+            first_5_rows.json - 0.00 MB
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
     MMMU_Finance/
         dataset_dict.json - 0.00 MB
         dev/
-            data-00000-of-00001.arrow - 0.29 MB
+            first_5_rows.json - 0.00 MB
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
         test/
-            data-00000-of-00001.arrow - 11.54 MB
+            first_5_rows.json - 0.00 MB
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
         validation/
-            data-00000-of-00001.arrow - 1.03 MB
+            first_5_rows.json - 0.00 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+    MMMU_Math/
+        dataset_dict.json - 0.00 MB
+        dev/
+            first_5_rows.json - 0.01 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        test/
+            first_5_rows.json - 0.00 MB
+            dataset_info.json - 0.00 MB
+            state.json - 0.00 MB
+        validation/
+            first_5_rows.json - 0.00 MB
             dataset_info.json - 0.00 MB
             state.json - 0.00 MB
     OmniDocBench/
         dataset_dict.json - 0.00 MB
         train/
-            data-00000-of-00001.arrow - 19.23 MB
+            first_5_rows.json - 0.10 MB
             dataset_info.json - 0.01 MB
             state.json - 0.00 MB

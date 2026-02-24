@@ -1,0 +1,42 @@
+[
+  {
+    "_id": "1",
+    "sentence": "Royal Mail chairman Donald Brydon set to step down",
+    "target": "Royal Mail",
+    "aspect": "Corporate/Appointment",
+    "score": -0.374,
+    "type": "headline"
+  },
+  {
+    "_id": "100",
+    "sentence": "Slump in Weir leads FTSE down from record high",
+    "target": "Weir",
+    "aspect": "Market/Volatility/Volatility",
+    "score": -0.827,
+    "type": "headline"
+  },
+  {
+    "_id": "1000",
+    "sentence": "AstraZeneca wins FDA approval for key new lung cancer pill",
+    "target": "AstraZeneca",
+    "aspect": "Corporate/Regulatory",
+    "score": 0.549,
+    "type": "headline"
+  },
+  {
+    "_id": "1002",
+    "sentence": "UPDATE 1-Lloyds to cut 945 jobs as part of 3-year restructuring plan",
+    "target": "Lloyds",
+    "aspect": "Corporate/Strategy",
+    "score": -0.266,
+    "type": "headline"
+  },
+  {
+    "_id": "1005",
+    "sentence": "Standard Chartered Shifts Emerging-Markets Strategy After Losses",
+    "target": "Standard Chartered",
+    "aspect": "Corporate/Strategy",
+    "score": -0.461,
+    "type": "headline"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "image": "<PIL.Image.Image (from bytes)>",
+    "query": "What's the color of graph with 56 as the highest value?",
+    "label": [
+      "Blue"
+    ],
+    "human_or_machine": 0
+  },
+  {
+    "image": "<PIL.Image.Image (from bytes)>",
+    "query": "In which year the difference between blue and green graph 1?",
+    "label": [
+      "2018"
+    ],
+    "human_or_machine": 0
+  },
+  {
+    "image": "<PIL.Image.Image (from bytes)>",
+    "query": "What does the blue line represent?",
+    "label": [
+      "Not too much/not at all"
+    ],
+    "human_or_machine": 0
+  },
+  {
+    "image": "<PIL.Image.Image (from bytes)>",
+    "query": "What is the max value of blue line?",
+    "label": [
+      "0.72"
+    ],
+    "human_or_machine": 0
+  },
+  {
+    "image": "<PIL.Image.Image (from bytes)>",
+    "query": "What's the percentage of respondents who say Job is a top priority for the president and Congress in 2016?",
+    "label": [
+      "68"
+    ],
+    "human_or_machine": 0
+  }
+]

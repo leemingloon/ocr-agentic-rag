@@ -9,6 +9,7 @@
     "test": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\credit_risk_pd\\LendingClub\\test",
     "train": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\credit_risk_pd\\LendingClub\\train",
     "dataset_info": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\credit_risk_pd\\LendingClub\\valid\\dataset_info.json",
+    "first_5_rows": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\credit_risk_pd\\LendingClub\\valid\\first_5_rows.json",
     "state": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\credit_risk_pd\\LendingClub\\valid\\state.json"
   },
   "credit_risk_sentiment": {
@@ -16,6 +17,7 @@
     "test": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\credit_risk_sentiment\\FiQA\\test",
     "train": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\credit_risk_sentiment\\FiQA\\train",
     "dataset_info": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\credit_risk_sentiment\\FiQA\\valid\\dataset_info.json",
+    "first_5_rows": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\credit_risk_sentiment\\FiQA\\valid\\first_5_rows.json",
     "state": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\credit_risk_sentiment\\FiQA\\valid\\state.json"
   },
   "drift_cache": {},
@@ -240,18 +242,19 @@
   "risk_memos": {},
   "vision": {
     "dataset_dict": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\OmniDocBench\\dataset_dict.json",
-    "test": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\MMMU_Finance\\test",
+    "test": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\MMMU_Math\\test",
     "train": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\OmniDocBench\\train",
     "dataset_info": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\ChartQA\\val\\dataset_info.json",
+    "first_5_rows": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\ChartQA\\val\\first_5_rows.json",
     "state": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\ChartQA\\val\\state.json",
     "test_v1.0": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\DocVQA\\test_v1.0.json",
     "train_v1.0_withQT": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\DocVQA\\train_v1.0_withQT.json",
     "val_v1.0_withQT": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\DocVQA\\val_v1.0_withQT.json",
-    "validation": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\MMMU_Finance\\validation",
+    "validation": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\MMMU_Math\\validation",
     "infographicsVQA_test_v1.0": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\InfographicsVQA\\infographicsVQA_test_v1.0.json",
     "infographicsVQA_train_v1.0": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\InfographicsVQA\\infographicsVQA_train_v1.0.json",
     "infographicsVQA_val_v1.0_withQT": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\InfographicsVQA\\infographicsVQA_val_v1.0_withQT.json",
-    "dev": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\MMMU_Finance\\dev"
+    "dev": "C:\\Users\\leemi\\OneDrive\\Desktop\\Job_search_2026\\ocr-agentic-rag\\data\\vision\\MMMU_Math\\dev"
   },
   "__pycache__": {}
 }

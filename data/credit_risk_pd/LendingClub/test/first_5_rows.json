@@ -1,0 +1,52 @@
+[
+  {
+    "id": "ex_000001",
+    "query": "Predict the loan status using the features below. Directly respond with 'fullypaid' if the loan is fully repaid or 'chargeoff' if the loan is charged off.\nText: ' addressState: ga, annualIncome: 66400.00, delinquencyIn2Years: 2.00, employmentLength: 10+Years, ficoRangeHigh: 669.00, ficoRangeLow: 665.00, grade: f, homeOwnership: mortgage, inquiriesIn6Months: 1.00, installment: 267.07, interestRate: 24.08, lastPaymentAmount: 267.02, loanAmount: 6800.00, loanApplicationType: individual, loanPurpose: other, mortgageAccounts: 4.00, openAccounts: 14.00, revolvingBalance: 17607.00, revolvingUtilizationRate: 91.70, totalAccounts: 22.00, verificationStatus: notVerified '.\nAnswer:",
+    "answer": "fullypaid",
+    "choices": [
+      "fullypaid",
+      "chargedoff"
+    ],
+    "gold": 0
+  },
+  {
+    "id": "ex_000002",
+    "query": "Predict the loan status using the features below. Directly respond with 'fullypaid' if the loan is fully repaid or 'chargeoff' if the loan is charged off.\nText: ' addressState: mn, annualIncome: 48000.00, delinquencyIn2Years: 0.00, employmentLength: 10+Years, ficoRangeHigh: 714.00, ficoRangeLow: 710.00, grade: c, homeOwnership: rent, inquiriesIn6Months: 1.00, installment: 344.95, interestRate: 14.65, lastPaymentAmount: 3886.72, loanAmount: 10000.00, loanApplicationType: individual, loanPurpose: creditCard, mortgageAccounts: 0.00, openAccounts: 10.00, revolvingBalance: 19749.00, revolvingUtilizationRate: 61.70, totalAccounts: 12.00, verificationStatus: sourceVerified '.\nAnswer:",
+    "answer": "fullypaid",
+    "choices": [
+      "fullypaid",
+      "chargedoff"
+    ],
+    "gold": 0
+  },
+  {
+    "id": "ex_000003",
+    "query": "Predict the loan status using the features below. Directly respond with 'fullypaid' if the loan is fully repaid or 'chargeoff' if the loan is charged off.\nText: ' addressState: ny, annualIncome: 46000.00, delinquencyIn2Years: 0.00, employmentLength: <1Year, ficoRangeHigh: 714.00, ficoRangeLow: 710.00, grade: a, homeOwnership: rent, inquiriesIn6Months: 1.00, installment: 617.46, interestRate: 6.99, lastPaymentAmount: 1020.42, loanAmount: 20000.00, loanApplicationType: individual, loanPurpose: debtConsolidation, mortgageAccounts: 0.00, openAccounts: 4.00, revolvingBalance: 9377.00, revolvingUtilizationRate: 62.10, totalAccounts: 18.00, verificationStatus: sourceVerified '.\nAnswer:",
+    "answer": "fullypaid",
+    "choices": [
+      "fullypaid",
+      "chargedoff"
+    ],
+    "gold": 0
+  },
+  {
+    "id": "ex_000004",
+    "query": "Predict the loan status using the features below. Directly respond with 'fullypaid' if the loan is fully repaid or 'chargeoff' if the loan is charged off.\nText: ' addressState: fl, annualIncome: 97000.00, delinquencyIn2Years: 1.00, employmentLength: 3Years, ficoRangeHigh: 679.00, ficoRangeLow: 675.00, grade: e, homeOwnership: rent, inquiriesIn6Months: 2.00, installment: 535.55, interestRate: 18.20, lastPaymentAmount: 535.55, loanAmount: 21000.00, loanApplicationType: individual, loanPurpose: debtConsolidation, mortgageAccounts: 1.00, openAccounts: 15.00, revolvingBalance: 11949.00, revolvingUtilizationRate: 53.80, totalAccounts: 38.00, verificationStatus: sourceVerified '.\nAnswer:",
+    "answer": "chargedoff",
+    "choices": [
+      "fullypaid",
+      "chargedoff"
+    ],
+    "gold": 1
+  },
+  {
+    "id": "ex_000005",
+    "query": "Predict the loan status using the features below. Directly respond with 'fullypaid' if the loan is fully repaid or 'chargeoff' if the loan is charged off.\nText: ' addressState: ok, annualIncome: 106050.00, delinquencyIn2Years: 0.00, employmentLength: 1Year, ficoRangeHigh: 679.00, ficoRangeLow: 675.00, grade: d, homeOwnership: mortgage, inquiriesIn6Months: 0.00, installment: 1246.14, interestRate: 18.99, lastPaymentAmount: 21706.01, loanAmount: 34000.00, loanApplicationType: individual, loanPurpose: debtConsolidation, mortgageAccounts: 3.00, openAccounts: 27.00, revolvingBalance: 37527.00, revolvingUtilizationRate: 46.10, totalAccounts: 51.00, verificationStatus: verified '.\nAnswer:",
+    "answer": "fullypaid",
+    "choices": [
+      "fullypaid",
+      "chargedoff"
+    ],
+    "gold": 0
+  }
+]

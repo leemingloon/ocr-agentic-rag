@@ -1,0 +1,2923 @@
+[
+  {
+    "layout_dets": [
+      {
+        "anno_id": 6,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "title",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              109.3333333333331,
+              121.73651418039208,
+              722.1022134807848,
+              121.73651418039208,
+              722.1022134807848,
+              195.75809149176507,
+              109.3333333333331,
+              195.75809149176507
+            ],
+            "text": "国资背景基金情况"
+          }
+        ],
+        "merge_list": null,
+        "order": 1,
+        "poly": [
+          102.5999912116609,
+          120.87255879760278,
+          719.3118659856144,
+          120.87255879760278,
+          719.3118659856144,
+          194.14083813380114,
+          102.5999912116609,
+          194.14083813380114
+        ],
+        "table_edit_status": null,
+        "text": "国资背景基金情况"
+      },
+      {
+        "anno_id": 4,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "text_block",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              99.66504579139392,
+              227.6650457913944,
+              1269.333333333333,
+              227.6650457913944,
+              1269.333333333333,
+              271.3365750838786,
+              99.66504579139392,
+              271.3365750838786
+            ],
+            "text": "2022年备案基金规模小幅回升，但仍未恢复至资管新规出台前的水平"
+          }
+        ],
+        "merge_list": null,
+        "order": 2,
+        "poly": [
+          97.71487020898245,
+          226.92028692633914,
+          1271.9932332148471,
+          226.92028692633914,
+          1271.9932332148471,
+          264.88925750697814,
+          97.71487020898245,
+          264.88925750697814
+        ],
+        "table_edit_status": null,
+        "text": "2022年备案基金规模小幅回升，但仍未恢复至资管新规出台前的水平"
+      },
+      {
+        "anno_id": 3,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "figure_caption",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              253.94664201855937,
+              321.21295194692755,
+              1076.1203813864063,
+              321.21295194692755,
+              1076.1203813864063,
+              364.93470762745034,
+              253.94664201855937,
+              364.93470762745034
+            ],
+            "text": "2014年-2023Q3国资背景基金的备案数量及规模"
+          }
+        ],
+        "merge_list": null,
+        "order": 3,
+        "poly": [
+          246.96994018554688,
+          318.7444152832031,
+          1088.26025390625,
+          318.7444152832031,
+          1088.26025390625,
+          369.0964660644531,
+          246.96994018554688,
+          369.0964660644531
+        ],
+        "table_edit_status": null,
+        "text": "2014年-2023Q3国资背景基金的备案数量及规模"
+      },
+      {
+        "anno_id": 2,
+        "attribute": null,
+        "category_type": "figure",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": null,
+        "merge_list": null,
+        "order": 4,
+        "poly": [
+          118.08102792118407,
+          379.29373168945347,
+          1299.4279383691976,
+          379.29373168945347,
+          1299.4279383691976,
+          1028.2773128579047,
+          118.08102792118407,
+          1028.2773128579047
+        ],
+        "table_edit_status": null,
+        "text": null
+      },
+      {
+        "anno_id": 8,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "figure_caption",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1509.6758069519938,
+              324.34247361866034,
+              2292.4771492866826,
+              324.34247361866034,
+              2292.4771492866826,
+              364.8196229053426,
+              1509.6758069519938,
+              364.8196229053426
+            ],
+            "text": "2014年-2023Q3国资背景基金数量TOP10地区"
+          }
+        ],
+        "merge_list": null,
+        "order": 5,
+        "poly": [
+          1497.726318359375,
+          318.7418518066406,
+          2301.80224609375,
+          318.7418518066406,
+          2301.80224609375,
+          367.1272888183594,
+          1497.726318359375,
+          367.1272888183594
+        ],
+        "table_edit_status": null,
+        "text": "2014年-2023Q3国资背景基金数量TOP10地区"
+      },
+      {
+        "anno_id": 5,
+        "attribute": null,
+        "category_type": "figure",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": null,
+        "merge_list": null,
+        "order": 6,
+        "poly": [
+          1370.0374839590943,
+          424.35013794251097,
+          2552.3561471143494,
+          424.35013794251097,
+          2552.3561471143494,
+          1026.8955618700252,
+          1370.0374839590943,
+          1026.8955618700252
+        ],
+        "table_edit_status": null,
+        "text": null
+      },
+      {
+        "anno_id": 9,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "title",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              169.67751098302242,
+              1071.225836994341,
+              328.08580770628134,
+              1071.225836994341,
+              328.08580770628134,
+              1111.655822350311,
+              169.67751098302242,
+              1111.655822350311
+            ],
+            "text": "核心发现"
+          }
+        ],
+        "merge_list": null,
+        "order": 7,
+        "poly": [
+          170.92340081387997,
+          1069.7956822171332,
+          326.21460986860313,
+          1069.7956822171332,
+          326.21460986860313,
+          1111.7494049722532,
+          170.92340081387997,
+          1111.7494049722532
+        ],
+        "table_edit_status": null,
+        "text": "核心发现"
+      },
+      {
+        "anno_id": 7,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "text_block",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              165.603649650326,
+              1150.009124125815,
+              2509.333333333333,
+              1150.009124125815,
+              2509.333333333333,
+              1198.666666666666,
+              165.603649650326,
+              1198.666666666666
+            ],
+            "text": "- 2018年4月资管新规出台后，国资背景基金备案数量增速放缓且规模骤减，受新冠疫情影响，2021年新增基金规模再次下降，虽然"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              219.22996126565647,
+              1201.1457902508969,
+              2250.770752144285,
+              1201.1457902508969,
+              2250.770752144285,
+              1243.9433217869077,
+              219.22996126565647,
+              1243.9433217869077
+            ],
+            "text": "2022年基金规模回升至1.25万亿元，但仍未恢复至资管新规出台前的水平，2023前三季度新增规模略低于2022年同期。"
+          }
+        ],
+        "merge_list": null,
+        "order": 8,
+        "poly": [
+          172.66793877059249,
+          1155.2640660519091,
+          2514.2408071863138,
+          1155.2640660519091,
+          2514.2408071863138,
+          1241.6284871157177,
+          172.66793877059249,
+          1241.6284871157177
+        ],
+        "table_edit_status": null,
+        "text": "- 2018年4月资管新规出台后，国资背景基金备案数量增速放缓且规模骤减，受新冠疫情影响，2021年新增基金规模再次下降，虽然 2022年基金规模回升至1.25万亿元，但仍未恢复至资管新规出台前的水平，2023前三季度新增规模略低于2022年同期。"
+      },
+      {
+        "anno_id": 1,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "text_block",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              161.7899369148969,
+              1278.308761376868,
+              2508.0,
+              1278.308761376868,
+              2508.0,
+              1317.333333333333,
+              161.7899369148969,
+              1317.333333333333
+            ],
+            "text": "- 截至2023Q3全国国资背景基金备案数量累计9196只，基金规模累计8.91万亿元。基金注册区域集中于广东省、浙江省和江苏省，广东"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              222.66666666666688,
+              1325.3333333333335,
+              1623.8331583485456,
+              1325.3333333333335,
+              1623.8331583485456,
+              1365.333333333333,
+              222.66666666666688,
+              1365.333333333333
+            ],
+            "text": "省国资背景基金总规模遥遥领先。备案基金数量前10的省份基金数量占全国总量的"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              1624.4165959289367,
+              1327.0154193159506,
+              1703.7259660435407,
+              1327.0154193159506,
+              1703.7259660435407,
+              1363.1237504250385,
+              1624.4165959289367,
+              1363.1237504250385
+            ],
+            "text": "73%"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1704.6905743174548,
+              1322.6134268787764,
+              2053.985160092844,
+              1322.6134268787764,
+              2053.985160092844,
+              1370.6736155849724,
+              1704.6905743174548,
+              1370.6736155849724
+            ],
+            "text": "，规模占全国总量的"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              2055.1374027302004,
+              1326.3706276890023,
+              2149.276980264608,
+              1326.3706276890023,
+              2149.276980264608,
+              1365.7029169328305,
+              2055.1374027302004,
+              1365.7029169328305
+            ],
+            "text": "68%。"
+          }
+        ],
+        "merge_list": null,
+        "order": 9,
+        "poly": [
+          171.69999831539863,
+          1278.820932742719,
+          2512.084408886781,
+          1278.820932742719,
+          2512.084408886781,
+          1365.690053585406,
+          171.69999831539863,
+          1365.690053585406
+        ],
+        "table_edit_status": null,
+        "text": "- 截至2023Q3全国国资背景基金备案数量累计9196只，基金规模累计8.91万亿元。基金注册区域集中于广东省、浙江省和江苏省，广东省国资背景基金总规模遥遥领先。备案基金数量前10的省份基金数量占全国总量的 73% ，规模占全国总量的 68%。"
+      },
+      {
+        "anno_id": 10,
+        "attribute": null,
+        "category_type": "abandon",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": null,
+        "merge_list": null,
+        "order": null,
+        "poly": [
+          114.12910090860571,
+          1403.1676953230935,
+          175.21358196554792,
+          1403.1676953230935,
+          175.21358196554792,
+          1462.6586681785502,
+          114.12910090860571,
+          1462.6586681785502
+        ],
+        "table_edit_status": null,
+        "text": null
+      },
+      {
+        "anno_id": 0,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_en_ch_mixed",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "footer",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              178.18192276049803,
+              1409.8767302579377,
+              288.0868232114207,
+              1409.8767302579377,
+              288.0868232114207,
+              1467.2607048296584,
+              178.18192276049803,
+              1467.2607048296584
+            ],
+            "text": "CVINFO 投中信息"
+          }
+        ],
+        "merge_list": null,
+        "order": null,
+        "poly": [
+          180.18207532211585,
+          1404.2778174322868,
+          289.9793827860912,
+          1404.2778174322868,
+          289.9793827860912,
+          1462.652231000048,
+          180.18207532211585,
+          1462.652231000048
+        ],
+        "table_edit_status": null,
+        "text": "CVINFO 投中信息"
+      }
+    ],
+    "extra": {
+      "relation": [
+        {
+          "relation_type": "parent_son",
+          "source_anno_id": 2,
+          "target_anno_id": 3
+        },
+        {
+          "relation_type": "parent_son",
+          "source_anno_id": 5,
+          "target_anno_id": 8
+        }
+      ]
+    },
+    "page_info": {
+      "height": 1500,
+      "image_path": "eastmoney_59cde7e939acc3124df9d3f2c85b5a0ec41b9da1157d5be38e098672022b47cb.pdf_11.jpg",
+      "page_attribute": {
+        "data_source": "PPT2PDF",
+        "language": "simplified_chinese",
+        "layout": "1andmore_column",
+        "special_issue": [
+          "watermark"
+        ]
+      },
+      "page_no": 11,
+      "width": 2667
+    }
+  },
+  {
+    "layout_dets": [
+      {
+        "anno_id": 3,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "title",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              81.05958886350463,
+              21.72697753034481,
+              1818.9999999999998,
+              21.72697753034481,
+              1818.9999999999998,
+              95.04225352112655,
+              81.05958886350463,
+              95.04225352112655
+            ],
+            "text": "中国物联网平台行业竞争格局-物联网平台主要玩家类型"
+          }
+        ],
+        "merge_list": null,
+        "order": 1,
+        "poly": [
+          83.20571886556269,
+          28.998092394211994,
+          1813.6515734811671,
+          28.998092394211994,
+          1813.6515734811671,
+          95.62768554687489,
+          83.20571886556269,
+          95.62768554687489
+        ],
+        "table_edit_status": null,
+        "text": "中国物联网平台行业竞争格局-物联网平台主要玩家类型"
+      },
+      {
+        "anno_id": 4,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "text_block",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              77.56401249048083,
+              104.00000000000034,
+              2604.0,
+              104.00000000000034,
+              2604.0,
+              162.6666666666663,
+              77.56401249048083,
+              162.6666666666663
+            ],
+            "text": "物联网平台行业企业数量不断增加，企业凭自身核心优势，以不同的目的和角度入局，按照企业属性将"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              72.6920374714426,
+              167.75664455049923,
+              1272.608388623753,
+              167.75664455049923,
+              1272.608388623753,
+              221.69836650758543,
+              72.6920374714426,
+              221.69836650758543
+            ],
+            "text": "进入物联网平台产业的主要玩家划分为五种类型。"
+          }
+        ],
+        "merge_list": null,
+        "order": 2,
+        "poly": [
+          80.68376230188262,
+          101.19426956571544,
+          2607.754870217299,
+          101.19426956571544,
+          2607.754870217299,
+          224.34784290691925,
+          80.68376230188262,
+          224.34784290691925
+        ],
+        "table_edit_status": null,
+        "text": "物联网平台行业企业数量不断增加，企业凭自身核心优势，以不同的目的和角度入局，按照企业属性将进入物联网平台产业的主要玩家划分为五种类型。"
+      },
+      {
+        "anno_id": 1,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "table_caption",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              90.90212798443905,
+              248.85803089931807,
+              531.3369794669227,
+              248.85803089931807,
+              531.3369794669227,
+              290.397095859997,
+              90.90212798443905,
+              290.397095859997
+            ],
+            "text": "物联网平台企业主要玩家类型"
+          }
+        ],
+        "merge_list": null,
+        "order": 3,
+        "poly": [
+          92.05310447235534,
+          251.66176228058168,
+          528.4049872061074,
+          251.66176228058168,
+          528.4049872061074,
+          285.23328011016423,
+          92.05310447235534,
+          285.23328011016423
+        ],
+        "table_edit_status": null,
+        "text": "物联网平台企业主要玩家类型"
+      },
+      {
+        "anno_id": 5,
+        "attribute": {
+          "formula_type": null,
+          "include_background": true,
+          "include_equation": false,
+          "include_photo": false,
+          "language": "table_simplified_chinese",
+          "line": "fewer_line",
+          "table_layout": "horizontal",
+          "text_background": null,
+          "text_language": null,
+          "text_rotate": null,
+          "with_span": false,
+          "with_structured_text": true
+        },
+        "category_type": "table",
+        "html": "<table>\n<thead>\n<tr>\n <th>企业类型</th>\n <th>目的</th>\n <th>模式和特点</th>\n <th>优势</th>\n <th>典型企业</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n <td>云服务提供商</td>\n <td>$\\cdot$ 以物联网为抓手带动上层应用服务业绩增长</td>\n <td>$\\cdot$ 目前多以提供底层计算资源、提供应用使能平台为主</td>\n <td>$\\cdot$ 在互联网领域中积累了丰富的技术、商业、生态优势经验<br>$\\cdot$ 底层IaaS能力突出、共性技术能力提炼</td>\n <td>阿里云、腾讯云、百度云、亚马逊AWS IoT等</td>\n</tr>\n<tr>\n <td>通信领域厂商</td>\n <td>$\\cdot$ 获得流量业务收入，战略布局物联网，把握新增市场机遇</td>\n <td>$\\cdot$ 多以连接管理、应用使能为平台主要功能服务为主</td>\n <td>$\\cdot$ 在连接管理平台具有绝对优势，具有全球通用连接能力</td>\n <td>电信运营商、通信设备厂商，中国电信天翼物联、如中国移动ONENet、中国联通物联网平台、华为云IoT等</td>\n</tr>\n<tr>\n <td>软件系统服务商</td>\n <td>$\\cdot$ 解决内部开发效率的问题，优化产品服务</td>\n <td>$\\cdot$ 以应用开发平台为主要服务内容为主</td>\n <td>$\\cdot$ 擅长软件设计、生产、管理、运维等服务，具备丰富的行业软件开发及服务经验</td>\n <td>紫光云、广联达筑联等</td>\n</tr>\n<tr>\n <td>垂直领域传统厂商</td>\n <td>$\\cdot$ 利用自身对行业的理解和经验，打造垂直型平台，实现传统企业的转型升级</td>\n <td>$\\cdot$ 垂直专业领域的物联网平台</td>\n <td>$\\cdot$ 深刻的行业理解和行业技术、对行业有深度应用，拥有行业数据和客户资源</td>\n <td>西门子、工业富联、美的M-Smart等企业</td>\n</tr>\n<tr>\n <td>初创企业</td>\n <td>$\\cdot$ 看好物联网未来的发展潜能</td>\n <td>$\\cdot$ 目前阶段很多初创型平台企业多以SaaS解决方案公司的形式存在</td>\n <td>$\\cdot$ 拥有与选定细分行业相关的软件、硬件经验<br>$\\cdot$ 服务延伸到通用型平台厂商难以触及的细分领域，形成错位竞争</td>\n <td>涂鸦智能、云智易、机智云、艾拉物联等</td>\n</tr>\n</tbody>\n</table>",
+        "ignore": false,
+        "latex": "\\begin{tabular}{|l|l|l|l|l|} \\hline\n 企业类型 & 目的 & 模式和特点 & 优势 & 典型企业 \\\\ \\hline\n 云服务提供商 & $\\cdot$ 以物联网为抓手带动上层应用服务业绩增长 & $\\cdot$ 目前多以提供底层计算资源、提供应用使能平台为主 & $\\cdot$ 在互联网领域中积累了丰富的技术、商业、生态优势经验 $\\cdot$ 底层IaaS能力突出、共性技术能力提炼 & 阿里云、腾讯云、百度云、亚马逊AWS IoT等 \\\\ \\hline\n 通信领域厂商 & $\\cdot$ 获得流量业务收入，战略布局物联网，把握新增市场机遇 & $\\cdot$ 多以连接管理、应用使能为平台主要功能服务为主 & $\\cdot$ 在连接管理平台具有绝对优势，具有全球通用连接能力 & 电信运营商、通信设备厂商，中国电信天翼物联、如中国移动ONENet、中国联通物联网平台、华为云IoT等 \\\\ \\hline\n 软件系统服务商 & $\\cdot$ 解决内部开发效率的问题，优化产品服务 & $\\cdot$ 以应用开发平台为主要服务内容为主 & $\\cdot$ 擅长软件设计、生产、管理、运维等服务，具备丰富的行业软件开发及服务经验 & 紫光云、广联达筑联等 \\\\ \\hline\n 垂直领域传统厂商 & $\\cdot$ 利用自身对行业的理解和经验，打造垂直型平台，实现传统企业的转型升级 & $\\cdot$ 垂直专业领域的物联网平台 & $\\cdot$ 深刻的行业理解和行业技术、对行业有深度应用，拥有行业数据和客户资源 & 西门子、工业富联、美的M-Smart等企业 \\\\ \\hline\n 初创企业 & $\\cdot$ 看好物联网未来的发展潜能 & $\\cdot$ 目前阶段很多初创型平台企业多以SaaS解决方案公司的形式存在 & $\\cdot$ 拥有与选定细分行业相关的软件、硬件经验 $\\cdot$ 服务延伸到通用型平台厂商难以触及的细分领域，形成错位竞争 & 涂鸦智能、云智易、机智云、艾拉物联等 \\\\ \\hline\n \\end{tabular}",
+        "line_with_spans": null,
+        "merge_list": null,
+        "order": 4,
+        "poly": [
+          106.6002454821404,
+          309.7151714500274,
+          2562.9562970635425,
+          309.7151714500274,
+          2562.9562970635425,
+          1377.1162338024615,
+          106.6002454821404,
+          1377.1162338024615
+        ],
+        "table_edit_status": "good",
+        "text": null
+      },
+      {
+        "anno_id": 2,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "table_footnote",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              78.5035955303437,
+              1400.8657154178495,
+              544.1126781943973,
+              1400.8657154178495,
+              544.1126781943973,
+              1439.1826723453153,
+              78.5035955303437,
+              1439.1826723453153
+            ],
+            "text": "来源：公开资料整理，头豹研究院"
+          }
+        ],
+        "merge_list": null,
+        "order": 5,
+        "poly": [
+          78.01616668701188,
+          1399.427368164063,
+          546.2730792165239,
+          1399.427368164063,
+          546.2730792165239,
+          1440.5054931640627,
+          78.01616668701188,
+          1440.5054931640627
+        ],
+        "table_edit_status": null,
+        "text": "来源：公开资料整理，头豹研究院"
+      },
+      {
+        "anno_id": 6,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "footer",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1299.6295864599203,
+              1393.2603483550276,
+              1382.8077122304533,
+              1393.2603483550276,
+              1382.8077122304533,
+              1454.4206026443785,
+              1299.6295864599203,
+              1454.4206026443785
+            ],
+            "text": "头豹 LeadLeo"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1127.9741705277042,
+              1464.0933714246075,
+              1324.259532657627,
+              1464.0933714246075,
+              1324.259532657627,
+              1488.8336979757814,
+              1127.9741705277042,
+              1488.8336979757814
+            ],
+            "text": "www.leadleo.com"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              1377.2708762223829,
+              1461.0877610768384,
+              1538.6279145394044,
+              1461.0877610768384,
+              1538.6279145394044,
+              1490.4254044072059,
+              1377.2708762223829,
+              1490.4254044072059
+            ],
+            "text": "400-072-5588"
+          }
+        ],
+        "merge_list": null,
+        "order": null,
+        "poly": [
+          1092.3397216796875,
+          1389.0064697265625,
+          1546.2144775390625,
+          1389.0064697265625,
+          1546.2144775390625,
+          1494.4884033203125,
+          1092.3397216796875,
+          1494.4884033203125
+        ],
+        "table_edit_status": null,
+        "text": "头豹 LeadLeo www.leadleo.com 400-072-5588"
+      },
+      {
+        "anno_id": 0,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "page_number",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              2575.5164198485636,
+              1424.1947877489756,
+              2607.714513476189,
+              1424.1947877489756,
+              2607.714513476189,
+              1453.0905127994088,
+              2575.5164198485636,
+              1453.0905127994088
+            ],
+            "text": "17"
+          }
+        ],
+        "merge_list": null,
+        "order": null,
+        "poly": [
+          2572.564208984375,
+          1423.800048828125,
+          2610.739501953125,
+          1423.800048828125,
+          2610.739501953125,
+          1455.02197265625,
+          2572.564208984375,
+          1455.02197265625
+        ],
+        "table_edit_status": null,
+        "text": "17"
+      }
+    ],
+    "extra": {
+      "relation": [
+        {
+          "relation_type": "parent_son",
+          "source_anno_id": 5,
+          "target_anno_id": 1
+        },
+        {
+          "relation_type": "parent_son",
+          "source_anno_id": 5,
+          "target_anno_id": 2
+        }
+      ]
+    },
+    "page_info": {
+      "height": 1500,
+      "image_path": "eastmoney_7cae1642250a3dbabfef7624d3424ec6e162ae91c8de4acfa89a9779092b0189.pdf_16.jpg",
+      "page_attribute": {
+        "data_source": "PPT2PDF",
+        "language": "simplified_chinese",
+        "layout": "single_column",
+        "special_issue": [
+          "table_fewer_line",
+          "table_horizontal"
+        ]
+      },
+      "page_no": 16,
+      "width": 2667
+    }
+  },
+  {
+    "layout_dets": [
+      {
+        "anno_id": 9,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "single_colored",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "title",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              22.666666666666572,
+              16.032631543567277,
+              539.7639001764901,
+              16.032631543567277,
+              539.7639001764901,
+              78.66666666666674,
+              22.666666666666572,
+              78.66666666666674
+            ],
+            "text": "PCB——全球产值"
+          }
+        ],
+        "merge_list": null,
+        "order": 1,
+        "poly": [
+          20.92542991595343,
+          15.689220123162727,
+          536.6344506837648,
+          15.689220123162727,
+          536.6344506837648,
+          80.75956024195636,
+          20.92542991595343,
+          80.75956024195636
+        ],
+        "table_edit_status": null,
+        "text": "PCB——全球产值"
+      },
+      {
+        "anno_id": 10,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "figure_caption",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              345.3333333333331,
+              126.23309940341142,
+              683.8337232165368,
+              126.23309940341142,
+              683.8337232165368,
+              156.13364523989628,
+              345.3333333333331,
+              156.13364523989628
+            ],
+            "text": "全球PCB产值规模（亿美元）"
+          }
+        ],
+        "merge_list": null,
+        "order": 2,
+        "poly": [
+          341.88225847171026,
+          127.69621138511707,
+          682.5861910643914,
+          127.69621138511707,
+          682.5861910643914,
+          155.9174785237426,
+          341.88225847171026,
+          155.9174785237426
+        ],
+        "table_edit_status": null,
+        "text": "全球PCB产值规模（亿美元）"
+      },
+      {
+        "anno_id": 2,
+        "attribute": null,
+        "category_type": "figure",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": null,
+        "merge_list": null,
+        "order": 3,
+        "poly": [
+          132.2563542420281,
+          174.38552149287602,
+          981.3155671720609,
+          174.38552149287602,
+          981.3155671720609,
+          688.8746070681773,
+          132.2563542420281,
+          688.8746070681773
+        ],
+        "table_edit_status": null,
+        "text": null
+      },
+      {
+        "anno_id": 0,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "table_caption",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1069.333333333333,
+              127.26651071338517,
+              1576.433567263255,
+              127.26651071338517,
+              1576.433567263255,
+              156.4335672632552,
+              1069.333333333333,
+              156.4335672632552
+            ],
+            "text": "表：全球各类PCB市场规模预估（亿美元）"
+          }
+        ],
+        "merge_list": null,
+        "order": 4,
+        "poly": [
+          1061.396944247159,
+          121.06166287508881,
+          1582.791475497159,
+          121.06166287508881,
+          1582.791475497159,
+          157.31006070223714,
+          1061.396944247159,
+          157.31006070223714
+        ],
+        "table_edit_status": null,
+        "text": "表：全球各类PCB市场规模预估（亿美元）"
+      },
+      {
+        "anno_id": 5,
+        "attribute": {
+          "formula_type": null,
+          "include_background": true,
+          "include_equation": true,
+          "include_photo": false,
+          "language": "table_simplified_chinese",
+          "line": "full_line",
+          "table_layout": "horizontal",
+          "text_background": null,
+          "text_language": null,
+          "text_rotate": null,
+          "with_span": false,
+          "with_structured_text": false
+        },
+        "category_type": "table",
+        "html": "<table>\n<thead>\n<tr>\n <th></th>\n <th>RPCB多层板</th>\n <th>软板+模组</th>\n <th>HDI</th>\n <th>IC载板</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n <td>2022(E)</td>\n <td>387.21</td>\n <td>138.42</td>\n <td>117.63</td>\n <td>174.15</td>\n</tr>\n<tr>\n <td>2023(F)</td>\n <td>373.40</td>\n <td>134.27</td>\n <td>115.28</td>\n <td>160.73</td>\n</tr>\n<tr>\n <td>2024(F)</td>\n <td>381.79</td>\n <td>141.31</td>\n <td>122.25</td>\n <td>174.41</td>\n</tr>\n<tr>\n <td>2025(F)</td>\n <td>419.39</td>\n <td>148.72</td>\n <td>129.65</td>\n <td>189.26</td>\n</tr>\n<tr>\n <td>2026(F)</td>\n <td>444.30</td>\n <td>156.52</td>\n <td>137.49</td>\n <td>205.38</td>\n</tr>\n<tr>\n <td>2027(F)</td>\n <td>450.48</td>\n <td>164.73</td>\n <td>145.81</td>\n <td>222.86</td>\n</tr>\n<tr>\n <td>2022-2027CAGR</td>\n <td>3.1%</td>\n <td>3.5%</td>\n <td>4.4%</td>\n <td>5.1%</td>\n</tr>\n</tbody>\n</table>",
+        "ignore": false,
+        "latex": "\\begin{tabular}{|c|c|c|c|c|} \\hline\n & RPCB多层板 & 软板+模组 & HDI & IC载板 \\\\ \\hline\n2022(E) & 387.21 & 138.42 & 117.63 & 174.15 \\\\ \\hline\n2023(F) & 373.40 & 134.27 & 115.28 & 160.73 \\\\ \\hline\n2024(F) & 381.79 & 141.31 & 122.25 & 174.41 \\\\ \\hline\n2025(F) & 419.39 & 148.72 & 129.65 & 189.26 \\\\ \\hline\n2026(F) & 444.30 & 156.52 & 137.49 & 205.38 \\\\ \\hline\n2027(F) & 450.48 & 164.73 & 145.81 & 222.86 \\\\ \\hline\n2022-2027CAGR & 3.1\\% & 3.5\\% & 4.4\\% & 5.1\\%\\\\ \\hline\n\\end{tabular}\n",
+        "line_with_spans": null,
+        "merge_list": null,
+        "order": 5,
+        "poly": [
+          1045.3229587590945,
+          175.34881591796875,
+          1994.490966796875,
+          175.34881591796875,
+          1994.490966796875,
+          676.3257866447032,
+          1045.3229587590945,
+          676.3257866447032
+        ],
+        "table_edit_status": "good",
+        "text": null
+      },
+      {
+        "anno_id": 12,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "figure_caption",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              345.3619170231889,
+              721.9479896079995,
+              662.2454345039637,
+              721.9479896079995,
+              662.2454345039637,
+              754.819723786503,
+              345.3619170231889,
+              754.819723786503
+            ],
+            "text": "2022年全球PCB产品结构"
+          }
+        ],
+        "merge_list": null,
+        "order": 6,
+        "poly": [
+          340.91786907456776,
+          720.5536921004511,
+          671.473667376243,
+          720.5536921004511,
+          671.473667376243,
+          752.4287155081125,
+          340.91786907456776,
+          752.4287155081125
+        ],
+        "table_edit_status": null,
+        "text": "2022年全球PCB产品结构"
+      },
+      {
+        "anno_id": 1,
+        "attribute": null,
+        "category_type": "figure",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": null,
+        "merge_list": null,
+        "order": 7,
+        "poly": [
+          151.8825947507369,
+          797.8283474882536,
+          889.0333226215594,
+          797.8283474882536,
+          889.0333226215594,
+          1228.7085220765955,
+          151.8825947507369,
+          1228.7085220765955
+        ],
+        "table_edit_status": null,
+        "text": null
+      },
+      {
+        "anno_id": 13,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "figure_caption",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1246.6666666666665,
+              725.4378231984115,
+              1684.0,
+              725.4378231984115,
+              1684.0,
+              753.2288434682551,
+              1246.6666666666665,
+              753.2288434682551
+            ],
+            "text": "2021年全球PCB以及细分行业产值（"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              1688.164327659421,
+              718.5597653846029,
+              1722.553390602562,
+              718.5597653846029,
+              1722.553390602562,
+              752.0670574830481,
+              1688.164327659421,
+              752.0670574830481
+            ],
+            "text": "%"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1721.7097214791352,
+              721.5330940232459,
+              1738.7909001563921,
+              721.5330940232459,
+              1738.7909001563921,
+              752.2792156423081,
+              1721.7097214791352,
+              752.2792156423081
+            ],
+            "text": ")"
+          }
+        ],
+        "merge_list": null,
+        "order": 8,
+        "poly": [
+          1242.647648805285,
+          718.6434840070426,
+          1744.9982412681068,
+          718.6434840070426,
+          1744.9982412681068,
+          754.7601932690754,
+          1242.647648805285,
+          754.7601932690754
+        ],
+        "table_edit_status": null,
+        "text": "2021年全球PCB以及细分行业产值（ % )"
+      },
+      {
+        "anno_id": 4,
+        "attribute": null,
+        "category_type": "figure",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": null,
+        "merge_list": null,
+        "order": 9,
+        "poly": [
+          1055.454592752972,
+          766.1134643554688,
+          1948.566247640043,
+          766.1134643554688,
+          1948.566247640043,
+          1238.087365804105,
+          1055.454592752972,
+          1238.087365804105
+        ],
+        "table_edit_status": null,
+        "text": null
+      },
+      {
+        "anno_id": 3,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "page_footnote",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              12.00000000000014,
+              1278.6666666666667,
+              1563.0352039688212,
+              1278.6666666666667,
+              1563.0352039688212,
+              1307.83920066147,
+              12.00000000000014,
+              1307.83920066147
+            ],
+            "text": "资料来源：Prismark，前瞻产业研究院，PCB网城ISPCAIGPCA公众号，中时新闻网，诚领智慧助您成功公众号，天风证券研究所"
+          }
+        ],
+        "merge_list": null,
+        "order": null,
+        "poly": [
+          14.709510803222795,
+          1277.7334432917655,
+          1558.746369996344,
+          1277.7334432917655,
+          1558.746369996344,
+          1308.0869800649807,
+          14.709510803222795,
+          1308.0869800649807
+        ],
+        "table_edit_status": null,
+        "text": "资料来源：Prismark，前瞻产业研究院，PCB网城ISPCAIGPCA公众号，中时新闻网，诚领智慧助您成功公众号，天风证券研究所"
+      },
+      {
+        "anno_id": 11,
+        "attribute": null,
+        "category_type": "abandon",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": null,
+        "merge_list": null,
+        "order": null,
+        "poly": [
+          1792.984783920042,
+          1343.1307729814346,
+          1847.8588651915122,
+          1343.1307729814346,
+          1847.8588651915122,
+          1401.4344843323718,
+          1792.984783920042,
+          1401.4344843323718
+        ],
+        "table_edit_status": null,
+        "text": null
+      },
+      {
+        "anno_id": 8,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "multi_colored",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "footer",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              165.69928598729805,
+              1344.2674033741605,
+              809.2505473317525,
+              1344.2674033741605,
+              809.2505473317525,
+              1389.5715535410081,
+              165.69928598729805,
+              1389.5715535410081
+            ],
+            "text": "请务必阅读正文之后的信息披露和免责申明"
+          }
+        ],
+        "merge_list": null,
+        "order": null,
+        "poly": [
+          168.4972495573699,
+          1348.7750248251125,
+          803.5368915949257,
+          1348.7750248251125,
+          803.5368915949257,
+          1385.2235254348134,
+          168.4972495573699,
+          1385.2235254348134
+        ],
+        "table_edit_status": null,
+        "text": "请务必阅读正文之后的信息披露和免责申明"
+      },
+      {
+        "anno_id": 7,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "multi_colored",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "page_number",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              2041.4428654930014,
+              1352.1432107947292,
+              2085.6949346642364,
+              1352.1432107947292,
+              2085.6949346642364,
+              1387.7747470105292,
+              2041.4428654930014,
+              1387.7747470105292
+            ],
+            "text": "18"
+          }
+        ],
+        "merge_list": null,
+        "order": null,
+        "poly": [
+          2044.8027856629935,
+          1353.7268007772955,
+          2084.5202422327293,
+          1353.7268007772955,
+          2084.5202422327293,
+          1385.0642214165941,
+          2044.8027856629935,
+          1385.0642214165941
+        ],
+        "table_edit_status": null,
+        "text": "18"
+      },
+      {
+        "anno_id": 6,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "multi_colored",
+          "text_language": "text_en_ch_mixed",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "footer",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1850.6594188585336,
+              1358.781021170414,
+              1942.215419808296,
+              1358.781021170414,
+              1942.215419808296,
+              1383.7185993159053,
+              1850.6594188585336,
+              1383.7185993159053
+            ],
+            "text": "天风证券"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1849.7159498179808,
+              1384.240537864158,
+              1921.4913785561873,
+              1384.240537864158,
+              1921.4913785561873,
+              1399.797773649779,
+              1849.7159498179808,
+              1399.797773649779
+            ],
+            "text": "TF SECURITIES"
+          }
+        ],
+        "merge_list": null,
+        "order": null,
+        "poly": [
+          1849.0676054719481,
+          1358.2367274721707,
+          1941.9689007204538,
+          1358.2367274721707,
+          1941.9689007204538,
+          1399.055924553073,
+          1849.0676054719481,
+          1399.055924553073
+        ],
+        "table_edit_status": null,
+        "text": "天风证券 TF SECURITIES"
+      }
+    ],
+    "extra": {
+      "relation": [
+        {
+          "relation_type": "parent_son",
+          "source_anno_id": 5,
+          "target_anno_id": 0
+        },
+        {
+          "relation_type": "parent_son",
+          "source_anno_id": 2,
+          "target_anno_id": 10
+        },
+        {
+          "relation_type": "parent_son",
+          "source_anno_id": 1,
+          "target_anno_id": 12
+        },
+        {
+          "relation_type": "parent_son",
+          "source_anno_id": 4,
+          "target_anno_id": 13
+        }
+      ]
+    },
+    "page_info": {
+      "height": 1418,
+      "image_path": "eastmoney_d09a006aa02ddc09299bbb9a1b5efa0d77408191f0c1ff1fca8c80bd6150f806.pdf_17.jpg",
+      "page_attribute": {
+        "data_source": "PPT2PDF",
+        "language": "simplified_chinese",
+        "layout": "double_column",
+        "special_issue": [
+          "colorful_backgroud",
+          "table_full_line",
+          "table_horizontal"
+        ]
+      },
+      "page_no": 17,
+      "width": 2127
+    }
+  },
+  {
+    "layout_dets": [
+      {
+        "anno_id": 3,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "title",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              85.73696758575453,
+              37.54907484687794,
+              1094.0871514075316,
+              37.54907484687794,
+              1094.0871514075316,
+              98.55656313746465,
+              85.73696758575453,
+              98.55656313746465
+            ],
+            "text": "锂：电动车主导锂需求，储能打造第二增长极"
+          }
+        ],
+        "merge_list": null,
+        "order": 1,
+        "poly": [
+          87.1163558959961,
+          37.92517852783203,
+          1099.9774169921875,
+          37.92517852783203,
+          1099.9774169921875,
+          94.9918212890625,
+          87.1163558959961,
+          94.9918212890625
+        ],
+        "table_edit_status": null,
+        "text": "锂：电动车主导锂需求，储能打造第二增长极"
+      },
+      {
+        "anno_id": 5,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "text_block",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              109.091258323611,
+              129.33333333333354,
+              1419.6965412929462,
+              129.33333333333354,
+              1419.6965412929462,
+              157.3333333333332,
+              109.091258323611,
+              157.3333333333332
+            ],
+            "text": "在新能源车和储能需求的拉动下，我们预计2023-2025年全球锂需求为102.7/123.6/148.9万吨LCE，增长"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              1419.701198848848,
+              129.0936252519649,
+              1627.8109715825956,
+              129.0936252519649,
+              1627.8109715825956,
+              156.46874387182135,
+              1419.701198848848,
+              156.46874387182135
+            ],
+            "text": "29%/20%/20%"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1628.0,
+              129.3333333333332,
+              1927.9125782114706,
+              129.3333333333332,
+              1927.9125782114706,
+              157.3333333333331,
+              1628.0,
+              157.3333333333331
+            ],
+            "text": "，其中新能源车需求占比"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              106.86362458591113,
+              170.67116862763902,
+              311.0020801242366,
+              170.67116862763902,
+              311.0020801242366,
+              198.86171724959814,
+              106.86362458591113,
+              198.86171724959814
+            ],
+            "text": "72%/72%/72%"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              311.3227180253099,
+              168.90997965568238,
+              505.9893846919767,
+              168.90997965568238,
+              505.9893846919767,
+              198.79363081518625,
+              311.3227180253099,
+              198.79363081518625
+            ],
+            "text": "，储能需求占比"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              507.66160295962186,
+              168.3405927761072,
+              722.0288532522428,
+              168.3405927761072,
+              722.0288532522428,
+              198.4583056271366,
+              507.66160295962186,
+              198.4583056271366
+            ],
+            "text": "13%/15%/17%。"
+          }
+        ],
+        "merge_list": null,
+        "order": 2,
+        "poly": [
+          101.55875442988622,
+          122.38129870396847,
+          1933.7380923711567,
+          122.38129870396847,
+          1933.7380923711567,
+          202.18709715672674,
+          101.55875442988622,
+          202.18709715672674
+        ],
+        "table_edit_status": null,
+        "text": "在新能源车和储能需求的拉动下，我们预计2023-2025年全球锂需求为102.7/123.6/148.9万吨LCE，增长 29%/20%/20% ，其中新能源车需求占比 72%/72%/72% ，储能需求占比 13%/15%/17%。"
+      },
+      {
+        "anno_id": 6,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "text_block",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              106.66666666666654,
+              212.22282252985593,
+              1384.8146147122702,
+              212.22282252985593,
+              1384.8146147122702,
+              242.66666666666652,
+              106.66666666666654,
+              242.66666666666652
+            ],
+            "text": "新能源车锂需求继续保持高增长。我们预计2023年全年新能源汽车产销量将超过900万辆，同比增速超过"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              1386.3813648288387,
+              212.44622001889115,
+              1444.5335557583214,
+              212.44622001889115,
+              1444.5335557583214,
+              239.60712356679323,
+              1386.3813648288387,
+              239.60712356679323
+            ],
+            "text": "30%"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1445.3333333333333,
+              214.66666666666666,
+              1913.3333333333333,
+              214.66666666666666,
+              1913.3333333333333,
+              242.66666666666666,
+              1445.3333333333333,
+              242.66666666666666
+            ],
+            "text": "，在受到高基数和各国补贴政策退出的"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              106.66666666666666,
+              254.66666666666666,
+              1920.0,
+              254.66666666666666,
+              1920.0,
+              282.66666666666663,
+              106.66666666666666,
+              282.66666666666663
+            ],
+            "text": "影响下仍然保持高增长。新能源汽车的受众群体在逐步扩大，消费从过往的政策驱动转为市场驱动，渗透率也逐渐增加，根据乘联会数据，2022年世"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              106.66666666666666,
+              297.3333333333333,
+              437.3333333333333,
+              297.3333333333333,
+              437.3333333333333,
+              326.66666666666663,
+              106.66666666666666,
+              326.66666666666663
+            ],
+            "text": "界新能源车渗透率已经达到"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              440.1250427985229,
+              295.01728589777207,
+              495.6044031701582,
+              295.01728589777207,
+              495.6044031701582,
+              323.6078765187375,
+              440.1250427985229,
+              323.6078765187375
+            ],
+            "text": "13%"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              495.99999999999994,
+              294.92565057836805,
+              844.8025609183218,
+              294.92565057836805,
+              844.8025609183218,
+              324.2589839117012,
+              495.99999999999994,
+              324.2589839117012
+            ],
+            "text": "水平，而2023年1-10月达到"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              845.6941667076719,
+              296.3837280480984,
+              924.8394969973308,
+              296.3837280480984,
+              924.8394969973308,
+              323.1478494020893,
+              845.6941667076719,
+              323.1478494020893
+            ],
+            "text": "15.4%"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              925.3333333333333,
+              297.3333333333333,
+              1201.3333333333333,
+              297.3333333333333,
+              1201.3333333333333,
+              326.66666666666663,
+              925.3333333333333,
+              326.66666666666663
+            ],
+            "text": "，其中中国渗透率达到"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              1203.7704793289515,
+              296.14525379467807,
+              1259.5629125380835,
+              296.14525379467807,
+              1259.5629125380835,
+              320.4776365598942,
+              1203.7704793289515,
+              320.4776365598942
+            ],
+            "text": "30%"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1261.8709641279704,
+              294.64517936014846,
+              1396.5376307946372,
+              294.64517936014846,
+              1396.5376307946372,
+              323.9785126934818,
+              1261.8709641279704,
+              323.9785126934818
+            ],
+            "text": "，德国达到"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              1399.2102228564195,
+              296.52616428911153,
+              1455.6600392842663,
+              296.52616428911153,
+              1455.6600392842663,
+              320.7515915820336,
+              1399.2102228564195,
+              320.7515915820336
+            ],
+            "text": "22%"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1457.3333333333333,
+              297.3333333333333,
+              1704.0,
+              297.3333333333333,
+              1704.0,
+              326.66666666666663,
+              1457.3333333333333,
+              326.66666666666663
+            ],
+            "text": "，但美国和日本仅有"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              1705.8541311269066,
+              295.7689136297053,
+              1746.398079091942,
+              295.7689136297053,
+              1746.398079091942,
+              321.4120943939157,
+              1705.8541311269066,
+              321.4120943939157
+            ],
+            "text": "9%"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1746.6666666666665,
+              297.3333333333333,
+              1773.3333333333333,
+              297.3333333333333,
+              1773.3333333333333,
+              326.66666666666663,
+              1746.6666666666665,
+              326.66666666666663
+            ],
+            "text": "和"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              1775.160025084232,
+              296.80850203906516,
+              1816.0505025190541,
+              296.80850203906516,
+              1816.0505025190541,
+              320.7190354543425,
+              1775.160025084232,
+              320.7190354543425
+            ],
+            "text": "3%"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1820.6878514924697,
+              296.66242970150574,
+              1928.6878514924697,
+              296.66242970150574,
+              1928.6878514924697,
+              325.99576303483906,
+              1820.6878514924697,
+              325.99576303483906
+            ],
+            "text": "，仍有较"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              106.12903587202965,
+              337.33333333333354,
+              1365.0322869762374,
+              337.33333333333354,
+              1365.0322869762374,
+              367.9999999999999,
+              106.12903587202965,
+              367.9999999999999
+            ],
+            "text": "大提升空间。我们保持中性假设，预计2023-2025年新能源车锂需求为73.9/89.0/107.1万吨LCE，增长"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              1365.5843815747075,
+              337.3763244834117,
+              1571.592182419423,
+              337.3763244834117,
+              1571.592182419423,
+              365.83544795738226,
+              1365.5843815747075,
+              365.83544795738226
+            ],
+            "text": "31%/20%/20%。"
+          }
+        ],
+        "merge_list": null,
+        "order": 3,
+        "poly": [
+          99.46964856735102,
+          211.65426386651643,
+          1929.5408786699486,
+          211.65426386651643,
+          1929.5408786699486,
+          368.3502819071036,
+          99.46964856735102,
+          368.3502819071036
+        ],
+        "table_edit_status": null,
+        "text": "新能源车锂需求继续保持高增长。我们预计2023年全年新能源汽车产销量将超过900万辆，同比增速超过 30% ，在受到高基数和各国补贴政策退出的影响下仍然保持高增长。新能源汽车的受众群体在逐步扩大，消费从过往的政策驱动转为市场驱动，渗透率也逐渐增加，根据乘联会数据，2022年世界新能源车渗透率已经达到 13%水平，而2023年1-10月达到 15.4% ，其中中国渗透率达到 30% ，德国达到 22% ，但美国和日本仅有 9%和 3% ，仍有较大提升空间。我们保持中性假设，预计2023-2025年新能源车锂需求为73.9/89.0/107.1万吨LCE，增长 31%/20%/20%。"
+      },
+      {
+        "anno_id": 7,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "text_block",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              109.0087120314541,
+              376.7709551141396,
+              1459.5750497797508,
+              376.7709551141396,
+              1459.5750497797508,
+              406.3815180279669,
+              109.0087120314541,
+              406.3815180279669
+            ],
+            "text": "储能打造第二增长极。据高工产业研究院（GGII）预测，预计“十四五”储能锂电池的总出货量年复合增长将超过"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              1460.8552262145918,
+              377.74702245470894,
+              1517.7526740154967,
+              377.74702245470894,
+              1517.7526740154967,
+              405.0955194639837,
+              1460.8552262145918,
+              405.0955194639837
+            ],
+            "text": "50%"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1518.8113940169371,
+              376.9823002012735,
+              1913.3333333333333,
+              376.9823002012735,
+              1913.3333333333333,
+              406.6666666666664,
+              1518.8113940169371,
+              406.6666666666664
+            ],
+            "text": "，到2025年，全球储能电池出货"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              105.33333333333333,
+              418.66666666666663,
+              1913.3333333333333,
+              418.66666666666663,
+              1913.3333333333333,
+              450.66666666666663,
+              105.33333333333333,
+              450.66666666666663
+            ],
+            "text": "量将逼近500GWh。海外市场光储结合和独立储能电站发展加速，强制配储的背景下，国内市场进入新能源配储元年，全球电化学储能有望迎来爆发"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              106.66666666666666,
+              464.0,
+              1074.6666666666665,
+              464.0,
+              1074.6666666666665,
+              488.0,
+              106.66666666666666,
+              488.0
+            ],
+            "text": "式增长，因此我们假设2023-2025年储能锂需求为13.7/18.9/25.5万吨LCE，增长"
+          },
+          {
+            "category_type": "equation_ignore",
+            "latex": null,
+            "poly": [
+              1074.4907038231831,
+              462.3871529288142,
+              1282.411557806644,
+              462.3871529288142,
+              1282.411557806644,
+              490.944956969916,
+              1074.4907038231831,
+              490.944956969916
+            ],
+            "text": "70%/38%/35%。"
+          }
+        ],
+        "merge_list": null,
+        "order": 4,
+        "poly": [
+          103.53940330490668,
+          376.39337375893354,
+          1917.1968012033906,
+          376.39337375893354,
+          1917.1968012033906,
+          490.66071801394173,
+          103.53940330490668,
+          490.66071801394173
+        ],
+        "table_edit_status": null,
+        "text": "储能打造第二增长极。据高工产业研究院（GGII）预测，预计“十四五”储能锂电池的总出货量年复合增长将超过 50% ，到2025年，全球储能电池出货量将逼近500GWh。海外市场光储结合和独立储能电站发展加速，强制配储的背景下，国内市场进入新能源配储元年，全球电化学储能有望迎来爆发式增长，因此我们假设2023-2025年储能锂需求为13.7/18.9/25.5万吨LCE，增长 70%/38%/35%。"
+      },
+      {
+        "anno_id": 9,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "table_caption",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              233.33333333333326,
+              514.3039860573933,
+              752.5227038469517,
+              514.3039860573933,
+              752.5227038469517,
+              545.3333333333334,
+              233.33333333333326,
+              545.3333333333334
+            ],
+            "text": "图表46：2015-2025年全球锂需求"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              770.6666666666666,
+              512.2422010888674,
+              924.2275237750241,
+              512.2422010888674,
+              924.2275237750241,
+              549.1669735028072,
+              770.6666666666666,
+              549.1669735028072
+            ],
+            "text": "（万吨LCE）"
+          }
+        ],
+        "merge_list": null,
+        "order": 5,
+        "poly": [
+          229.6986781832943,
+          507.6756767263508,
+          926.926863134337,
+          507.6756767263508,
+          926.926863134337,
+          553.4970672115878,
+          229.6986781832943,
+          553.4970672115878
+        ],
+        "table_edit_status": null,
+        "text": "图表46：2015-2025年全球锂需求 （万吨LCE）"
+      },
+      {
+        "anno_id": 2,
+        "attribute": {
+          "formula_type": null,
+          "include_background": true,
+          "include_equation": false,
+          "include_photo": false,
+          "language": "table_simplified_chinese",
+          "line": "full_line",
+          "table_layout": "horizontal",
+          "text_background": null,
+          "text_language": null,
+          "text_rotate": null,
+          "with_span": true,
+          "with_structured_text": false
+        },
+        "category_type": "table",
+        "html": "<table>\n<thead>\n<tr>\n <th>栏目</th>\n <th>2016A</th>\n <th>2017A</th>\n <th>2018A</th>\n <th>2019A</th>\n <th>2020A</th>\n <th>2021A</th>\n <th>2022A</th>\n <th>2023E</th>\n <th>2024E</th>\n <th>2025E</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n <td>全球锂需求</td>\n <td>18.8</td>\n <td>22.9</td>\n <td>26. 4</td>\n <td>33.3</td>\n <td>37. 0</td>\n <td>58. 0</td>\n <td>79.7</td>\n <td>102.7</td>\n <td>123.6</td>\n <td>148. 9</td>\n</tr>\n<tr>\n <td>同比</td>\n <td>22%</td>\n <td>22%</td>\n <td>15%</td>\n <td>26%</td>\n <td>11%</td>\n <td>57%</td>\n <td>37%</td>\n <td>29%</td>\n <td>20%</td>\n <td>20%</td>\n</tr>\n<tr>\n <td>动力电池需求</td>\n <td>5. 6</td>\n <td>7.7</td>\n <td>12. 0</td>\n <td>17. 8</td>\n <td>20. 2</td>\n <td>37.7</td>\n <td>56. 4</td>\n <td>73. 9</td>\n <td>89.0</td>\n <td>107.1</td>\n</tr>\n<tr>\n <td>同比</td>\n <td>35%</td>\n <td>38%</td>\n <td>57%</td>\n <td>48%</td>\n <td>13%</td>\n <td>86%</td>\n <td>50%</td>\n <td>31%</td>\n <td>20%</td>\n <td>20%</td>\n</tr>\n<tr>\n <td>储能需求</td>\n <td>0. 1</td>\n <td>0. 2</td>\n <td>0. 4</td>\n <td>0. 3</td>\n <td>0. 5</td>\n <td>3. 3</td>\n <td>8. 0</td>\n <td>13.7</td>\n <td>18.9</td>\n <td>25.5</td>\n</tr>\n<tr>\n <td>同比</td>\n <td>25%</td>\n <td>50%</td>\n <td>150%</td>\n <td>-9%</td>\n <td>57%</td>\n <td>520%</td>\n <td>140%</td>\n <td>70%</td>\n <td>38%</td>\n <td>35%</td>\n</tr>\n<tr>\n <td>消费电池需求</td>\n <td>2. 8</td>\n <td>2. 9</td>\n <td>2.9</td>\n <td>3. 0</td>\n <td>3.9</td>\n <td>4.7</td>\n <td>4. 0</td>\n <td>3.7</td>\n <td>3.9</td>\n <td>3.9</td>\n</tr>\n<tr>\n <td>同比</td>\n <td>6%</td>\n <td>6%</td>\n <td>1%</td>\n <td>3%</td>\n <td>27%</td>\n <td>23%</td>\n <td>-16%</td>\n <td>-6%</td>\n <td>4%</td>\n <td>2%</td>\n</tr>\n<tr>\n <td>电动自行车需求</td>\n <td>0. 8</td>\n <td>1. 0</td>\n <td>1. 2</td>\n <td>1.6</td>\n <td>1. 6</td>\n <td>2. 4</td>\n <td>1. 9</td>\n <td>1.9</td>\n <td>2. 0</td>\n <td>2.1</td>\n</tr>\n<tr>\n <td>同比</td>\n <td>24%</td>\n <td>29%</td>\n <td>22%</td>\n <td>29%</td>\n <td>2%</td>\n <td>47%</td>\n <td>20%</td>\n <td>3%</td>\n <td>3%</td>\n <td>3%</td>\n</tr>\n<tr>\n <td>传统需求</td>\n <td>7. 6</td>\n <td>8. 2</td>\n <td>8.8</td>\n <td>9.5</td>\n <td>8. 8</td>\n <td>7.9</td>\n <td>7.5</td>\n <td>7. 5</td>\n <td>7. 8</td>\n <td>8.1</td>\n</tr>\n<tr>\n <td>同比</td>\n <td>8%</td>\n <td>8%</td>\n <td>8%</td>\n <td>8%</td>\n <td>-8%</td>\n <td>-10%</td>\n <td>-5%</td>\n <td>0%</td>\n <td>4%</td>\n <td>4%</td>\n</tr>\n<tr>\n <td>其他需求</td>\n <td>2. 0</td>\n <td>3. 0</td>\n <td>1. 0</td>\n <td>1. 0</td>\n <td>2. 0</td>\n <td>2. 0</td>\n <td>2. 0</td>\n <td>2. 0</td>\n <td>2.1</td>\n <td>2. 3</td>\n</tr>\n<tr>\n <td>同比</td>\n <td>100%</td>\n <td>50%</td>\n <td>-67%</td>\n <td>0%</td>\n <td>100%</td>\n <td>0%</td>\n <td>0%</td>\n <td>0%</td>\n <td>7%</td>\n <td>7%</td>\n</tr>\n</tbody>\n</table>",
+        "ignore": false,
+        "latex": "\\begin{tabular}{|l|l|l|l|l|l|l|l|l|l|l|} \\hline\n栏目 & 2016A & 2017A & 2018A & 2019A & 2020A & 2021A & 2022A & 2023E & 2024E & 2025E \\\\ \\hline\n全球锂需求 & 18.8 & 22.9 & 26. 4 & 33.3 & 37. 0 & 58. 0 & 79.7 & 102.7 & 123.6 & 148. 9 \\\\ \\hline\n同比 & 22\\% & 22\\% & 15\\% & 26\\% & 11\\% & 57\\% & 37\\% & 29\\% & 20\\% & 20\\% \\\\ \\hline\n动力电池需求 & 5. 6 & 7.7 & 12. 0 & 17. 8 & 20. 2 & 37.7 & 56. 4 & 73. 9 & 89.0 & 107.1 \\\\ \\hline\n同比 & 35\\% & 38\\% & 57\\% & 48\\% & 13\\% & 86\\% & 50\\% & 31\\% & 20\\% & 20\\% \\\\ \\hline\n储能需求 & 0. 1 & 0. 2 & 0. 4 & 0. 3 & 0. 5 & 3. 3 & 8. 0 & 13.7 & 18.9 & 25.5 \\\\ \\hline\n同比 & 25\\% & 50\\% & 150\\% & -9\\% & 57\\% & 520\\% & 140\\% & 70\\% & 38\\% & 35\\% \\\\ \\hline\n消费电池需求 & 2. 8 & 2. 9 & 2.9 & 3. 0 & 3.9 & 4.7 & 4. 0 & 3.7 & 3.9 & 3.9 \\\\ \\hline\n同比 & 6\\% & 6\\% & 1\\% & 3\\% & 27\\% & 23\\% & -16\\% & -6\\% & 4\\% & 2\\% \\\\ \\hline\n电动自行车需求 & 0. 8 & 1. 0 & 1. 2 & 1.6 & 1. 6 & 2. 4 & 1. 9 & 1.9 & 2. 0 & 2.1 \\\\ \\hline\n同比 & 24\\% & 29\\% & 22\\% & 29\\% & 2\\% & 47\\% & 20\\% & 3\\% & 3\\% & 3\\% \\\\ \\hline\n传统需求 & 7. 6 & 8. 2 & 8.8 & 9.5 & 8. 8 & 7.9 & 7.5 & 7. 5 & 7. 8 & 8.1 \\\\ \\hline\n同比 & 8\\% & 8\\% & 8\\% & 8\\% & -8\\% & -10\\% & -5\\% & 0\\% & 4\\% & 4\\% \\\\ \\hline\n其他需求 & 2. 0 & 3. 0 & 1. 0 & 1. 0 & 2. 0 & 2. 0 & 2. 0 & 2. 0 & 2.1 & 2. 3 \\\\ \\hline\n同比 & 100\\% & 50\\% & -67\\% & 0\\% & 100\\% & 0\\% & 0\\% & 0\\% & 7\\% & 7\\%\\\\ \\hline\n\\end{tabular}\n",
+        "line_with_spans": null,
+        "merge_list": null,
+        "order": 6,
+        "poly": [
+          241.76143579518134,
+          567.7474031865735,
+          1779.568208296575,
+          567.7474031865735,
+          1779.568208296575,
+          1030.5679781201554,
+          241.76143579518134,
+          1030.5679781201554
+        ],
+        "table_edit_status": "good",
+        "text": null
+      },
+      {
+        "anno_id": 0,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "multi_colored",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "table_footnote",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              226.6816863530173,
+              1049.9015795867128,
+              1106.5666011310118,
+              1049.9015795867128,
+              1106.5666011310118,
+              1077.3979831735248,
+              226.6816863530173,
+              1077.3979831735248
+            ],
+            "text": "资料来源：各公司公告、各公司官网、IDC、政府官网等，华福证券研究所整理"
+          }
+        ],
+        "merge_list": null,
+        "order": 7,
+        "poly": [
+          227.6900094957681,
+          1047.7133789062505,
+          1113.4589829424842,
+          1047.7133789062505,
+          1113.4589829424842,
+          1079.7938232421877,
+          227.6900094957681,
+          1079.7938232421877
+        ],
+        "table_edit_status": null,
+        "text": "资料来源：各公司公告、各公司官网、IDC、政府官网等，华福证券研究所整理"
+      },
+      {
+        "anno_id": 4,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_en_ch_mixed",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "header",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1773.837639131554,
+              22.83900606844759,
+              1926.0904738040813,
+              22.83900606844759,
+              1926.0904738040813,
+              60.42443387463635,
+              1773.837639131554,
+              60.42443387463635
+            ],
+            "text": "华福证券"
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1776.7195396971088,
+              65.61737914284913,
+              1926.2032917029287,
+              65.61737914284913,
+              1926.2032917029287,
+              74.53291107162568,
+              1776.7195396971088,
+              74.53291107162568
+            ],
+            "text": "HUAFUSECURITIES CO..LTD."
+          }
+        ],
+        "merge_list": null,
+        "order": null,
+        "poly": [
+          1772.0401194705628,
+          23.03113174438454,
+          1930.3225097656248,
+          23.03113174438454,
+          1930.3225097656248,
+          78.87128448486305,
+          1772.0401194705628,
+          78.87128448486305
+        ],
+        "table_edit_status": null,
+        "text": "华福证券 HUAFUSECURITIES CO..LTD."
+      },
+      {
+        "anno_id": 8,
+        "attribute": null,
+        "category_type": "abandon",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": null,
+        "merge_list": null,
+        "order": null,
+        "poly": [
+          1691.6823048359759,
+          25.031383216520567,
+          1769.2264796613479,
+          25.031383216520567,
+          1769.2264796613479,
+          76.12638213246322,
+          1691.6823048359759,
+          76.12638213246322
+        ],
+        "table_edit_status": null,
+        "text": null
+      },
+      {
+        "anno_id": 1,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "page_number",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1817.7777433420883,
+              1075.6936263348591,
+              1851.2623446058221,
+              1075.6936263348591,
+              1851.2623446058221,
+              1102.0029558992214,
+              1817.7777433420883,
+              1102.0029558992214
+            ],
+            "text": "32"
+          }
+        ],
+        "merge_list": null,
+        "order": null,
+        "poly": [
+          1816.0277099609375,
+          1076.32421875,
+          1849.6063232421875,
+          1076.32421875,
+          1849.6063232421875,
+          1103.2196044921875,
+          1816.0277099609375,
+          1103.2196044921875
+        ],
+        "table_edit_status": null,
+        "text": "32"
+      }
+    ],
+    "extra": {
+      "relation": [
+        {
+          "relation_type": "parent_son",
+          "source_anno_id": 2,
+          "target_anno_id": 9
+        },
+        {
+          "relation_type": "parent_son",
+          "source_anno_id": 2,
+          "target_anno_id": 0
+        },
+        {
+          "relation_type": "truncated",
+          "source_anno_id": 5,
+          "target_anno_id": 6
+        },
+        {
+          "relation_type": "truncated",
+          "source_anno_id": 6,
+          "target_anno_id": 7
+        }
+      ]
+    },
+    "page_info": {
+      "height": 1125,
+      "image_path": "yanbaopptmerge_6b6ed54523980841c1a28a656d0295ec638cf50c991c16cafec715237c83919f.pdf_31.jpg",
+      "page_attribute": {
+        "data_source": "PPT2PDF",
+        "language": "simplified_chinese",
+        "layout": "single_column",
+        "special_issue": [
+          "table_full_line",
+          "table_horizontal"
+        ]
+      },
+      "page_no": 31,
+      "width": 2000
+    }
+  },
+  {
+    "layout_dets": [
+      {
+        "anno_id": 0,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_english",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "table_caption",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              74.66666666666649,
+              165.33333333333348,
+              933.3333333333331,
+              165.33333333333348,
+              933.3333333333331,
+              238.92266286551114,
+              74.66666666666649,
+              238.92266286551114
+            ],
+            "text": "Example: Symbol Table"
+          }
+        ],
+        "merge_list": null,
+        "order": 1,
+        "poly": [
+          70.2922210693358,
+          160.89187622070335,
+          939.0181274414061,
+          160.89187622070335,
+          939.0181274414061,
+          241.72527647680567,
+          70.2922210693358,
+          241.72527647680567
+        ],
+        "table_edit_status": null,
+        "text": "Example: Symbol Table"
+      },
+      {
+        "anno_id": 1,
+        "attribute": {
+          "formula_type": null,
+          "include_background": false,
+          "include_equation": false,
+          "include_photo": false,
+          "language": "table_en",
+          "line": "full_line",
+          "table_layout": "horizontal",
+          "text_background": null,
+          "text_language": null,
+          "text_rotate": null,
+          "with_span": false,
+          "with_structured_text": false
+        },
+        "category_type": "table",
+        "html": "<table>\n<thead>\n<tr>\n <th>Name</th>\n <th>Type</th>\n <th>Offset</th>\n <th>Scope</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n <td>inGlobal</td>\n <td>int</td>\n <td>0</td>\n <td>global</td>\n</tr>\n<tr>\n <td>inLocal</td>\n <td>int</td>\n <td>0</td>\n <td>main</td>\n</tr>\n<tr>\n <td>outLocalA</td>\n <td>int</td>\n <td>-1</td>\n <td>main</td>\n</tr>\n<tr>\n <td>outLocalB</td>\n <td>int</td>\n <td>-2</td>\n <td>main</td>\n</tr>\n</tbody>\n</table>",
+        "ignore": false,
+        "latex": "\\begin{tabular}{|l|l|l|l|} \\hline\nName & Type & Offset & Scope \\\\ \\hline\ninGlobal & int & 0 & global \\\\ \\hline\ninLocal & int & 0 & main \\\\ \\hline\noutLocalA & int & -1 & main \\\\ \\hline\noutLocalB & int & -2 & main\\\\ \\hline\n\\end{tabular}\n",
+        "line_with_spans": null,
+        "merge_list": null,
+        "order": 2,
+        "poly": [
+          204.63194274902344,
+          298.9232482910156,
+          1677.8414306640625,
+          298.9232482910156,
+          1677.8414306640625,
+          869.5210571289062,
+          204.63194274902344,
+          869.5210571289062
+        ],
+        "table_edit_status": "good",
+        "text": null
+      },
+      {
+        "anno_id": 3,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "header",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              528.5368730928005,
+              61.993111057223814,
+              629.1822810219238,
+              61.993111057223814,
+              629.1822810219238,
+              90.17382527737834,
+              528.5368730928005,
+              90.17382527737834
+            ],
+            "text": "Copyright"
+          },
+          {
+            "category_type": "equation_inline",
+            "latex": "$\\copyright$",
+            "poly": [
+              629.4479006872185,
+              64.65967940681105,
+              655.1543757339558,
+              64.65967940681105,
+              655.1543757339558,
+              85.42260155994506,
+              629.4479006872185,
+              85.42260155994506
+            ],
+            "text": null
+          },
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              655.7916245739518,
+              59.62730815196096,
+              1469.3421898304855,
+              59.62730815196096,
+              1469.3421898304855,
+              91.7725480706946,
+              655.7916245739518,
+              91.7725480706946
+            ],
+            "text": "The McGraw-Hill Companies, Inc. Permission required for reproduction or display."
+          }
+        ],
+        "merge_list": null,
+        "order": null,
+        "poly": [
+          527.4888305664062,
+          62.85319137573242,
+          1466.5247802734375,
+          62.85319137573242,
+          1466.5247802734375,
+          89.39054107666016,
+          527.4888305664062,
+          89.39054107666016
+        ],
+        "table_edit_status": null,
+        "text": "Copyright $\\copyright$ The McGraw-Hill Companies, Inc. Permission required for reproduction or display."
+      },
+      {
+        "anno_id": 2,
+        "attribute": {
+          "formula_type": null,
+          "include_background": null,
+          "include_equation": null,
+          "include_photo": null,
+          "language": null,
+          "line": null,
+          "table_layout": null,
+          "text_background": "white",
+          "text_language": "text_simplified_chinese",
+          "text_rotate": "normal",
+          "with_span": null,
+          "with_structured_text": null
+        },
+        "category_type": "page_number",
+        "html": null,
+        "ignore": false,
+        "latex": null,
+        "line_with_spans": [
+          {
+            "category_type": "text_span",
+            "latex": null,
+            "poly": [
+              1794.30602325212,
+              1405.5095623062355,
+              1934.2171838024133,
+              1405.5095623062355,
+              1934.2171838024133,
+              1460.9915742485932,
+              1794.30602325212,
+              1460.9915742485932
+            ],
+            "text": "12-28"
+          }
+        ],
+        "merge_list": null,
+        "order": null,
+        "poly": [
+          1791.2867431640625,
+          1405.3134765625,
+          1932.33544921875,
+          1405.3134765625,
+          1932.33544921875,
+          1453.65234375,
+          1791.2867431640625,
+          1453.65234375
+        ],
+        "table_edit_status": null,
+        "text": "12-28"
+      }
+    ],
+    "extra": {
+      "relation": [
+        {
+          "relation_type": "parent_son",
+          "source_anno_id": 1,
+          "target_anno_id": 0
+        }
+      ]
+    },
+    "page_info": {
+      "height": 1500,
+      "image_path": "yanbaopptmerge_PattPatelCh12.pdf_27.jpg",
+      "page_attribute": {
+        "data_source": "PPT2PDF",
+        "language": "english",
+        "layout": "single_column",
+        "special_issue": [
+          "table_full_line",
+          "table_horizontal"
+        ]
+      },
+      "page_no": 27,
+      "width": 2000
+    }
+  }
+]

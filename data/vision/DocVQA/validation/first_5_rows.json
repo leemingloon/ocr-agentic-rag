@@ -1,0 +1,79 @@
+[
+  {
+    "questionId": "56437",
+    "question": "What is the \"ACCOUNT NO.\"?",
+    "question_types": [
+      "form"
+    ],
+    "image": "<PIL.Image.Image (from bytes)>",
+    "docId": 14800,
+    "ucsf_document_id": "jrcy0227",
+    "ucsf_document_page_no": "15",
+    "answers": [
+      "93637"
+    ],
+    "data_split": "val"
+  },
+  {
+    "questionId": "56438",
+    "question": "How much is the \"total charge\"?",
+    "question_types": [
+      "form"
+    ],
+    "image": "<PIL.Image.Image (from bytes)>",
+    "docId": 14799,
+    "ucsf_document_id": "jrcy0227",
+    "ucsf_document_page_no": "38",
+    "answers": [
+      "15.12"
+    ],
+    "data_split": "val"
+  },
+  {
+    "questionId": "56439",
+    "question": "How much is the \"TIME AND MILEAGE CHARGE\"?",
+    "question_types": [
+      "form"
+    ],
+    "image": "<PIL.Image.Image (from bytes)>",
+    "docId": 14799,
+    "ucsf_document_id": "jrcy0227",
+    "ucsf_document_page_no": "38",
+    "answers": [
+      "12.40"
+    ],
+    "data_split": "val"
+  },
+  {
+    "questionId": "56440",
+    "question": "What is the \"CAR NUMBER\"?",
+    "question_types": [
+      "form"
+    ],
+    "image": "<PIL.Image.Image (from bytes)>",
+    "docId": 14799,
+    "ucsf_document_id": "jrcy0227",
+    "ucsf_document_page_no": "38",
+    "answers": [
+      "420367"
+    ],
+    "data_split": "val"
+  },
+  {
+    "questionId": "64633",
+    "question": "What is the name of the lady on the left in the picture showing three people smiling?",
+    "question_types": [
+      "Image/Photo"
+    ],
+    "image": "<PIL.Image.Image (from bytes)>",
+    "docId": 10908,
+    "ucsf_document_id": "yrpf0227",
+    "ucsf_document_page_no": "3",
+    "answers": [
+      "Miss Kendra Ellis",
+      "miss kendra ellis",
+      "kendra ellis"
+    ],
+    "data_split": "val"
+  }
+]

@@ -40,7 +40,7 @@ class BaseDatasetAdapter:
         self.data_source_from_hf_or_manual = data_source_from_hf_or_manual
         self.hf_repo_name = hf_repo_name
         self.hf_repo_variant = hf_repo_variant
-        self.root_dir = os.path.join(os.getcwd(), "data", self.dataset_name)
+        self.root_dir = os.path.join(os.getcwd(), "data", self.category, self.dataset_name)
         self.dataset_obj = None  # populated for HF datasets
         self.dataset_split = "train"  # default
     

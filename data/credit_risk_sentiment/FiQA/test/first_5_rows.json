@@ -1,0 +1,42 @@
+[
+  {
+    "_id": "645",
+    "sentence": "Britain's FTSE steadies, supported by Dixons Carphone",
+    "target": "Dixons Carphone",
+    "aspect": "Stock/Price Action",
+    "score": 0.329,
+    "type": "headline"
+  },
+  {
+    "_id": "651",
+    "sentence": "Glaxo's ViiV Healthcare Signs China Manufacturing Deal With Desano",
+    "target": "Glaxo",
+    "aspect": "Corporate/Sales/Partnership",
+    "score": 0.284,
+    "type": "headline"
+  },
+  {
+    "_id": "653",
+    "sentence": "AstraZeneca sells Caprelsa rights to Sanofi unit",
+    "target": "Sanofi",
+    "aspect": "Corporate/Sales/Deal",
+    "score": 0.233,
+    "type": "headline"
+  },
+  {
+    "_id": "659",
+    "sentence": "UPDATE 5-Barclays Chairman McFarlane axes CEO to speed up strategic change",
+    "target": "Barclays",
+    "aspect": "Corporate/Strategy",
+    "score": -0.229,
+    "type": "headline"
+  },
+  {
+    "_id": "665",
+    "sentence": "Miners Meltdown as BHP to Rio Tinto Sink in Commodities Rout",
+    "target": "Rio Tinto",
+    "aspect": "Stock/Price Action/Bearish/Bearish Behaviour",
+    "score": -0.665,
+    "type": "headline"
+  }
+]

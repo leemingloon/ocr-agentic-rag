@@ -1,0 +1,42 @@
+[
+  {
+    "image": "<PIL.Image.Image (from bytes)>",
+    "query": "How many food item is shown in the bar graph?",
+    "label": [
+      "14"
+    ],
+    "human_or_machine": 0
+  },
+  {
+    "image": "<PIL.Image.Image (from bytes)>",
+    "query": "What is the difference in value between Lamb and Corn?",
+    "label": [
+      "0.57"
+    ],
+    "human_or_machine": 0
+  },
+  {
+    "image": "<PIL.Image.Image (from bytes)>",
+    "query": "How many bars are shown in the chart?",
+    "label": [
+      "3"
+    ],
+    "human_or_machine": 0
+  },
+  {
+    "image": "<PIL.Image.Image (from bytes)>",
+    "query": "Is the sum value of Madagascar more then Fiji?",
+    "label": [
+      "No"
+    ],
+    "human_or_machine": 0
+  },
+  {
+    "image": "<PIL.Image.Image (from bytes)>",
+    "query": "What's the value of the lowest bar?",
+    "label": [
+      "23"
+    ],
+    "human_or_machine": 0
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "image": "<PIL.Image.Image (from bytes)>",
+    "query": "How many colleges did Bengaluru have in 2019?",
+    "label": [
+      "880"
+    ],
+    "human_or_machine": 1
+  },
+  {
+    "image": "<PIL.Image.Image (from bytes)>",
+    "query": "What is the capital of Rajasthan?",
+    "label": [
+      "Jaipur"
+    ],
+    "human_or_machine": 1
+  },
+  {
+    "image": "<PIL.Image.Image (from bytes)>",
+    "query": "In what year did the average household size drop to 2.36?",
+    "label": [
+      "2004"
+    ],
+    "human_or_machine": 1
+  },
+  {
+    "image": "<PIL.Image.Image (from bytes)>",
+    "query": "What was the average number of people per household in the UK in 2020?",
+    "label": [
+      "2.39"
+    ],
+    "human_or_machine": 1
+  },
+  {
+    "image": "<PIL.Image.Image (from bytes)>",
+    "query": "What was the average household size in the mid-1990s?",
+    "label": [
+      "2.42"
+    ],
+    "human_or_machine": 1
+  }
+]

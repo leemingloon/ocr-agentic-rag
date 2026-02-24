@@ -21,7 +21,7 @@ import numpy as np
 from PIL import Image
 from pathlib import Path
 
-from dataset_adapters import (
+from eval_dataset_adapters import (
     OCRDatasetAdapter,
     SROIEAdapter,
     FUNSDAdapter,
@@ -89,7 +89,7 @@ AUTO_DATASETS = {
     ],
 
     "credit_risk_sentiment": [ # FinBERT
-        ("FinancialPhraseBank", "hf", "takala/financial_phrasebank", "sentences_allagree"),
+        ("FinancialPhraseBank", "hf", "FinanceMTEB/financial_phrasebank", None),
         ("FiQA", "hf", "TheFinAI/fiqa-sentiment-classification", None),
     ],
 
