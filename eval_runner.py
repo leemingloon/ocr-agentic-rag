@@ -223,10 +223,12 @@ def aggregate_metrics(per_sample_scores: list[dict[str, float]]) -> dict[str, fl
 
 
 def evaluate_dataset(adapter, category: str, dataset_name: str, max_samples_per_split=None, max_samples_per_category=None):
+    # Load split-limited rows first; apply category cap after GT filtering
+    # so test-only rows with missing labels do not consume the entire budget.
     dataset = adapter.load_split(
         dataset_split=None,
         max_samples_per_split=max_samples_per_split,
-        max_samples_per_category=max_samples_per_category,
+        max_samples_per_category=None,
     )
     if not dataset:
         print(f"⚠️ Dataset {dataset_name} skipped (empty).")
@@ -249,6 +251,9 @@ def evaluate_dataset(adapter, category: str, dataset_name: str, max_samples_per_
         if not has_ground_truth(sample, category):
             skipped_no_ground_truth += 1
             continue
+
+        if max_samples_per_category is not None and len(per_sample_rows) >= max_samples_per_category:
+            break
 
         prediction = run_model(sample, category=category, dataset_name=dataset_name)
 
