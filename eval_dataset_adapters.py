@@ -124,31 +124,34 @@ class BaseDatasetAdapter:
     # Generic helper: load Parquet folder
     # -----------------------------------------
     def _load_arrow_folder(self, folder_path: Path, max_samples_per_split=None, max_samples_per_category=None):
-        """
-        Load HuggingFace Parquet shards inside a folder.
-
-        Returns:
-            List of raw samples (dict) without decoding images (prevents MemoryError)
-        """
+        """Load parquet shards from a split folder and return row dicts."""
         if not folder_path.exists():
             raise FileNotFoundError(f"Folder not found: {folder_path}")
 
-        dataset = load_from_disk(str(folder_path))
+        max_samples = None
+        if max_samples_per_split is not None and max_samples_per_category is not None:
+            max_samples = min(max_samples_per_split, max_samples_per_category)
+        elif max_samples_per_split is not None:
+            max_samples = max_samples_per_split
+        elif max_samples_per_category is not None:
+            max_samples = max_samples_per_category
 
-        # Apply max_samples_per_split if specified
-        if max_samples_per_split:
-            dataset = dataset.select(range(min(len(dataset), max_samples_per_split)))
+        rows = []
+        for row in self._arrow_row_stream(folder_path, max_samples=max_samples):
+            rows.append(row)
 
-        # Apply max_samples_per_category if specified
-        if max_samples_per_category:
-            dataset = dataset.select(range(min(len(dataset), max_samples_per_category)))
+        if rows:
+            return rows
 
-        # --- ADDITIVE CHANGE ---
-        # Convert to dicts per row to keep downstream code compatible
-        # Avoid loading images into memory by setting format to "numpy" for images or keep "parquet" for everything else
-        dataset = dataset.with_format("python")  # <-- returns dicts instead of pyarrow.Table
+        fallback_json = folder_path / "first_5_rows.json"
+        if fallback_json.exists():
+            with open(fallback_json, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if max_samples is not None:
+                data = data[:max_samples]
+            return data
 
-        return list(dataset)
+        return rows
     
     @classmethod
     def load_dataset_splits(cls, data_dir=None, json_file="data_structure.json"):
@@ -188,23 +191,17 @@ class BaseDatasetAdapter:
                 row = batch.to_pydict()
                 row = {k: v[0] for k, v in row.items()}
                 
-                print("DEBUG row bboxes:", row.get("bboxes"))
-                print("Row 0 image type:", type(row["image"]))
                 # --- PIL conversion logic ---
                 img_field = row.get("image")
                 if isinstance(img_field, dict):
-                    print("DEBUG: image dict keys:", list(img_field.keys()))
                     # case 1: bytes inside the dict
                     if "bytes" in img_field and img_field["bytes"] is not None:
-                        print("DEBUG: img_field['bytes'][:5]:", list(img_field['bytes'][:5]))
                         try:
                             row["image"] = Image.open(io.BytesIO(img_field["bytes"])).convert("RGB")
                         except Exception as e:
                             print(f"[WARN] Failed to convert bytes to image for row {row.get('id')}: {e}")
-                        print("DEBUG: type after converting bytes to image:", type(row["image"]))
                     # case 2: path to image file
                     elif "path" in img_field and img_field["path"] is not None:
-                        print("DEBUG: img_field['path']:", list(img_field['path']))
                         row["image"] = Image.open(img_field["path"]).convert("RGB")
                     else:
                         row["image"] = None
@@ -1764,7 +1761,7 @@ class InfographicsVQAAdapter(VisionDatasetAdapter):
             "notes": "Test folder containing 4 Parquet shard files"
         },
         "validation": {
-            "format": "json",
+            "format": "folder",
             "dataset_path": "data/vision/InfographicsVQA/validation",
             "ground_truth_path": None,
             "notes": "Validation folder containing 4 Parquet shard files"
@@ -2569,15 +2566,42 @@ class FinQAAdapter(BaseDatasetAdapter):
         self.FILE_MAPPING = self.FILE_MAPPING
 
     def load_split(self, dataset_split=None, recursive=False, max_samples_per_split=None, max_samples_per_category=None):
-        dataset_split = dataset_split or self.dataset_split
-        self.download()
-        return self._prepare_samples(
-            dataset_split_obj=self.dataset_obj.get(dataset_split, []),
-            dataset_name="FinQA",
-            max_samples_per_split=max_samples_per_split,
-            input_keys=["question", "table", "text"],
-            answer_key="answer"
-        )
+        """Load FinQA split(s) in universal RAG format."""
+        splits_to_load = [dataset_split or self.dataset_split] if (dataset_split or self.dataset_split) else list(self.FILE_MAPPING.keys())
+        all_samples = []
+
+        for split in splits_to_load:
+            if split not in self.FILE_MAPPING:
+                raise ValueError(f"FinQA supports splits: {list(self.FILE_MAPPING.keys())}")
+
+            split_path = Path().cwd() / self.FILE_MAPPING[split]["dataset_path"]
+            rows = self._arrow_row_stream(split_path, max_samples=max_samples_per_split)
+
+            for idx, row in enumerate(rows):
+                all_samples.append(
+                    {
+                        "input": {
+                            "query": row.get("query") or row.get("question") or f"query-id={row.get('query-id')}",
+                            "image": row.get("image"),
+                        },
+                        "ground_truth": {
+                            "answer": row.get("answer") if row.get("answer") is not None else str(row.get("score", "")),
+                            "score": row.get("score"),
+                            "query_id": row.get("query-id"),
+                            "corpus_id": row.get("corpus-id"),
+                        },
+                        "metadata": {
+                            "dataset": self.dataset_name,
+                            "split": split,
+                            "sample_id": row.get("query-id", f"{split}_{idx}"),
+                        },
+                    }
+                )
+
+        if max_samples_per_category:
+            all_samples = all_samples[:max_samples_per_category]
+
+        return all_samples
 
 class TATQAAdapter(BaseDatasetAdapter):
     """
@@ -2793,32 +2817,65 @@ class TATQAAdapter(BaseDatasetAdapter):
         self.dataset_split = dataset_split
         self.FILE_MAPPING = self.FILE_MAPPING
 
-    def load_split(self, dataset_split="dev", recursive=False, max_samples_per_split=None, max_samples_per_category=None):
-        file_map = {
+    def load_split(self, dataset_split=None, recursive=False, max_samples_per_split=None, max_samples_per_category=None):
+        """Load TAT-QA split(s) in universal RAG format."""
+        split_files = {
             "train": "tatqa_dataset_train.json",
             "dev": "tatqa_dataset_dev.json",
-            "test": "tatqa_dataset_test_gold.json"
+            "test": "tatqa_dataset_test_gold.json",
         }
-        file_name = file_map.get(dataset_split, file_map["dev"])
-        path = os.path.join(self.root_dir, file_name)
-        if not os.path.exists(path):
-            print(f"⚠️ {self.dataset_name} {dataset_split} split not found")
-            return []
+        splits_to_load = [dataset_split or self.dataset_split] if (dataset_split or self.dataset_split) else list(self.FILE_MAPPING.keys())
+        all_samples = []
 
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        for split in splits_to_load:
+            file_name = split_files.get(split)
+            if not file_name:
+                continue
+            path = Path(self.root_dir) / file_name
+            if not path.exists():
+                print(f"⚠️ {self.dataset_name} {split} split not found")
+                continue
 
-        def transform(row):
-            return {"question": row.get("question"), "context": row.get("paragraphs")}
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
 
-        return self._prepare_samples(
-            dataset_split_obj=data,
-            dataset_name="TATQA",
-            max_samples_per_split=max_samples_per_split,
-            input_keys=None,
-            answer_key="answer",
-            transform=transform
-        )
+            sample_idx = 0
+            for doc in data:
+                table = doc.get("table", {})
+                paragraphs = doc.get("paragraphs", [])
+                for q in doc.get("questions", []):
+                    if max_samples_per_split is not None and sample_idx >= max_samples_per_split:
+                        break
+                    answers = q.get("answer", [])
+                    if isinstance(answers, list):
+                        answer = answers[0] if answers else ""
+                    else:
+                        answer = answers
+
+                    all_samples.append(
+                        {
+                            "input": {
+                                "query": q.get("question"),
+                                "context": {"table": table.get("table"), "paragraphs": paragraphs},
+                                "image": None,
+                            },
+                            "ground_truth": {
+                                "answer": str(answer),
+                                "scale": q.get("scale", ""),
+                                "derivation": q.get("derivation", ""),
+                            },
+                            "metadata": {
+                                "dataset": self.dataset_name,
+                                "split": split,
+                                "sample_id": q.get("uid", f"{split}_{sample_idx}"),
+                            },
+                        }
+                    )
+                    sample_idx += 1
+
+        if max_samples_per_category:
+            all_samples = all_samples[:max_samples_per_category]
+        return all_samples
 
 # ------------------------
 # Credit Risk Adapters (PD)
