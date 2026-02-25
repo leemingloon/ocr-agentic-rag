@@ -1707,7 +1707,7 @@ class DocVQAAdapter(VisionDatasetAdapter):
                         "question": s.get("question")
                     },
                     "ground_truth": s.get("answers")[0] if s.get("answers") else None,
-                    "metadata": {"dataset": "DocVQA", "sample_id": idx}
+                    "metadata": {"dataset": "DocVQA", "split": split, "sample_id": f"{split}_{idx}"}
                 })
 
         if max_samples_per_category:
@@ -1815,7 +1815,7 @@ class InfographicsVQAAdapter(VisionDatasetAdapter):
                         "question": s.get("question")
                     },
                     "ground_truth": s.get("answers")[0] if s.get("answers") else None,
-                    "metadata": {"dataset": "InfographicsVQA", "sample_id": idx}
+                    "metadata": {"dataset": "InfographicsVQA", "split": split, "sample_id": f"{split}_{idx}"}
                 })
 
         if max_samples_per_category:
@@ -1934,7 +1934,7 @@ class ChartQAAdapter(VisionDatasetAdapter):
                 all_samples.append({
                     "input": {"image": row.get("image", row)},
                     "ground_truth": row.get("answer"),
-                    "metadata": {"dataset": "ChartQA", "sample_id": idx}
+                    "metadata": {"dataset": "ChartQA", "split": split, "sample_id": f"{split}_{idx}"}
                 })
 
         if max_samples_per_category:
@@ -2021,7 +2021,7 @@ class OmniDocBenchAdapter(VisionDatasetAdapter):
             standardized.append({
                 "input": s,
                 "ground_truth": None,
-                "metadata": {"dataset": "OmniDocBench", "sample_id": idx}
+                "metadata": {"dataset": "OmniDocBench", "split": split, "sample_id": f"{split}_{idx}"}
             })
         
         if max_samples_per_category:
