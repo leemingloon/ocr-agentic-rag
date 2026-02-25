@@ -308,6 +308,46 @@ def aggregate_metrics(per_sample_scores: list[dict[str, float]]) -> dict[str, fl
     return aggregated
 
 
+
+
+def _debug_audit_vision_samples(dataset_name: str, dataset: list[dict]):
+    split_gt_counts = Counter()
+    image_pattern_counts = Counter()
+    image_preview_examples = {}
+
+    for sample in dataset:
+        split = sample.get("metadata", {}).get("split", "unknown")
+        split_gt_counts[(split, "with_gt" if has_ground_truth(sample, "vision") else "no_gt")] += 1
+
+        img_val = sample.get("input", {}).get("image") if isinstance(sample, dict) else None
+        pattern = "other"
+        if img_val is None:
+            pattern = "none"
+        elif isinstance(img_val, str):
+            stripped = img_val.strip()
+            if stripped.startswith("<PIL.Image.Image"):
+                pattern = "serialized_pil_repr"
+            elif stripped.startswith("data:image/"):
+                pattern = "data_url"
+            elif stripped == "":
+                pattern = "empty_str"
+            elif os.path.exists(stripped):
+                pattern = "valid_path"
+            else:
+                pattern = "missing_path"
+        else:
+            pattern = type(img_val).__name__
+
+        image_pattern_counts[pattern] += 1
+        if pattern not in image_preview_examples:
+            image_preview_examples[pattern] = str(img_val)[:160]
+
+    print(f"[DEBUG] vision_audit dataset={dataset_name} split_gt_counts={{{', '.join([f'{k}:{v}' for k,v in split_gt_counts.items()])}}}")
+    print(f"[DEBUG] vision_audit dataset={dataset_name} image_pattern_counts={dict(image_pattern_counts)}")
+    preview_payload = {k: image_preview_examples[k] for k in sorted(image_preview_examples.keys())}
+    print(f"[DEBUG] vision_audit dataset={dataset_name} image_preview_examples={preview_payload}")
+
+
 def evaluate_dataset(adapter, category: str, dataset_name: str, max_samples_per_split=None, max_samples_per_category=None, debug=False):
     # Load split-limited rows first; apply category cap after GT filtering
     # so test-only rows with missing labels do not consume the entire budget.
@@ -332,6 +372,8 @@ def evaluate_dataset(adapter, category: str, dataset_name: str, max_samples_per_
             if has_ground_truth(sample, category):
                 gt_present += 1
         print(f"[DEBUG] dataset_loaded name={dataset_name} total_rows={len(dataset)} gt_rows={gt_present} split_counts={dict(split_counts)} image_type_counts={dict(img_type_counts)}")
+        if category == "vision":
+            _debug_audit_vision_samples(dataset_name, dataset)
 
     model_meta = MODEL_META.get(
         category,
