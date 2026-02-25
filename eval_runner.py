@@ -14,13 +14,11 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from eval_dataset_adapters import (
-    OCRDatasetAdapter,
     SROIEAdapter,
     FUNSDAdapter,
     DocVQAAdapter,
@@ -118,8 +116,16 @@ RAG_UTILS = {
 }
 
 MODEL_META = {
-    "vision": {"model_class": "VisionOCR", "backbone": "claude_3_5_sonnet", "model_slug": "visionocr"},
-    "rag": {"model_class": "AgenticRAG", "backbone": "langgraph_hybrid_retrieval_bge", "model_slug": "agenticrag"},
+    "vision": {
+        "model_class": "VisionOCR",
+        "backbone": "claude_3_5_sonnet",
+        "model_slug": "visionocr",
+    },
+    "rag": {
+        "model_class": "AgenticRAG",
+        "backbone": "langgraph_hybrid_retriever_bge_reranker",
+        "model_slug": "agenticrag",
+    },
 }
 
 
@@ -127,19 +133,29 @@ def utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def to_float(value: Any) -> float | None:
-    try:
-        if value is None:
-            return None
-        return float(value)
-    except (TypeError, ValueError):
-        return None
+def has_ground_truth(sample: dict, category: str) -> bool:
+    gt = sample.get("ground_truth")
+    if category == "vision":
+        if gt is None:
+            return False
+        if isinstance(gt, str):
+            return bool(gt.strip())
+        if isinstance(gt, list):
+            return bool(gt and str(gt[0]).strip())
+        return True
+    if category == "rag":
+        if isinstance(gt, dict):
+            answer = gt.get("answer")
+            return answer is not None and str(answer).strip() != ""
+        return gt is not None and str(gt).strip() != ""
+    return False
 
 
 def run_model(sample: dict, category: str, dataset_name: str) -> dict:
-    """Baseline inference stub preserving runner architecture.
+    """Model inference hook.
 
-    Replace with real model class calls per category in subsequent iterations.
+    NOTE: this is intentionally a baseline stub so the evaluation plumbing can run end-to-end.
+    Replace this with real pipeline calls (VisionOCR / AgenticRAG) per deployment mode.
     """
     sample_input = sample.get("input", {}) if isinstance(sample, dict) else {}
 
@@ -216,7 +232,10 @@ def evaluate_dataset(adapter, category: str, dataset_name: str, max_samples_per_
         print(f"⚠️ Dataset {dataset_name} skipped (empty).")
         return None
 
-    model_meta = MODEL_META.get(category, {"model_class": "unknown", "backbone": "unknown", "model_slug": "model"})
+    model_meta = MODEL_META.get(
+        category,
+        {"model_class": "unknown", "backbone": "unknown", "model_slug": "model"},
+    )
     model_slug = model_meta["model_slug"]
 
     category_proof_dir = Path("data/proof") / category.lower()
@@ -224,8 +243,13 @@ def evaluate_dataset(adapter, category: str, dataset_name: str, max_samples_per_
 
     per_sample_rows = []
     per_sample_scores = []
+    skipped_no_ground_truth = 0
 
     for sample in dataset:
+        if not has_ground_truth(sample, category):
+            skipped_no_ground_truth += 1
+            continue
+
         prediction = run_model(sample, category=category, dataset_name=dataset_name)
 
         if category == "vision":
@@ -240,12 +264,19 @@ def evaluate_dataset(adapter, category: str, dataset_name: str, max_samples_per_
             {
                 "sample_id": sample.get("metadata", {}).get("sample_id"),
                 "split": sample.get("metadata", {}).get("split"),
+                "ground_truth": sample.get("ground_truth"),
+                "prediction": prediction.get("answer"),
                 "metrics": metric_row,
             }
         )
 
     dataset_avg = aggregate_metrics(per_sample_scores)
-    dataset_avg["sample_count"] = len(per_sample_rows)
+    dataset_avg.update(
+        {
+            "sample_count": len(per_sample_rows),
+            "skipped_no_ground_truth": skipped_no_ground_truth,
+        }
+    )
 
     per_sample_path = category_proof_dir / f"{dataset_name.lower()}_per_sample_{model_slug}.json"
     with open(per_sample_path, "w", encoding="utf-8") as f:
@@ -333,7 +364,7 @@ def main(max_samples_per_split=None, max_samples_per_category=None, run_category
                 max_samples_per_split=max_samples_per_split,
                 max_samples_per_category=max_samples_per_category,
             )
-            if summary:
+            if summary and summary["sample_count"] > 0:
                 dataset_summaries.append(summary)
 
         write_category_weighted_avg(category, dataset_summaries)
