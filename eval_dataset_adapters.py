@@ -145,6 +145,7 @@ class BaseDatasetAdapter:
 
         fallback_json = folder_path / "first_5_rows.json"
         if fallback_json.exists():
+            print(f"[WARN] No parquet rows found under {folder_path}; using fallback JSON {fallback_json}")
             with open(fallback_json, "r", encoding="utf-8") as f:
                 data = json.load(f)
             if max_samples is not None:
