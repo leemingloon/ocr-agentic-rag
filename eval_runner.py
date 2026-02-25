@@ -181,6 +181,10 @@ def _extract_image_for_vision(sample: dict, debug: bool = False):
             candidate = img.strip()
             if not candidate:
                 return None, "empty_image_string"
+            if candidate.startswith("<PIL.Image.Image"):
+                return None, "serialized_pil_repr_in_json_fallback"
+            if candidate.startswith("data:image/"):
+                return None, "unsupported_data_url_image"
             if not os.path.exists(candidate):
                 return None, f"image_path_not_found:{candidate[:160]}"
             arr = np.array(Image.open(candidate).convert("RGB"))
@@ -202,10 +206,15 @@ def _run_vision_model(sample: dict, debug: bool = False) -> dict:
         if debug:
             img_val = sample.get("input", {}).get("image") if isinstance(sample, dict) else None
             preview = str(img_val)
+            hint = ""
+            if image_error == "serialized_pil_repr_in_json_fallback":
+                hint = " hint=first_5_rows_json_contains_repr_not_real_image"
+            elif str(image_error).startswith("image_path_not_found"):
+                hint = " hint=image_path_missing_or_not_materialized"
             print(
                 f"[DEBUG] vision_input_invalid sample={sample_id} reason={image_error} "
                 f"image_type={type(img_val).__name__ if img_val is not None else 'None'} "
-                f"image_preview={preview[:180]}"
+                f"image_preview={preview[:180]}{hint}"
             )
         return {"answer": "", "error": f"missing_image:{image_error}"}
 
@@ -310,6 +319,19 @@ def evaluate_dataset(adapter, category: str, dataset_name: str, max_samples_per_
     if not dataset:
         print(f"⚠️ Dataset {dataset_name} skipped (empty).")
         return None
+
+    if debug:
+        img_type_counts = Counter()
+        split_counts = Counter()
+        gt_present = 0
+        for sample in dataset:
+            split_counts[sample.get("metadata", {}).get("split", "unknown")] += 1
+            inp = sample.get("input", {}) if isinstance(sample, dict) else {}
+            img_val = inp.get("image")
+            img_type_counts[type(img_val).__name__] += 1
+            if has_ground_truth(sample, category):
+                gt_present += 1
+        print(f"[DEBUG] dataset_loaded name={dataset_name} total_rows={len(dataset)} gt_rows={gt_present} split_counts={dict(split_counts)} image_type_counts={dict(img_type_counts)}")
 
     model_meta = MODEL_META.get(
         category,
