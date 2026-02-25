@@ -155,29 +155,59 @@ def has_ground_truth(sample: dict, category: str) -> bool:
 
 
 
-def _extract_image_for_vision(sample: dict):
+def _extract_image_for_vision(sample: dict, debug: bool = False):
     img = sample.get("input", {}).get("image") if isinstance(sample, dict) else None
+    sample_id = sample.get("metadata", {}).get("sample_id") if isinstance(sample, dict) else None
+
     if img is None:
-        return None
+        return None, "missing_image_field"
+
     try:
         import numpy as np
         from PIL import Image
+
         if isinstance(img, np.ndarray):
-            return img
+            if debug:
+                print(f"[DEBUG] image_ok sample={sample_id} source=numpy shape={img.shape}")
+            return img, None
+
         if isinstance(img, Image.Image):
-            return np.array(img.convert("RGB"))
-        if isinstance(img, str) and os.path.exists(img):
-            return np.array(Image.open(img).convert("RGB"))
-    except Exception:
-        return None
-    return None
+            arr = np.array(img.convert("RGB"))
+            if debug:
+                print(f"[DEBUG] image_ok sample={sample_id} source=pil shape={arr.shape}")
+            return arr, None
+
+        if isinstance(img, str):
+            candidate = img.strip()
+            if not candidate:
+                return None, "empty_image_string"
+            if not os.path.exists(candidate):
+                return None, f"image_path_not_found:{candidate[:160]}"
+            arr = np.array(Image.open(candidate).convert("RGB"))
+            if debug:
+                print(f"[DEBUG] image_ok sample={sample_id} source=path path={candidate[:160]} shape={arr.shape}")
+            return arr, None
+
+        return None, f"unsupported_image_type:{type(img).__name__}"
+    except Exception as exc:
+        return None, f"image_decode_exception:{exc}"
 
 
-def _run_vision_model(sample: dict) -> dict:
-    image = _extract_image_for_vision(sample)
+def _run_vision_model(sample: dict, debug: bool = False) -> dict:
+    image, image_error = _extract_image_for_vision(sample, debug=debug)
     question = sample.get("input", {}).get("question") if isinstance(sample, dict) else None
+    sample_id = sample.get("metadata", {}).get("sample_id") if isinstance(sample, dict) else None
+
     if image is None:
-        return {"answer": "", "error": "missing_image"}
+        if debug:
+            img_val = sample.get("input", {}).get("image") if isinstance(sample, dict) else None
+            preview = str(img_val)
+            print(
+                f"[DEBUG] vision_input_invalid sample={sample_id} reason={image_error} "
+                f"image_type={type(img_val).__name__ if img_val is not None else 'None'} "
+                f"image_preview={preview[:180]}"
+            )
+        return {"answer": "", "error": f"missing_image:{image_error}"}
 
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
@@ -197,7 +227,7 @@ def _run_vision_model(sample: dict) -> dict:
         return {"answer": "", "error": f"vision_inference_failed:{exc}"}
 
 
-def run_model(sample: dict, category: str, dataset_name: str) -> dict:
+def run_model(sample: dict, category: str, dataset_name: str, debug: bool = False) -> dict:
     """Model inference hook.
 
     NOTE: this is intentionally a baseline stub so the evaluation plumbing can run end-to-end.
@@ -206,7 +236,7 @@ def run_model(sample: dict, category: str, dataset_name: str) -> dict:
     sample_input = sample.get("input", {}) if isinstance(sample, dict) else {}
 
     if category == "vision":
-        return _run_vision_model(sample)
+        return _run_vision_model(sample, debug=debug)
 
     if category == "rag":
         query = sample_input.get("query") or sample_input.get("question") or ""
@@ -303,7 +333,7 @@ def evaluate_dataset(adapter, category: str, dataset_name: str, max_samples_per_
         if max_samples_per_category is not None and len(per_sample_rows) >= max_samples_per_category:
             break
 
-        prediction = run_model(sample, category=category, dataset_name=dataset_name)
+        prediction = run_model(sample, category=category, dataset_name=dataset_name, debug=debug)
         prediction_error = prediction.get("error")
         if prediction_error:
             prediction_error_counter[prediction_error] += 1
