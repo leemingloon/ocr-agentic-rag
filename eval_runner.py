@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -151,6 +152,50 @@ def has_ground_truth(sample: dict, category: str) -> bool:
     return False
 
 
+
+
+def _extract_image_for_vision(sample: dict):
+    img = sample.get("input", {}).get("image") if isinstance(sample, dict) else None
+    if img is None:
+        return None
+    try:
+        import numpy as np
+        from PIL import Image
+        if isinstance(img, np.ndarray):
+            return img
+        if isinstance(img, Image.Image):
+            return np.array(img.convert("RGB"))
+        if isinstance(img, str) and os.path.exists(img):
+            return np.array(Image.open(img).convert("RGB"))
+    except Exception:
+        return None
+    return None
+
+
+def _run_vision_model(sample: dict) -> dict:
+    image = _extract_image_for_vision(sample)
+    question = sample.get("input", {}).get("question") if isinstance(sample, dict) else None
+    if image is None:
+        return {"answer": "", "error": "missing_image"}
+
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        return {"answer": "", "error": "missing_anthropic_api_key"}
+
+    try:
+        from ocr_pipeline.recognition.vision_ocr import VisionOCR
+        vision = VisionOCR(api_key=api_key)
+        # Use chart-aware path when question exists; otherwise generic recognize.
+        if question:
+            out = vision.extract_charts(image=image, question=question)
+            return {"answer": str(out.get("chart_analysis", ""))}
+
+        out = vision.recognize(image=image, task="extract")
+        return {"answer": str(getattr(out, "text", ""))}
+    except Exception as exc:
+        return {"answer": "", "error": f"vision_inference_failed:{exc}"}
+
+
 def run_model(sample: dict, category: str, dataset_name: str) -> dict:
     """Model inference hook.
 
@@ -160,14 +205,15 @@ def run_model(sample: dict, category: str, dataset_name: str) -> dict:
     sample_input = sample.get("input", {}) if isinstance(sample, dict) else {}
 
     if category == "vision":
-        return {"answer": str(sample_input.get("question") or "")}
+        return _run_vision_model(sample)
 
     if category == "rag":
         query = sample_input.get("query") or sample_input.get("question") or ""
+        # Placeholder until AgenticRAG is wired with retriever/reranker/model creds.
         return {
-            "answer": str(query),
+            "answer": "",
             "sources": [],
-            "reasoning": "baseline_stub",
+            "reasoning": f"baseline_stub_query={query[:80]}",
         }
 
     return {"answer": ""}
