@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -268,7 +269,7 @@ def aggregate_metrics(per_sample_scores: list[dict[str, float]]) -> dict[str, fl
     return aggregated
 
 
-def evaluate_dataset(adapter, category: str, dataset_name: str, max_samples_per_split=None, max_samples_per_category=None):
+def evaluate_dataset(adapter, category: str, dataset_name: str, max_samples_per_split=None, max_samples_per_category=None, debug=False):
     # Load split-limited rows first; apply category cap after GT filtering
     # so test-only rows with missing labels do not consume the entire budget.
     dataset = adapter.load_split(
@@ -292,6 +293,7 @@ def evaluate_dataset(adapter, category: str, dataset_name: str, max_samples_per_
     per_sample_rows = []
     per_sample_scores = []
     skipped_no_ground_truth = 0
+    prediction_error_counter = Counter()
 
     for sample in dataset:
         if not has_ground_truth(sample, category):
@@ -302,6 +304,11 @@ def evaluate_dataset(adapter, category: str, dataset_name: str, max_samples_per_
             break
 
         prediction = run_model(sample, category=category, dataset_name=dataset_name)
+        prediction_error = prediction.get("error")
+        if prediction_error:
+            prediction_error_counter[prediction_error] += 1
+            if debug:
+                print(f"[DEBUG] {dataset_name} sample={sample.get('metadata', {}).get('sample_id')} error={prediction_error}")
 
         if category == "vision":
             metric_row = evaluate_vision_sample(dataset_name, prediction, sample)
@@ -317,6 +324,7 @@ def evaluate_dataset(adapter, category: str, dataset_name: str, max_samples_per_
                 "split": sample.get("metadata", {}).get("split"),
                 "ground_truth": sample.get("ground_truth"),
                 "prediction": prediction.get("answer"),
+                "prediction_error": prediction.get("error"),
                 "metrics": metric_row,
             }
         )
@@ -326,6 +334,7 @@ def evaluate_dataset(adapter, category: str, dataset_name: str, max_samples_per_
         {
             "sample_count": len(per_sample_rows),
             "skipped_no_ground_truth": skipped_no_ground_truth,
+            "prediction_error_counts": dict(prediction_error_counter),
         }
     )
 
@@ -382,7 +391,7 @@ def write_category_weighted_avg(category: str, dataset_summaries: list[dict]):
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
 
-def main(max_samples_per_split=None, max_samples_per_category=None, run_category=None, run_dataset=None):
+def main(max_samples_per_split=None, max_samples_per_category=None, run_category=None, run_dataset=None, debug=False):
     for category, datasets in AUTO_DATASETS.items():
         if run_category and category.lower() != run_category.lower():
             continue
@@ -414,6 +423,7 @@ def main(max_samples_per_split=None, max_samples_per_category=None, run_category
                 dataset_name,
                 max_samples_per_split=max_samples_per_split,
                 max_samples_per_category=max_samples_per_category,
+                debug=debug,
             )
             if summary and summary["sample_count"] > 0:
                 dataset_summaries.append(summary)
@@ -427,6 +437,7 @@ if __name__ == "__main__":
     parser.add_argument("--max_category", type=int, default=None, help="Maximum samples per category")
     parser.add_argument("--category", type=str, default=None, help="Only run this category")
     parser.add_argument("--dataset", type=str, default=None, help="Only run this dataset")
+    parser.add_argument("--debug", action="store_true", help="Print per-sample inference errors for diagnosis")
     args = parser.parse_args()
 
     main(
@@ -434,4 +445,5 @@ if __name__ == "__main__":
         max_samples_per_category=args.max_category,
         run_category=args.category,
         run_dataset=args.dataset,
+        debug=args.debug,
     )
