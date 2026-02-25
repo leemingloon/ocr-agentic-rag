@@ -1526,6 +1526,14 @@ class VisionDatasetAdapter(BaseDatasetAdapter):
         # JSON-only
         # -------------------------
         elif fmt == "json":
+            if dataset_path.is_dir():
+                # Some datasets keep parquet shards under split directories while FILE_MAPPING uses "json".
+                return self._load_arrow_folder(
+                    dataset_path,
+                    max_samples_per_split=max_samples_per_split,
+                    max_samples_per_category=max_samples_per_category,
+                )
+
             data = self._load_json(dataset_path)
 
             # If JSON has top-level key like {"data": [...]}
@@ -1653,7 +1661,7 @@ class DocVQAAdapter(VisionDatasetAdapter):
             "notes": "Test folder containing 8 Parquet shard files"
         },
         "validation": {
-            "format": "folder",
+            "format": "json",
             "dataset_path": "data/vision/DocVQA/validation",
             "ground_truth_path": None,
             "notes": "Validation folder containing 8 Parquet shard files"
@@ -2495,6 +2503,25 @@ class MMMUMathAdapter(VisionDatasetAdapter):
 # ------------------------
 # RAG Adapters
 # ------------------------
+"""
+universal_rag_sample = {
+    "input": {
+        "query": str,
+        "context": Any,   # optional table/paragraph/chunk payload
+        "image": <PIL.Image.Image> or None,
+    },
+    "ground_truth": {
+        "answer": str,
+        "scale": str | None,
+        "extra": dict | None,
+    },
+    "metadata": {
+        "dataset": str,
+        "split": str,
+        "sample_id": str | int,
+    }
+}
+"""
 class FinQAAdapter(BaseDatasetAdapter):
     """
     data/rag/FinQA/train/data-00000-of-00001.parquet,
@@ -2880,6 +2907,21 @@ class TATQAAdapter(BaseDatasetAdapter):
 # ------------------------
 # Credit Risk Adapters (PD)
 # ------------------------
+"""
+universal_credit_risk_pd_sample = {
+    "input": {
+        "features": dict | str,
+    },
+    "ground_truth": {
+        "label": str | int | float,
+    },
+    "metadata": {
+        "dataset": str,
+        "split": str,
+        "sample_id": str | int,
+    }
+}
+"""
 class LendingClubAdapter(BaseDatasetAdapter):
     """
     data/credit_risk_pd/LendingClub/test/data-00000-of-00001.parquet,
@@ -3006,6 +3048,14 @@ class LendingClubAdapter(BaseDatasetAdapter):
 # ------------------------
 # Credit Risk Adapters (Sentiment)
 # ------------------------
+
+"""
+universal_credit_risk_sentiment_sample = {
+    "input": {"text": str},
+    "ground_truth": {"label": str | int},
+    "metadata": {"dataset": str, "split": str, "sample_id": str | int}
+}
+"""
 
 class FinancialPhraseBankAdapter(BaseDatasetAdapter):
     """
@@ -3191,6 +3241,14 @@ class FiQAAdapter(BaseDatasetAdapter):
 # ------------------------
 # Credit Risk Adapters (Memo Generator)
 # ------------------------
+
+"""
+universal_credit_risk_memo_generator_sample = {
+    "input": {"prompt": str, "context": Any},
+    "ground_truth": {"reference": str | None},
+    "metadata": {"dataset": str, "split": str, "sample_id": str | int}
+}
+"""
 
 class FinanceBenchAdapter(BaseDatasetAdapter):
     """
