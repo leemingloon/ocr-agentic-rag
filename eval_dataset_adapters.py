@@ -143,15 +143,9 @@ class BaseDatasetAdapter:
         if rows:
             return rows
 
-        fallback_json = folder_path / "first_5_rows.json"
-        if fallback_json.exists():
-            print(f"[WARN] No parquet rows found under {folder_path}; using fallback JSON {fallback_json}")
-            with open(fallback_json, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            if max_samples is not None:
-                data = data[:max_samples]
-            return data
-
+        # first_5_rows.json files are schema/debug references only and should not be
+        # used as evaluation data when parquet shards are unavailable in this repo.
+        print(f"[WARN] No parquet rows found under {folder_path}; skipping split (no JSON fallback)")
         return rows
     
     @classmethod
