@@ -187,6 +187,7 @@ data/**
 # !data/vision/MMMU_Math/**
 
 !data/rag/FinQA/**
+data/rag/FinQA/train/train_qa.json
 !data/rag/TAT-QA/**
 
 !data/credit_risk_memo_generator/**
