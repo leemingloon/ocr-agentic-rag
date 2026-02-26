@@ -1,0 +1,15 @@
+[
+  {
+    "sample_id": "dev_Math_1",
+    "split": "dev",
+    "ground_truth": "4",
+    "input_text": {
+      "question": "Each of seven students has chosen three courses from ten options, and must sit an exam for each of his or her three choices. Two students sitting the same exam must do so at the same time, but no student can sit more than one exam in the same day. The table of choices is given in <image 1>. Find the smallest number of days required to schedule the exams. Return only the number of days."
+    },
+    "prediction": "## Structured Analysis\n\n### 1. Chart Type\nTable\n\n### 2. Title\nNone present\n\n### 3. Axes Labels\n- Columns: Student, Exams (3 exams per student)\n- Students: A through G\n\n### 4. Data Points\n| Student | Exam 1 | Exam 2 | Exam 3 |\n|---------|--------|--------|--------|\n| A | 1 | 2 | 3 |\n| B | 1 | 4 | 5 |\n| C | 2 | 4 | 6 |\n| D | 3 | 5 | 7 |\n| E | 6 | 8 | 10 |\n| F | 7 | 8 | 9 |\n| G | 1 | 9 | 10 |\n\n### 5. Trends & Graph Coloring Analysis\n\n**Conflict Graph:** Two exams conflict (must be on different days) if any student takes both.\n\nBuilding the conflict edges:\n- A: (1,2),(1,3),(2,3)\n- B: (1,4),(1,5),(4,5)\n- C: (2,4),(2,6),(4,6)\n- D: (3,5),(3,7),(5,7)\n- E: (6,8),(6,10),(8,10)\n- F: (7,8),(7,9),(8,9)\n- G: (1,9),(1,10),(9,10)\n\n**Chromatic number** = minimum days needed = minimum coloring of this conflict graph.\n\n**Finding cliques** (lower bound): Look for cliques of size k.\n- Exams 8,9,10: 8-9 (F), 8-10 (E), 9-10 (G) → triangle → need ≥ 3 days\n- Check for 4-clique among {1,2,3,4,5,6,7,8,9,10}\n\nTry: 1,4,5 conflict (from B). Does 1 conflict with something else in a 4-clique? 1-2(A), 1-3(A), 1-4(B), 1-5(B), 1-9(G), 1-10(G).\n\n**Attempting a valid coloring with 4 days:**\n\nAssign days (colors):\n- Day 1: 1, 6, 9 → check conflicts: 1-6? No student has both. 1-9? G has both! ❌\n- Day 1: 1, 6, 7 → 1-6? No. 1-7? No. 6-7? No. ✓\n- Day 2: 2, 5, 8 → 2-5? No. 2-8? No. 5-8? No. ✓\n- Day 3: 3, 4, 9 → 3-4? No. 3-9? No. 4-9? No. ✓\n- Day 4: 10 → remaining\n\nCheck remaining: 10. What's left? Exams assigned: 1,6,7,2,5,8,3,4,9 → **exam 10** on Day 4.\n\n**Verify all students:**\n- A(1,2,3): Days 1,2,3 ✓\n- B(1,4,5): Days 1,3,2 ✓\n- C(2,4,6): Days 2,3,1 ✓\n- D(3,5,7): Days 3,2,1 ✓\n- E(6,8,10): Days 1,2,4 ✓\n- F(7,8,9): Days 1,2,3 ✓\n- G(1,9,10): Days 1,3,4 ✓\n\nAll students have their 3 exams on **different days** ✓\n\n### 6. Key Insights\n4 days suffices and the conflict structure (triangles) requires at least 3, with careful analysis showing 3 is insufficient due to the interconnected conflicts.\n\n## **Answer: 4**",
+    "prediction_error": null,
+    "metrics": {
+      "accuracy": 1.0
+    }
+  }
+]

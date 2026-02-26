@@ -1,0 +1,11 @@
+========================================================================
+sample_id: test_Math_1
+split: test
+ground_truth: B
+question: Convex quadrilateral $ABCD$ has $AB=3$, $BC=4$, $CD=13$, $AD=12$, and $\angle ABC=90^{\circ}$, as shown. What is the area of the quadrilateral?<image 1>
+------------------------------------------------------------------------
+prediction:
+
+------------------------------------------------------------------------
+prediction_error: missing_image:unsupported_image_type:dict
+========================================================================

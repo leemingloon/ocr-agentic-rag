@@ -1,0 +1,30 @@
+{
+  "dataset": "MMMU_Finance",
+  "sample_count": 1,
+  "splits": [
+    "dev",
+    "test"
+  ],
+  "splits_breakdown": [
+    {
+      "split": "dev",
+      "sample_count": 1,
+      "metrics": {
+        "accuracy_mean": 1.0
+      }
+    },
+    {
+      "split": "test",
+      "sample_count": 0,
+      "metrics": {}
+    }
+  ],
+  "skipped_no_ground_truth": 0,
+  "prediction_error_counts": {},
+  "model_class": "VisionOCR",
+  "backbone": "claude-sonnet-4-6",
+  "timestamp": "2026-02-26T23:49:17.780701+08:00",
+  "weighted_metrics": {
+    "accuracy_mean": 1.0
+  }
+}

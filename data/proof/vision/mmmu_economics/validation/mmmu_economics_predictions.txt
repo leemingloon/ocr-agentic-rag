@@ -1,0 +1,56 @@
+========================================================================
+sample_id: validation_Economics_1
+split: validation
+ground_truth: A
+question: Consider the following balance sheet for TD. <image 1> Suppose that someone deposited $700 at TD Bank. Given this data, what is the minimum amount by which the money supply will increase?
+------------------------------------------------------------------------
+prediction:
+# Balance Sheet Analysis for TD Bank
+
+## 1. Chart Type
+**Table** – A simplified T-account balance sheet
+
+## 2. Title
+Balance Sheet for TD Bank
+
+## 3. Axes Labels
+| **Assets** | | **Liabilities** | |
+|---|---|---|---|
+| Reserves | $493 | Deposits | $2,900 |
+| Loans | $2,407 | | |
+
+## 4. Data Points
+- **Reserves:** $493
+- **Loans:** $2,407
+- **Deposits:** $2,900
+- **Total Assets = Total Liabilities = $2,900**
+
+---
+
+## 5. Key Calculations
+
+### Step 1: Calculate the Reserve Ratio
+$$\text{Reserve Ratio} = \frac{\text{Reserves}}{\text{Deposits}} = \frac{493}{2900} \approx 0.17 = 17\%$$
+
+### Step 2: Calculate the Money Multiplier
+$$\text{Money Multiplier} = \frac{1}{\text{Reserve Ratio}} = \frac{1}{0.17} \approx 5.88$$
+
+### Step 3: Calculate Minimum Increase in Money Supply
+$$\Delta \text{Money Supply} = \text{Deposit} \times \text{Money Multiplier}$$
+$$= \$700 \times 5.88 \approx \$4,118$$
+
+---
+
+## 6. Key Insights
+
+| Item | Value |
+|---|---|
+| New Deposit | $700 |
+| Reserve Ratio | ~17% |
+| Money Multiplier | ~5.88 |
+| **Minimum Money Supply Increase** | **~$4,118** |
+
+> ✅ **The minimum increase in the money supply is approximately $4,118**, driven by the fractional reserve banking system where TD holds ~17% in reserves and lends out the rest repeatedly through the banking system.
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================

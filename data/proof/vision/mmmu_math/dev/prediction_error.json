@@ -1,0 +1,13 @@
+[
+  {
+    "sample_id": "dev_Math_1",
+    "split": "dev",
+    "ground_truth": "4",
+    "input_text": {
+      "question": "Each of seven students has chosen three courses from ten options, and must sit an exam for each of his or her three choices. Two students sitting the same exam must do so at the same time, but no student can sit more than one exam in the same day. The table of choices is given in <image 1>. Find the smallest number of days required to schedule the exams. Return only the number of days."
+    },
+    "prediction": "",
+    "prediction_error": "missing_image:unsupported_image_type:dict",
+    "metrics": {}
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "sample_id": "dev_Accounting_1",
+  "question": "Each of the following situations relates to a different company. <image 1> For company B, find the missing amounts.",
+  "answer": "D",
+  "options": "['$63,020', '$58,410', '$71,320', '$77,490']",
+  "options_present": true,
+  "img_type": "['Tables']",
+  "note": "Options are a string list: A=index0, B=index1, C=index2, D=index3. Answer 'D' = 4th option ($77,490 for first sample)."
+}
