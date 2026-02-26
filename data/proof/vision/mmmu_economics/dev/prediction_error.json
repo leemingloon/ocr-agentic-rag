@@ -1,0 +1,13 @@
+[
+  {
+    "sample_id": "dev_Economics_1",
+    "split": "dev",
+    "ground_truth": "D",
+    "input_text": {
+      "question": "The graph below shows the AD-AS diagram for Spain. All numbers are in billions. <image 1> What is the price level in the short-run equilibrium?"
+    },
+    "prediction": "",
+    "prediction_error": "missing_image:unsupported_image_type:dict",
+    "metrics": {}
+  }
+]

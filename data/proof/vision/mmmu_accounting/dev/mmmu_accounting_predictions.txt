@@ -1,0 +1,52 @@
+========================================================================
+sample_id: dev_Accounting_1
+split: dev
+ground_truth: D
+question: Each of the following situations relates to a different company. <image 1> For company B, find the missing amounts.
+------------------------------------------------------------------------
+prediction:
+# Structured Analysis
+
+## 1. Chart Type
+**Table** – Financial comparison across four companies
+
+## 2. Title
+No explicit title, but represents **Income Statement Components** for Companies A, B, C, and D
+
+## 3. Axes Labels
+| Row | Category |
+|-----|----------|
+| 1 | Revenues |
+| 2 | Expenses |
+| 3 | Gains |
+| 4 | Losses |
+| 5 | Net Income or (Loss) |
+
+## 4. Data Points – Company B
+| Item | Amount |
+|------|--------|
+| Revenues | $1,480,500 |
+| Expenses | $1,518,300 |
+| Gains | **?** |
+| Losses | $0 |
+| Net Income or (Loss) | $39,690 |
+
+## 5. Solving for Company B's Missing Amount (Gains)
+
+Using the **Net Income Formula**:
+$$\text{Net Income} = \text{Revenues} - \text{Expenses} + \text{Gains} - \text{Losses}$$
+
+$$39,690 = 1,480,500 - 1,518,300 + \text{Gains} - 0$$
+
+$$39,690 = -37,800 + \text{Gains}$$
+
+$$\boxed{\text{Gains} = \$77,490}$$
+
+## 6. Key Insights
+- Company B operates at an **operating loss** of $37,800 (Expenses > Revenues)
+- The company relies on **$77,490 in gains** to achieve positive net income
+- Without these gains, Company B would report a **net loss**
+- This suggests gains are a **critical non-operating income source** for Company B's profitability
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================

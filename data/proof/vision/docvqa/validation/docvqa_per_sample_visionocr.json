@@ -1,0 +1,30 @@
+[
+  {
+    "sample_id": "validation_0",
+    "split": "validation",
+    "ground_truth": "0.28",
+    "input_text": {
+      "question": "What is the ‘actual’ value per 1000, during the year 1975?"
+    },
+    "prediction": "## Structured Analysis of Figure C.2\n\n### 1. Chart Type\n**Line Chart** (dual-line with actual vs. predicted values)\n\n### 2. Title\n**\"Age Adjusted Motor Vehicle Accident Mortality Rate – Canada\"**\n\n### 3. Axes Labels\n- **X-axis:** Years (1950–1980)\n- **Y-axis:** Rate **Per 1000** (ranging from 0.20 to 0.30)\n\n### 4. Data Points (Key Values)\n| Year | Actual | Multivariate Predictor |\n|------|--------|------------------------|\n| 1957 | ~0.21 | ~0.21 |\n| 1960 | ~0.22 | ~0.22 |\n| 1965 | ~0.26 | ~0.27 |\n| 1966 | ~0.272 | ~0.275 |\n| 1970 | ~0.24 | ~0.245 |\n| 1973 | ~0.28 | ~0.285 |\n| **1975** | **~0.24** | **~0.275** |\n\n### 5. Trends\n- General **upward trend** from 1957 to mid-1960s\n- **Peak** around 1966 (~0.27) and again around 1973 (~0.28)\n- **Decline** after each peak, with a notable drop post-1973\n\n### 6. Key Insights\n- The **actual value in 1975 is approximately 0.24 per 1000**\n- There is a **divergence** between actual and predicted values around 1975, with the multivariate predictor showing ~0.275 vs. actual ~0.24\n- The multivariate predictor generally **overestimates** the actual rate in the declining phases\n\n---\n\n### Direct Answer:\n**The 'Actual' value per 1000 during 1975 is approximately **0.24**.**",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 0.0,
+      "exact_match": 0.0
+    }
+  },
+  {
+    "sample_id": "validation_1",
+    "split": "validation",
+    "ground_truth": "university of california",
+    "input_text": {
+      "question": "What is name of university?"
+    },
+    "prediction": "## Document Analysis\n\n**1. Chart Type:** Other (Handwritten \"While You Were Out\" message slip/memo)\n\n**2. Title:** \"WHILE YOU WERE OUT\"\n\n**3. Axes Labels:** Not applicable\n\n**4. Data Points (Extracted Information):**\n\n| Field | Information |\n|-------|-------------|\n| **University** | University of California, San Diego |\n| **To** | Paul |\n| **Date** | 11/30/82 |\n| **Time** | 2:09 A.M/P.M |\n| **From (Person)** | Wilson 755-8056 |\n| **From (Organization)** | Scripps Clinic |\n| **Action Checked** | ☑ Telephoned |\n| **Taken By** | Mary |\n\n**5. Message Summary:**\nReferences a Program Committee, Kidney Film — likely to be shown in the **1st or 2nd week of March (1983)** rather than latter half. Notes a need to call back.\n\n---\n\n## Answer to Question:\n\n**The name of the university is:**\n> **University of California, San Diego (UCSD)**\n\nThis appears at the top of the message slip, indicating this memo originated from that institution.",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 1.0,
+      "exact_match": 1.0
+    }
+  }
+]

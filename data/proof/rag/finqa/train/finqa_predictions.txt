@@ -1,0 +1,57 @@
+========================================================================
+sample_id: ADI/2009/page_49.pdf-1
+split: train
+ground_truth: {'answer': '3.8', 'score': None, 'query_id': 0, 'corpus_id': 'ADI/2009/page_49.pdf-1'}
+input_text: {"query": "what is the the interest expense in 2009?"}
+------------------------------------------------------------------------
+prediction:
+Based on the information provided, the interest expense in 2009 was **$2.4 million**.
+
+This information comes from the first chunk in the search results, which states: "interest expense was $ 3.9 million , $ 2.3 million and $ 2.4 million for the years ended december 31 , 2011 , 2010 and 2009 , respectively."
+
+The document also notes that this interest expense includes "the amortization of deferred financing costs and interest expense under the credit and long term debt facilities, as well as the assumed loan discussed above."
+
+**Citation:** Entry ID 51 from finqa_train source
+------------------------------------------------------------------------
+metrics: {"program_accuracy": 1.0, "numerical_exact_match": 0.0, "f1": 1.0, "exact_match": 1.0}
+========================================================================
+
+========================================================================
+sample_id: ABMD/2012/page_75.pdf-1
+split: train
+ground_truth: {'answer': 'yes', 'score': None, 'query_id': 1, 'corpus_id': 'ABMD/2012/page_75.pdf-1'}
+input_text: {"query": "during the 2012 year , did the equity awards in which the prescribed performance milestones were achieved exceed the equity award compensation expense for equity granted during the year?"}
+------------------------------------------------------------------------
+prediction:
+I cannot answer the query about whether equity awards with achieved performance milestones exceeded equity award compensation expense for equity granted during 2012.
+
+The information provided shows that Step 1 of the analysis failed with an error stating "Could not parse expression" when attempting to locate the company's 2012 financial statements. Without access to the relevant financial data from the 2012 annual report or SEC filings, it is impossible to:
+
+1. Determine the value of equity awards where prescribed performance milestones were achieved during 2012
+2. Identify the equity award compensation expense for equity granted during 2012
+3. Compare these two figures to answer the query
+
+To properly answer this question, access to the company's 2012 financial statements, particularly notes related to stock-based compensation and equity awards, would be required.
+------------------------------------------------------------------------
+metrics: {"program_accuracy": 0.0, "numerical_exact_match": 0.0, "f1": 0.0, "exact_match": 0.0}
+========================================================================
+
+========================================================================
+sample_id: AAL/2018/page_13.pdf-2
+split: train
+ground_truth: {'answer': '41932.20339', 'score': None, 'query_id': 2, 'corpus_id': 'AAL/2018/page_13.pdf-2'}
+input_text: {"query": "what was the total operating expenses in 2018 in millions"}
+------------------------------------------------------------------------
+prediction:
+Based on the information provided, I cannot determine the total operating expenses for 2018. 
+
+The data shows that aircraft fuel expense was $9,896 million in 2018, but this represents only a portion of the total operating expenses (as indicated by the "percent of total operating expenses" column). However, the actual percentage value and total operating expenses figure are not included in the retrieved information.
+
+To calculate the total operating expenses, I would need either:
+1. The complete percentage that aircraft fuel expense represents of total operating expenses, or
+2. The actual total operating expenses figure
+
+**Citation:** AAL/2018/page_13.pdf-2
+------------------------------------------------------------------------
+metrics: {"program_accuracy": 0.0, "numerical_exact_match": 0.0, "f1": 0.0, "exact_match": 0.0}
+========================================================================

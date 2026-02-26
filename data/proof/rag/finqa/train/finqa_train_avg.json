@@ -1,0 +1,7 @@
+{
+  "exact_match_mean": 0.25,
+  "f1_mean": 0.25,
+  "numerical_exact_match_mean": 0.0,
+  "program_accuracy_mean": 0.25,
+  "sample_count": 4
+}

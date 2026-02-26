@@ -1,0 +1,13 @@
+[
+  {
+    "sample_id": "dev_Finance_1",
+    "split": "dev",
+    "ground_truth": "0.8638",
+    "input_text": {
+      "question": "Without referring to the preprogrammed function on your financial calculator, use the basic formula for present value, along with the given opportunity cost, r, and the number of periods, n, to calculate the present value of $1 in case C shown in the following table. <image 1>"
+    },
+    "prediction": "",
+    "prediction_error": "missing_image:unsupported_image_type:dict",
+    "metrics": {}
+  }
+]

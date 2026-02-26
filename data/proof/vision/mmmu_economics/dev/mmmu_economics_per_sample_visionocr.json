@@ -1,0 +1,15 @@
+[
+  {
+    "sample_id": "dev_Economics_1",
+    "split": "dev",
+    "ground_truth": "D",
+    "input_text": {
+      "question": "The graph below shows the AD-AS diagram for Spain. All numbers are in billions. <image 1> What is the price level in the short-run equilibrium?"
+    },
+    "prediction": "# AD-AS Diagram Analysis for Spain\n\n## 1. Chart Type\n**Other** – Economic model diagram (AD-AS: Aggregate Demand-Aggregate Supply)\n\n---\n\n## 2. Title\nNo explicit title (described as \"AD-AS diagram for Spain\")\n\n---\n\n## 3. Axes Labels\n- **Y-axis:** Price Level (0–1100)\n- **X-axis:** Real GDP in billions (0–1100)\n\n---\n\n## 4. Data Points & Curves\n\n| Curve | Description | Key Coordinates |\n|-------|-------------|-----------------|\n| **AD** | Downward sloping | Starts ~(0, 1000), ends ~(1000, 0) |\n| **SRAS** | Upward sloping | Starts ~(0, 200), ends ~(1000, 1100) |\n| **LRAS** | Vertical line | Fixed at Real GDP = **500** |\n\n---\n\n## 5. Short-Run Equilibrium\n\nThe **short-run equilibrium** occurs where **AD intersects SRAS**:\n\n- Tracing both lines, they intersect at approximately:\n  - **Real GDP = 600 billion**\n  - **Price Level = 650**\n\n> ### ✅ Answer: The Price Level in Short-Run Equilibrium ≈ **650**\n\n---\n\n## 6. Key Insights\n\n- **Output Gap:** Short-run equilibrium GDP (600) **exceeds** LRAS (500) → **Inflationary gap**\n- The economy is **overheating** relative to its long-run potential\n- Long-run adjustment would require prices to rise, shifting SRAS **leftward** until equilibrium returns to LRAS at GDP = 500\n- This suggests **contractionary** pressure in the long run",
+    "prediction_error": null,
+    "metrics": {
+      "accuracy": 1.0
+    }
+  }
+]

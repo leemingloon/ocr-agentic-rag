@@ -1,0 +1,161 @@
+========================================================================
+sample_id: test_0
+split: test
+ground_truth: ['14']
+question: How many food item is shown in the bar graph?
+------------------------------------------------------------------------
+prediction:
+# Structured Analysis of the Bar Graph
+
+## 1. Chart Type
+**Horizontal Bar Chart**
+
+## 2. Title
+**"Long-term price index in food commodities, 1850-2015, World, 1934"**
+- Subtitle: Commodity price index in food items dating 1850-2015, measured relative to real prices in 1900 (i.e., 1900 = 100)
+
+## 3. Axes Labels
+- **X-axis:** Price Index values (0 to 100+)
+- **Y-axis:** Food commodity names
+
+## 4. Data Points (All Visible)
+| Food Item | Price Index |
+|-----------|-------------|
+| Lamb | 103.7 |
+| Corn | 103.13 |
+| Barley | 102.46 |
+| Rye | 87.37 |
+| Beef | 85.27 |
+| Wheat | 83.73 |
+| Coffee | 82.2 |
+| Tea | 68.48 |
+| Peanuts | 64.71 |
+| Palm Oil | 57.6 |
+| Pork | 55.36 |
+| Rice | 42.48 |
+| Sugar | 25.56 |
+| Cocoa | 18.81 |
+
+## 5. Trends
+- Top 3 items (Lamb, Corn, Barley) are **near or above 100** (baseline)
+- Sharp **decline** from mid-range to bottom commodities
+- Sugar and Cocoa are significantly **below average**
+
+## 6. Key Insights
+
+### ✅ Direct Answer: **14 food items** are shown in the bar graph
+
+### Additional Insights:
+- **Lamb** has the highest price index (103.7)
+- **Cocoa** has the lowest price index (18.81)
+- Only **3 items** (Lamb, Corn, Barley) meet or exceed the 1900 baseline of 100
+- Most commodities show **lower prices** relative to 1900 levels
+------------------------------------------------------------------------
+metrics: {"strict_accuracy": 1.0, "relaxed_accuracy": 1.0}
+========================================================================
+
+========================================================================
+sample_id: test_1
+split: test
+ground_truth: ['0.57']
+question: What is the difference in value between Lamb and Corn?
+------------------------------------------------------------------------
+prediction:
+# Structured Analysis of the Chart
+
+## 1. Chart Type
+**Horizontal Bar Chart**
+
+## 2. Title
+**"Long-term price index in food commodities, 1850-2015, World, 1934"**
+- Subtitle: Commodity price index in food items dating 1850-2015, measured relative to real prices in 1900 (i.e., 1900 = 100)
+
+## 3. Axes Labels
+- **X-axis:** Price Index Value (0 to ~100+)
+- **Y-axis:** Food Commodity Categories (14 items)
+
+## 4. Data Points (All Values)
+| Commodity | Index Value |
+|-----------|-------------|
+| Lamb | 103.7 |
+| Corn | 103.13 |
+| Barley | 102.46 |
+| Rye | 87.37 |
+| Beef | 85.27 |
+| Wheat | 83.73 |
+| Coffee | 82.2 |
+| Tea | 68.48 |
+| Peanuts | 64.71 |
+| Palm Oil | 57.6 |
+| Pork | 55.36 |
+| Rice | 42.48 |
+| Sugar | 25.56 |
+| Cocoa | 18.81 |
+
+## 5. Trends
+- **Top tier** (>100): Lamb, Corn, Barley cluster near/above baseline
+- **Sharp decline** visible between Coffee (82.2) and Tea (68.48)
+- **Steep drop** at the bottom between Rice and Sugar/Cocoa
+
+## 6. Key Insights
+- Animal products (Lamb, Beef) maintain relatively high price indices
+- Cocoa and Sugar have dramatically **lost value** relative to 1900
+- Most grains remain near or above the 1900 baseline
+
+---
+
+## 🎯 Answer to Specific Question
+
+**Difference between Lamb and Corn:**
+
+$$103.7 - 103.13 = \boxed{0.57}$$
+
+The difference is **0.57 index points**, making them nearly identical in value in 1934.
+------------------------------------------------------------------------
+metrics: {"strict_accuracy": 1.0, "relaxed_accuracy": 1.0}
+========================================================================
+
+========================================================================
+sample_id: test_2
+split: test
+ground_truth: ['3']
+question: How many bars are shown in the chart?
+------------------------------------------------------------------------
+prediction:
+## Structured Analysis
+
+### 1. Chart Type
+**Horizontal Bar Chart**
+
+### 2. Title
+**"Armed forces personnel as share of total population, 1985"**
+
+### 3. Axes Labels
+- **Y-axis (vertical):** Country names (Mauritania, Fiji, Madagascar)
+- **X-axis (horizontal):** Percentage scale (0% to 0.4%+)
+
+### 4. Data Points
+| Country | Value |
+|---------|-------|
+| Mauritania | 0.48% |
+| Fiji | 0.38% |
+| Madagascar | 0.21% |
+
+### 5. Trends
+- Clear **descending order** from top to bottom
+- Mauritania leads significantly, with nearly **double** Madagascar's share
+- The gap between Mauritania and Fiji (~0.10%) is smaller than the gap between Fiji and Madagascar (~0.17%)
+
+### 6. Key Insights
+- **Mauritania** had the highest military personnel share at **0.48%**
+- **Fiji** ranked second at **0.38%**, despite being a much smaller island nation
+- **Madagascar** had the lowest share at **0.21%**
+- All three values are relatively **small fractions** of total population
+
+---
+
+### Answer to Question:
+**3 bars** are shown in the chart — one each for Mauritania, Fiji, and Madagascar.
+------------------------------------------------------------------------
+metrics: {"strict_accuracy": 1.0, "relaxed_accuracy": 1.0}
+========================================================================

@@ -1,0 +1,51 @@
+========================================================================
+sample_id: train_0
+split: train
+ground_truth: ['Yes']
+question: Is the value of Favorable 38 in 2015?
+------------------------------------------------------------------------
+prediction:
+# Chart Analysis
+
+## 1. Chart Type
+**Line Chart** (dual-line time series)
+
+## 2. Title
+**"Americans Give China Mostly Negative Ratings"**
+*Subtitle: U.S. views of China*
+
+## 3. Axes Labels
+- **X-axis:** Years (2005–2015)
+- **Y-axis:** Percentage (0–80%)
+
+## 4. Data Points
+
+| Year | Unfavorable | Favorable |
+|------|-------------|-----------|
+| 2005 | 43% | 35% |
+| 2006 | 52% | 29% |
+| 2007 | 42% | 39% |
+| 2008 | 42% | 39% |
+| 2009 | 50% | 38% |
+| 2010 | 49% | 36% |
+| 2011 | 51% | 36% |
+| 2012 | 40% | 40% |
+| 2013 | 52% | 37% |
+| 2014 | 55% | 35% |
+| **2015** | **54%** | **38%** |
+
+## 5. Trends
+- **Unfavorable** ratings consistently dominate throughout the period
+- Both lines show fluctuation but unfavorable views trend **upward** overall
+- Favorable views remain relatively **stable and low**
+
+## 6. Key Insights
+- Negative views of China consistently exceed positive ones
+
+---
+
+## ✅ Answer to Your Question
+**Yes**, the Favorable value in **2015 is 38%**, as clearly labeled on the chart's green line at the rightmost data point.
+------------------------------------------------------------------------
+metrics: {"strict_accuracy": 1.0, "relaxed_accuracy": 1.0}
+========================================================================

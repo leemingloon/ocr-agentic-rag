@@ -1,0 +1,64 @@
+========================================================================
+sample_id: dev_Finance_1
+split: dev
+ground_truth: 0.8638
+question: Without referring to the preprogrammed function on your financial calculator, use the basic formula for present value, along with the given opportunity cost, r, and the number of periods, n, to calculate the present value of $1 in case C shown in the following table. <image 1>
+------------------------------------------------------------------------
+prediction:
+# Structured Analysis
+
+## 1. Chart Type
+**Table** – A structured data table with financial variables.
+
+## 2. Title
+No explicit title provided (contextually related to **Present Value calculations**).
+
+## 3. Axes Labels (Column Headers)
+| Column | Description |
+|--------|-------------|
+| **Case** | Identifier (A, B, C, D) |
+| **Opportunity Cost, r** | Discount/interest rate (%) |
+| **Number of Periods, n** | Time periods |
+
+## 4. Data Points Extracted
+| Case | r (%) | n |
+|------|-------|---|
+| A | 2% | 4 |
+| B | 10% | 2 |
+| **C** | **5%** | **3** |
+| D | 13% | 2 |
+
+---
+
+## 5. **Case C – Present Value Calculation**
+
+### Formula:
+$$PV = \frac{FV}{(1 + r)^n}$$
+
+### Given Values (Case C):
+- **FV** = $1.00
+- **r** = 5% = 0.05
+- **n** = 3
+
+### Step-by-Step Solution:
+$$PV = \frac{\$1}{(1 + 0.05)^3}$$
+
+$$PV = \frac{\$1}{(1.05)^3}$$
+
+$$PV = \frac{\$1}{1.157625}$$
+
+$$\boxed{PV = \$0.8638}$$
+
+---
+
+## 6. Trends & Key Insights
+
+| Insight | Explanation |
+|---------|-------------|
+| **Higher r → Lower PV** | Case D (13%) will yield the lowest PV |
+| **More periods → Lower PV** | Longer time discounts value more heavily |
+| **Case C result** | $1 received in 3 years is worth only **$0.8638 today** at 5% |
+| **Time Value of Money** | Money today is worth more than the same amount in the future |
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================

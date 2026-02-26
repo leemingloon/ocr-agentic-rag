@@ -1,0 +1,13 @@
+[
+  {
+    "sample_id": "validation_2",
+    "split": "validation",
+    "ground_truth": "itc limited",
+    "input_text": {
+      "question": "What is the name of the company?"
+    },
+    "prediction": "",
+    "prediction_error": "missing_anthropic_api_key",
+    "metrics": {}
+  }
+]

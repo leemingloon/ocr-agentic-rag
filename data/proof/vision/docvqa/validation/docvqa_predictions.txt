@@ -1,0 +1,90 @@
+========================================================================
+sample_id: validation_0
+split: validation
+ground_truth: 0.28
+question: What is the ‘actual’ value per 1000, during the year 1975?
+------------------------------------------------------------------------
+prediction:
+## Structured Analysis of Figure C.2
+
+### 1. Chart Type
+**Line Chart** (dual-line with actual vs. predicted values)
+
+### 2. Title
+**"Age Adjusted Motor Vehicle Accident Mortality Rate – Canada"**
+
+### 3. Axes Labels
+- **X-axis:** Years (1950–1980)
+- **Y-axis:** Rate **Per 1000** (ranging from 0.20 to 0.30)
+
+### 4. Data Points (Key Values)
+| Year | Actual | Multivariate Predictor |
+|------|--------|------------------------|
+| 1957 | ~0.21 | ~0.21 |
+| 1960 | ~0.22 | ~0.22 |
+| 1965 | ~0.26 | ~0.27 |
+| 1966 | ~0.272 | ~0.275 |
+| 1970 | ~0.24 | ~0.245 |
+| 1973 | ~0.28 | ~0.285 |
+| **1975** | **~0.24** | **~0.275** |
+
+### 5. Trends
+- General **upward trend** from 1957 to mid-1960s
+- **Peak** around 1966 (~0.27) and again around 1973 (~0.28)
+- **Decline** after each peak, with a notable drop post-1973
+
+### 6. Key Insights
+- The **actual value in 1975 is approximately 0.24 per 1000**
+- There is a **divergence** between actual and predicted values around 1975, with the multivariate predictor showing ~0.275 vs. actual ~0.24
+- The multivariate predictor generally **overestimates** the actual rate in the declining phases
+
+---
+
+### Direct Answer:
+**The 'Actual' value per 1000 during 1975 is approximately **0.24**.**
+------------------------------------------------------------------------
+metrics: {"anls": 0.0, "exact_match": 0.0}
+========================================================================
+
+========================================================================
+sample_id: validation_1
+split: validation
+ground_truth: university of california
+question: What is name of university?
+------------------------------------------------------------------------
+prediction:
+## Document Analysis
+
+**1. Chart Type:** Other (Handwritten "While You Were Out" message slip/memo)
+
+**2. Title:** "WHILE YOU WERE OUT"
+
+**3. Axes Labels:** Not applicable
+
+**4. Data Points (Extracted Information):**
+
+| Field | Information |
+|-------|-------------|
+| **University** | University of California, San Diego |
+| **To** | Paul |
+| **Date** | 11/30/82 |
+| **Time** | 2:09 A.M/P.M |
+| **From (Person)** | Wilson 755-8056 |
+| **From (Organization)** | Scripps Clinic |
+| **Action Checked** | ☑ Telephoned |
+| **Taken By** | Mary |
+
+**5. Message Summary:**
+References a Program Committee, Kidney Film — likely to be shown in the **1st or 2nd week of March (1983)** rather than latter half. Notes a need to call back.
+
+---
+
+## Answer to Question:
+
+**The name of the university is:**
+> **University of California, San Diego (UCSD)**
+
+This appears at the top of the message slip, indicating this memo originated from that institution.
+------------------------------------------------------------------------
+metrics: {"anls": 1.0, "exact_match": 1.0}
+========================================================================

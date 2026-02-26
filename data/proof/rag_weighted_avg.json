@@ -1,0 +1,73 @@
+{
+  "category": "rag",
+  "sample_count": 4,
+  "sample_count_by_dataset": {
+    "FinQA": 4
+  },
+  "datasets": [
+    "FinQA"
+  ],
+  "datasets_breakdown": [
+    {
+      "dataset": "FinQA",
+      "sample_count": 4,
+      "splits_breakdown": [
+        {
+          "split": "train",
+          "sample_count": 4,
+          "metrics": {
+            "exact_match_mean": 0.25,
+            "f1_mean": 0.25,
+            "numerical_exact_match_mean": 0.0,
+            "program_accuracy_mean": 0.25
+          }
+        }
+      ],
+      "weighted_metrics": {
+        "exact_match_mean": 0.25,
+        "f1_mean": 0.25,
+        "numerical_exact_match_mean": 0.0,
+        "program_accuracy_mean": 0.25
+      }
+    }
+  ],
+  "weighted_metrics": {
+    "exact_match_mean": 0.25,
+    "f1_mean": 0.25,
+    "numerical_exact_match_mean": 0.0,
+    "program_accuracy_mean": 0.25
+  },
+  "metrics_breakdown": {
+    "exact_match_mean": {
+      "value": 0.25,
+      "n_samples": 4,
+      "datasets": [
+        "FinQA"
+      ]
+    },
+    "f1_mean": {
+      "value": 0.25,
+      "n_samples": 4,
+      "datasets": [
+        "FinQA"
+      ]
+    },
+    "numerical_exact_match_mean": {
+      "value": 0.0,
+      "n_samples": 4,
+      "datasets": [
+        "FinQA"
+      ]
+    },
+    "program_accuracy_mean": {
+      "value": 0.25,
+      "n_samples": 4,
+      "datasets": [
+        "FinQA"
+      ]
+    }
+  },
+  "model_class": "AgenticRAG",
+  "backbone": "langgraph_hybrid_retriever_bge_reranker",
+  "timestamp": "2026-02-27T04:21:42.188025+08:00"
+}
