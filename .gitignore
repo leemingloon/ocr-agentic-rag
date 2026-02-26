@@ -194,6 +194,9 @@ data/rag/FinQA/train/train_qa.json
 !data/credit_risk_pd/**
 !data/credit_risk_sentiment/**
 
+# Show proof files
+!data/proof
+
 # Ignore local evaluation related artifacts
 /local_eval/
 mini.py
