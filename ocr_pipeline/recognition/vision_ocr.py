@@ -1,5 +1,5 @@
 """
-Vision-Language OCR using Claude 3.5 Sonnet
+Vision-Language OCR using Claude Sonnet (vision-capable)
 
 Provides true multimodal document understanding:
 - Chart extraction and reasoning
@@ -36,7 +36,7 @@ class VisionResult:
 
 class VisionOCR:
     """
-    Vision-Language OCR using Claude 3.5 Sonnet
+    Vision-Language OCR using Claude Sonnet
     
     Capabilities:
     - Visual document understanding (charts, tables, layouts)
@@ -59,23 +59,30 @@ class VisionOCR:
     def __init__(
         self,
         api_key: Optional[str] = None,
-        model: str = "claude-3-5-sonnet-20241022",
+        model: str = None,
         max_tokens: int = 1000,
     ):
         """
-        Initialize Vision OCR
-        
-        Args:
-            api_key: Anthropic API key
-            model: Claude model with vision support
-            max_tokens: Maximum response tokens
+        Initialize Vision OCR.
+        Uses a vision-capable Claude Sonnet model.
+
+        Resolution order for model:
+        - VISION_OCR_MODEL env var, if set
+        - explicit `model` arg, if provided
+        - default: "claude-sonnet-4-6"
         """
         self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
-        self.model = model
+        env_model = os.getenv("VISION_OCR_MODEL")
+        self.model = env_model or model or "claude-sonnet-4-6"
         self.max_tokens = max_tokens
-        
+
         # Initialize Anthropic client
         self.client = Anthropic(api_key=self.api_key)
+
+    @classmethod
+    def get_effective_model(cls) -> str:
+        """Return the model id used for vision (env VISION_OCR_MODEL or default). Single source of truth for proof JSONs."""
+        return os.getenv("VISION_OCR_MODEL") or "claude-sonnet-4-6"
     
     def recognize(
         self,

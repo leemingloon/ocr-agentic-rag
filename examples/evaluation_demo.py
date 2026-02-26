@@ -1,11 +1,11 @@
 """
 Evaluation Demo - Complete Benchmark Suite
 
-Runs evaluations on 13 benchmarks + 3 system tests:
-- 6 OCR benchmarks
-- 3 Multimodal benchmarks (NEW: ChartQA, PlotQA, TextVQA)
-- 4 RAG benchmarks
-- 3 System-level tests (Robustness, Bias, Load)
+Runs evaluations aligned with eval_runner / eval_dataset_adapters (splits with ground truth):
+- 5 OCR benchmarks (SROIE, FUNSD, DocVQA, InfographicsVQA, + others)
+- Multimodal benchmarks (DocVQA, ChartQA, InfographicsVQA)
+- RAG benchmarks (FinQA, TAT-QA)
+- System-level tests (Robustness, Bias, Load)
 """
 
 import sys
@@ -40,31 +40,16 @@ def main():
     }
     
     # ========================================
-    # PART 1: OCR Benchmarks (6 datasets)
+    # PART 1: OCR Benchmarks (5 datasets, splits with ground truth)
     # ========================================
     print("\n" + "=" * 70)
-    print("PART 1: OCR Benchmarks (6 datasets)")
+    print("PART 1: OCR Benchmarks (5 datasets)")
     print("=" * 70)
     
     ocr_evaluator = OCREvaluator()
     
-    # 1. OmniDocBench
-    print("\n1. OmniDocBench v1.5 (CVPR 2025 - Industry Standard)")
-    print("-" * 70)
-    omnidoc_results = ocr_evaluator.evaluate_omnidocbench(sample_size=10)
-    
-    if "metrics" in omnidoc_results:
-        print(f"✓ Text Detection F1: {omnidoc_results['metrics']['ocr']['f1']:.2%}")
-        print(f"✓ Table Structure F1: 90% (assumed)")
-        print(f"✓ 3-Tier Distribution:")
-        print(f"    Tier 1 (Cache): {omnidoc_results['metrics']['detection']['tier1_cache_usage']:.1%}")
-        print(f"    Tier 2 (Classical): {omnidoc_results['metrics']['detection']['tier2_classical_usage']:.1%}")
-        print(f"    Tier 3 (PaddleOCR): {omnidoc_results['metrics']['detection']['tier3_paddleocr_usage']:.1%}")
-        print(f"✓ Avg Detection Cost: ${omnidoc_results['metrics']['detection']['avg_detection_cost']:.6f}")
-        results["ocr_benchmarks"]["omnidocbench"] = omnidoc_results["metrics"]
-    
-    # 2. SROIE
-    print("\n2. SROIE (ICDAR 2019 - Singapore Invoice Dataset)")
+    # 1. SROIE
+    print("\n1. SROIE (ICDAR 2019 - Singapore Invoice Dataset)")
     print("-" * 70)
     sroie_results = ocr_evaluator.evaluate_sroie(sample_size=10)
     
@@ -77,8 +62,8 @@ def main():
         print(f"  - Total: {kv_metrics.get('total', 0):.2%}")
         results["ocr_benchmarks"]["sroie"] = sroie_results["metrics"]
     
-    # 3. FUNSD
-    print("\n3. FUNSD (ICDAR 2019 - Form Understanding for KYC)")
+    # 2. FUNSD
+    print("\n2. FUNSD (ICDAR 2019 - Form Understanding for KYC)")
     print("-" * 70)
     funsd_results = ocr_evaluator.evaluate_funsd(sample_size=10)
     
@@ -89,8 +74,8 @@ def main():
         print(f"  Use Case: KYC forms, account opening")
         results["ocr_benchmarks"]["funsd"] = funsd_results["metrics"]
     
-    # 4-6. Continue with other OCR benchmarks...
-    print("\n4-6. [Other OCR benchmarks - abbreviated for length]")
+    # 3-5. Other OCR benchmarks (DocVQA, InfographicsVQA, etc.)
+    print("\n3-5. [Other OCR benchmarks - abbreviated for length]")
     
     # ========================================
     # PART 2: Multimodal Benchmarks (3 NEW)
@@ -258,10 +243,10 @@ def main():
     print("Evaluation Summary")
     print("=" * 70)
     
-    print(f"\n✓ Implemented Benchmarks: 10/16")
-    print(f"  - OCR: 6/6 ✓")
-    print(f"  - Multimodal: 2/5 (DocVQA, InfographicsVQA)")
-    print(f"  - RAG: 4/4 ✓")
+    print(f"\n✓ Implemented Benchmarks (aligned with eval_runner splits-with-GT):")
+    print(f"  - OCR: 5 (SROIE, FUNSD, DocVQA, InfographicsVQA, + others)")
+    print(f"  - Multimodal: 2+ (DocVQA, InfographicsVQA)")
+    print(f"  - RAG: 4 (FinQA, TAT-QA, HotpotQA, BIRD-SQL)")
     print(f"  - System Tests: 0/3")
     
     print(f"\n⚠ Missing Multimodal Benchmarks:")
@@ -275,7 +260,7 @@ def main():
     print(f"  - Load testing (throughput)")
     
     print(f"\n✓ Current Strengths:")
-    print(f"  - Comprehensive OCR evaluation (6 benchmarks)")
+    print(f"  - OCR evaluation (SROIE, FUNSD, DocVQA, InfographicsVQA; splits with ground truth)")
     print(f"  - Financial reasoning validated (FinQA, TAT-QA)")
     print(f"  - Multimodal capability demonstrated (2 benchmarks)")
     print(f"  - Above industry average on all implemented benchmarks")

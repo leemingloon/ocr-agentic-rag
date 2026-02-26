@@ -1,0 +1,910 @@
+[
+  {
+    "table": {
+      "uid": "dc9d58a4e24a74d52f719372c1a16e7f",
+      "table": [
+        [
+          "Current assets",
+          "As Reported",
+          "Adjustments",
+          "Balances without Adoption of Topic 606"
+        ],
+        [
+          "Receivables, less allowance for doubtful accounts",
+          "$831.7",
+          "$8.7",
+          "$840.4"
+        ],
+        [
+          "Inventories .",
+          "1,571.7",
+          "(3.1)",
+          "1,568.6"
+        ],
+        [
+          "Prepaid expenses and other current assets",
+          "93.8",
+          "(16.6)",
+          "77.2"
+        ],
+        [
+          "Current liabilities",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Other accrued liabilities",
+          "691.6",
+          "(1.1)",
+          "690.5"
+        ],
+        [
+          "Other noncurrent liabilities .",
+          "1,951.8",
+          "(2.5)",
+          "1,949.3"
+        ]
+      ]
+    },
+    "paragraphs": [
+      {
+        "uid": "4202457313786d975b89fabc695c3efb",
+        "order": 1,
+        "text": "We utilized a comprehensive approach to evaluate and document the impact of the guidance on our current accounting policies and practices in order to identify material differences, if any, that would result from applying the new requirements to our revenue contracts. We did not identify any material differences resulting from applying the new requirements to our revenue contracts. In addition, we did not identify any significant changes to our business processes, systems, and controls to support recognition and disclosure requirements under the new guidance. We adopted the provisions of Topic 606 in fiscal 2019 utilizing the modified retrospective method. We recorded a $0.5 million cumulative effect adjustment, net of tax, to the opening balance of fiscal 2019 retained earnings, a decrease to receivables of $7.6 million, an increase to inventories of $2.8 million, an increase to prepaid expenses and other current assets of $6.9 million, an increase to other accrued liabilities of $1.4 million, and an increase to other noncurrent liabilities of $0.2 million. The adjustments primarily related to the timing of recognition of certain customer charges, trade promotional expenditures, and volume discounts."
+      },
+      {
+        "uid": "dc9d4ca8bf19cbef92cb9ae980182af3",
+        "order": 2,
+        "text": "The effect of the changes made to our Consolidated Balance Sheet as of May 26, 2019 for the adoption of Topic 606 was as follows:"
+      }
+    ],
+    "questions_sample": [
+      {
+        "uid": "a1b54eff7de3dc7bfab148325c7a940b",
+        "order": 1,
+        "question": "What method did the company use when Topic 606 in fiscal 2019 was adopted?",
+        "answer": [
+          "the modified retrospective method"
+        ],
+        "derivation": "",
+        "answer_type": "span",
+        "answer_from": "text",
+        "rel_paragraphs": [
+          "1"
+        ],
+        "req_comparison": false,
+        "scale": "",
+        "facts": [
+          "the modified retrospective method"
+        ],
+        "consts": [],
+        "mappings": [
+          {
+            "paragraph_1": [
+              629,
+              662
+            ]
+          }
+        ]
+      },
+      {
+        "uid": "e1ebf2222c9950fbf5375e54a65729f2",
+        "order": 2,
+        "question": "How much was the cumulative-effect adjustment to the opening balance of fiscal 2019 retained earnings?",
+        "answer": [
+          "$0.5 million"
+        ],
+        "derivation": "",
+        "answer_type": "span",
+        "answer_from": "text",
+        "rel_paragraphs": [
+          "1"
+        ],
+        "req_comparison": false,
+        "scale": "",
+        "facts": [
+          "$0.5 million"
+        ],
+        "consts": [],
+        "mappings": [
+          {
+            "paragraph_1": [
+              677,
+              691
+            ]
+          }
+        ]
+      },
+      {
+        "uid": "7c510956809977a550837006a464fd91",
+        "order": 3,
+        "question": "What are the balances (without Adoption of Topic 606, in millions) of inventories and other accrued liabilities, respectively?",
+        "answer": [
+          "1,568.6",
+          "690.5"
+        ],
+        "derivation": "",
+        "answer_type": "multi-span",
+        "answer_from": "table-text",
+        "rel_paragraphs": [
+          "3"
+        ],
+        "req_comparison": false,
+        "scale": "",
+        "facts": [
+          "1,568.6",
+          "690.5"
+        ],
+        "consts": [],
+        "mappings": [
+          {
+            "table": [
+              2,
+              3
+            ]
+          },
+          {
+            "table": [
+              5,
+              3
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "table": {
+      "uid": "33295076b558d53b86fd6e5537022af6",
+      "table": [
+        [
+          "",
+          "",
+          "Years Ended",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "July 27, 2019",
+          "July 28, 2018",
+          "July 29, 2017",
+          "Variance in Dollars",
+          "Variance in Percent"
+        ],
+        [
+          "Research and development",
+          "$ 6,577",
+          "$ 6,332",
+          "$6,059",
+          "$245",
+          "4%"
+        ],
+        [
+          "Percentage of revenue",
+          "12.7%",
+          "12.8%",
+          "12.6%",
+          "",
+          ""
+        ],
+        [
+          "Sales and marketing",
+          "9,571",
+          "9,242",
+          "9,184",
+          "329",
+          "4%"
+        ],
+        [
+          "Percentage of revenue",
+          "18.4%",
+          "18.7%",
+          "19.1%",
+          "",
+          ""
+        ],
+        [
+          "General and administrative",
+          "1,827",
+          "2,144",
+          "1,993",
+          "(317)",
+          "(15)%"
+        ],
+        [
+          "Percentage of revenue",
+          "3.5%",
+          "4.3%",
+          "4.2%",
+          "",
+          ""
+        ],
+        [
+          "Total",
+          "$17,975",
+          "$17,718",
+          "$17,236",
+          "$257",
+          "1%"
+        ],
+        [
+          "Percentage of revenue",
+          "34.6%",
+          "35.9%",
+          "35.9%",
+          "",
+          ""
+        ]
+      ]
+    },
+    "paragraphs": [
+      {
+        "uid": "6bf771d424d0f16b40574196cdb6c492",
+        "order": 1,
+        "text": "Research and Development (“R&D”), Sales and Marketing, and General and Administrative (“G&A”) Expenses"
+      },
+      {
+        "uid": "15c976abb84ee9920e7a187e65774ffe",
+        "order": 2,
+        "text": "R&D, sales and marketing, and G&A expenses are summarized in the following table (in millions, except percentages):"
+      }
+    ],
+    "questions_sample": [
+      {
+        "uid": "dab39e83b38ceedf0797e94847ca2dae",
+        "order": 1,
+        "question": "Which years does the table provide information for R&D, sales and marketing, and G&A expenses?",
+        "answer": [
+          "2019",
+          "2018",
+          "2017"
+        ],
+        "derivation": "",
+        "answer_type": "multi-span",
+        "answer_from": "table-text",
+        "rel_paragraphs": [
+          "2"
+        ],
+        "req_comparison": false,
+        "scale": "",
+        "facts": [
+          "2017",
+          "2018",
+          "2019"
+        ],
+        "consts": [],
+        "mappings": [
+          {
+            "table": [
+              1,
+              3
+            ]
+          },
+          {
+            "table": [
+              1,
+              2
+            ]
+          },
+          {
+            "table": [
+              1,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "uid": "414b4ef29d5fb8114a86f0d8a33ddace",
+        "order": 2,
+        "question": "What was the research and development expense in 2019?",
+        "answer": [
+          "6,577"
+        ],
+        "derivation": "",
+        "answer_type": "span",
+        "answer_from": "table-text",
+        "rel_paragraphs": [
+          "2"
+        ],
+        "req_comparison": false,
+        "scale": "million",
+        "facts": [
+          "6,577"
+        ],
+        "consts": [],
+        "mappings": [
+          {
+            "table": [
+              2,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "uid": "77ccdc4a2f152ed1708466fec79576fb",
+        "order": 3,
+        "question": "What was the sales and marketing expense in 2017?",
+        "answer": [
+          "9,184"
+        ],
+        "derivation": "",
+        "answer_type": "span",
+        "answer_from": "table-text",
+        "rel_paragraphs": [
+          "2"
+        ],
+        "req_comparison": false,
+        "scale": "million",
+        "facts": [
+          "9,184"
+        ],
+        "consts": [],
+        "mappings": [
+          {
+            "table": [
+              4,
+              3
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "table": {
+      "uid": "b3d63fb06110ad7e91c9e765227c1d27",
+      "table": [
+        [
+          "",
+          "June 30,",
+          ""
+        ],
+        [
+          "",
+          "2019",
+          "2018"
+        ],
+        [
+          "Deferred tax assets",
+          "",
+          ""
+        ],
+        [
+          "Non-capital loss carryforwards",
+          "$161,119",
+          "$129,436"
+        ],
+        [
+          "Capital loss carryforwards",
+          "155",
+          "417"
+        ],
+        [
+          "Undeducted scientific research and development expenses",
+          "137,253",
+          "123,114"
+        ],
+        [
+          "Depreciation and amortization",
+          "683,777",
+          "829,369"
+        ],
+        [
+          "Restructuring costs and other reserves",
+          "17,845",
+          "17,202"
+        ],
+        [
+          "Deferred revenue",
+          "53,254",
+          "62,726"
+        ],
+        [
+          "Other",
+          "59,584",
+          "57,461"
+        ],
+        [
+          "Total deferred tax asset",
+          "$1,112,987",
+          "$1,219,725"
+        ],
+        [
+          "Valuation Allowance",
+          "$(77,328)",
+          "$(80,924)"
+        ],
+        [
+          "Deferred tax liabilities",
+          "",
+          ""
+        ],
+        [
+          "Scientific research and development tax credits",
+          "$(14,482)",
+          "$(13,342)"
+        ],
+        [
+          "Other",
+          "(72,599)",
+          "(82,668)"
+        ],
+        [
+          "Deferred tax liabilities",
+          "$(87,081)",
+          "$(96,010)"
+        ],
+        [
+          "Net deferred tax asset",
+          "$948,578",
+          "$1,042,791"
+        ],
+        [
+          "Comprised of:",
+          "",
+          ""
+        ],
+        [
+          "Long-term assets",
+          "1,004,450",
+          "1,122,729"
+        ],
+        [
+          "Long-term liabilities",
+          "(55,872)",
+          "(79,938)"
+        ],
+        [
+          "",
+          "$948,578",
+          "$1,042,791"
+        ]
+      ]
+    },
+    "paragraphs": [
+      {
+        "uid": "433c76b48faeb04242cf318ce916d9d0",
+        "order": 1,
+        "text": "The primary components of the deferred tax assets and liabilities are as follows, for the periods indicated below:"
+      },
+      {
+        "uid": "cf54c193cfcc67095600328f9111a031",
+        "order": 2,
+        "text": "We believe that sufficient uncertainty exists regarding the realization of certain deferred tax assets that a valuation allowance is required. We continue to evaluate our taxable position quarterly and consider factors by taxing jurisdiction, including but not limited to factors such as estimated taxable income, any historical experience of losses for tax purposes and the future growth of OpenText."
+      }
+    ],
+    "questions_sample": [
+      {
+        "uid": "d88745f6bcf2e7ab5335def3a0f0df44",
+        "order": 1,
+        "question": "What does the table show?",
+        "answer": [
+          "primary components of the deferred tax assets and liabilities"
+        ],
+        "derivation": "",
+        "answer_type": "span",
+        "answer_from": "text",
+        "rel_paragraphs": [
+          "1"
+        ],
+        "req_comparison": false,
+        "scale": "",
+        "facts": [
+          "primary components of the deferred tax assets and liabilities"
+        ],
+        "consts": [],
+        "mappings": [
+          {
+            "paragraph_1": [
+              4,
+              65
+            ]
+          }
+        ]
+      },
+      {
+        "uid": "107efaa11617ac41f5f9b3b5adf1e98c",
+        "order": 2,
+        "question": "What is the total assets as of June 30, 2019?",
+        "answer": [
+          "948,578"
+        ],
+        "derivation": "",
+        "answer_type": "span",
+        "answer_from": "table",
+        "rel_paragraphs": [],
+        "req_comparison": false,
+        "scale": "",
+        "facts": [
+          "948,578"
+        ],
+        "consts": [],
+        "mappings": [
+          {
+            "table": [
+              16,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "uid": "607dd25b10e5d14396ef2abda187330d",
+        "order": 3,
+        "question": "What are the Fiscal years included in the table?",
+        "answer": [
+          "2019",
+          "2018"
+        ],
+        "derivation": "",
+        "answer_type": "multi-span",
+        "answer_from": "table",
+        "rel_paragraphs": [],
+        "req_comparison": false,
+        "scale": "",
+        "facts": [
+          "2018",
+          "2019"
+        ],
+        "consts": [],
+        "mappings": [
+          {
+            "table": [
+              1,
+              2
+            ]
+          },
+          {
+            "table": [
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "table": {
+      "uid": "1424e718ab72e7d0bc792bbed0f42df6",
+      "table": [
+        [
+          "(In millions of dollars, except capital intensity)",
+          "Years ended December 31",
+          "",
+          ""
+        ],
+        [
+          "",
+          "2019",
+          "2018",
+          "%Chg"
+        ],
+        [
+          "Capital expenditures 1",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Wireless",
+          "1,320",
+          "1,086",
+          "22"
+        ],
+        [
+          "Cable",
+          "1,153",
+          "1,429",
+          "(19)"
+        ],
+        [
+          "Media",
+          "102",
+          "90",
+          "13"
+        ],
+        [
+          "Corporate",
+          "232",
+          "185",
+          "25"
+        ],
+        [
+          "Capital expenditures 1",
+          "2,807",
+          "2,790",
+          "1"
+        ],
+        [
+          "Capital intensity 2",
+          "18.6%",
+          "18.5%",
+          "0.1 pts"
+        ]
+      ]
+    },
+    "paragraphs": [
+      {
+        "uid": "f65b06e7eb97dbfb4423039eb432bb17",
+        "order": 1,
+        "text": "CAPITAL EXPENDITURES"
+      },
+      {
+        "uid": "fee20f493561f051bff4213974a7f298",
+        "order": 2,
+        "text": "Capital expenditures include costs associated with acquiring property, plant and equipment and placing it into service. The telecommunications business requires extensive and continual investments, including investment in new technologies and the expansion of capacity and geographical reach. Expenditures related to the acquisition of spectrum licences and additions to right-of-use assets are not included in capital expenditures and do not factor into the calculation of free cash flow or capital intensity. See “Managing Our Liquidity and Financial Resources”, “Key Performance Indicators”, and “Non-GAAP Measures and Related Performance Measures” for more information."
+      }
+    ],
+    "questions_sample": [
+      {
+        "uid": "88e9d40c09cf22303104880ce94bccce",
+        "order": 1,
+        "question": "What costs are associated under capital expenditure?",
+        "answer": [
+          "associated with acquiring property, plant and equipment and placing it into service"
+        ],
+        "derivation": "",
+        "answer_type": "span",
+        "answer_from": "text",
+        "rel_paragraphs": [
+          "2"
+        ],
+        "req_comparison": false,
+        "scale": "",
+        "facts": [
+          "associated with acquiring property, plant and equipment and placing it into service"
+        ],
+        "consts": [],
+        "mappings": [
+          {
+            "paragraph_2": [
+              35,
+              118
+            ]
+          }
+        ]
+      },
+      {
+        "uid": "43c792d0803c8cd37130be5e06db5ebc",
+        "order": 2,
+        "question": "What caused the increase in capital expenditures related to wireless?",
+        "answer": [
+          "result of investments made to upgrade our wireless network to continue delivering reliable performance for our customers."
+        ],
+        "derivation": "",
+        "answer_type": "span",
+        "answer_from": "text",
+        "rel_paragraphs": [
+          "5"
+        ],
+        "req_comparison": false,
+        "scale": "",
+        "facts": [
+          "result of investments made to upgrade our wireless network to continue delivering reliable performance for our customers."
+        ],
+        "consts": [],
+        "mappings": [
+          {
+            "paragraph_5": [
+              73,
+              196
+            ]
+          }
+        ]
+      },
+      {
+        "uid": "8251e63e0583f439d05c2837e1cf9cc1",
+        "order": 3,
+        "question": "What caused the decrease in capital expenditure in cable in 2019?",
+        "answer": [
+          "result of lower purchases of customer premise equipment and lower investments related to the initial launch of Ignite TV."
+        ],
+        "derivation": "",
+        "answer_type": "span",
+        "answer_from": "text",
+        "rel_paragraphs": [
+          "6"
+        ],
+        "req_comparison": false,
+        "scale": "",
+        "facts": [
+          "result of lower purchases of customer premise equipment and lower investments related to the initial launch of Ignite TV."
+        ],
+        "consts": [],
+        "mappings": [
+          {
+            "paragraph_6": [
+              67,
+              190
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "table": {
+      "uid": "9a43ac474979cb7ecf516b5a8e7849ee",
+      "table": [
+        [
+          "",
+          "2019",
+          "2018",
+          "2017"
+        ],
+        [
+          "EARNINGS PER SHARE",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Net profit/(loss) for the year (USDm)",
+          "166.0",
+          "-34.8",
+          "2.4"
+        ],
+        [
+          "Million shares",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Weighted average number of shares",
+          "74.3",
+          "73.4",
+          "62.3"
+        ],
+        [
+          "Weighted average number of treasury shares",
+          "-0.3",
+          "-0.3",
+          "-0.3"
+        ],
+        [
+          "Weighted average number of shares outstanding",
+          "74.0",
+          "73.1",
+          "62.0"
+        ],
+        [
+          "Dilutive effect of outstanding share options",
+          "0.0",
+          "-",
+          "-"
+        ],
+        [
+          "Weighted average number of shares outstanding incl. dilutive effect of share options",
+          "74.0",
+          "73.1",
+          "62.0"
+        ],
+        [
+          "Basic earnings/(loss) per share (USD)",
+          "2.24",
+          "-0.48",
+          "0.04"
+        ],
+        [
+          "Diluted earnings/(loss) per share (USD)",
+          "2.24",
+          "-0.48",
+          "0.04"
+        ]
+      ]
+    },
+    "paragraphs": [
+      {
+        "uid": "94d4687278ec762eea9f04edfd1d85ae",
+        "order": 1,
+        "text": "NOTE 26 – EARNINGS PER SHARE AND DIVIDEND PER SHARE"
+      },
+      {
+        "uid": "25b53445c79d504f8638ade42fd7638b",
+        "order": 2,
+        "text": "When calculating diluted earnings per share for 2018 and 2017, RSUs have been omitted as they are out-of-the-money and thus anti-dilutive, but the RSUs may potentially dilute earnings per share in the future. Please refer to note 3 for information on the RSU share options."
+      }
+    ],
+    "questions_sample": [
+      {
+        "uid": "1eefb8a6e023d742f3afec9d7fe47974",
+        "order": 1,
+        "question": "Why have RSUs been omitted when calculating diluted earnings per share for 2018 and 2017?",
+        "answer": [
+          "RSUs have been omitted as they are out-of-the-money and thus anti-dilutive"
+        ],
+        "derivation": "",
+        "answer_type": "span",
+        "answer_from": "text",
+        "rel_paragraphs": [
+          "2"
+        ],
+        "req_comparison": false,
+        "scale": "",
+        "facts": [
+          "RSUs have been omitted as they are out-of-the-money and thus anti-dilutive"
+        ],
+        "consts": [],
+        "mappings": [
+          {
+            "paragraph_2": [
+              63,
+              137
+            ]
+          }
+        ]
+      },
+      {
+        "uid": "09310d9e9059dc5a998344ed5b321da5",
+        "order": 2,
+        "question": "What information does note 3 provide?",
+        "answer": [
+          "information on the RSU share options"
+        ],
+        "derivation": "",
+        "answer_type": "span",
+        "answer_from": "text",
+        "rel_paragraphs": [
+          "2"
+        ],
+        "req_comparison": false,
+        "scale": "",
+        "facts": [
+          "information on the RSU share options"
+        ],
+        "consts": [],
+        "mappings": [
+          {
+            "paragraph_2": [
+              236,
+              272
+            ]
+          }
+        ]
+      },
+      {
+        "uid": "4b3da5e65da1ec752806e0f145a93544",
+        "order": 3,
+        "question": "What are the types of earnings/(loss) per share provided in the table?",
+        "answer": [
+          "Basic earnings/(loss) per share (USD)",
+          "Diluted earnings/(loss) per share (USD)"
+        ],
+        "derivation": "",
+        "answer_type": "multi-span",
+        "answer_from": "table-text",
+        "rel_paragraphs": [
+          "1"
+        ],
+        "req_comparison": false,
+        "scale": "",
+        "facts": [
+          "Basic earnings/(loss) per share (USD)",
+          "Diluted earnings/(loss) per share (USD)"
+        ],
+        "consts": [],
+        "mappings": [
+          {
+            "table": [
+              9,
+              0
+            ]
+          },
+          {
+            "table": [
+              10,
+              0
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -6,6 +6,7 @@ The BaseDatasetAdapter defines the common interface and utilities for all datase
 while each specific dataset adapter (e.g., SROIEAdapter, FUNSDAdapter) implements 
 the dataset-specific directory path, file type loading, and parsing data schema logic.
 """
+import ast
 import os
 import io
 import re
@@ -21,6 +22,25 @@ from collections import defaultdict
 from difflib import SequenceMatcher
 from datasets import load_dataset, load_from_disk
 from scipy.optimize import linear_sum_assignment
+
+
+def _parse_options_list(value):  # noqa: ANN001, ANN201
+    """Parse options from parquet (string like \"['$63,020', ...]\" or list) into a Python list. Returns None if missing/invalid."""
+    if value is None:
+        return None
+    if isinstance(value, list):
+        return value if value else None
+    if isinstance(value, str):
+        s = value.strip()
+        if not s:
+            return None
+        try:
+            out = ast.literal_eval(s)
+            return out if isinstance(out, list) and out else None
+        except (ValueError, SyntaxError):
+            return None
+    return None
+
 
 # ======================================================
 # Base Adapter
@@ -124,7 +144,7 @@ class BaseDatasetAdapter:
     # Generic helper: load Parquet folder
     # -----------------------------------------
     def _load_arrow_folder(self, folder_path: Path, max_samples_per_split=None, max_samples_per_category=None):
-        """Load parquet shards from a split folder and return row dicts."""
+        """Yield parquet rows from a split folder as a generator (streaming)."""
         if not folder_path.exists():
             raise FileNotFoundError(f"Folder not found: {folder_path}")
 
@@ -136,17 +156,11 @@ class BaseDatasetAdapter:
         elif max_samples_per_category is not None:
             max_samples = max_samples_per_category
 
-        rows = []
-        for row in self._arrow_row_stream(folder_path, max_samples=max_samples):
-            rows.append(row)
-
-        if rows:
-            return rows
-
-        # first_5_rows.json files are schema/debug references only and should not be
-        # used as evaluation data when parquet shards are unavailable in this repo.
-        print(f"[WARN] No parquet rows found under {folder_path}; skipping split (no JSON fallback)")
-        return rows
+        # Delegate to the low-level row streamer. Callers should treat the return
+        # value as an iterator/generator and MUST NOT materialize it into a list
+        # for large datasets, to avoid exhausting memory on very large parquet
+        # shards.
+        return self._arrow_row_stream(folder_path, max_samples=max_samples)
     
     @classmethod
     def load_dataset_splits(cls, data_dir=None, json_file="data_structure.json"):
@@ -277,16 +291,6 @@ FILE_MAPPING = {
         "ground_truth_path": None,
         "notes": None
     }
-}
-
-3. Single-folder dataset (OmniDocBench):
-FILE_MAPPING = {
-    "train": {
-            "format": "folder",
-            "dataset_path": "data/vision/OmniDocBench/train/",
-            "ground_truth_path": None,
-            "notes": "1 parquet shard file under 'train' folder"
-    },
 }
 
 Loading logic should dynamically handle:
@@ -1111,7 +1115,9 @@ class SROIEAdapter(OCRDatasetAdapter):
         self,
         dataset_split=None,
         max_samples_per_split=None,
-        max_samples_per_category=None
+        max_samples_per_category=None,
+        only_splits_with_gt=False,
+        **kwargs,
     ):
         """Load one split or all splits if dataset_split is None."""
         splits_to_load = (
@@ -1336,7 +1342,9 @@ class FUNSDAdapter(OCRDatasetAdapter):
     def load_split(self, 
         dataset_split=None, 
         max_samples_per_split=None, 
-        max_samples_per_category=None
+        max_samples_per_category=None,
+        only_splits_with_gt=False,
+        **kwargs,
     ):
         """
         Load one split or all splits if dataset_split is None.
@@ -1577,7 +1585,6 @@ universal_vision_sample = {
     "ground_truth": Any,  # label/answer, could be:
         # - string (DocVQA, InfographicsVQA, MMMU datasets)
         # - list of strings (ChartQA)
-        # - None (OmniDocBench)
     "metadata": {
         "dataset": str,  # dataset name, e.g., "DocVQA"
         "split": str,  # split name, e.g., "test", "train", "validation"
@@ -1648,13 +1655,16 @@ class DocVQAAdapter(VisionDatasetAdapter):
     which is called by the generic _load_images_and_labels() helper,
     and serves to extract structured data based on a schema shared across all samples within the same file type.
     """
+    # Only validation has ground truth in the dataset; test has answers: null.
+    SPLITS_WITH_GT = {"validation"}
+
     FILE_MAPPING = {
-        "test": {
-            "format": "folder",
-            "dataset_path": "data/vision/DocVQA/test",
-            "ground_truth_path": None,
-            "notes": "Test folder containing 8 Parquet shard files"
-        },
+        # "test": {  # no GT (answers: null); evaluation uses validation only
+        #     "format": "folder",
+        #     "dataset_path": "data/vision/DocVQA/test",
+        #     "ground_truth_path": None,
+        #     "notes": "Test folder containing 8 Parquet shard files"
+        # },
         "validation": {
             "format": "json",
             "dataset_path": "data/vision/DocVQA/validation",
@@ -1687,28 +1697,50 @@ class DocVQAAdapter(VisionDatasetAdapter):
         self.dataset_split = dataset_split
         self.FILE_MAPPING = self.FILE_MAPPING
     
-    def load_split(self, dataset_split=None, max_samples_per_split=None, max_samples_per_category=None):
-        splits_to_load = [dataset_split or self.dataset_split] if dataset_split or self.dataset_split else list(self.FILE_MAPPING.keys())
-        all_samples = []
+    def load_split(
+        self,
+        dataset_split=None,
+        max_samples_per_split=None,
+        max_samples_per_category=None,
+        only_splits_with_gt=False,
+    ):
+        """Stream DocVQA samples in universal vision format, one row at a time."""
+        all_splits = list(self.FILE_MAPPING.keys())
+        if dataset_split or self.dataset_split:
+            splits_to_load = [dataset_split or self.dataset_split]
+        else:
+            splits_to_load = all_splits
+        if only_splits_with_gt and getattr(self, "SPLITS_WITH_GT", None):
+            splits_to_load = [s for s in splits_to_load if s in self.SPLITS_WITH_GT]
 
-        for split in splits_to_load:
-            raw_samples = self.vision_dataset_loader(split, self.FILE_MAPPING, max_samples_per_split=max_samples_per_split)
+        def _iter():
+            emitted = 0
+            for split in splits_to_load:
+                raw_samples = self.vision_dataset_loader(
+                    split,
+                    self.FILE_MAPPING,
+                    max_samples_per_split=max_samples_per_split,
+                )
 
-            # standardize to universal_format_for_vision_datasets
-            for idx, s in enumerate(raw_samples):
-                all_samples.append({
-                    "input": {
-                        "image": s.get("image"),
-                        "question": s.get("question")
-                    },
-                    "ground_truth": s.get("answers")[0] if s.get("answers") else None,
-                    "metadata": {"dataset": "DocVQA", "split": split, "sample_id": f"{split}_{idx}"}
-                })
+                # standardize to universal_format_for_vision_datasets
+                for idx, s in enumerate(raw_samples):
+                    yield {
+                        "input": {
+                            "image": s.get("image"),
+                            "question": s.get("question"),
+                        },
+                        "ground_truth": s.get("answers")[0] if s.get("answers") else None,
+                        "metadata": {
+                            "dataset": "DocVQA",
+                            "split": split,
+                            "sample_id": f"{split}_{idx}",
+                        },
+                    }
+                    emitted += 1
+                    if max_samples_per_category and emitted >= max_samples_per_category:
+                        return
 
-        if max_samples_per_category:
-            all_samples = all_samples[:max_samples_per_category]
-
-        return all_samples
+        return _iter()
 
 class InfographicsVQAAdapter(VisionDatasetAdapter):
     """
@@ -1756,13 +1788,16 @@ class InfographicsVQAAdapter(VisionDatasetAdapter):
     which is called by the generic _load_images_and_labels() helper,
     and serves to extract structured data based on a schema shared across all samples within the same file type.
     """
+    # Only validation has ground truth; test may have null/unreliable labels.
+    SPLITS_WITH_GT = {"validation"}
+
     FILE_MAPPING = {
-        "test": {
-            "format": "folder",
-            "dataset_path": "data/vision/InfographicsVQA/test",
-            "ground_truth_path": None,
-            "notes": "Test folder containing 4 Parquet shard files"
-        },
+        # "test": {  # no GT for evaluation; evaluation uses validation only
+        #     "format": "folder",
+        #     "dataset_path": "data/vision/InfographicsVQA/test",
+        #     "ground_truth_path": None,
+        #     "notes": "Test folder containing 4 Parquet shard files"
+        # },
         "validation": {
             "format": "folder",
             "dataset_path": "data/vision/InfographicsVQA/validation",
@@ -1796,27 +1831,49 @@ class InfographicsVQAAdapter(VisionDatasetAdapter):
         self.dataset_split = dataset_split
         self.FILE_MAPPING = self.FILE_MAPPING
     
-    def load_split(self, dataset_split=None, max_samples_per_split=None, max_samples_per_category=None):
-        splits_to_load = [dataset_split or self.dataset_split] if dataset_split or self.dataset_split else list(self.FILE_MAPPING.keys())
-        all_samples = []
+    def load_split(
+        self,
+        dataset_split=None,
+        max_samples_per_split=None,
+        max_samples_per_category=None,
+        only_splits_with_gt=False,
+    ):
+        """Stream InfographicsVQA samples in universal vision format."""
+        all_splits = list(self.FILE_MAPPING.keys())
+        if dataset_split or self.dataset_split:
+            splits_to_load = [dataset_split or self.dataset_split]
+        else:
+            splits_to_load = all_splits
+        if only_splits_with_gt and getattr(self, "SPLITS_WITH_GT", None):
+            splits_to_load = [s for s in splits_to_load if s in self.SPLITS_WITH_GT]
 
-        for split in splits_to_load:
-            raw_samples = self.vision_dataset_loader(split, self.FILE_MAPPING, max_samples_per_split=max_samples_per_split)
+        def _iter():
+            emitted = 0
+            for split in splits_to_load:
+                raw_samples = self.vision_dataset_loader(
+                    split,
+                    self.FILE_MAPPING,
+                    max_samples_per_split=max_samples_per_split,
+                )
 
-            for idx, s in enumerate(raw_samples):
-                all_samples.append({
-                    "input": {
-                        "image": s.get("image"),
-                        "question": s.get("question")
-                    },
-                    "ground_truth": s.get("answers")[0] if s.get("answers") else None,
-                    "metadata": {"dataset": "InfographicsVQA", "split": split, "sample_id": f"{split}_{idx}"}
-                })
+                for idx, s in enumerate(raw_samples):
+                    yield {
+                        "input": {
+                            "image": s.get("image"),
+                            "question": s.get("question"),
+                        },
+                        "ground_truth": s.get("answers")[0] if s.get("answers") else None,
+                        "metadata": {
+                            "dataset": "InfographicsVQA",
+                            "split": split,
+                            "sample_id": f"{split}_{idx}",
+                        },
+                    }
+                    emitted += 1
+                    if max_samples_per_category and emitted >= max_samples_per_category:
+                        return
 
-        if max_samples_per_category:
-            all_samples = all_samples[:max_samples_per_category]
-
-        return all_samples
+        return _iter()
 
 class ChartQAAdapter(VisionDatasetAdapter):
     """
@@ -1918,111 +1975,50 @@ class ChartQAAdapter(VisionDatasetAdapter):
         self.dataset_split = dataset_split
         self.FILE_MAPPING = self.FILE_MAPPING
 
-    def load_split(self, dataset_split=None, max_samples_per_split=None, max_samples_per_category=None):
-        splits_to_load = [dataset_split or self.dataset_split] if dataset_split or self.dataset_split else list(self.FILE_MAPPING.keys())
-        all_samples = []
-
-        for split in splits_to_load:
-            raw_samples = self.vision_dataset_loader(split, self.FILE_MAPPING, max_samples_per_split=max_samples_per_split)
-
-            for idx, row in enumerate(raw_samples):
-                all_samples.append({
-                    "input": {"image": row.get("image", row)},
-                    "ground_truth": row.get("answer"),
-                    "metadata": {"dataset": "ChartQA", "split": split, "sample_id": f"{split}_{idx}"}
-                })
-
-        if max_samples_per_category:
-            all_samples = all_samples[:max_samples_per_category]
-
-        return all_samples
-
-class OmniDocBenchAdapter(VisionDatasetAdapter):
-    """
-    data/vision/OmniDocBench/train/data-00000-of-00001.parquet,
-    is the only parquet shard file in train/ sub-folder.
-    
-    === Dataset object ===
-    Dataset({
-        features: ['layout_dets', 'extra', 'page_info'],
-        num_rows: 981
-    })
-
-    === Dataset features ===
-    {'extra': {'relation': List({'relation_type': Value('string'), 'source_anno_id': Value('int64'), 'target_anno_id': Value('int64')})},
-    'layout_dets': List({'anno_id': Value('int64'), 'attribute': {'formula_type': Value('string'), 'include_background': Value('bool'), 'include_equation': Value('bool'), 'include_photo': Value('bool'), 'language': Value('string'), 'line': Value('string'), 'table_layout': Value('string'), 'text_background': Value('string'), 'text_language': Value('string'), 'text_rotate': Value('string'), 'with_span': Value('bool'), 'with_structured_text': Value('bool')}, 'category_type': Value('string'), 'html': Value('string'), 'ignore': Value('bool'), 'latex': Value('string'), 'line_with_spans': List({'category_type': Value('string'), 'latex': Value('string'), 'poly': List(Value('float64')), 'text': Value('string')}), 'merge_list': List({'anno_id': Value('int64'), 'attribute': {'formula_type': Value('string'), 'text_background': Value('string'), 'text_language': Value('string'), 'text_rotate': 
-    Value('string')}, 'category_type': Value('string'), 'ignore': Value('bool'), 'latex': Value('string'), 'line_with_spans': List({'category_type': Value('string'), 'latex': Value('string'), 'poly': List(Value('float64')), 'text': Value('string')}), 'order': Value('int64'), 'poly': List(Value('float64')), 'text': Value('string')}), 'order': Value('int64'), 
-    'poly': List(Value('float64')), 'table_edit_status': Value('string'), 'text': Value('string')}),
-    'page_info': {'height': Value('int64'),
-                'image_path': Value('string'),
-                'page_attribute': {'data_source': Value('string'),
-                                    'language': Value('string'),
-                                    'layout': Value('string'),
-                                    'special_issue': List(Value('string'))},
-                'page_no': Value('int64'),
-                'width': Value('int64')}}
-
-                
-    we need to load it once and print out the first 5 rows/set of samples to
-    inspect the actual structure to implement the parsing logic in _parse_omnidocbench_annotation().
-        
-    FILE_MAPPING below only serves to provide the path right down to the split level.
-    For each split, the actual loading logic in load_split() must handle the pathing,
-    down to the individual sample level under train/ folder.
-    The parsing logic for each sample is implemented in the _parse_omnidocbench_annotation() function,
-    which is called by the generic _load_images_and_labels() helper,
-    and serves to extract structured data based on a schema shared across all samples within the same file type.
-    """
-    FILE_MAPPING = {
-        "default": {
-            "format": "folder",
-            "dataset_path": "data/vision/OmniDocBench/train",
-            "ground_truth_path": None,
-            "notes": "Single parquet file under 'train'; no official splits"
-        }
-    }
-
-    def __init__(
+    def load_split(
         self,
-        category: str = "vision",
-        dataset_name: str = "OmniDocBench",
-        data_source_from_hf_or_manual: str = "hf",
-        hf_repo_name: str = "Quivr/OmniDocBench",
-        hf_repo_variant: str = "full_dataset",
-        dataset_split=None
+        dataset_split=None,
+        max_samples_per_split=None,
+        max_samples_per_category=None,
+        only_splits_with_gt=False,
     ):
-        super().__init__(
-            category=category,
-            dataset_name=dataset_name,
-            data_source_from_hf_or_manual=data_source_from_hf_or_manual,
-            hf_repo_name=hf_repo_name,
-            hf_repo_variant=hf_repo_variant
-        )
-        self.category = category
-        self.dataset_name = dataset_name
-        self.data_source_from_hf_or_manual = data_source_from_hf_or_manual
-        self.hf_repo_name = hf_repo_name
-        self.hf_repo_variant = hf_repo_variant
-        self.dataset_split = dataset_split
-        self.FILE_MAPPING = self.FILE_MAPPING
+        """Stream ChartQA samples in universal vision format. All splits have labels (test, train, val)."""
+        if dataset_split or self.dataset_split:
+            splits_to_load = [dataset_split or self.dataset_split]
+        else:
+            splits_to_load = list(self.FILE_MAPPING.keys())
+        # ChartQA test/train/val all have ground truth; no filtering when only_splits_with_gt
 
-    def load_split(self, dataset_split=None, max_samples_per_split=None, max_samples_per_category=None, recursive=True):
-        split = dataset_split or self.dataset_split
-        raw_samples = self.vision_dataset_loader(split, self.FILE_MAPPING, max_samples_per_split=max_samples_per_split)
+        def _iter():
+            emitted = 0
+            for split in splits_to_load:
+                raw_samples = self.vision_dataset_loader(
+                    split,
+                    self.FILE_MAPPING,
+                    max_samples_per_split=max_samples_per_split,
+                )
 
-        # For OmniDocBench we just return files (Parquet folder)
-        standardized = []
-        for idx, s in enumerate(raw_samples):
-            standardized.append({
-                "input": s,
-                "ground_truth": None,
-                "metadata": {"dataset": "OmniDocBench", "split": split, "sample_id": f"{split}_{idx}"}
-            })
-        
-        if max_samples_per_category:
-            standardized = standardized[:max_samples_per_category]
+                for idx, row in enumerate(raw_samples):
+                    yield {
+                        "input": {
+                            "image": row.get("image", row),
+                            "question": row.get("query"),
+                        },
+                        # ChartQA ground truth labels are stored under "label" (list[str]).
+                        # We keep the list here; evaluation will take the first element.
+                        "ground_truth": row.get("label"),
+                        "metadata": {
+                            "dataset": "ChartQA",
+                            "split": split,
+                            "sample_id": f"{split}_{idx}",
+                        },
+                    }
+                    emitted += 1
+                    if max_samples_per_category and emitted >= max_samples_per_category:
+                        return
 
-        return standardized
+        return _iter()
+
 
 class MMMUAccountingAdapter(VisionDatasetAdapter):
     """
@@ -2095,6 +2091,8 @@ class MMMUAccountingAdapter(VisionDatasetAdapter):
     which is called by the generic _load_images_and_labels() helper,
     and serves to extract structured data based on a schema shared across all samples within the same file type.
     """
+    SPLITS_WITH_GT = {"dev", "test", "validation"}
+
     FILE_MAPPING = {
         "dev": {
             "format": "folder",
@@ -2138,7 +2136,55 @@ class MMMUAccountingAdapter(VisionDatasetAdapter):
         self.hf_repo_variant = hf_repo_variant
         self.dataset_split = dataset_split
         self.FILE_MAPPING = self.FILE_MAPPING
-    pass
+
+    def load_split(
+        self,
+        dataset_split=None,
+        max_samples_per_split=None,
+        max_samples_per_category=None,
+        only_splits_with_gt=False,
+    ):
+        """Stream MMMU samples in universal vision format. Parquet rows have answer, question, image_1..image_7."""
+        splits_to_load = (
+            [dataset_split or self.dataset_split]
+            if (dataset_split or self.dataset_split)
+            else list(self.FILE_MAPPING.keys())
+        )
+        if only_splits_with_gt and getattr(self, "SPLITS_WITH_GT", None):
+            splits_to_load = [s for s in splits_to_load if s in self.SPLITS_WITH_GT]
+
+        def _iter():
+            emitted = 0
+            for split in splits_to_load:
+                raw_samples = self.vision_dataset_loader(
+                    split,
+                    self.FILE_MAPPING,
+                    max_samples_per_split=max_samples_per_split,
+                )
+                for idx, row in enumerate(raw_samples):
+                    img = row.get("image_1")
+                    if img is None:
+                        for i in range(2, 8):
+                            img = row.get(f"image_{i}")
+                            if img is not None:
+                                break
+                    meta = {
+                        "dataset": self.dataset_name,
+                        "split": split,
+                        "sample_id": row.get("id", f"{split}_{idx}"),
+                    }
+                    opts = _parse_options_list(row.get("options"))
+                    if opts is not None:
+                        meta["options_list"] = opts
+                    yield {
+                        "input": {"image": img, "question": row.get("question")},
+                        "ground_truth": str(row.get("answer", "")),
+                        "metadata": meta,
+                    }
+                    emitted += 1
+                    if max_samples_per_category and emitted >= max_samples_per_category:
+                        return
+        return _iter()
 
 class MMMUEconomicsAdapter(VisionDatasetAdapter):
     """
@@ -2212,6 +2258,8 @@ class MMMUEconomicsAdapter(VisionDatasetAdapter):
     which is called by the generic _load_images_and_labels() helper,
     and serves to extract structured data based on a schema shared across all samples within the same file type.
     """
+    SPLITS_WITH_GT = {"dev", "test", "validation"}
+
     FILE_MAPPING = {
         "dev": {
             "format": "folder",
@@ -2255,7 +2303,55 @@ class MMMUEconomicsAdapter(VisionDatasetAdapter):
         self.hf_repo_variant = hf_repo_variant
         self.dataset_split = dataset_split
         self.FILE_MAPPING = self.FILE_MAPPING
-    pass
+
+    def load_split(
+        self,
+        dataset_split=None,
+        max_samples_per_split=None,
+        max_samples_per_category=None,
+        only_splits_with_gt=False,
+    ):
+        """Stream MMMU samples in universal vision format. Parquet rows have answer, question, image_1..image_7."""
+        splits_to_load = (
+            [dataset_split or self.dataset_split]
+            if (dataset_split or self.dataset_split)
+            else list(self.FILE_MAPPING.keys())
+        )
+        if only_splits_with_gt and getattr(self, "SPLITS_WITH_GT", None):
+            splits_to_load = [s for s in splits_to_load if s in self.SPLITS_WITH_GT]
+
+        def _iter():
+            emitted = 0
+            for split in splits_to_load:
+                raw_samples = self.vision_dataset_loader(
+                    split,
+                    self.FILE_MAPPING,
+                    max_samples_per_split=max_samples_per_split,
+                )
+                for idx, row in enumerate(raw_samples):
+                    img = row.get("image_1")
+                    if img is None:
+                        for i in range(2, 8):
+                            img = row.get(f"image_{i}")
+                            if img is not None:
+                                break
+                    meta = {
+                        "dataset": self.dataset_name,
+                        "split": split,
+                        "sample_id": row.get("id", f"{split}_{idx}"),
+                    }
+                    opts = _parse_options_list(row.get("options"))
+                    if opts is not None:
+                        meta["options_list"] = opts
+                    yield {
+                        "input": {"image": img, "question": row.get("question")},
+                        "ground_truth": str(row.get("answer", "")),
+                        "metadata": meta,
+                    }
+                    emitted += 1
+                    if max_samples_per_category and emitted >= max_samples_per_category:
+                        return
+        return _iter()
 
 class MMMUFinanceAdapter(VisionDatasetAdapter):
     """
@@ -2330,6 +2426,8 @@ class MMMUFinanceAdapter(VisionDatasetAdapter):
     which is called by the generic _load_images_and_labels() helper,
     and serves to extract structured data based on a schema shared across all samples within the same file type.
     """
+    SPLITS_WITH_GT = {"dev", "test", "validation"}
+
     FILE_MAPPING = {
         "dev": {
             "format": "folder",
@@ -2373,7 +2471,55 @@ class MMMUFinanceAdapter(VisionDatasetAdapter):
         self.hf_repo_variant = hf_repo_variant
         self.dataset_split = dataset_split
         self.FILE_MAPPING = self.FILE_MAPPING
-    pass
+
+    def load_split(
+        self,
+        dataset_split=None,
+        max_samples_per_split=None,
+        max_samples_per_category=None,
+        only_splits_with_gt=False,
+    ):
+        """Stream MMMU samples in universal vision format. Parquet rows have answer, question, image_1..image_7."""
+        splits_to_load = (
+            [dataset_split or self.dataset_split]
+            if (dataset_split or self.dataset_split)
+            else list(self.FILE_MAPPING.keys())
+        )
+        if only_splits_with_gt and getattr(self, "SPLITS_WITH_GT", None):
+            splits_to_load = [s for s in splits_to_load if s in self.SPLITS_WITH_GT]
+
+        def _iter():
+            emitted = 0
+            for split in splits_to_load:
+                raw_samples = self.vision_dataset_loader(
+                    split,
+                    self.FILE_MAPPING,
+                    max_samples_per_split=max_samples_per_split,
+                )
+                for idx, row in enumerate(raw_samples):
+                    img = row.get("image_1")
+                    if img is None:
+                        for i in range(2, 8):
+                            img = row.get(f"image_{i}")
+                            if img is not None:
+                                break
+                    meta = {
+                        "dataset": self.dataset_name,
+                        "split": split,
+                        "sample_id": row.get("id", f"{split}_{idx}"),
+                    }
+                    opts = _parse_options_list(row.get("options"))
+                    if opts is not None:
+                        meta["options_list"] = opts
+                    yield {
+                        "input": {"image": img, "question": row.get("question")},
+                        "ground_truth": str(row.get("answer", "")),
+                        "metadata": meta,
+                    }
+                    emitted += 1
+                    if max_samples_per_category and emitted >= max_samples_per_category:
+                        return
+        return _iter()
 
 class MMMUMathAdapter(VisionDatasetAdapter):
     """
@@ -2450,6 +2596,8 @@ class MMMUMathAdapter(VisionDatasetAdapter):
     which is called by the generic _load_images_and_labels() helper,
     and serves to extract structured data based on a schema shared across all samples within the same file type.
     """
+    SPLITS_WITH_GT = {"dev", "test", "validation"}
+
     FILE_MAPPING = {
         "dev": {
             "format": "folder",
@@ -2493,7 +2641,55 @@ class MMMUMathAdapter(VisionDatasetAdapter):
         self.hf_repo_variant = hf_repo_variant
         self.dataset_split = dataset_split
         self.FILE_MAPPING = self.FILE_MAPPING
-    pass
+
+    def load_split(
+        self,
+        dataset_split=None,
+        max_samples_per_split=None,
+        max_samples_per_category=None,
+        only_splits_with_gt=False,
+    ):
+        """Stream MMMU samples in universal vision format. Parquet rows have answer, question, image_1..image_7."""
+        splits_to_load = (
+            [dataset_split or self.dataset_split]
+            if (dataset_split or self.dataset_split)
+            else list(self.FILE_MAPPING.keys())
+        )
+        if only_splits_with_gt and getattr(self, "SPLITS_WITH_GT", None):
+            splits_to_load = [s for s in splits_to_load if s in self.SPLITS_WITH_GT]
+
+        def _iter():
+            emitted = 0
+            for split in splits_to_load:
+                raw_samples = self.vision_dataset_loader(
+                    split,
+                    self.FILE_MAPPING,
+                    max_samples_per_split=max_samples_per_split,
+                )
+                for idx, row in enumerate(raw_samples):
+                    img = row.get("image_1")
+                    if img is None:
+                        for i in range(2, 8):
+                            img = row.get(f"image_{i}")
+                            if img is not None:
+                                break
+                    meta = {
+                        "dataset": self.dataset_name,
+                        "split": split,
+                        "sample_id": row.get("id", f"{split}_{idx}"),
+                    }
+                    opts = _parse_options_list(row.get("options"))
+                    if opts is not None:
+                        meta["options_list"] = opts
+                    yield {
+                        "input": {"image": img, "question": row.get("question")},
+                        "ground_truth": str(row.get("answer", "")),
+                        "metadata": meta,
+                    }
+                    emitted += 1
+                    if max_samples_per_category and emitted >= max_samples_per_category:
+                        return
+        return _iter()
 
 # ------------------------
 # RAG Adapters
@@ -2519,55 +2715,55 @@ universal_rag_sample = {
 """
 class FinQAAdapter(BaseDatasetAdapter):
     """
-    data/rag/FinQA/train/data-00000-of-00001.parquet,
-    is the only parquet shard file in train/ sub-folder.
-    
-    === Dataset object ===
-    Dataset({
-        features: ['query-id', 'corpus-id', 'score'],
-        num_rows: 8281
-    })
+    FinQA for RAG QA evaluation. Data is loaded from a single JSON file per split.
 
-    === Dataset features ===
-    {'corpus-id': Value('int64'),
-    'query-id': Value('int64'),
-    'score': Value('int64')}
+    data/rag/FinQA/train/train_qa.json
 
-    === First 3 samples ===
+    === Dataset schema (train_qa.json) ===
+    List of entries; each entry has:
+    - "id": str (unique example id, e.g. report name + index)
+    - "pre_text": str (text before the table)
+    - "post_text": str (text after the table)
+    - "table": list (structured table data)
+    - "qa": {
+        "question": str,
+        "program": list (reasoning program),
+        "gold_inds": ...,
+        "exe_ans": str (gold execution result / answer),
+        "program_re": ...
+      }
 
-    --- Sample 0 ---
-    {'corpus-id': 4344, 'query-id': 0, 'score': 1}
+    === First sample (structure) ===
+    {
+        "id": "...",
+        "pre_text": "...",
+        "post_text": "...",
+        "table": [...],
+        "qa": {
+            "question": "What is ...?",
+            "exe_ans": "123.45",
+            "program": [...]
+        }
+    }
 
-    --- Sample 1 ---
-    {'corpus-id': 5191, 'query-id': 1, 'score': 1}
-
-    --- Sample 2 ---
-    {'corpus-id': 4918, 'query-id': 2, 'score': 1}
-
-    we need to load it once and print out the first 5 rows/set of samples to
-    inspect the actual structure to implement the parsing logic in _parse_finqa_annotation().
-
-    FILE_MAPPING below only serves to provide the path right down to the split level.
-    For each split, the actual loading logic in load_split() must handle the pathing,
-    down to the individual sample level under train/ folder.
-    The parsing logic for each sample is implemented in the _parse_finqa_annotation() function,
-    which is called by the generic _load_samples() helper,
-    and serves to extract structured data based on a schema shared across all samples within the same file type.
+    FILE_MAPPING points to the JSON file path. No parquet is used.
+    Source: Official FinQA from https://github.com/czyssrs/FinQA (dataset/train.json).
     """
     FILE_MAPPING = {
         "train": {
-            "format": "folder",
-            "dataset_path": "data/rag/FinQA/train",
+            "format": "json",
+            "dataset_path": "data/rag/FinQA/train/train_qa.json",
             "ground_truth_path": None,
-            "notes": "1 parquet file under 'train' folder"
+            "notes": "Single JSON file train_qa.json (list of QA entries)"
         }
     }
+    SPLITS_WITH_GT = {"train"}
 
     def __init__(
         self,
         category: str = "rag",
         dataset_name: str = "FinQA",
-        data_source_from_hf_or_manual: str = "hf",
+        data_source_from_hf_or_manual: str = "manual",
         hf_repo_name: str = "FinanceMTEB/FinQA",
         hf_repo_variant: str = None,
         dataset_split=None
@@ -2587,43 +2783,87 @@ class FinQAAdapter(BaseDatasetAdapter):
         self.dataset_split = dataset_split
         self.FILE_MAPPING = self.FILE_MAPPING
 
-    def load_split(self, dataset_split=None, recursive=False, max_samples_per_split=None, max_samples_per_category=None):
-        """Load FinQA split(s) in universal RAG format."""
-        splits_to_load = [dataset_split or self.dataset_split] if (dataset_split or self.dataset_split) else list(self.FILE_MAPPING.keys())
-        all_samples = []
+    def load_split(
+        self,
+        dataset_split=None,
+        recursive=False,
+        max_samples_per_split=None,
+        max_samples_per_category=None,
+        only_splits_with_gt=False,
+    ):
+        """Stream FinQA split(s) in universal RAG format from train_qa.json. All splits have ground truth."""
+        splits_to_load = (
+            [dataset_split or self.dataset_split]
+            if (dataset_split or self.dataset_split)
+            else list(self.FILE_MAPPING.keys())
+        )
+        if only_splits_with_gt and getattr(self, "SPLITS_WITH_GT", None):
+            splits_to_load = [s for s in splits_to_load if s in self.SPLITS_WITH_GT]
 
-        for split in splits_to_load:
-            if split not in self.FILE_MAPPING:
-                raise ValueError(f"FinQA supports splits: {list(self.FILE_MAPPING.keys())}")
+        def _load_qa_list(path: Path) -> list:
+            """Load list of QA entries from JSON (list or dict with 'data' key)."""
+            if not path.exists():
+                return []
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, list):
+                return data
+            if isinstance(data, dict) and "data" in data:
+                return data["data"]
+            return []
 
-            split_path = Path().cwd() / self.FILE_MAPPING[split]["dataset_path"]
-            rows = self._arrow_row_stream(split_path, max_samples=max_samples_per_split)
+        def _entry_to_query_and_answer(entry: dict) -> tuple:
+            """Extract query and ground-truth answer from one train_qa.json entry."""
+            qa = entry.get("qa") or {}
+            if isinstance(qa, dict):
+                query = qa.get("question") or entry.get("question") or entry.get("query")
+                ans = qa.get("exe_ans") or qa.get("answer") or entry.get("answer") or entry.get("answers")
+            else:
+                query = entry.get("question") or entry.get("query") or (entry.get("questions", [None])[0] if entry.get("questions") else None)
+                ans = entry.get("answer") or entry.get("answers")
+            gt_answer = ans[0] if isinstance(ans, list) else (str(ans) if ans is not None else "")
+            return query or "", gt_answer or ""
 
-            for idx, row in enumerate(rows):
-                all_samples.append(
-                    {
+        def _iter():
+            emitted = 0
+            for split in splits_to_load:
+                if split not in self.FILE_MAPPING:
+                    raise ValueError(f"FinQA supports splits: {list(self.FILE_MAPPING.keys())}")
+
+                json_path = Path().cwd() / self.FILE_MAPPING[split]["dataset_path"]
+                qa_list = _load_qa_list(json_path)
+                if not qa_list:
+                    raise FileNotFoundError(
+                        f"FinQA {split}: {json_path} not found or empty. "
+                        "Add train_qa.json from https://github.com/czyssrs/FinQA (dataset/train.json)."
+                    )
+
+                for idx, entry in enumerate(qa_list):
+                    if max_samples_per_split is not None and idx >= max_samples_per_split:
+                        break
+                    query, gt_answer = _entry_to_query_and_answer(entry)
+                    yield {
                         "input": {
-                            "query": row.get("query") or row.get("question") or f"query-id={row.get('query-id')}",
-                            "image": row.get("image"),
+                            "query": query,
+                            "image": None,
                         },
                         "ground_truth": {
-                            "answer": row.get("answer") if row.get("answer") is not None else str(row.get("score", "")),
-                            "score": row.get("score"),
-                            "query_id": row.get("query-id"),
-                            "corpus_id": row.get("corpus-id"),
+                            "answer": gt_answer,
+                            "score": None,
+                            "query_id": idx,
+                            "corpus_id": entry.get("id"),
                         },
                         "metadata": {
                             "dataset": self.dataset_name,
                             "split": split,
-                            "sample_id": row.get("query-id", f"{split}_{idx}"),
+                            "sample_id": entry.get("id", idx),
                         },
                     }
-                )
+                    emitted += 1
+                    if max_samples_per_category is not None and emitted >= max_samples_per_category:
+                        return
 
-        if max_samples_per_category:
-            all_samples = all_samples[:max_samples_per_category]
-
-        return all_samples
+        return _iter()
 
 class TATQAAdapter(BaseDatasetAdapter):
     """
@@ -2794,26 +3034,26 @@ class TATQAAdapter(BaseDatasetAdapter):
     and serves to extract structured data based on a schema shared across all samples within the same file type.
     """
     FILE_MAPPING = {
-        "dev": {
-            "format": "json",
-            "dataset_path": "data/rag/TAT-QA/dev.json",
-            "ground_truth_path": None,
-            "notes": None
-        },
+        # "dev": {  # no official GT file for eval; evaluation uses test (tatqa_dataset_test_gold.json) only
+        #     "format": "json",
+        #     "dataset_path": "data/rag/TAT-QA/dev.json",
+        #     "ground_truth_path": None,
+        #     "notes": None
+        # },
         "test": {
             "format": "json",
             "dataset_path": "data/rag/TAT-QA/test.json",
             "ground_truth_path": "data/rag/TAT-QA/test_gold.json",
             "notes": "2 json files: Ground truth for test set is in 'test_gold.json', test set is in 'test.json'"
         },
-        "train": {
-            "format": "json",
-            "dataset_path": "data/rag/TAT-QA/train.json",
-            "ground_truth_path": None,
-            "notes": None
-        },
+        # "train": {  # no official GT file for eval; evaluation uses test only
+        #     "format": "json",
+        #     "dataset_path": "data/rag/TAT-QA/train.json",
+        #     "ground_truth_path": None,
+        #     "notes": None
+        # },
     }
-
+    SPLITS_WITH_GT = {"test"}
 
     def __init__(
         self,
@@ -2838,44 +3078,59 @@ class TATQAAdapter(BaseDatasetAdapter):
         self.hf_repo_variant = hf_repo_variant
         self.dataset_split = dataset_split
         self.FILE_MAPPING = self.FILE_MAPPING
+        # Data lives under TAT-QA folder; adapter name is TATQA (no hyphen)
+        self.root_dir = os.path.join(os.getcwd(), "data", self.category, "TAT-QA")
 
-    def load_split(self, dataset_split=None, recursive=False, max_samples_per_split=None, max_samples_per_category=None):
-        """Load TAT-QA split(s) in universal RAG format."""
+    def load_split(
+        self,
+        dataset_split=None,
+        recursive=False,
+        max_samples_per_split=None,
+        max_samples_per_category=None,
+        only_splits_with_gt=False,
+    ):
+        """Stream TAT-QA split(s) in universal RAG format. All splits have ground truth."""
         split_files = {
             "train": "tatqa_dataset_train.json",
             "dev": "tatqa_dataset_dev.json",
             "test": "tatqa_dataset_test_gold.json",
         }
-        splits_to_load = [dataset_split or self.dataset_split] if (dataset_split or self.dataset_split) else list(self.FILE_MAPPING.keys())
-        all_samples = []
+        splits_to_load = (
+            [dataset_split or self.dataset_split]
+            if (dataset_split or self.dataset_split)
+            else list(self.FILE_MAPPING.keys())
+        )
+        if only_splits_with_gt and getattr(self, "SPLITS_WITH_GT", None):
+            splits_to_load = [s for s in splits_to_load if s in self.SPLITS_WITH_GT]
 
-        for split in splits_to_load:
-            file_name = split_files.get(split)
-            if not file_name:
-                continue
-            path = Path(self.root_dir) / file_name
-            if not path.exists():
-                print(f"⚠️ {self.dataset_name} {split} split not found")
-                continue
+        def _iter():
+            emitted = 0
+            for split in splits_to_load:
+                file_name = split_files.get(split)
+                if not file_name:
+                    continue
+                path = Path(self.root_dir) / file_name
+                if not path.exists():
+                    print(f"⚠️ {self.dataset_name} {split} split not found at {path}")
+                    continue
 
-            with open(path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
 
-            sample_idx = 0
-            for doc in data:
-                table = doc.get("table", {})
-                paragraphs = doc.get("paragraphs", [])
-                for q in doc.get("questions", []):
-                    if max_samples_per_split is not None and sample_idx >= max_samples_per_split:
-                        break
-                    answers = q.get("answer", [])
-                    if isinstance(answers, list):
-                        answer = answers[0] if answers else ""
-                    else:
-                        answer = answers
+                sample_idx = 0
+                for doc in data:
+                    table = doc.get("table", {})
+                    paragraphs = doc.get("paragraphs", [])
+                    for q in doc.get("questions", []):
+                        if max_samples_per_split is not None and sample_idx >= max_samples_per_split:
+                            break
+                        answers = q.get("answer", [])
+                        if isinstance(answers, list):
+                            answer = answers[0] if answers else ""
+                        else:
+                            answer = answers
 
-                    all_samples.append(
-                        {
+                        yield {
                             "input": {
                                 "query": q.get("question"),
                                 "context": {"table": table.get("table"), "paragraphs": paragraphs},
@@ -2892,12 +3147,12 @@ class TATQAAdapter(BaseDatasetAdapter):
                                 "sample_id": q.get("uid", f"{split}_{sample_idx}"),
                             },
                         }
-                    )
-                    sample_idx += 1
+                        sample_idx += 1
+                        emitted += 1
+                        if max_samples_per_category and emitted >= max_samples_per_category:
+                            return
 
-        if max_samples_per_category:
-            all_samples = all_samples[:max_samples_per_category]
-        return all_samples
+        return _iter()
 
 # ------------------------
 # Credit Risk Adapters (PD)
@@ -2982,12 +3237,12 @@ class LendingClubAdapter(BaseDatasetAdapter):
             "ground_truth_path": None,
             "notes": "Test folder containing 1 Parquet shard file"
         },
-        "train": {
-            "format": "folder",
-            "dataset_path": "data/credit_risk_pd/LendingClub/train",
-            "ground_truth_path": None,
-            "notes": "Train folder containing 1 Parquet shard file"
-        },
+        # "train": {  # for evaluation only splits with GT are used; train used for training only
+        #     "format": "folder",
+        #     "dataset_path": "data/credit_risk_pd/LendingClub/train",
+        #     "ground_truth_path": None,
+        #     "notes": "Train folder containing 1 Parquet shard file"
+        # },
         "valid": {
             "format": "folder",
             "dataset_path": "data/credit_risk_pd/LendingClub/valid",
@@ -3019,26 +3274,52 @@ class LendingClubAdapter(BaseDatasetAdapter):
         self.dataset_split = dataset_split
         self.FILE_MAPPING = self.FILE_MAPPING
 
-    def load_split(self, dataset_split="train", recursive=False, max_samples_per_split=None, max_samples_per_category=None):
-        csv_files = [f for f in os.listdir(self.root_dir) if f.endswith(".csv")]
-        if not csv_files:
-            print(f"⚠️ {self.dataset_name} CSV not found")
-            return []
+    def load_split(
+        self,
+        dataset_split=None,
+        recursive=False,
+        max_samples_per_split=None,
+        max_samples_per_category=None,
+        only_splits_with_gt=False,
+        **kwargs,
+    ):
+        """Stream samples from parquet (test/valid per FILE_MAPPING). One row at a time; parse query text to features."""
+        from credit_risk.feature_engineering.common_features import parse_query_to_features
 
-        import pandas as pd
-        df = pd.concat([pd.read_csv(os.path.join(self.root_dir, f)) for f in csv_files], ignore_index=True)
-
-        def transform(row):
-            return row.to_dict()
-
-        return self._prepare_samples(
-            dataset_split_obj=df.itertuples(index=False),
-            dataset_name="LendingClub",
-            max_samples_per_split=max_samples_per_split,
-            input_keys=None,
-            answer_key="label",
-            transform=transform
+        splits_to_load = (
+            [dataset_split] if dataset_split is not None
+            else list(self.FILE_MAPPING.keys())
         )
+        emitted = 0
+        for split in splits_to_load:
+            if split not in self.FILE_MAPPING:
+                continue
+            split_path = Path().cwd() / self.FILE_MAPPING[split]["dataset_path"]
+            if not split_path.exists():
+                continue
+            for idx, row in enumerate(self._arrow_row_stream(split_path, max_samples=max_samples_per_split)):
+                query = row.get("query") or ""
+                gold = row.get("gold")
+                answer = row.get("answer")
+                if gold is not None and hasattr(gold, "item"):
+                    gold = int(gold.item())
+                elif answer is not None:
+                    gold = 1 if str(answer).strip().lower() in ("chargedoff", "chargeoff") else 0
+                else:
+                    gold = None
+                features = parse_query_to_features(query)
+                yield {
+                    "input": {"features": features, "query": query},
+                    "ground_truth": {"label": gold} if gold is not None else {},
+                    "metadata": {
+                        "dataset": self.dataset_name,
+                        "split": split,
+                        "sample_id": row.get("id") or f"{split}_{idx}",
+                    },
+                }
+                emitted += 1
+                if max_samples_per_category is not None and emitted >= max_samples_per_category:
+                    return
 
 # ------------------------
 # Credit Risk Adapters (Sentiment)
@@ -3098,12 +3379,12 @@ class FinancialPhraseBankAdapter(BaseDatasetAdapter):
             "ground_truth_path": None,
             "notes": "Test folder containing 1 Parquet shard file"
         },
-        "train": {
-            "format": "folder",
-            "dataset_path": "data/credit_risk_sentiment/FinancialPhraseBank/train",
-            "ground_truth_path": None,
-            "notes": "Train folder containing 1 Parquet shard file"
-        },
+        # "train": {  # for evaluation only splits with GT used for reporting; train used for training only
+        #     "format": "folder",
+        #     "dataset_path": "data/credit_risk_sentiment/FinancialPhraseBank/train",
+        #     "ground_truth_path": None,
+        #     "notes": "Train folder containing 1 Parquet shard file"
+        # },
     }
     def __init__(
         self,
@@ -3128,7 +3409,43 @@ class FinancialPhraseBankAdapter(BaseDatasetAdapter):
         self.hf_repo_variant = hf_repo_variant
         self.dataset_split = dataset_split
         self.FILE_MAPPING = self.FILE_MAPPING
-    pass
+
+    def load_split(
+        self,
+        dataset_split=None,
+        recursive=False,
+        max_samples_per_split=None,
+        max_samples_per_category=None,
+        only_splits_with_gt=False,
+        **kwargs,
+    ):
+        """Stream samples from FILE_MAPPING (test only for eval). Parquet rows: label, label_text, text."""
+        splits_to_load = (
+            [dataset_split or self.dataset_split]
+            if (dataset_split or self.dataset_split)
+            else list(self.FILE_MAPPING.keys())
+        )
+        emitted = 0
+        for split in splits_to_load:
+            if split not in self.FILE_MAPPING:
+                continue
+            split_path = Path().cwd() / self.FILE_MAPPING[split]["dataset_path"]
+            for idx, row in enumerate(self._arrow_row_stream(split_path, max_samples=max_samples_per_split)):
+                label = row.get("label")
+                if label is not None and hasattr(label, "item"):
+                    label = label.item()
+                yield {
+                    "input": {"text": row.get("text") or row.get("sentence", "")},
+                    "ground_truth": row.get("label_text") or str(label) if label is not None else "",
+                    "metadata": {
+                        "dataset": self.dataset_name,
+                        "split": split,
+                        "sample_id": row.get("id", f"{split}_{idx}"),
+                    },
+                }
+                emitted += 1
+                if max_samples_per_category and emitted >= max_samples_per_category:
+                    return
 
 class FiQAAdapter(BaseDatasetAdapter):
     """
@@ -3189,7 +3506,7 @@ class FiQAAdapter(BaseDatasetAdapter):
             "format": "folder",
             "dataset_path": "data/credit_risk_sentiment/FiQA/train",
             "ground_truth_path": None,
-            "notes": "Train folder containing 1 Parquet shard file"
+            "notes": "Train folder for training; eval uses test/valid"
         },
         "valid": {
             "format": "folder",
@@ -3198,6 +3515,7 @@ class FiQAAdapter(BaseDatasetAdapter):
             "notes": "Validation folder containing 1 Parquet shard file"
         },
     }
+
     def __init__(
         self,
         category: str = "credit_risk_sentiment",
@@ -3222,16 +3540,55 @@ class FiQAAdapter(BaseDatasetAdapter):
         self.dataset_split = dataset_split
         self.FILE_MAPPING = self.FILE_MAPPING
 
-    def load_split(self, dataset_split=None, recursive=False, max_samples_per_split=None, max_samples_per_category=None):
-        dataset_split = dataset_split or self.dataset_split
-        self.download()
-        return self._prepare_samples(
-            dataset_split_obj=self.dataset_obj.get(dataset_split, []),
-            dataset_name="FiQA",
-            max_samples_per_split=max_samples_per_split,
-            input_keys=["sentence"],
-            answer_key="label"
+    def load_split(
+        self,
+        dataset_split=None,
+        recursive=False,
+        max_samples_per_split=None,
+        max_samples_per_category=None,
+        only_splits_with_gt=False,
+        **kwargs,
+    ):
+        """Stream samples from parquet (test/train/valid per FILE_MAPPING). Score mapped to label (negative/neutral/positive)."""
+        def _score_to_label(score: float, neg: float = -0.2, pos: float = 0.2) -> str:
+            if score < neg:
+                return "negative"
+            if score > pos:
+                return "positive"
+            return "neutral"
+        splits_to_load = (
+            [dataset_split] if dataset_split is not None
+            else list(self.FILE_MAPPING.keys())
         )
+        emitted = 0
+        for split in splits_to_load:
+            if split not in self.FILE_MAPPING:
+                continue
+            split_path = Path().cwd() / self.FILE_MAPPING[split]["dataset_path"]
+            if not split_path.exists():
+                continue
+            for idx, row in enumerate(self._arrow_row_stream(split_path, max_samples=max_samples_per_split)):
+                text = row.get("sentence") or row.get("text") or ""
+                score = row.get("score")
+                if score is not None and hasattr(score, "item"):
+                    score = float(score.item())
+                elif score is not None:
+                    score = float(score)
+                else:
+                    score = 0.0
+                label_text = _score_to_label(score)
+                yield {
+                    "input": {"text": text},
+                    "ground_truth": label_text,
+                    "metadata": {
+                        "dataset": self.dataset_name,
+                        "split": split,
+                        "sample_id": row.get("_id") or row.get("id") or f"{split}_{idx}",
+                    },
+                }
+                emitted += 1
+                if max_samples_per_category is not None and emitted >= max_samples_per_category:
+                    return
 
 # ------------------------
 # Credit Risk Adapters (Memo Generator)
@@ -3315,13 +3672,48 @@ class FinanceBenchAdapter(BaseDatasetAdapter):
         self.dataset_split = dataset_split
         self.FILE_MAPPING = self.FILE_MAPPING
 
-    def load_split(self, dataset_split=None, recursive=False, max_samples_per_split=None, max_samples_per_category=None):
-        dataset_split = dataset_split or self.dataset_split
-        self.download()
-        return self._prepare_samples(
-            dataset_split_obj=self.dataset_obj.get(dataset_split, []),
-            dataset_name="FinanceBench",
-            max_samples_per_split=max_samples_per_split,
-            input_keys=["question", "context"],
-            answer_key="answer"
-        )
+    def load_split(
+        self,
+        dataset_split=None,
+        recursive=False,
+        max_samples_per_split=None,
+        max_samples_per_category=None,
+        only_splits_with_gt=False,
+        **kwargs,
+    ):
+        """Stream samples from parquet (train per FILE_MAPPING). Context = concatenated evidence text."""
+        split_name = dataset_split or self.dataset_split or "default"
+        splits_to_load = [split_name] if split_name in self.FILE_MAPPING else list(self.FILE_MAPPING.keys())
+        emitted = 0
+        for split in splits_to_load:
+            if split not in self.FILE_MAPPING:
+                continue
+            split_path = Path().cwd() / self.FILE_MAPPING[split]["dataset_path"]
+            if not split_path.exists():
+                continue
+            for idx, row in enumerate(self._arrow_row_stream(split_path, max_samples=max_samples_per_split)):
+                question = row.get("question") or ""
+                evidence = row.get("evidence") or []
+                context_parts = []
+                if isinstance(evidence, list):
+                    for e in evidence:
+                        if isinstance(e, dict) and e.get("evidence_text"):
+                            context_parts.append(e["evidence_text"])
+                        else:
+                            context_parts.append(str(e))
+                else:
+                    context_parts.append(str(evidence))
+                context = "\n\n".join(context_parts)
+                answer = row.get("answer")
+                yield {
+                    "input": {"question": question, "context": context, "prompt": question},
+                    "ground_truth": {"reference": answer} if answer is not None else {},
+                    "metadata": {
+                        "dataset": self.dataset_name,
+                        "split": split,
+                        "sample_id": row.get("financebench_id") or row.get("id") or f"{split}_{idx}",
+                    },
+                }
+                emitted += 1
+                if max_samples_per_category is not None and emitted >= max_samples_per_category:
+                    return

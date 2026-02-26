@@ -1,13 +1,12 @@
 """
 OCR Evaluation
 
-Evaluate OCR pipeline on standard benchmarks:
-- OmniDocBench
+Evaluate OCR pipeline on standard benchmarks (splits with ground truth as source of truth):
 - SROIE
 - FUNSD (form understanding)
-- DocVQA (visual document QA) - NEW
-- DUDE (multi-page documents) - NEW
-- InfographicsVQA (chart understanding) - NEW
+- DocVQA (visual document QA)
+- DUDE (multi-page documents)
+- InfographicsVQA (chart understanding)
 """
 
 import cv2
@@ -25,15 +24,14 @@ from .metrics import MetricsCalculator
 
 class OCREvaluator:
     """
-    Evaluate OCR pipeline on benchmarks
-    
+    Evaluate OCR pipeline on benchmarks (splits with ground truth as source of truth).
+
     Benchmarks:
-    - OmniDocBench v1.5
     - SROIE Invoice Dataset
     - FUNSD (Form Understanding)
-    - DocVQA (Visual Document QA) - NEW
-    - DUDE (Multi-page Documents) - NEW
-    - InfographicsVQA (Chart Understanding) - NEW
+    - DocVQA (Visual Document QA)
+    - DUDE (Multi-page Documents)
+    - InfographicsVQA (Chart Understanding)
     """
     
     def __init__(self, data_dir: str = "data/evaluation"):

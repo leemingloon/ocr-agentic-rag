@@ -3,6 +3,8 @@
 **Document Intelligence + Credit Risk Platform**  
 **Complete Pipeline: OCR → Agentic RAG → Multimodal Vision → Credit Risk**
 
+Evaluation metrics cited in this document are not yet backed by `data/proof/`; scores will be filled in as proof runs complete. Demos in `notebooks/` read from `data/proof/`.
+
 ---
 
 ## Table of Contents
@@ -31,9 +33,7 @@
 │   │ Assessment   │  │ Detection    │  │ Detection    │        │
 │   └──────────────┘  └──────────────┘  └──────┬───────┘        │
 │                                              │                   │
-│   Tier 1 (65%): Cache → $0, 0ms                                │
-│   Tier 2 (25%): Classical → $0, 50ms                           │
-│   Tier 3 (10%): PaddleOCR → $0.0001, 1.2s                     │
+│   Tier 1: Cache | Tier 2: Classical | Tier 3: PaddleOCR        │
 │                                              │                   │
 │   ┌──────────────┐  ┌──────────────┐       │                  │
 │   │ Tesseract    │← │ Confidence   │←──────┘                  │
@@ -72,9 +72,7 @@
 │   │              │  │              │  │ (text+visual)│        │
 │   └──────────────┘  └──────────────┘  └──────┬───────┘        │
 │                                              │                   │
-│   Use Cases:                                                     │
-│   - Financial chart extraction (95% accuracy vs 58% OCR)        │
-│   - Handwriting recognition                                     │
+│   Use Cases: chart extraction, handwriting, complex layouts      │
 │   - Complex layout understanding                                │
 │   - Visual validation of OCR output                             │
 └────────────────────────────┬────────────────────────────────────┘
@@ -192,7 +190,7 @@ features = {
 }fingerprint = md5(features)if fingerprint in cache:
 return cache[fingerprint]["roi_boxes"]  # Skip detection!
 
-**Impact:** 65% of documents bypass detection entirely
+**Impact:** High share of documents bypass detection (cache hit rate — TBD).
 
 #### Tier 2: Classical Detection (25% usage)
 
@@ -213,14 +211,13 @@ if missing_key_regions(boxes, template_type):
 if large_vertical_gaps(boxes):
     return False  # Likely missed text → escalatereturn True  # Accept classical detection
 
-**Results:** Catches 90% of false negatives, reduces error propagation from 23% to 8%
+**Results:** TBD (completeness heuristics reduce false negatives and error propagation).
 
 #### Tier 3: PaddleOCR Detection (10% usage)
 
 **ONNX Optimization:**
 - Standard PyTorch: 15-20s on CPU
-- ONNX Runtime: 1.2s on CPU (12x faster)
-- Accuracy: 95% (industry-leading)
+- ONNX Runtime: faster CPU inference (metrics TBD)
 
 **When Used:**
 - Unknown templates
@@ -280,17 +277,14 @@ graph.add_edge("execute", "synthesize")
 **Dense (BGE-M3):** Semantic similarity  
 **Reranking (BGE-reranker-v2-m3):** Cross-encoder scoring
 
-**Performance:**
-- Sparse only: 77% F1
-- Dense only: 82% F1
-- Hybrid: 86% F1
-- Hybrid + Reranking: **89% F1**
+**Performance:** TBD (see data/proof for RAG evaluation)
 
 ---
 
 ## Multimodal Vision-Language
 
-### When to Use Vision vs OCRDecision Matrix:Content TypeMethodAccuracyDense textOCR (Tesseract)95%Charts/graphsVision (Claude)95%HandwritingVision85%TablesOCR92%Mixed (text+chart)Hybrid90%
+### When to Use Vision vs OCR  
+Decision matrix: dense text → OCR; charts/graphs and handwriting → Vision; tables → OCR; mixed → hybrid. Accuracy metrics TBD (see data/proof).
 
 ### Vision OCR Integration
 ```pythonclass HybridOCR:
@@ -314,10 +308,7 @@ ocr_result = tesseract.recognize(image)    # Step 2: Confidence check
         # Combine OCR text + chart data
         return merge(ocr_result, chart_result)    return ocr_result
 
-**Chart Extraction Performance:**
-- Vision-first: **95% accuracy**
-- OCR text extraction: 58% accuracy
-- **Improvement: +37% for financial dashboards**
+**Chart extraction:** Vision-first and OCR paths — metrics TBD (see data/proof).
 
 ---
 
@@ -448,9 +439,7 @@ objective="binary:logistic"
     pd = self.model.predict_proba(X)[0, 1]
     return pd
 
-**Performance (Lending Club, 2.9M loans):**
-- AUC-ROC: **0.82** (industry benchmark: 0.80)
-- Recall @ 10% FPR: 0.65
+**Performance:** TBD (proof under data/proof when available).
 
 ---
 
@@ -524,9 +513,7 @@ prompt_version = self.prompt_registry.get_latest("risk_memo_v2.1")    # Step 2: 
     filtered_memo = self.safety_filter.filter(response.content[0].text)    # Step 5: Audit trail
     self.log_generation(prompt_version, borrower, filtered_memo)    return filtered_memo
 
-**Evaluation:**
-- FinanceBench (10,231 Q&A): **89% Exact Match**
-- ECTSum (2,425 summaries): **ROUGE-L 0.85**
+**Evaluation:** TBD (proof under data/proof when available).
 
 ---
 
@@ -594,9 +581,7 @@ Detect drift using Kolmogorov-Smirnov test    Threshold: p-value < 0.05 → Sign
             "drifted": p_value < 0.05
         }    return drift_results
 
-**Evaluation (Credit Card UCI, 30K):**
-- KS-statistic: **0.03** (<0.05 threshold)
-- No drift detected ✅
+**Evaluation:** TBD (proof under data/proof when available).
 
 ---
 
@@ -608,28 +593,15 @@ Detect drift using Kolmogorov-Smirnov test    Threshold: p-value < 0.05 → Sign
 
 **Decision:** Implement 3-tier cascade (cache → classical → DL)
 
-**Rationale:**
-- 65% of documents are identical templates → cache reuses ROIs ($0, 0ms)
-- 25% are known templates with clean scans → classical works ($0, 50ms)
-- Only 10% truly need expensive DL
+**Rationale:** Many documents use identical templates (cache); known templates use classical detection; remainder use DL.
 
-**Results:**
-- Cost: $0.00001 avg (10x cheaper than always-DL)
-- Latency: 133ms avg (9x faster than always-DL)
-- Accuracy: Same 85% (completeness heuristics prevent degradation)
-
-**Trade-offs:**
-- Complexity: Higher (3 detection engines vs 1)
-- Maintenance: Need to update template cache
-- **Worth it:** Yes - 90% cost/latency savings with no accuracy loss
+**Results:** TBD (see data/proof when available). Trade-off: higher complexity vs cost/latency savings.
 
 ---
 
 ### ADR 2: Why Completeness Heuristics?
 
-**Context:** Classical detection has 85% accuracy (vs 95% for PaddleOCR)
-
-**Problem:** 15% false negative rate → error propagates to RAG → bad answers
+**Context:** Classical detection has lower accuracy than full DL; false negatives can propagate to RAG.
 
 **Decision:** Implement completeness heuristics to catch FNs before they propagate
 
@@ -638,10 +610,7 @@ Detect drift using Kolmogorov-Smirnov test    Threshold: p-value < 0.05 → Sign
 2. **Spatial coverage:** Header + body + footer should all have text
 3. **Suspicious gaps:** Large vertical gaps (>20% image height) suggest missing text
 
-**Results:**
-- Catches 90% of classical FNs
-- False alarm rate: 8% (acceptable - just escalates to Tier 3)
-- **Error propagation reduced:** 23% → 8%
+**Results:** TBD (see data/proof when available).
 
 ---
 
@@ -721,10 +690,7 @@ CREATE TABLE prompts (
 - Fast training/inference
 - Interpretable (SHAP values)
 
-**Results (Lending Club, 2.9M loans):**
-- AUC-ROC: **0.82** (beats industry benchmark 0.80)
-- Training time: <5 minutes
-- Inference: <1ms per prediction
+**Results:** TBD (see data/proof when available).
 
 ---
 
@@ -745,10 +711,7 @@ CREATE TABLE prompts (
 - Open-source (no API costs)
 - Fast inference (<100ms per article)
 
-**Evaluation (FiQA, 1,173 samples):**
-- F1 Score: **0.87**
-- Better than generic BERT (0.79)
-- Comparable to GPT-4 (0.89) at 1000x lower cost
+**Evaluation:** TBD (see data/proof when available).
 
 ---
 
@@ -819,11 +782,7 @@ response = client.messages.create(
 
 **Solution:** Combine BM25 (sparse) + BGE-M3 (dense) + reranking
 
-**Results:**
-- BM25 only: 77% F1
-- Dense only: 82% F1
-- Hybrid: 86% F1
-- **Hybrid + Reranking: 89% F1**
+**Results:** TBD (see data/proof).
 
 ---
 
@@ -850,11 +809,7 @@ def test_bias():
     assert bias_gap < 0.10, f"Bias gap {bias_gap:.2%} exceeds 10% threshold"
 ```
 
-**Results:**
-- Invoice: 87%
-- Contract: 85%
-- Statement: 86%
-- **Bias gap: 2% < 10% threshold ✓**
+**Results:** TBD (see data/proof when available). Target: bias gap &lt; 10%.
 
 ---
 
@@ -875,10 +830,7 @@ def make_decision(pd, lgd, ead):
         return "human_review"  # HITL required
 ```
 
-**Results:**
-- Auto-approved: 60%
-- Conditional: 25%
-- **Human review: 15%** (high-stakes only)
+**Results:** TBD.
 
 ---
 
@@ -900,9 +852,7 @@ audit_log = {
 }
 ```
 
-**Results:**
-- 100% decision auditability
-- <2 seconds audit log write latency
+**Results:** TBD.
 
 ---
 
@@ -990,34 +940,7 @@ explanation = {
 
 ## Performance Benchmarks
 
-### End-to-End Latency (p95)
-
-| Component | Latency | % of Total |
-|-----------|---------|------------|
-| OCR (3-tier avg) | 133ms | 5.5% |
-| Chunking | 50ms | 2.1% |
-| Retrieval | 100ms | 4.2% |
-| Reranking | 150ms | 6.3% |
-| LLM Generation | 1.5s | 62.5% |
-| Credit Risk Model | 50ms | 2.1% |
-| Feature Engineering | 50ms | 2.1% |
-| Misc | 367ms | 15.3% |
-| **Total** | **2.4s** | **100%** |
-
----
-
-### Cost Analysis
-
-**Per Document (E2E Pipeline):**
-
-| Component | Cost | % of Total |
-|-----------|------|------------|
-| Detection (3-tier) | $0.00001 | 0.2% |
-| Recognition | $0.000025 | 0.4% |
-| Embeddings (BGE-M3) | $0 | 0% |
-| Retrieval (FAISS) | $0 | 0% |
-| LLM (Claude Sonnet 4) | $0.006 | 99.4% |
-| **Total** | **$0.00602** | **100%** |
+Latency and cost breakdowns are TBD. Evaluation outputs live under `data/proof/`; see `eval_runner.py` for how they are produced.
 
 ---
 
