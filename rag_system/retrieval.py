@@ -2,15 +2,24 @@
 Hybrid Retrieval System
 
 Combines sparse (BM25) and dense (BGE-M3) retrieval
-with Reciprocal Rank Fusion for optimal results
+with Reciprocal Rank Fusion for optimal results.
+
+CPU-only / low-RAM: set RAG_FAST_EMBEDDINGS=1 to use a small, fast model
+(all-MiniLM-L6-v2). Install onnxruntime for extra speed: pip install onnxruntime
 """
 
+import os
 import numpy as np
 import faiss
 from typing import List, Dict, Tuple, Optional
 from rank_bm25 import BM25Okapi
 from sentence_transformers import SentenceTransformer
 from llama_index.core.schema import TextNode
+
+# Env: RAG_FAST_EMBEDDINGS=1 uses a small CPU-friendly model (faster, lower quality)
+_USE_FAST_EMBEDDINGS = os.environ.get("RAG_FAST_EMBEDDINGS", "").strip().lower() in ("1", "true", "yes")
+_FAST_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+_DEFAULT_MODEL = "BAAI/bge-m3"
 
 
 class HybridRetriever:
@@ -51,10 +60,17 @@ class HybridRetriever:
         self.top_k_dense = top_k_dense
         self.top_k_final = top_k_final
         self.rrf_k = rrf_k
-        
-        # Load embedding model
-        print(f"Loading embedding model: {embedding_model}")
-        self.embed_model = SentenceTransformer(embedding_model)
+
+        # Optional: use small fast model on CPU / low-RAM (set RAG_FAST_EMBEDDINGS=1)
+        model_to_load = _FAST_MODEL if _USE_FAST_EMBEDDINGS else (embedding_model or _DEFAULT_MODEL)
+        if _USE_FAST_EMBEDDINGS:
+            print(f"[RAG] Using fast CPU embedding model: {model_to_load} (RAG_FAST_EMBEDDINGS=1)")
+        # Load on CPU explicitly; try ONNX backend if available (faster on CPU)
+        print(f"Loading embedding model: {model_to_load}")
+        try:
+            self.embed_model = SentenceTransformer(model_to_load, device="cpu", backend="onnx")
+        except Exception:
+            self.embed_model = SentenceTransformer(model_to_load, device="cpu")
         
         # Will be initialized when index is built
         self.bm25_index = None
@@ -78,13 +94,17 @@ class HybridRetriever:
         tokenized_corpus = [text.lower().split() for text in self.chunk_texts]
         self.bm25_index = BM25Okapi(tokenized_corpus)
         
-        # Build FAISS index
+        # Build FAISS index (batch_size: larger = faster on CPU up to RAM limit; 16GB ~ 48 for BGE-M3, 128 for small model)
+        embed_batch_size = 128 if _USE_FAST_EMBEDDINGS else 48
         print("Generating embeddings...")
         embeddings = self.embed_model.encode(
             self.chunk_texts,
             show_progress_bar=True,
-            batch_size=32
+            batch_size=embed_batch_size,
+            convert_to_numpy=True,
         )
+        if not isinstance(embeddings, np.ndarray):
+            embeddings = np.asarray(embeddings, dtype=np.float32)
         
         # Normalize embeddings for cosine similarity
         faiss.normalize_L2(embeddings)
@@ -96,33 +116,50 @@ class HybridRetriever:
         
         print(f"Indices built successfully!")
     
-    def retrieve(self, query: str) -> List[Tuple[TextNode, float]]:
+    def retrieve(
+        self,
+        query: str,
+        top_k: Optional[int] = None,
+        corpus_id: Optional[str] = None,
+    ) -> List[Tuple[TextNode, float]]:
         """
-        Retrieve relevant chunks using hybrid search
-        
+        Retrieve relevant chunks using hybrid search.
+
         Args:
             query: Search query
-            
+            top_k: Optional override for number of results (default: use self.top_k_final)
+            corpus_id: If set, keep only chunks whose metadata.corpus_id matches (e.g. FinQA document id)
+
         Returns:
             List of (chunk, score) tuples
         """
         if not self.bm25_index or not self.faiss_index:
             raise ValueError("Indices not built. Call build_index() first.")
-        
+
         # Step 1: Sparse retrieval (BM25)
         sparse_results = self._sparse_retrieve(query)
-        
+
         # Step 2: Dense retrieval (BGE-M3)
         dense_results = self._dense_retrieve(query)
-        
+
         # Step 3: Reciprocal Rank Fusion
         fused_results = self._reciprocal_rank_fusion(
-            sparse_results, 
+            sparse_results,
             dense_results
         )
-        
-        # Step 4: Return top-k
-        return fused_results[:self.top_k_final]
+
+        # Step 4: Optionally filter to chunks from a specific document (e.g. FinQA corpus_id)
+        if corpus_id:
+            filtered = []
+            for chunk, score in fused_results:
+                meta = getattr(chunk, "metadata", None) or {}
+                if str(meta.get("corpus_id")) == str(corpus_id):
+                    filtered.append((chunk, score))
+            fused_results = filtered
+
+        # Step 5: Return top-k (caller may pass top_k, e.g. agentic retrieval_tools)
+        k = top_k if top_k is not None else self.top_k_final
+        return fused_results[:k]
     
     def _sparse_retrieve(self, query: str) -> List[Tuple[int, float]]:
         """
@@ -153,7 +190,8 @@ class HybridRetriever:
         
         # Search FAISS index
         scores, indices = self.faiss_index.search(query_embedding, self.top_k_dense)
-        
+        if indices.size == 0 or (indices.ndim > 0 and len(indices[0]) == 0):
+            return []
         return [(int(indices[0][i]), float(scores[0][i])) for i in range(len(indices[0]))]
     
     def _reciprocal_rank_fusion(

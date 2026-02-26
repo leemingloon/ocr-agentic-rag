@@ -169,37 +169,41 @@ class ToolRegistry:
                     "formatted": f"{percentage}% of {value} = {result}"
                 }
         
-        # Handle basic arithmetic
-        # Remove non-math characters
+        # Reject natural language: calculator expects a math expression (e.g. "0.15 * 2500"), not a sentence
         clean_expr = re.sub(r'[^0-9+\-*/().\s]', '', expression)
-        
+        if len(expression) > 50 or (len(clean_expr.strip()) < 2 and len(expression.strip()) > 10):
+            return {
+                "expression": expression[:80] + ("..." if len(expression) > 80 else ""),
+                "result": None,
+                "error": "Calculator expects a mathematical expression (e.g. 0.15 * 2500), not a sentence. Use RAG retrieval first to get numbers from the documents, then compute."
+            }
+        # Handle basic arithmetic
         try:
-            # Safe evaluation (only allow math operations)
             result = eval(clean_expr, {"__builtins__": {}})
             return {
                 "expression": clean_expr,
                 "result": result,
                 "formatted": f"{clean_expr} = {result}"
             }
-        except:
+        except Exception:
             return {
-                "expression": expression,
+                "expression": expression[:80] + ("..." if len(expression) > 80 else ""),
                 "result": None,
-                "error": "Could not parse expression"
+                "error": "Could not parse as math expression. Provide numbers and operators (e.g. 100 + 50)."
             }
     
-    def _rag_retrieval(self, query: str, top_k: int = 5) -> Dict:
-        """Retrieve relevant chunks from knowledge base"""
+    def _rag_retrieval(self, query: str, top_k: int = 5, corpus_id: Optional[str] = None) -> Dict:
+        """Retrieve relevant chunks from knowledge base. If corpus_id is set, only chunks from that document are returned (e.g. FinQA); use larger top_k so the model sees more of the doc."""
         if not self.retriever:
             return {
                 "query": query,
                 "chunks": [],
                 "error": "Retriever not initialized"
             }
-        
+        # When scoping to one document, retrieve more chunks so tables/context aren't missed
+        k = min(20, top_k * 2) if corpus_id else top_k
         try:
-            # Retrieve chunks - FIX: use correct method
-            results = self.retriever.retrieve(query, top_k=top_k)
+            results = self.retriever.retrieve(query, top_k=k, corpus_id=corpus_id)
             
             # Format results - handle different return types
             chunks = []

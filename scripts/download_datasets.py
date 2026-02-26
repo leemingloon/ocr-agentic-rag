@@ -75,7 +75,7 @@ VISION_DATASETS = [
     ("InfographicsVQA", "lmms-lab/DocVQA", "InfographicVQA"),  # manual
     # ("VisualMRC", "NTT-hil-insight/VisualMRC", None),
     # ("DUDE", None, None),  # manual
-    ("OmniDocBench", "Quivr/OmniDocBench", "full_dataset"),
+    # ("OmniDocBench", "Quivr/OmniDocBench", "full_dataset"),
     # ("PlotQA", "achang/plot_qa", None),
     ("MMMU_Accounting", "MMMU/MMMU", "Accounting"),
     ("MMMU_Economics", "MMMU/MMMU", "Economics"),
@@ -112,12 +112,10 @@ for name, hf_name, hf_config in VISION_DATASETS:
 ########################################
 # RAG / Financial QA datasets
 ########################################
+# FinQA: no HF download; data from train_qa.json only (downloaded below)
 RAG_DATASETS = [
-    # ("HotpotQA", "hotpot_qa", "fullwiki"),
-    ("FinQA", "FinanceMTEB/FinQA", None),
+    ("FinQA", None, None),
     ("TAT-QA", None, None),  # manual from github
-    # ("TAT-QA", "next-tat/TAT-QA", None),
-    # ("BIRD-SQL", "domyn/FINCH", None),
 ]
 
 print("\n=== Downloading RAG / Financial QA datasets ===")
@@ -131,6 +129,21 @@ for name, hf_name, hf_config in RAG_DATASETS:
         print(f"Saved {name} to {folder}")
     else:
         print(f"Manual step required: {name}. Place files under {folder}")
+
+# FinQA: single source is train_qa.json (no parquet). Download official FinQA train.json from GitHub.
+finqa_qa_url = "https://raw.githubusercontent.com/czyssrs/FinQA/main/dataset/train.json"
+finqa_train_dir = os.path.join(BASE_DIR, "rag", "FinQA", "train")
+finqa_qa_path = os.path.join(finqa_train_dir, "train_qa.json")
+if not os.path.exists(finqa_qa_path):
+    try:
+        os.makedirs(finqa_train_dir, exist_ok=True)
+        print(f"Downloading FinQA QA (questions+answers) from GitHub...")
+        urllib.request.urlretrieve(finqa_qa_url, finqa_qa_path)
+        print(f"Saved FinQA QA to {finqa_qa_path}")
+    except Exception as e:
+        print(f"FinQA QA download skipped ({e}). For RAG QA evaluation, add {finqa_qa_path} from https://github.com/czyssrs/FinQA")
+else:
+    print(f"FinQA QA already present: {finqa_qa_path}")
 
 ########################################
 # Credit Risk datasets (PD)

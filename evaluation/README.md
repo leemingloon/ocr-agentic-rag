@@ -1,37 +1,32 @@
 # Evaluation Datasets
 
-This directory contains the 10 industry-standard benchmarks used to evaluate the OCR→Agentic RAG pipeline.
+This directory contains benchmarks used to evaluate the OCR→Agentic RAG pipeline. Aligned with eval_runner / eval_dataset_adapters (splits with ground truth as source of truth).
 
 ## Complete Benchmark Suite
 
-### OCR Benchmarks (6 datasets)
+### OCR Benchmarks (5 datasets, splits with ground truth)
 
-1. **OmniDocBench v1.5** (CVPR 2025)
-   - Industry standard OCR benchmark
-   - Text detection, table structure, layout
-   - `omnidocbench_sample/`
-
-2. **SROIE** (ICDAR 2019)
+1. **SROIE** (ICDAR 2019)
    - Singapore invoice dataset
    - Key-value extraction
    - `sroie_sample/`
 
-3. **FUNSD** (ICDAR 2019)
+2. **FUNSD** (ICDAR 2019)
    - Form understanding (KYC use case)
    - Entity detection and linking
    - `funsd_sample/`
 
-4. **DocVQA** (CVPR 2021) - **Multimodal**
+3. **DocVQA** (CVPR 2021) - **Multimodal**
    - Visual document question answering
    - Tests vision-language capabilities
    - `docvqa_sample/`
 
-5. **InfographicsVQA** (WACV 2022) - **Multimodal**
+4. **InfographicsVQA** (WACV 2022) - **Multimodal**
    - Chart and infographic understanding
    - Tests visual reasoning
    - `infographicsvqa_sample/`
 
-6. **DUDE** (NeurIPS 2023)
+5. **DUDE** (NeurIPS 2023)
    - Multi-page document understanding
    - Cross-page references
    - `dude_sample/`
@@ -63,7 +58,6 @@ This directory contains the 10 industry-standard benchmarks used to evaluate the
 data/evaluation/
 ├── README.md (this file)
 ├── DATASETS.md (download instructions)
-├── omnidocbench_sample/
 ├── sroie_sample/
 ├── funsd_sample/
 ├── docvqa_sample/
@@ -92,7 +86,6 @@ For quick testing without full datasets:
 
 | Benchmark | Expected Score |
 |-----------|---------------|
-| OmniDocBench | 85% Text F1 |
 | SROIE | 94% Extraction |
 | FUNSD | 89% F1 |
 | DocVQA | 72% ANLS |

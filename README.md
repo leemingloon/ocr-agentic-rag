@@ -4,6 +4,8 @@ OCR→Agentic RAG→Credit Risk Platform
 **Author:** Lee Ming Loon  
 **Status:** Deployed to AWS Sagemaker. Evaluating models on Local PC (in progress on evaluate_on_local branch). Finally, Production-ready prototype.
 
+> **Evaluation data:** Demos and notebooks in the `notebooks/` folder load model evaluation results from the `data/proof/` folder. Any metrics or scores cited in this repo that are not backed by current artifacts under `data/proof/` are placeholders and will be filled in as evaluation progresses.
+
 ---
 
 ## 🎯 Project Overview
@@ -12,11 +14,11 @@ End-to-end pipeline: **OCR → Agentic RAG → Multimodal Vision → Credit Risk
 
 ### Key Achievements
 
-- **89% E2E fidelity** (image → answer accuracy)
-- **85% STP** (straight-through processing)
-- **$0.00602 cost per document** (10x cheaper than pure DL)
-- **Validated on 20 tests** (16 benchmarks + 4 system tests)
-- **MAS FEAT compliant** (bias <10%, audit trails, prompt versioning)
+- E2E fidelity (image → answer) — *see `data/proof/`*
+- STP (straight-through processing) — *TBD*
+- Cost per document — *TBD*
+- Benchmarks: OCR, Vision, RAG, Credit Risk — *proof under `data/proof/`*
+- MAS FEAT: audit trails, prompt versioning — *TBD*
 
 ---
 
@@ -24,41 +26,39 @@ End-to-end pipeline: **OCR → Agentic RAG → Multimodal Vision → Credit Risk
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    LAYER 1: OCR PIPELINE                     │
-│   3-Tier Detection: Cache (65%) → Classical (25%) → DL (10%) │
+│   3-Tier Detection: Cache → Classical → DL                  │
 │   Recognition: Tesseract → PaddleOCR → Vision OCR           │
-│   Performance: $0.00001, 133ms, 85% STP                     │
+│   Performance: TBD (see data/proof)                          │
 └────────────────────────┬────────────────────────────────────┘
                          │
                          ▼ Structured Text + Layout
                          │
 ┌─────────────────────────────────────────────────────────────┐
 │                  LAYER 2: AGENTIC RAG                        │
-│   Retrieval: BM25 + BGE-M3 (hybrid dense+sparse)           │
-│   Reranking: BGE-reranker-v2-m3 (cross-encoder)            │
-│   Orchestration: LangGraph (autonomous tool selection)      │
-│   Performance: 88% precision, 85% recall                    │
+│   Retrieval: BM25 + BGE-M3 (hybrid dense+sparse)            │
+│   Reranking: BGE-reranker-v2-m3 (cross-encoder)             │
+│   Orchestration: LangGraph (autonomous tool selection)       │
+│   Performance: TBD (see data/proof)                         │
 └────────────────────────┬────────────────────────────────────┘
                          │
                          ▼ Enriched Context
                          │
 ┌─────────────────────────────────────────────────────────────┐
 │              LAYER 3: MULTIMODAL VISION                      │
-│   Vision Model: Claude 3.5 Sonnet Vision                   │
-│   Chart Extraction: 95% accuracy (vs 58% OCR-only)         │
-│   Use Cases: Charts, handwriting, complex layouts          │
-│   Performance: 15% multimodal usage rate                    │
+│   Vision Model: Claude 3.5 Sonnet Vision                    │
+│   Use Cases: Charts, handwriting, complex layouts            │
+│   Performance: TBD (see data/proof)                          │
 └────────────────────────┬────────────────────────────────────┘
                          │
                          ▼ Structured Features
                          │
 ┌─────────────────────────────────────────────────────────────┐
 │            LAYER 4: CREDIT RISK PIPELINE                     │
-│   Feature Engineering: Ratios, Trends, NLP sentiment       │
-│   PD Model: XGBoost (AUC-ROC 0.82 on 2.9M loans)          │
-│   Risk Memos: LLM-generated (89% EM, ROUGE-L 0.85)         │
-│   Governance: Prompt versioning, safety filters            │
-│   Monitoring: Drift detection (KS-stat <0.05)              │
-│   Performance: 85% credit deterioration detection          │
+│   Feature Engineering: Ratios, Trends, NLP sentiment        │
+│   PD Model: XGBoost — metrics TBD                           │
+│   Risk Memos: LLM-generated — metrics TBD                   │
+│   Governance: Prompt versioning, safety filters              │
+│   Monitoring: Drift detection — TBD                          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -114,35 +114,16 @@ python examples/06_full_e2e_demo.py
 
 ## 📊 Evaluation Results
 
-### Complete Benchmark Suite (20 Tests)
+Evaluation is run via `eval_runner.py`; results are written under **`data/proof/`**.  
+Demos in **`notebooks/`** read from `data/proof/` for any reported metrics.
 
-**OCR Benchmarks (6):**
-- Weighted avg: **87%** across 50K+ samples
-- OmniDocBench, SROIE, FUNSD, DUDE, DocVQA, InfographicsVQA
+**Categories with proof under `data/proof/`:**
+- **Vision:** ChartQA, DocVQA, InfographicsVQA, MMMU (Accounting, Economics, Finance, Math) — *scores TBD*
+- **RAG:** FinQA (and adversarial) — *scores TBD*
 
-**Multimodal Benchmarks (8):**
-- Weighted avg: **74%** across 45K+ samples
-- DocVQA, ChartQA, PlotQA, TextVQA, OCR-VQA, AI2D, InfographicsVQA, VisualMRC
+**Other categories** (OCR, full multimodal, other RAG datasets, Credit Risk, system tests) are not yet backed by artifacts in `data/proof/`. Scores will be added as evaluation progresses.
 
-**RAG Benchmarks (4):**
-- Weighted avg: **88%** across 25K+ samples
-- HotpotQA, FinQA, TAT-QA, BIRD-SQL
-
-**Credit Risk Benchmarks (6):**
-- PD Model: **AUC-ROC 0.82** (Lending Club, 2.9M loans)
-- NLP Sentiment: **F1 0.87** (FiQA, 1,173 samples)
-- Risk Memo Q&A: **EM 0.89** (FinanceBench, 10,231 Q&A)
-- Risk Memo Summary: **ROUGE-L 0.85** (ECTSum, 2,425 summaries)
-- Drift Detection: **KS-stat 0.03** (Credit Card UCI, 30K)
-- Counterfactual: **92% sensitivity accuracy** (Synthetic, 1,000)
-
-**System Tests (4):**
-- Robustness: **<10% degradation** under noise
-- Bias & Fairness: **2% gap** (MAS FEAT compliant)
-- Adversarial: **95.6% resistance** to prompt injection
-- Load: **0.3% error rate** at 1000 requests
-
-**Total: 20 tests across 1.2M+ samples** ✅
+See [EVALUATION_RESULTS.md](EVALUATION_RESULTS.md) for methodology; current numbers are placeholders until filled from proof runs.
 
 ---
 
@@ -215,26 +196,24 @@ ocr-agentic-rag/
 ## 🎯 Use Cases
 
 ### OCR Layer
-- Invoice processing (SROIE: 94%)
-- Form extraction (FUNSD: 89%)
-- Multi-page documents (DUDE: 81%)
+- Invoice processing (SROIE)
+- Form extraction (FUNSD)
+- Multi-page documents (DUDE)
 
 ### Multimodal Layer
-- Chart extraction (95% accuracy)
-- Handwriting recognition
-- Visual document QA (DocVQA: 72%)
+- Chart extraction, handwriting recognition
+- Visual document QA (DocVQA, ChartQA, InfographicsVQA, MMMU — *see data/proof*)
 
 ### RAG Layer
-- Multi-hop reasoning (HotpotQA: 89%)
-- Financial QA (FinQA: 87%)
-- Table reasoning (TAT-QA: 84%)
+- Multi-hop reasoning (HotpotQA)
+- Financial QA (FinQA — *see data/proof*)
+- Table reasoning (TAT-QA)
 
-### Credit Risk Layer (NEW)
-- Default probability prediction (AUC-ROC 0.82)
-- Credit deterioration detection (85% precision, 3-month lead time)
-- Automated risk memo generation (89% EM, ROUGE-L 0.85)
-- Covenant stress testing
-- What-if scenario analysis
+### Credit Risk Layer
+- Default probability prediction (PD model)
+- Credit deterioration detection
+- Automated risk memo generation
+- Covenant stress testing, what-if analysis
 - Real-time drift monitoring
 
 ---
@@ -359,56 +338,27 @@ python run_e2e.py --mode production --eval
 ## 🔒 MAS FEAT Compliance
 
 ### Fairness
-- Bias gap: **2%** (<10% threshold) ✅
-- Tested across document types, languages, templates
+- Bias gap target: &lt;10% threshold — *TBD*
 
 ### Ethics
-- Human-in-the-loop: **15%** of high-risk decisions
-- Autonomous approval: Only low-risk cases (<5% expected loss)
+- Human-in-the-loop for high-risk decisions
+- Autonomous approval for low-risk cases only
 
 ### Accountability
-- **100% audit trail** coverage
-- Complete lineage tracking (data → features → model → decision)
-- Prompt versioning (all LLM calls logged)
+- Audit trail and lineage tracking (data → features → model → decision)
+- Prompt versioning (LLM calls logged)
 
 ### Transparency
 - SHAP explainability for PD model
 - LLM explanations with citation tracking
-- Drift monitoring (<5% distribution shift threshold)
+- Drift monitoring — *TBD*
 
 ---
 
 ## ⚡ Performance Benchmarks
 
-### End-to-End Latency (p95)
-
-| Component | Latency | % of Total |
-|-----------|---------|------------|
-| OCR (3-tier) | 133ms | 5.5% |
-| RAG | 300ms | 12.5% |
-| Vision (when used) | 2000ms | 40% (charts only) |
-| Credit Risk | 50ms | 2.1% |
-| LLM Generation | 1500ms | 62.5% |
-| **Total (no charts)** | **~2.4s** | **100%** |
-| **Total (with charts)** | **~4.4s** | - |
-
-### Throughput
-
-| Mode | Workers | QPS | Cost/Query |
-|------|---------|-----|------------|
-| Local | 1 | 0.4 | $0.00602 |
-| SageMaker | 10 | 4 | $0.00602 |
-| Production (target) | 2500 | 1000 | $0.00602 |
-
-### Cost Breakdown
-
-| Component | Cost | % of Total |
-|-----------|------|------------|
-| OCR Detection | $0.00001 | 0.2% |
-| OCR Recognition | $0.000025 | 0.4% |
-| RAG (embeddings) | $0 | 0% |
-| LLM (Claude Sonnet 4) | $0.006 | 99.4% |
-| **Total** | **$0.00602** | **100%** |
+Latency, throughput, and cost figures are TBD and will be updated from runs that write to `data/proof/`.  
+See `eval_runner.py` and `data/proof/` for current evaluation outputs.
 
 ---
 

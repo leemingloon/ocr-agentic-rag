@@ -1,0 +1,23 @@
+# Dependencies for PD & QNLP notebooks (01–04)
+# Install from repo root: pip install -r notebooks/requirements-notebooks.txt
+# Or install main repo deps first: pip install -r requirements.txt
+
+# Already in main requirements.txt but listed here for notebook-only envs
+pandas>=1.5.0
+numpy>=1.21.0
+scikit-learn>=1.0.0
+xgboost>=1.7.0
+scipy>=1.9.0
+joblib>=1.2.0
+
+# Parquet I/O (notebook 01 output / 02–03 input)
+pyarrow>=10.0.0
+
+# Quantum PD (notebook 03)
+pennylane>=0.32.0
+
+# QNLP sentiment (notebook 04) – optional
+lambeq>=0.3.0
+
+# Plotting (notebook 01 optional)
+matplotlib>=3.5.0
