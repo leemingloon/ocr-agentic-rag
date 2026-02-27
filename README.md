@@ -198,20 +198,18 @@ ocr-agentic-rag/
 ### OCR Layer
 - Invoice processing (SROIE)
 - Form extraction (FUNSD)
-- Multi-page documents (DUDE)
 
 ### Multimodal Layer
 - Chart extraction, handwriting recognition
 - Visual document QA (DocVQA, ChartQA, InfographicsVQA, MMMU — *see data/proof*)
 
 ### RAG Layer
-- Multi-hop reasoning (HotpotQA)
 - Financial QA (FinQA — *see data/proof*)
 - Table reasoning (TAT-QA)
 
 ### Credit Risk Layer
 - Default probability prediction (PD model)
-- Credit deterioration detection
+- Credit deterioration
 - Automated risk memo generation
 - Covenant stress testing, what-if analysis
 - Real-time drift monitoring
@@ -220,10 +218,10 @@ ocr-agentic-rag/
 
 ## 💻 Running on Different Platforms
 
-### Local PC (Your Machine)
+### Local PC
 
 **Specs:** 16GB RAM, i5-11500, no GPU  
-**Mode:** `local`  
+**Mode:** `local` 
 **Samples:** 80 total  
 **Runtime:** ~3 minutes  
 **Cost:** $0
@@ -300,7 +298,7 @@ python run_e2e.py --mode production --eval
 - **LLM:** Claude Sonnet 4
 
 ### Multimodal
-- **Vision Model:** Claude 3.5 Sonnet Vision
+- **Vision Model:** Claude 4.6 Sonnet Vision
 - **Chart Understanding:** Vision-first (95% accuracy)
 
 ### Credit Risk (NEW)
@@ -372,9 +370,8 @@ MIT License
 
 **Datasets:**
 - Lending Club (Kaggle)
-- FiQA, FinanceBench, ECTSum (HuggingFace)
-- Credit Card Default (UCI)
-- OmniDocBench, SROIE, FUNSD, DocVQA (Academia)
+- FiQA, FinanceBench, (HuggingFace)
+- SROIE, FUNSD, DocVQA (Academia)
 
 **Frameworks:**
 - PaddleOCR, LlamaIndex, LangGraph
