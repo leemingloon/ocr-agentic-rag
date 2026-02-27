@@ -315,6 +315,9 @@ def _run_vision_model(sample: dict, debug: bool = False) -> dict:
 # Cache for RAG retriever per dataset (index built once, reused for all samples)
 _RAG_RETRIEVER_CACHE: dict[str, Any] = {}
 
+# Cache for PD (XGBoost) model: load once per process for overnight sample-by-sample evaluation (CPU-only)
+_PD_MODEL_CACHE: dict[str, Any] = {}
+
 
 def _build_finqa_corpus_chunks(debug: bool = False) -> list:
     """Load FinQA train_qa.json and return list of TextNode chunks for retrieval index.
@@ -465,12 +468,22 @@ def run_model(sample: dict, category: str, dataset_name: str, debug: bool = Fals
     if category == "credit_risk_PD":
         features = sample_input.get("features") or {}
         try:
-            from credit_risk.models.pd_model import PDModel
-            pd_model = PDModel(mode="local")
-            model_path = Path("models/pd/pd_model_local_v1.pkl")
-            if model_path.exists():
-                pd_model.load(str(model_path))
-            pd_prob = pd_model.predict_pd(features)
+            repo_root = Path(__file__).resolve().parent
+            model_path = repo_root / "models" / "pd" / "pd_model_local_v1.pkl"
+            cache_key = str(model_path)
+            if cache_key not in _PD_MODEL_CACHE:
+                from credit_risk.models.pd_model import PDModel
+                pd_model = PDModel(mode="local")
+                if model_path.exists():
+                    pd_model.load(str(model_path))
+                    _PD_MODEL_CACHE[cache_key] = pd_model
+                else:
+                    _PD_MODEL_CACHE[cache_key] = None
+            pd_model = _PD_MODEL_CACHE[cache_key]
+            if pd_model is not None:
+                pd_prob = pd_model.predict_pd(features)
+            else:
+                pd_prob = 0.0
         except Exception as e:
             if debug:
                 print(f"[DEBUG] PD inference failed: {e}")

@@ -140,7 +140,7 @@ Summary of issues encountered and fixes applied so that future runs and readers 
 - **Re-run with fixes:** To see improved predictions and correct metrics, run without skipping: e.g. temporarily move or clear the FinQA per_sample file for the split you care about, then run again so those samples are re-evaluated (and metrics recomputed with FinQAUtils + new RAG/generator behavior).
 - **Simulate before spending API credits:** Use `scripts/simulate_finqa_retrieval.py` to check what chunks the model would see for a given query and `corpus_id`.
 - **Primary metric for FinQA:** Use **numerical_exact_match** (and the strict exact_match for numeric answers) when reporting or comparing runs.
-- **Faster embedding (Colab GPU):** Use **notebooks/05_agentic_demo.ipynb** on Google Colab (free T4 GPU): it downloads FinQA + TAT-QA, builds the FinQA index on GPU, runs RAG eval, and displays results. You can also download the `finqa_retriever_index` zip and unzip into `data/rag/FinQA/train/finqa_retriever_index/` for local runs.
+- **Faster embedding (Colab GPU):** Use **notebooks/demo_agentic_rag_eval.ipynb** on Google Colab (free T4 GPU): it downloads FinQA + TAT-QA, builds the FinQA index on GPU, runs RAG eval, and displays results. You can also download the `finqa_retriever_index` zip and unzip into `data/rag/FinQA/train/finqa_retriever_index/` for local runs.
 
 ---
 
