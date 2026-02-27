@@ -84,25 +84,28 @@ class HybridRetriever:
         self.chunks = []
         self.chunk_texts = []
         
-    def build_index(self, chunks: List[TextNode]):
+    def build_index(self, chunks: List[TextNode], batch_size: Optional[int] = None):
         """
-        Build both BM25 and FAISS indices
-        
+        Build both BM25 and FAISS indices.
+
         Args:
             chunks: List of document chunks
+            batch_size: Override for embedding batch size (larger = faster on GPU, e.g. 256–512 on Colab)
         """
         self.chunks = chunks
         self.chunk_texts = [chunk.text for chunk in chunks]
-        
+
         print(f"Building indices for {len(chunks)} chunks...")
-        
+
         # Build BM25 index
         tokenized_corpus = [text.lower().split() for text in self.chunk_texts]
         self.bm25_index = BM25Okapi(tokenized_corpus)
-        
-        # Build FAISS index (batch_size: larger = faster on CPU up to RAM limit; 16GB ~ 48 for BGE-M3, 128 for small model)
-        embed_batch_size = 128 if _USE_FAST_EMBEDDINGS else 48
-        print("Generating embeddings...")
+
+        if batch_size is None:
+            embed_batch_size = 128 if _USE_FAST_EMBEDDINGS else 48
+        else:
+            embed_batch_size = batch_size
+        print(f"Generating embeddings (batch_size={embed_batch_size})...")
         embeddings = self.embed_model.encode(
             self.chunk_texts,
             show_progress_bar=True,

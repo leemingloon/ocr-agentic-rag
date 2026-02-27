@@ -3237,12 +3237,12 @@ class LendingClubAdapter(BaseDatasetAdapter):
             "ground_truth_path": None,
             "notes": "Test folder containing 1 Parquet shard file"
         },
-        # "train": {  # for evaluation only splits with GT are used; train used for training only
-        #     "format": "folder",
-        #     "dataset_path": "data/credit_risk_pd/LendingClub/train",
-        #     "ground_truth_path": None,
-        #     "notes": "Train folder containing 1 Parquet shard file"
-        # },
+        "train": {
+            "format": "folder",
+            "dataset_path": "data/credit_risk_pd/LendingClub/train",
+            "ground_truth_path": None,
+            "notes": "Train folder (for full overnight sample-by-sample evaluation)"
+        },
         "valid": {
             "format": "folder",
             "dataset_path": "data/credit_risk_pd/LendingClub/valid",

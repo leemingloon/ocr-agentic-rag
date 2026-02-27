@@ -53,6 +53,11 @@ This directory contains benchmarks used to evaluate the OCR→Agentic RAG pipeli
     - Autonomous agent capability
     - `bird_sql_sample.json`
 
+### Credit Risk PD (LendingClub)
+
+- **LendingClub** (TheFinAI/lendingclub-benchmark): PD (probability of default) prediction on query-style samples; train/test/valid parquet under `data/credit_risk_pd/LendingClub/`.
+- **Overnight run (CPU-only, e.g. i5-11500, 16GB):** From repo root, run `python eval_runner.py --category credit_risk_PD`. The XGBoost model is loaded once and reused for every sample; evaluation streams row-by-row and writes proof under `data/proof/credit_risk_pd/` (per-sample JSON, split averages, weighted_avg) for comparison with quantum models. Use no `--max_split`/`--max_category` to evaluate all splits.
+
 ## Directory Structure
 ```
 data/evaluation/

@@ -9,6 +9,7 @@ scikit-learn>=1.0.0
 xgboost>=1.7.0
 scipy>=1.9.0
 joblib>=1.2.0
+optuna>=3.0.0
 
 # Parquet I/O (notebook 01 output / 02–03 input)
 pyarrow>=10.0.0
