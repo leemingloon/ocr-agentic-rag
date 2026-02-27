@@ -8,6 +8,7 @@ Provides tools for:
 - Web search (external knowledge)
 """
 
+import os
 import re
 import json
 from typing import Dict, Any, Optional, List
@@ -200,8 +201,8 @@ class ToolRegistry:
                 "chunks": [],
                 "error": "Retriever not initialized"
             }
-        # When scoping to one document, retrieve more chunks so tables/context aren't missed
-        k = min(20, top_k * 2) if corpus_id else top_k
+        # When scoping to one document, retrieve more chunks so table/numerical context isn't missed
+        k = min(30, top_k * 3) if corpus_id else top_k
         try:
             results = self.retriever.retrieve(query, top_k=k, corpus_id=corpus_id)
             
@@ -229,6 +230,11 @@ class ToolRegistry:
                             "metadata": {}
                         })
             
+            if os.environ.get("RAG_DEBUG") == "1":
+                has_table_like = any(("$" in (c.get("text") or "") or "|" in (c.get("text") or "")) for c in chunks)
+                meta0 = (chunks[0].get("metadata") or {}) if chunks else {}
+                print(f"[DEBUG] _rag_retrieval: corpus_id={corpus_id!r} top_k_requested={k} num_chunks={len(chunks)} "
+                      f"first_corpus_id={meta0.get('corpus_id')!r} has_table_like_content={has_table_like}")
             return {
                 "query": query,
                 "num_results": len(chunks),
@@ -237,6 +243,8 @@ class ToolRegistry:
             }
         
         except Exception as e:
+            if os.environ.get("RAG_DEBUG") == "1":
+                print(f"[DEBUG] _rag_retrieval failed: {e}")
             return {
                 "query": query,
                 "chunks": [],

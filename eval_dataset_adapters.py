@@ -2851,7 +2851,7 @@ class FinQAAdapter(BaseDatasetAdapter):
                             "answer": gt_answer,
                             "score": None,
                             "query_id": idx,
-                            "corpus_id": entry.get("id"),
+                            "corpus_id": entry.get("id") or entry.get("filename"),
                         },
                         "metadata": {
                             "dataset": self.dataset_name,
