@@ -365,6 +365,48 @@ def _build_finqa_corpus_chunks(debug: bool = False) -> list:
     return all_chunks
 
 
+def _build_tatqa_corpus_chunks(debug: bool = False) -> list:
+    """Load TAT-QA train and dev JSONs and return list of TextNode chunks for retrieval index.
+    Each doc's table + paragraphs are combined and chunked. corpus_id = table uid per doc."""
+    from rag_system.chunking import DocumentChunker
+
+    repo_root = Path(__file__).resolve().parent
+    tatqa_dir = repo_root / "data" / "rag" / "TAT-QA"
+    chunker = DocumentChunker(chunk_size=512, chunk_overlap=128)
+    all_chunks = []
+    for split, filename in [("train", "tatqa_dataset_train.json"), ("dev", "tatqa_dataset_dev.json")]:
+        path = tatqa_dir / filename
+        if not path.exists():
+            continue
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if not isinstance(data, list):
+            continue
+        for doc_idx, doc in enumerate(data):
+            table = doc.get("table") or {}
+            table_rows = table.get("table") if isinstance(table, dict) else table
+            if isinstance(table_rows, list):
+                table_str = "\n".join(" | ".join(str(c) for c in row) for row in table_rows)
+            else:
+                table_str = str(table_rows or "")
+            paragraphs = doc.get("paragraphs") or []
+            para_str = "\n".join(
+                p.get("text", "") for p in paragraphs if isinstance(p, dict)
+            )
+            doc_text = f"{table_str}\n\n{para_str}".strip()
+            if not doc_text:
+                continue
+            corpus_id = table.get("uid") if isinstance(table, dict) else None
+            if not corpus_id:
+                corpus_id = f"tatqa_{split}_{doc_idx}"
+            chunks = chunker.chunk_document(
+                doc_text,
+                metadata={"entry_id": doc_idx, "source": f"tatqa_{split}", "corpus_id": corpus_id},
+            )
+            all_chunks.extend(chunks)
+    return all_chunks
+
+
 def _get_rag_retriever_for_dataset(dataset_name: str, debug: bool = False):
     """Return a HybridRetriever with index built from the dataset corpus. Cached per dataset."""
     global _RAG_RETRIEVER_CACHE
@@ -395,6 +437,24 @@ def _get_rag_retriever_for_dataset(dataset_name: str, debug: bool = False):
                     corpus_ids = [x for x in corpus_ids if x is not None][:10]
                     print(f"[DEBUG] RAG FinQA: building index from {len(chunks)} chunks (train_qa.json); "
                           f"sample corpus_ids: {corpus_ids}")
+                retriever.build_index(chunks)
+    elif dataset_name == "TATQA":
+        repo_root = Path(__file__).resolve().parent
+        prebuilt_index_dir = repo_root / "data" / "rag" / "TAT-QA" / "tatqa_retriever_index"
+        if (prebuilt_index_dir / "meta.json").exists():
+            if debug:
+                print(f"[DEBUG] RAG TATQA: loading pre-built index from {prebuilt_index_dir}")
+            retriever.load_index_bundle(str(prebuilt_index_dir))
+        else:
+            chunks = _build_tatqa_corpus_chunks(debug=debug)
+            if not chunks:
+                if debug:
+                    print("[DEBUG] RAG TATQA: no chunks from TAT-QA train/dev; index will be empty (retrieve will fail)")
+            else:
+                if debug:
+                    meta = lambda c: getattr(c, "metadata", None) or {}
+                    corpus_ids = list({meta(c).get("corpus_id") for c in chunks})[:10]
+                    print(f"[DEBUG] RAG TATQA: building index from {len(chunks)} chunks; sample corpus_ids: {corpus_ids}")
                 retriever.build_index(chunks)
     else:
         if debug:
