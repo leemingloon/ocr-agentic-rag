@@ -203,3 +203,9 @@ mini.py
 
 # Optional: pre-built FinQA index (from Colab notebook); omit to build from scratch
 data/rag/FinQA/train/finqa_retriever_index/
+
+# Windows startup / MCP (local only, not for SageMaker or repo)
+scripts/start_cursor_mcp_with_env.ps1
+scripts/StartCursorMCP.bat
+scripts/install_mcp_startup.ps1
+scripts/MCP_STARTUP.md
