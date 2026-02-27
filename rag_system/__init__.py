@@ -14,8 +14,6 @@ Components:
 from .chunking import DocumentChunker
 from .retrieval import HybridRetriever
 from .reranking import BGEReranker
-from .agentic import AgenticRAG, ToolRegistry, ConversationMemory
-from .multimodal_rag import MultimodalRAG  # NEW
 
 __version__ = "1.0.0"
 
@@ -26,5 +24,16 @@ __all__ = [
     "AgenticRAG",
     "ToolRegistry",
     "ConversationMemory",
-    "MultimodalRAG",  # NEW
+    "MultimodalRAG",
 ]
+
+
+def __getattr__(name):
+    """Lazy-load agentic and multimodal_rag so scripts that only need chunking/retrieval don't require anthropic/langgraph."""
+    if name in ("AgenticRAG", "ToolRegistry", "ConversationMemory"):
+        from .agentic import AgenticRAG, ToolRegistry, ConversationMemory
+        return AgenticRAG if name == "AgenticRAG" else (ToolRegistry if name == "ToolRegistry" else ConversationMemory)
+    if name == "MultimodalRAG":
+        from .multimodal_rag import MultimodalRAG
+        return MultimodalRAG
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
