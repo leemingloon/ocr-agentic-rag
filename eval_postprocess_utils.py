@@ -386,14 +386,18 @@ class CreditRiskPDUtils(CreditRiskUtils):
 
     @staticmethod
     def auc_roc(y_true: list[int], y_score: list[float]) -> float:
-        """Compute AUC-ROC from binary labels and probability scores."""
+        """Compute AUC-ROC from binary labels and probability scores. Returns 0.5 when undefined (one class only or NaN)."""
         if not y_true or not y_score or len(y_true) != len(y_score):
-            return 0.0
+            return 0.5
+        if len(set(y_true)) < 2:
+            return 0.5  # need both classes for AUC
         try:
             from sklearn.metrics import roc_auc_score
-            return float(roc_auc_score(y_true, y_score))
+            import math
+            auc = float(roc_auc_score(y_true, y_score))
+            return 0.5 if math.isnan(auc) else auc
         except Exception:
-            return 0.0
+            return 0.5
 
     @staticmethod
     def f1_precision_recall(y_true: list[int], y_pred: list[int]) -> dict[str, float]:

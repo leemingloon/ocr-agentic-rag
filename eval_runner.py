@@ -79,7 +79,14 @@ AUTO_DATASETS = {
     "credit_risk_PD": [
         ("LendingClub", "hf", "TheFinAI/lendingclub-benchmark", None),
     ],
+    "credit_risk_PD_quantum": [
+        ("LendingClub", "hf", "TheFinAI/lendingclub-benchmark", None),
+    ],
     "credit_risk_sentiment": [
+        ("FinancialPhraseBank", "hf", "FinanceMTEB/financial_phrasebank", None),
+        ("FiQA", "hf", "TheFinAI/fiqa-sentiment-classification", None),
+    ],
+    "credit_risk_sentiment_finbert": [
         ("FinancialPhraseBank", "hf", "FinanceMTEB/financial_phrasebank", None),
         ("FiQA", "hf", "TheFinAI/fiqa-sentiment-classification", None),
     ],
@@ -137,7 +144,17 @@ MODEL_META = {
         "backbone": "xgboost",
         "model_slug": "pd_xgboost",
     },
+    "credit_risk_PD_quantum": {
+        "model_class": "QuantumPDModel",
+        "backbone": "pennylane_vqc",
+        "model_slug": "pd_quantum_vqc",
+    },
     "credit_risk_sentiment": {
+        "model_class": "SentimentClassical",
+        "backbone": "tfidf_classical",
+        "model_slug": "sentiment_classical",
+    },
+    "credit_risk_sentiment_finbert": {
         "model_class": "NLPSignalExtractor",
         "backbone": "finbert",
         "model_slug": "finbert",
@@ -155,6 +172,17 @@ SINGAPORE_TZ = ZoneInfo("Asia/Singapore")
 def singapore_now_iso() -> str:
     """Timestamp in Singapore timezone for all proof JSONs."""
     return datetime.now(SINGAPORE_TZ).isoformat()
+
+
+def _safe_metric_val(v: float | None, default: float = 0.5) -> float:
+    """Return default when value is NaN (e.g. AUC undefined for one-class split)."""
+    if v is None:
+        return default
+    try:
+        import math
+        return default if (isinstance(v, float) and math.isnan(v)) else float(v)
+    except (TypeError, ValueError):
+        return default
 
 
 def get_vision_backbone() -> str:
@@ -178,7 +206,7 @@ def has_ground_truth(sample: dict, category: str) -> bool:
             answer = gt.get("answer")
             return answer is not None and str(answer).strip() != ""
         return gt is not None and str(gt).strip() != ""
-    if category in ("credit_risk_PD", "credit_risk_sentiment", "credit_risk_memo_generator"):
+    if category in ("credit_risk_PD", "credit_risk_PD_quantum", "credit_risk_sentiment", "credit_risk_sentiment_finbert", "credit_risk_memo_generator"):
         if isinstance(gt, dict):
             val = gt.get("label") or gt.get("answer") or gt.get("reference")
         else:
@@ -317,6 +345,8 @@ _RAG_RETRIEVER_CACHE: dict[str, Any] = {}
 
 # Cache for PD (XGBoost) model: load once per process for overnight sample-by-sample evaluation (CPU-only)
 _PD_MODEL_CACHE: dict[str, Any] = {}
+_QUANTUM_PD_MODEL_CACHE: dict[str, Any] = {}
+_SENTIMENT_PKL_CACHE: dict[str, Any] = {}
 
 
 def _build_finqa_corpus_chunks(debug: bool = False) -> list:
@@ -555,7 +585,68 @@ def run_model(sample: dict, category: str, dataset_name: str, debug: bool = Fals
             "binary_pred": binary_pred,
         }
 
+    if category == "credit_risk_PD_quantum":
+        features = sample_input.get("features") or {}
+        try:
+            repo_root = Path(__file__).resolve().parent
+            model_path = repo_root / "models" / "pd" / "pd_quantum_vqc_v1.pkl"
+            cache_key = str(model_path)
+            if cache_key not in _QUANTUM_PD_MODEL_CACHE:
+                from credit_risk.models.quantum_pd_model import QuantumPDModel
+                qpd = QuantumPDModel()
+                if model_path.exists():
+                    qpd.load(str(model_path))
+                    _QUANTUM_PD_MODEL_CACHE[cache_key] = qpd
+                else:
+                    _QUANTUM_PD_MODEL_CACHE[cache_key] = None
+            qpd_model = _QUANTUM_PD_MODEL_CACHE[cache_key]
+            if qpd_model is not None:
+                pd_prob = qpd_model.predict_pd(features)
+            else:
+                pd_prob = 0.0
+        except Exception as e:
+            if debug:
+                print(f"[DEBUG] Quantum PD inference failed: {e}")
+            pd_prob = 0.0
+        binary_pred = 1 if pd_prob >= 0.5 else 0
+        return {
+            "answer": str(pd_prob),
+            "probability": pd_prob,
+            "binary_pred": binary_pred,
+        }
+
     if category == "credit_risk_sentiment":
+        text = sample_input.get("text") or ""
+        try:
+            repo_root = Path(__file__).resolve().parent
+            pkl_path = repo_root / "models" / "sentiment" / "sentiment_classical_v1.pkl"
+            if pkl_path.exists():
+                cache_key = str(pkl_path)
+                if cache_key not in _SENTIMENT_PKL_CACHE:
+                    import joblib
+                    _SENTIMENT_PKL_CACHE[cache_key] = joblib.load(pkl_path)
+                data = _SENTIMENT_PKL_CACHE[cache_key]
+                vec = data.get("vectorizer")
+                clf = data.get("classifier")
+                if vec is not None and clf is not None:
+                    X = vec.transform([str(text)])
+                    label = clf.predict(X)[0]
+                    if hasattr(label, "item"):
+                        label = str(label.item()) if hasattr(clf, "classes_") else str(label)
+                    else:
+                        label = str(label)
+                    label = label.strip().lower() if label else "neutral"
+                else:
+                    label = "neutral"
+            else:
+                label = "neutral"
+        except Exception as e:
+            if debug:
+                print(f"[DEBUG] Sentiment (classical pkl) inference failed: {e}")
+            label = "neutral"
+        return {"answer": label}
+
+    if category == "credit_risk_sentiment_finbert":
         text = sample_input.get("text") or ""
         try:
             from credit_risk.feature_engineering.nlp_signals import NLPSignalExtractor
@@ -572,7 +663,7 @@ def run_model(sample: dict, category: str, dataset_name: str, debug: bool = Fals
                 label = "neutral"
         except Exception as e:
             if debug:
-                print(f"[DEBUG] Sentiment inference failed: {e}")
+                print(f"[DEBUG] FinBERT sentiment inference failed: {e}")
             label = "neutral"
         return {"answer": label}
 
@@ -1041,7 +1132,11 @@ def evaluate_dataset(
                 metric_row = evaluate_rag_sample(dataset_name, prediction, sample)
             elif category == "credit_risk_PD":
                 metric_row = evaluate_credit_risk_pd_sample(prediction, sample)
+            elif category == "credit_risk_PD_quantum":
+                metric_row = evaluate_credit_risk_pd_sample(prediction, sample)
             elif category == "credit_risk_sentiment":
+                metric_row = evaluate_credit_risk_sentiment_sample(prediction, sample)
+            elif category == "credit_risk_sentiment_finbert":
                 metric_row = evaluate_credit_risk_sentiment_sample(prediction, sample)
             elif category == "credit_risk_memo_generator":
                 metric_row = evaluate_credit_risk_memo_sample(prediction, sample)
@@ -1142,7 +1237,7 @@ def evaluate_dataset(
         with open(per_sample_path, "r", encoding="utf-8") as f:
             rows_from_file = json.load(f)
         split_metric_rows = [r.get("metrics") or {} for r in rows_from_file if r.get("metrics")]
-        if category == "credit_risk_PD" and split_metric_rows:
+        if category in ("credit_risk_PD", "credit_risk_PD_quantum") and split_metric_rows:
             pd_utils = CreditRiskPDUtils()
             y_true = [r["gt_binary"] for r in split_metric_rows if r.get("gt_binary") is not None]
             y_score = [r["pd_prob"] for r in split_metric_rows if r.get("pd_prob") is not None]
@@ -1159,7 +1254,7 @@ def evaluate_dataset(
             else:
                 split_avg = aggregate_metrics(split_metric_rows)
                 split_avg["sample_count"] = len(rows_from_file)
-        elif category == "credit_risk_sentiment" and split_metric_rows:
+        elif category in ("credit_risk_sentiment", "credit_risk_sentiment_finbert") and split_metric_rows:
             sent_utils = CreditRiskSentimentUtils()
             refs = [r.get("reference", "neutral") for r in split_metric_rows]
             preds = [r.get("prediction", "neutral") for r in split_metric_rows]
@@ -1224,7 +1319,8 @@ def evaluate_dataset(
         denom = 0
         for split_name, avg in split_avgs_from_files.items():
             count = avg.get("sample_count", 0)
-            num += avg.get(key, 0.0) * count
+            val = _safe_metric_val(avg.get(key), default=0.5)
+            num += val * count
             denom += count
         dataset_weighted_metrics[key] = num / denom if denom else 0.0
 
@@ -1289,7 +1385,7 @@ def write_category_weighted_avg(category: str, dataset_summaries: list[dict]):
     for key in metric_keys:
         numerator = 0.0
         for d in dataset_summaries:
-            numerator += d["avg"].get(key, 0.0) * d["sample_count"]
+            numerator += _safe_metric_val(d["avg"].get(key), 0.5) * d["sample_count"]
         weighted[key] = numerator / total_samples if total_samples else 0.0
 
     payload = {
@@ -1378,7 +1474,7 @@ def refresh_category_weighted_avg_from_files(category: str) -> None:
             if key not in w:
                 continue
             count = d.get("sample_count", 0)
-            num += w[key] * count
+            num += _safe_metric_val(w[key], 0.5) * count
             denom += count
             contributing_datasets.append(d.get("dataset", ""))
         weighted[key] = num / denom if denom else 0.0
