@@ -45,32 +45,38 @@ class HybridRetriever:
         top_k_dense: int = 20,
         top_k_final: int = 10,
         rrf_k: int = 60,  # Reciprocal Rank Fusion parameter
+        device: Optional[str] = None,  # "cuda" for GPU (e.g. Colab); None/"cpu" for CPU
     ):
         """
         Initialize hybrid retriever
-        
+
         Args:
             embedding_model: HuggingFace model for dense retrieval
             top_k_sparse: Top results from BM25
             top_k_dense: Top results from dense search
             top_k_final: Final top results after fusion
             rrf_k: RRF smoothing parameter
+            device: "cuda" for GPU (faster embedding in Colab), None or "cpu" for CPU
         """
         self.top_k_sparse = top_k_sparse
         self.top_k_dense = top_k_dense
         self.top_k_final = top_k_final
         self.rrf_k = rrf_k
+        self._device = device or "cpu"
 
         # Optional: use small fast model on CPU / low-RAM (set RAG_FAST_EMBEDDINGS=1)
         model_to_load = _FAST_MODEL if _USE_FAST_EMBEDDINGS else (embedding_model or _DEFAULT_MODEL)
         if _USE_FAST_EMBEDDINGS:
             print(f"[RAG] Using fast CPU embedding model: {model_to_load} (RAG_FAST_EMBEDDINGS=1)")
-        # Load on CPU explicitly; try ONNX backend if available (faster on CPU)
-        print(f"Loading embedding model: {model_to_load}")
+        # Load on CPU or GPU (GPU recommended for building large indices, e.g. Colab)
+        print(f"Loading embedding model: {model_to_load} (device={self._device})")
         try:
-            self.embed_model = SentenceTransformer(model_to_load, device="cpu", backend="onnx")
+            if self._device == "cuda":
+                self.embed_model = SentenceTransformer(model_to_load, device="cuda")
+            else:
+                self.embed_model = SentenceTransformer(model_to_load, device="cpu", backend="onnx")
         except Exception:
-            self.embed_model = SentenceTransformer(model_to_load, device="cpu")
+            self.embed_model = SentenceTransformer(model_to_load, device=self._device)
         
         # Will be initialized when index is built
         self.bm25_index = None
@@ -103,6 +109,7 @@ class HybridRetriever:
             batch_size=embed_batch_size,
             convert_to_numpy=True,
         )
+        # Move to CPU numpy if we were on GPU (FAISS expects host memory)
         if not isinstance(embeddings, np.ndarray):
             embeddings = np.asarray(embeddings, dtype=np.float32)
         
@@ -149,13 +156,28 @@ class HybridRetriever:
         )
 
         # Step 4: Optionally filter to chunks from a specific document (e.g. FinQA corpus_id)
+        _rag_debug = os.environ.get("RAG_DEBUG") == "1"
         if corpus_id:
+            before_count = len(fused_results)
             filtered = []
             for chunk, score in fused_results:
                 meta = getattr(chunk, "metadata", None) or {}
-                if str(meta.get("corpus_id")) == str(corpus_id):
+                cid = str(meta.get("corpus_id", ""))
+                if cid == str(corpus_id):
                     filtered.append((chunk, score))
+            # Fallback: if 0 chunks, try matching by document prefix (e.g. "AAL/2018/page_13.pdf-2" -> "AAL/2018/page_13.pdf")
+            if len(filtered) == 0 and "-" in str(corpus_id):
+                prefix = str(corpus_id).rsplit("-", 1)[0]
+                for chunk, score in fused_results:
+                    meta = getattr(chunk, "metadata", None) or {}
+                    cid = str(meta.get("corpus_id", ""))
+                    if cid == prefix or cid.startswith(prefix + "-"):
+                        filtered.append((chunk, score))
+                if _rag_debug and filtered:
+                    print(f"[DEBUG] retrieval: corpus_id exact match 0; prefix match {prefix!r} -> {len(filtered)} chunks")
             fused_results = filtered
+            if _rag_debug:
+                print(f"[DEBUG] retrieval: corpus_id={corpus_id!r} before_filter={before_count} after_filter={len(fused_results)}")
 
         # Step 5: Return top-k (caller may pass top_k, e.g. agentic retrieval_tools)
         k = top_k if top_k is not None else self.top_k_final
@@ -232,14 +254,89 @@ class HybridRetriever:
         ]
         
         return results
-    
+
+    def save_index_bundle(
+        self,
+        dir_path: str,
+        embedding_model: Optional[str] = None,
+    ) -> None:
+        """
+        Save full index bundle (FAISS + BM25 corpus + chunks) so it can be loaded later
+        without recomputing embeddings. Use from Colab after GPU embedding, then download
+        and load locally. dir_path should be a directory (created if missing).
+        """
+        import json
+        import pickle
+        from pathlib import Path
+        p = Path(dir_path)
+        p.mkdir(parents=True, exist_ok=True)
+        if self.faiss_index is None or not self.chunks:
+            raise ValueError("No index built. Call build_index() first.")
+        # Save FAISS
+        faiss.write_index(self.faiss_index, str(p / "faiss.index"))
+        # Save chunk texts and metadata for BM25 rebuild and retrieve()
+        chunk_texts = self.chunk_texts
+        chunks_meta = [
+            {"text": getattr(c, "text", ""), "metadata": getattr(c, "metadata", None) or {}}
+            for c in self.chunks
+        ]
+        with open(p / "chunk_texts.pkl", "wb") as f:
+            pickle.dump(chunk_texts, f)
+        with open(p / "chunks_meta.pkl", "wb") as f:
+            pickle.dump(chunks_meta, f)
+        dim = self.faiss_index.d
+        model_name = embedding_model or _DEFAULT_MODEL
+        with open(p / "meta.json", "w") as f:
+            json.dump({"embedding_model": model_name, "dimension": dim, "num_chunks": len(self.chunks)}, f)
+        print(f"Saved index bundle to {dir_path} ({len(self.chunks)} chunks, dim={dim})")
+
+    def load_index_bundle(
+        self,
+        dir_path: str,
+        device: Optional[str] = None,
+    ) -> None:
+        """
+        Load index bundle (FAISS + BM25 + chunks) from a directory saved by save_index_bundle.
+        Uses CPU for the embedding model (only needed for encoding queries). For GPU embedding
+        use the Colab notebook, then download the bundle and load it locally with this method.
+        """
+        import json
+        import pickle
+        from pathlib import Path
+        p = Path(dir_path)
+        if not p.is_dir():
+            raise FileNotFoundError(f"Index bundle directory not found: {dir_path}")
+        with open(p / "meta.json") as f:
+            meta = json.load(f)
+        model_name = meta.get("embedding_model", _DEFAULT_MODEL)
+        dim = meta["dimension"]
+        # Load embedding model for query encoding (CPU is fine for single-query)
+        use_cuda = (device == "cuda")
+        if device is None:
+            use_cuda = False
+        self.embed_model = SentenceTransformer(model_name, device="cuda" if use_cuda else "cpu")
+        # Load FAISS
+        self.faiss_index = faiss.read_index(str(p / "faiss.index"))
+        with open(p / "chunk_texts.pkl", "rb") as f:
+            self.chunk_texts = pickle.load(f)
+        with open(p / "chunks_meta.pkl", "rb") as f:
+            chunks_meta = pickle.load(f)
+        self.chunks = [
+            TextNode(text=m["text"], metadata=m["metadata"])
+            for m in chunks_meta
+        ]
+        # Rebuild BM25
+        tokenized_corpus = [t.lower().split() for t in self.chunk_texts]
+        self.bm25_index = BM25Okapi(tokenized_corpus)
+        print(f"Loaded index bundle from {dir_path} ({len(self.chunks)} chunks, model={model_name})")
+
     def save_index(self, path: str):
-        """Save FAISS index to disk"""
+        """Save FAISS index only to a single file (legacy). Prefer save_index_bundle for full save."""
         if self.faiss_index:
             faiss.write_index(self.faiss_index, path)
-    
+
     def load_index(self, path: str):
-        """Load FAISS index from disk"""
+        """Load FAISS index only from a single file (legacy). Prefer load_index_bundle for full load."""
         self.faiss_index = faiss.read_index(path)
 
 

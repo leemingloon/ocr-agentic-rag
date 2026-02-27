@@ -200,3 +200,6 @@ data/rag/FinQA/train/train_qa.json
 # Ignore local evaluation related artifacts
 /local_eval/
 mini.py
+
+# Optional: pre-built FinQA index (from Colab notebook); omit to build from scratch
+data/rag/FinQA/train/finqa_retriever_index/

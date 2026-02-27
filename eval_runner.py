@@ -316,14 +316,10 @@ def _run_vision_model(sample: dict, debug: bool = False) -> dict:
 _RAG_RETRIEVER_CACHE: dict[str, Any] = {}
 
 
-# When debug=True, limit FinQA corpus to this many entries to keep index build fast (local embeddings only).
-_FINQA_DEBUG_MAX_ENTRIES = 80
-
-
 def _build_finqa_corpus_chunks(debug: bool = False) -> list:
     """Load FinQA train_qa.json and return list of TextNode chunks for retrieval index.
     Each entry's pre_text, table, post_text are combined into a document and chunked.
-    If debug=True, only first _FINQA_DEBUG_MAX_ENTRIES entries are used for a fast index build."""
+    Always uses the full corpus so RAG evaluation is fair (no subset limit)."""
     from rag_system.chunking import DocumentChunker
 
     # Resolve path from repo root so it works regardless of cwd
@@ -337,10 +333,6 @@ def _build_finqa_corpus_chunks(debug: bool = False) -> list:
         data = data["data"]
     if not isinstance(data, list):
         return []
-
-    if debug and len(data) > _FINQA_DEBUG_MAX_ENTRIES:
-        data = data[:_FINQA_DEBUG_MAX_ENTRIES]
-        print(f"[DEBUG] FinQA corpus limited to first {_FINQA_DEBUG_MAX_ENTRIES} entries for fast index build (embeddings run locally, no API credits).")
 
     chunker = DocumentChunker(chunk_size=512, chunk_overlap=128)
     all_chunks = []
@@ -360,6 +352,7 @@ def _build_finqa_corpus_chunks(debug: bool = False) -> list:
         doc_text = f"{pre_str}\n\n{table_str}\n\n{post_str}".strip()
         if not doc_text:
             continue
+        # Use id (e.g. "AAL/2018/page_13.pdf-2") so eval ground_truth.corpus_id matches exactly
         corpus_id = entry.get("id") or entry.get("filename", str(idx))
         chunks = chunker.chunk_document(
             doc_text,
@@ -381,14 +374,25 @@ def _get_rag_retriever_for_dataset(dataset_name: str, debug: bool = False):
 
     retriever = HybridRetriever()
     if dataset_name == "FinQA":
-        chunks = _build_finqa_corpus_chunks(debug=debug)
-        if not chunks:
+        repo_root = Path(__file__).resolve().parent
+        prebuilt_index_dir = repo_root / "data" / "rag" / "FinQA" / "train" / "finqa_retriever_index"
+        if (prebuilt_index_dir / "meta.json").exists():
             if debug:
-                print("[DEBUG] RAG FinQA: no chunks from train_qa.json; index will be empty (retrieve will fail)")
+                print(f"[DEBUG] RAG FinQA: loading pre-built index from {prebuilt_index_dir}")
+            retriever.load_index_bundle(str(prebuilt_index_dir))
         else:
-            if debug:
-                print(f"[DEBUG] RAG FinQA: building index from {len(chunks)} chunks (train_qa.json)")
-            retriever.build_index(chunks)
+            chunks = _build_finqa_corpus_chunks(debug=debug)
+            if not chunks:
+                if debug:
+                    print("[DEBUG] RAG FinQA: no chunks from train_qa.json; index will be empty (retrieve will fail)")
+            else:
+                if debug:
+                    meta = lambda c: getattr(c, "metadata", None) or {}
+                    corpus_ids = list({meta(c).get("corpus_id") for c in chunks})
+                    corpus_ids = [x for x in corpus_ids if x is not None][:10]
+                    print(f"[DEBUG] RAG FinQA: building index from {len(chunks)} chunks (train_qa.json); "
+                          f"sample corpus_ids: {corpus_ids}")
+                retriever.build_index(chunks)
     else:
         if debug:
             print(f"[DEBUG] RAG {dataset_name}: no corpus loader; indices not built (retrieve will fail)")
@@ -411,14 +415,39 @@ def run_model(sample: dict, category: str, dataset_name: str, debug: bool = Fals
         query = sample_input.get("query") or sample_input.get("question") or ""
         gt = sample.get("ground_truth") if isinstance(sample.get("ground_truth"), dict) else {}
         corpus_id = gt.get("corpus_id") if gt else None
+        if debug:
+            print(f"[DEBUG] RAG query corpus_id={corpus_id!r} query={query[:80]!r}...")
         try:
-            from rag_system.agentic.orchestrator import AgenticRAG
-            from rag_system.reranking import BGEReranker
+            import os
+            _prev_rag_debug = os.environ.get("RAG_DEBUG")
+            if debug:
+                os.environ["RAG_DEBUG"] = "1"
+            try:
+                from rag_system.agentic.orchestrator import AgenticRAG
+                from rag_system.reranking import BGEReranker
 
-            retriever = _get_rag_retriever_for_dataset(dataset_name, debug=debug)
-            reranker = BGEReranker()
-            rag = AgenticRAG(retriever=retriever, reranker=reranker)
-            out = rag.query(query, corpus_id=corpus_id)
+                retriever = _get_rag_retriever_for_dataset(dataset_name, debug=debug)
+                reranker = BGEReranker()
+                rag = AgenticRAG(retriever=retriever, reranker=reranker)
+                out = rag.query(query, corpus_id=corpus_id)
+            finally:
+                if _prev_rag_debug is None and "RAG_DEBUG" in os.environ:
+                    os.environ.pop("RAG_DEBUG", None)
+                elif _prev_rag_debug is not None:
+                    os.environ["RAG_DEBUG"] = _prev_rag_debug
+            if debug:
+                sources = out.get("tool_results") or []
+                num_chunks = 0
+                for s in sources:
+                    r = s.get("result") if isinstance(s.get("result"), dict) else {}
+                    num_chunks += len(r.get("chunks") or [])
+                first_preview = ""
+                if sources:
+                    r0 = sources[0].get("result")
+                    if isinstance(r0, dict) and r0.get("chunks"):
+                        t = (r0["chunks"][0].get("text") or "")[:200]
+                        first_preview = t.replace("\n", " ") + ("..." if len(t) >= 200 else "")
+                print(f"[DEBUG] RAG result: {num_chunks} chunks retrieved; first_chunk_preview={first_preview!r}")
             return {
                 "answer": out.get("answer") or "",
                 "sources": out.get("tool_results", []),
