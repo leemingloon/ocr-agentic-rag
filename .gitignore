@@ -124,6 +124,9 @@ models/paddle_model/
 .ray/
 ray_results/
 
+# QNLP/lambeq training run checkpoints (notebook 04)
+notebooks/runs/
+
 # Temporary
 temp_conversion/
 *.pyc
