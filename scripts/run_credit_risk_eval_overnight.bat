@@ -24,3 +24,6 @@ if errorlevel 1 echo Sentiment FinBERT eval had errors.
 
 echo.
 echo Done. Check data/proof/credit_risk_pd/ data/proof/credit_risk_pd_quantum/ data/proof/credit_risk_sentiment/ data/proof/credit_risk_sentiment_finbert/
+echo.
+echo === Resume metrics (fill in from data/proof/eval_summary.json) ===
+python scripts/print_resume_metrics.py
