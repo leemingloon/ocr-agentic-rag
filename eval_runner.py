@@ -129,6 +129,11 @@ RAG_UTILS = {
 }
 
 MODEL_META = {
+    "ocr": {
+        "model_class": "HybridOCR",
+        "backbone": "paddleocr_tesseract",
+        "model_slug": "hybridocr",
+    },
     "vision": {
         "model_class": "VisionOCR",
         "backbone": None,  # Set at runtime from VisionOCR.get_effective_model()
@@ -343,6 +348,9 @@ def _run_vision_model(sample: dict, debug: bool = False) -> dict:
 # Cache for RAG retriever per dataset (index built once, reused for all samples)
 _RAG_RETRIEVER_CACHE: dict[str, Any] = {}
 
+# Cache for HybridOCR (one instance per process for OCR eval)
+_OCR_HYBRID_CACHE: dict[str, Any] = {}
+
 # Cache for PD (XGBoost) model: load once per process for overnight sample-by-sample evaluation (CPU-only)
 _PD_MODEL_CACHE: dict[str, Any] = {}
 _QUANTUM_PD_MODEL_CACHE: dict[str, Any] = {}
@@ -500,6 +508,24 @@ def run_model(sample: dict, category: str, dataset_name: str, debug: bool = Fals
     Replace this with real pipeline calls (VisionOCR / AgenticRAG) per deployment mode.
     """
     sample_input = sample.get("input", {}) if isinstance(sample, dict) else {}
+
+    if category == "ocr":
+        image, image_error = _extract_image_for_vision(sample, debug=debug)
+        if image is None:
+            return {"answer": "", "error": f"missing_image:{image_error}", "metadata": {}}
+        try:
+            from ocr_pipeline.recognition.hybrid_ocr import HybridOCR
+            if "ocr" not in _OCR_HYBRID_CACHE:
+                _OCR_HYBRID_CACHE["ocr"] = HybridOCR(use_detection_router=True, use_vision_augmentation=False)
+            ocr = _OCR_HYBRID_CACHE["ocr"]
+            out = ocr.process_document(image)
+            text = out.get("text", "")
+            metadata = out.get("metadata", {})
+            return {"answer": text or "", "metadata": metadata}
+        except Exception as e:
+            if debug:
+                print(f"[DEBUG] OCR inference failed: {e}")
+            return {"answer": "", "error": f"ocr_inference_failed:{e}", "metadata": {}}
 
     if category == "vision":
         return _run_vision_model(sample, debug=debug)
@@ -1026,6 +1052,10 @@ def evaluate_dataset(
     # Per-split 1-based row count for --generate_png: <dataset>_<split>_<row_count>.png
     split_png_counter: dict[str, int] = {}
 
+    # OCR: accumulate per-sample rows for monitoring_metrics (layout_fingerprint_cache, completeness_heuristics)
+    layout_cache_rows_ocr: list[dict] = []
+    completeness_rows_ocr: list[dict] = []
+
     # Debug aggregates (computed on-the-fly to keep streaming)
     debug_split_counts = Counter()
     debug_img_type_counts = Counter()
@@ -1140,6 +1170,26 @@ def evaluate_dataset(
                 metric_row = evaluate_credit_risk_sentiment_sample(prediction, sample)
             elif category == "credit_risk_memo_generator":
                 metric_row = evaluate_credit_risk_memo_sample(prediction, sample)
+            elif category == "ocr":
+                metric_row = {}  # OCR proof uses monitoring_metrics per-sample; no accuracy metric here
+                if not prediction_error:
+                    metadata = prediction.get("metadata") or {}
+                    det_method = metadata.get("detection_method") or "unknown"
+                    layout_cache_rows_ocr.append({
+                        "sample_id": sample_id,
+                        "split": split_name,
+                        "dataset": dataset_name,
+                        "cache_hit": 1 if det_method == "cache" else 0,
+                        "detection_method": det_method,
+                    })
+                    text = (prediction.get("answer") or "").strip()
+                    completeness_rows_ocr.append({
+                        "sample_id": sample_id,
+                        "split": split_name,
+                        "dataset": dataset_name,
+                        "heuristic_caught": 1 if len(text) >= 10 else 0,
+                        "text_length": len(text),
+                    })
             else:
                 continue
 
@@ -1175,6 +1225,19 @@ def evaluate_dataset(
             f"split_counts={dict(debug_split_counts)} "
             f"image_type_counts={dict(debug_img_type_counts)}"
         )
+
+    # OCR: append layout_fingerprint_cache and completeness_heuristics per-sample to monitoring_metrics/
+    if category == "ocr" and (layout_cache_rows_ocr or completeness_rows_ocr):
+        proof_dir = category_proof_dir.parent
+        try:
+            from eval_monitoring_metrics import append_per_sample_monitoring_metrics
+            if layout_cache_rows_ocr:
+                append_per_sample_monitoring_metrics(proof_dir, "layout_fingerprint_cache", "ocr", layout_cache_rows_ocr)
+            if completeness_rows_ocr:
+                append_per_sample_monitoring_metrics(proof_dir, "completeness_heuristics", "ocr", completeness_rows_ocr)
+        except Exception as e:
+            if debug:
+                print(f"[DEBUG] monitoring_metrics append failed: {e}")
 
     # -------------------------------
     # Persist per-split proofs (append). Order: per_sample -> split_avg -> dataset_weighted -> category -> eval_summary
@@ -1569,20 +1632,28 @@ def main(
             refresh_category_weighted_avg_from_files(category)
             write_eval_summary()
 
-        # When --category rag: run adversarial testing (controlled by --max_split) and update compliance_metrics.
-        # Skip adversarial when --debug to avoid loading embedding model + reranker twice (OOM/segfault on 16GB).
+        # Adversarial testing runs only when --category rag (not for vision/ocr/other). Skip when --debug to avoid loading embedding+reranker twice (OOM/segfault on 16GB).
         if run_category and run_category.lower() == "rag" and not debug:
             try:
-                from eval_other_metrics import run_adversarial_rag_samples, write_compliance_proof
+                from eval_monitoring_metrics import run_adversarial_rag_samples, write_monitoring_proof
             except Exception:
                 run_adversarial_rag_samples = None
-                write_compliance_proof = None
-            if run_adversarial_rag_samples and write_compliance_proof:
+                write_monitoring_proof = None
+            if run_adversarial_rag_samples and write_monitoring_proof:
                 proof_dir = Path("data/proof")
                 n_adv = max(1, max_samples_per_split or 1)
                 print("Running RAG adversarial (prompt-injection) tests...")
                 run_adversarial_rag_samples(n_adv, proof_dir)
-                write_compliance_proof(proof_dir)
+                write_monitoring_proof(proof_dir)
+
+        # Monitoring aggregation for OCR runs only when --category ocr (layout_fingerprint_cache, completeness_heuristics per-sample files under data/proof/monitoring_metrics/).
+        if run_category and run_category.lower() == "ocr":
+            try:
+                from eval_monitoring_metrics import write_monitoring_proof
+                write_monitoring_proof(Path("data/proof"))
+            except Exception as e:
+                if debug:
+                    print(f"[DEBUG] write_monitoring_proof after OCR: {e}")
 
 def write_eval_summary():
     """Write data/proof/eval_summary.json aggregating all category weighted_avg for interview presentation.
