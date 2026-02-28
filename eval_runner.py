@@ -5,12 +5,12 @@ Unified evaluation runner for OCR / Vision / RAG / Credit Risk.
 Architecture notes:
 - AUTO_DATASETS and ADAPTER_REGISTRY are authoritative benchmark registries.
 - Evaluates one dataset at a time and writes:
-  - per-sample JSON: {dataset}_per_sample_{model}.json
+  - per-sample JSON: {dataset}_{split}_samples.json (under data/proof/<category>/<dataset>/<split>/)
   - split average JSON: {dataset}_{split}_avg.json (per split)
   - dataset weighted average: {dataset}_weighted_avg.json
   - category weighted average: {category}_weighted_avg.json
   - eval_summary.json
-  Propagation order: per_sample -> split_avg -> dataset_weighted_avg -> category_weighted_avg -> eval_summary.
+  Propagation order: samples -> split_avg -> dataset_weighted_avg -> category_weighted_avg -> eval_summary.
   Each level is computed by reading the previous level's files so edits to per_sample propagate on next run.
 """
 
@@ -19,7 +19,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -885,6 +885,11 @@ def evaluate_credit_risk_memo_sample(prediction: dict, sample: dict) -> dict[str
     return {"exact_match": exact, "f1": max(f1, exact)}
 
 
+def _samples_filename(dataset_name: str, split_name: str) -> str:
+    """Standardized per-sample proof filename: data/proof/<category>/<dataset>/<split>/<dataset>_<split>_samples.json"""
+    return f"{dataset_name.lower()}_{split_name}_samples.json"
+
+
 def aggregate_metrics(per_sample_scores: list[dict[str, float]]) -> dict[str, float]:
     if not per_sample_scores:
         return {}
@@ -898,52 +903,59 @@ def aggregate_metrics(per_sample_scores: list[dict[str, float]]) -> dict[str, fl
 
 def migrate_prediction_errors_from_per_sample(proof_dir: Path | str = "data/proof") -> None:
     """
-    One-time migration: for every *_per_sample_*.json under proof_dir, move rows that have
-    prediction_error into prediction_error.json in the same split folder, and remove them
-    from the per_sample file so split/category/eval_summary stats are correct.
+    One-time migration: for every <dataset>_<split>_samples.json under proof_dir (excluding monitoring_metrics),
+    move rows that have prediction_error into prediction_error.json in the same split folder, and remove them
+    from the samples file so split/category/eval_summary stats are correct.
     """
     proof_dir = Path(proof_dir)
     if not proof_dir.exists():
         return
-    for per_sample_path in sorted(proof_dir.rglob("*_per_sample_*.json")):
-        try:
-            with open(per_sample_path, "r", encoding="utf-8") as f:
-                rows = json.load(f)
-        except Exception:
+    for cat_dir in sorted(proof_dir.iterdir()):
+        if not cat_dir.is_dir() or cat_dir.name == "monitoring_metrics":
             continue
-        if not isinstance(rows, list):
-            continue
-        ok_rows = [r for r in rows if not r.get("prediction_error")]
-        err_rows = [r for r in rows if r.get("prediction_error")]
-        if not err_rows:
-            continue
-        split_dir = per_sample_path.parent
-        prediction_error_path = split_dir / "prediction_error.json"
-        existing_err = []
-        if prediction_error_path.exists():
-            try:
-                with open(prediction_error_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                existing_err = data if isinstance(data, list) else data.get("samples", [])
-            except Exception:
-                pass
-        err_by_id = {str(r.get("sample_id")): r for r in existing_err}
-        for r in err_rows:
-            err_by_id[str(r.get("sample_id"))] = r
-        with open(prediction_error_path, "w", encoding="utf-8") as f:
-            json.dump(list(err_by_id.values()), f, ensure_ascii=False, indent=2)
-        with open(per_sample_path, "w", encoding="utf-8") as f:
-            json.dump(ok_rows, f, ensure_ascii=False, indent=2)
-        # Recompute split avg so split-level stats stay correct
-        split_metric_rows = [r.get("metrics") or {} for r in ok_rows if r.get("metrics")]
-        split_avg = aggregate_metrics(split_metric_rows)
-        split_avg["sample_count"] = len(ok_rows)
-        dataset_key = per_sample_path.parent.parent.name
-        split_name = per_sample_path.parent.name
-        avg_path = per_sample_path.parent / f"{dataset_key}_{split_name}_avg.json"
-        with open(avg_path, "w", encoding="utf-8") as f:
-            json.dump(split_avg, f, ensure_ascii=False, indent=2)
-        print(f"[migrate_prediction_errors] {per_sample_path}: moved {len(err_rows)} error(s) to {prediction_error_path.name}, updated {avg_path.name}")
+        for ds_dir in sorted(cat_dir.iterdir()):
+            if not ds_dir.is_dir():
+                continue
+            for split_dir in sorted(ds_dir.iterdir()):
+                if not split_dir.is_dir():
+                    continue
+                per_sample_path = split_dir / _samples_filename(ds_dir.name, split_dir.name)
+                if not per_sample_path.exists():
+                    continue
+                try:
+                    with open(per_sample_path, "r", encoding="utf-8") as f:
+                        rows = json.load(f)
+                except Exception:
+                    continue
+                if not isinstance(rows, list):
+                    continue
+                ok_rows = [r for r in rows if not r.get("prediction_error")]
+                err_rows = [r for r in rows if r.get("prediction_error")]
+                if not err_rows:
+                    continue
+                prediction_error_path = split_dir / "prediction_error.json"
+                existing_err = []
+                if prediction_error_path.exists():
+                    try:
+                        with open(prediction_error_path, "r", encoding="utf-8") as f:
+                            data = json.load(f)
+                        existing_err = data if isinstance(data, list) else data.get("samples", [])
+                    except Exception:
+                        pass
+                err_by_id = {str(r.get("sample_id")): r for r in existing_err}
+                for r in err_rows:
+                    err_by_id[str(r.get("sample_id"))] = r
+                with open(prediction_error_path, "w", encoding="utf-8") as f:
+                    json.dump(list(err_by_id.values()), f, ensure_ascii=False, indent=2)
+                with open(per_sample_path, "w", encoding="utf-8") as f:
+                    json.dump(ok_rows, f, ensure_ascii=False, indent=2)
+                split_metric_rows = [r.get("metrics") or {} for r in ok_rows if r.get("metrics")]
+                split_avg = aggregate_metrics(split_metric_rows)
+                split_avg["sample_count"] = len(ok_rows)
+                avg_path = split_dir / f"{ds_dir.name.lower()}_{split_dir.name}_avg.json"
+                with open(avg_path, "w", encoding="utf-8") as f:
+                    json.dump(split_avg, f, ensure_ascii=False, indent=2)
+                print(f"[migrate_prediction_errors] {per_sample_path}: moved {len(err_rows)} error(s) to {prediction_error_path.name}, updated {avg_path.name}")
 
 
 
@@ -1087,7 +1099,7 @@ def evaluate_dataset(
         # Lazily load already-evaluated IDs for this split (only from per_sample; do NOT skip samples in prediction_error.json so they get re-evaluated)
         if split_name not in existing_ids_by_split:
             split_dir = dataset_proof_dir / split_name
-            per_sample_path = split_dir / f"{dataset_name.lower()}_per_sample_{model_slug}.json"
+            per_sample_path = split_dir / _samples_filename(dataset_name, split_name)
             ids = set()
             if per_sample_path.exists():
                 try:
@@ -1226,15 +1238,23 @@ def evaluate_dataset(
             f"image_type_counts={dict(debug_img_type_counts)}"
         )
 
-    # OCR: append layout_fingerprint_cache and completeness_heuristics per-sample to monitoring_metrics/
+    # OCR: append layout_fingerprint_cache and completeness_heuristics per-sample to monitoring_metrics/<metric>/<dataset>_<split>_samples.json
     if category == "ocr" and (layout_cache_rows_ocr or completeness_rows_ocr):
         proof_dir = category_proof_dir.parent
         try:
             from eval_monitoring_metrics import append_per_sample_monitoring_metrics
-            if layout_cache_rows_ocr:
-                append_per_sample_monitoring_metrics(proof_dir, "layout_fingerprint_cache", "ocr", layout_cache_rows_ocr)
-            if completeness_rows_ocr:
-                append_per_sample_monitoring_metrics(proof_dir, "completeness_heuristics", "ocr", completeness_rows_ocr)
+            layout_by_ds_split: dict[tuple[str, str], list] = defaultdict(list)
+            completeness_by_ds_split: dict[tuple[str, str], list] = defaultdict(list)
+            for r in layout_cache_rows_ocr:
+                layout_by_ds_split[(r.get("dataset", ""), r.get("split", ""))].append(r)
+            for r in completeness_rows_ocr:
+                completeness_by_ds_split[(r.get("dataset", ""), r.get("split", ""))].append(r)
+            for (ds, sp), rows in layout_by_ds_split.items():
+                if ds and sp:
+                    append_per_sample_monitoring_metrics(proof_dir, "layout_fingerprint_cache", ds, sp, rows)
+            for (ds, sp), rows in completeness_by_ds_split.items():
+                if ds and sp:
+                    append_per_sample_monitoring_metrics(proof_dir, "completeness_heuristics", ds, sp, rows)
         except Exception as e:
             if debug:
                 print(f"[DEBUG] monitoring_metrics append failed: {e}")
@@ -1249,7 +1269,7 @@ def evaluate_dataset(
         split_dir = dataset_proof_dir / split_name
         split_dir.mkdir(parents=True, exist_ok=True)
 
-        per_sample_path = split_dir / f"{dataset_name.lower()}_per_sample_{model_slug}.json"
+        per_sample_path = split_dir / _samples_filename(dataset_name, split_name)
         prediction_error_path = split_dir / "prediction_error.json"
 
         ok_rows = [r for r in new_rows if not r.get("prediction_error")]
@@ -1352,8 +1372,8 @@ def evaluate_dataset(
                 split_avgs_from_files[split_name] = json.load(f)
         except Exception:
             continue
-        # Override sample_count with per_sample file length (excludes prediction_error rows)
-        per_sample_path = split_dir / f"{dataset_name.lower()}_per_sample_{model_slug}.json"
+        # Override sample_count with samples file length (excludes prediction_error rows)
+        per_sample_path = split_dir / _samples_filename(dataset_name, split_name)
         if per_sample_path.exists():
             try:
                 with open(per_sample_path, "r", encoding="utf-8") as f:
@@ -1467,20 +1487,22 @@ def write_category_weighted_avg(category: str, dataset_summaries: list[dict]):
 
 
 def _dataset_sample_count_from_per_sample_files(dataset_proof_dir: Path) -> int:
-    """Sum rows from per_sample JSONs under dataset_proof_dir (one file per split). Excludes prediction_error rows."""
+    """Sum rows from <dataset>_<split>_samples.json under dataset_proof_dir (one file per split). Excludes prediction_error rows."""
     total = 0
+    dataset_name = dataset_proof_dir.name
     for split_dir in dataset_proof_dir.iterdir():
         if not split_dir.is_dir():
             continue
-        for per_path in split_dir.glob("*_per_sample_*.json"):
-            try:
-                with open(per_path, "r", encoding="utf-8") as f:
-                    rows = json.load(f)
-                if isinstance(rows, list):
-                    total += len([r for r in rows if not r.get("prediction_error")])
-            except Exception:
-                pass
-            break  # one per_sample file per split
+        path = split_dir / _samples_filename(dataset_name, split_dir.name)
+        if not path.exists():
+            continue
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                rows = json.load(f)
+            if isinstance(rows, list):
+                total += len([r for r in rows if not r.get("prediction_error")])
+        except Exception:
+            pass
     return total
 
 
@@ -1703,27 +1725,51 @@ def export_predictions_txt(
     dataset: str | None = None,
 ) -> None:
     """
-    Generate readable .txt files from *_per_sample_*.json proof files.
-    For each per_sample JSON, writes a *_predictions.txt in the same split-level folder
+    Generate readable .txt files from <dataset>_<split>_samples.json proof files.
+    For each samples JSON, writes a <dataset>_<split>_predictions.txt in the same split-level folder
     with sample_id, ground_truth, input (question), prediction, and metrics for developer review.
     If category/dataset are set, only exports under proof_dir/<category>/<dataset> (current run scope).
+    Skips data/proof/monitoring_metrics/.
     """
     proof_dir = Path(proof_dir)
     if not proof_dir.exists():
         return
 
+    per_sample_paths: list[Path] = []
     if category and dataset:
         base = proof_dir / category.lower() / dataset.lower()
-        if not base.exists():
-            return
-        per_sample_paths = sorted(base.rglob("*_per_sample_*.json"))
+        if base.exists():
+            for split_dir in base.iterdir():
+                if split_dir.is_dir():
+                    p = split_dir / _samples_filename(dataset, split_dir.name)
+                    if p.exists():
+                        per_sample_paths.append(p)
+        per_sample_paths.sort()
     elif category:
         base = proof_dir / category.lower()
-        if not base.exists():
-            return
-        per_sample_paths = sorted(base.rglob("*_per_sample_*.json"))
+        if base.exists():
+            for ds_dir in base.iterdir():
+                if not ds_dir.is_dir():
+                    continue
+                for split_dir in ds_dir.iterdir():
+                    if split_dir.is_dir():
+                        p = split_dir / _samples_filename(ds_dir.name, split_dir.name)
+                        if p.exists():
+                            per_sample_paths.append(p)
+        per_sample_paths.sort()
     else:
-        per_sample_paths = sorted(proof_dir.rglob("*_per_sample_*.json"))
+        for cat_dir in proof_dir.iterdir():
+            if not cat_dir.is_dir() or cat_dir.name == "monitoring_metrics":
+                continue
+            for ds_dir in cat_dir.iterdir():
+                if not ds_dir.is_dir():
+                    continue
+                for split_dir in ds_dir.iterdir():
+                    if split_dir.is_dir():
+                        p = split_dir / _samples_filename(ds_dir.name, split_dir.name)
+                        if p.exists():
+                            per_sample_paths.append(p)
+        per_sample_paths.sort()
 
     for per_sample_path in per_sample_paths:
         try:
@@ -1734,10 +1780,10 @@ def export_predictions_txt(
         if not isinstance(rows, list) or not rows:
             continue
 
-        # Output in same folder; name: e.g. mmmu_accounting_per_sample_visionocr.json -> mmmu_accounting_predictions.txt
+        # Output in same folder; name: e.g. chartqa_test_samples.json -> chartqa_test_predictions.txt
         stem = per_sample_path.stem
-        base = stem.split("_per_sample_")[0] if "_per_sample_" in stem else stem
-        txt_name = f"{base}_predictions.txt"
+        base_name = stem.replace("_samples", "") if stem.endswith("_samples") else stem
+        txt_name = f"{base_name}_predictions.txt"
         out_path = per_sample_path.parent / txt_name
 
         lines = []
@@ -1789,7 +1835,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--export_predictions_txt",
         action="store_true",
-        help="Export readable .txt from *_per_sample_*.json (prediction + context) in each split folder",
+        help="Export readable .txt from <dataset>_<split>_samples.json (prediction + context) in each split folder",
     )
     parser.add_argument(
         "--generate_png",

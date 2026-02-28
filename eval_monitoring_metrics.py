@@ -9,7 +9,7 @@ Writes data/proof/monitoring_metrics.json with:
 - adversarial testing (95% prompt injection resistance)
 
 Per-sample metrics are appended to:
-  data/proof/monitoring_metrics/<metric>/<metric>_per_sample_<category>.json
+  data/proof/monitoring_metrics/<monitoring_metrics>/<dataset>_<split>_samples.json
 
 Can be run standalone (python eval_monitoring_metrics.py) or invoked by eval_runner.py
 when --category rag (adversarial) or --category ocr (layout cache, completeness).
@@ -46,22 +46,28 @@ def _monitoring_metrics_dir(proof_dir: Path) -> Path:
     return proof_dir / "monitoring_metrics"
 
 
+def _monitoring_samples_filename(dataset: str, split: str) -> str:
+    """Standardized per-sample filename under monitoring_metrics: <dataset>_<split>_samples.json"""
+    return f"{dataset.lower()}_{split}_samples.json"
+
+
 def append_per_sample_monitoring_metrics(
     proof_dir: Path,
     metric_name: str,
-    category: str,
+    dataset: str,
+    split: str,
     new_rows: list[dict],
 ) -> None:
     """
     Append (merge by sample_id) per-sample rows into
-    data/proof/monitoring_metrics/<metric_name>/<metric_name>_per_sample_<category>.json
+    data/proof/monitoring_metrics/<metric_name>/<dataset>_<split>_samples.json
     """
     if not new_rows or metric_name not in MONITORING_METRIC_NAMES:
         return
     base = _monitoring_metrics_dir(proof_dir)
     subdir = base / metric_name
     subdir.mkdir(parents=True, exist_ok=True)
-    path = subdir / f"{metric_name}_per_sample_{category}.json"
+    path = subdir / _monitoring_samples_filename(dataset, split)
     existing: list[dict] = []
     if path.exists():
         try:
@@ -104,24 +110,24 @@ def _contains_sensitive_data(text: str) -> bool:
     return True
 
 
-def _adversarial_per_sample_path(proof_dir: Path) -> Path:
-    """Path for adversarial RAG per-sample metrics: data/proof/monitoring_metrics/adversarial_testing/adversarial_testing_per_sample_rag.json"""
+def _adversarial_samples_path(proof_dir: Path) -> Path:
+    """Path for adversarial RAG per-sample metrics: data/proof/monitoring_metrics/adversarial_testing/adversarial_rag_samples.json"""
     base = _monitoring_metrics_dir(proof_dir) / "adversarial_testing"
     base.mkdir(parents=True, exist_ok=True)
-    return base / "adversarial_testing_per_sample_rag.json"
+    return base / _monitoring_samples_filename("adversarial", "rag")
 
 
 def run_adversarial_rag_samples(max_samples: int, proof_dir: Path | None = None) -> dict:
     """
     Run adversarial (prompt-injection) RAG tests; only invoked when --category rag.
     Uses same resume logic as datasets: only runs adversarial_{i} for indices not already in
-    per-sample file; appends new results. Writes per-sample results to:
-    - data/proof/monitoring_metrics/adversarial_testing/adversarial_testing_per_sample_rag.json
+    samples file; appends new results. Writes per-sample results to:
+    - data/proof/monitoring_metrics/adversarial_testing/adversarial_rag_samples.json
     and prediction_error rows to data/proof/rag/prediction_error.json.
     Returns summary for monitoring_metrics.json aggregation.
     """
     proof_dir = proof_dir or PROOF_DIR_DEFAULT
-    per_sample_path = _adversarial_per_sample_path(proof_dir)
+    per_sample_path = _adversarial_samples_path(proof_dir)
     rag_proof = proof_dir / "rag"
     rag_proof.mkdir(parents=True, exist_ok=True)
     prediction_error_path = rag_proof / "prediction_error.json"
@@ -361,19 +367,30 @@ def _monitoring_robustness(proof_dir: Path) -> dict:
         }
 
 
+def _read_all_monitoring_samples(proof_dir: Path, metric_name: str) -> list[dict]:
+    """Read and merge all <dataset>_<split>_samples.json under monitoring_metrics/<metric_name>/."""
+    base = _monitoring_metrics_dir(proof_dir) / metric_name
+    if not base.exists():
+        return []
+    rows: list[dict] = []
+    for path in base.glob("*_*_samples.json"):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                raw = json.load(f)
+            if isinstance(raw, list):
+                rows.extend(raw)
+        except Exception:
+            pass
+    return rows
+
+
 def _monitoring_layout_cache(proof_dir: Path) -> dict:
     """Layout fingerprint cache (65% hit rate). Prefer per-sample aggregation from monitoring_metrics/."""
     hit_rate_actual = None
-    per_sample_path = _monitoring_metrics_dir(proof_dir) / "layout_fingerprint_cache" / "layout_fingerprint_cache_per_sample_ocr.json"
-    if per_sample_path.exists():
-        try:
-            with open(per_sample_path, "r", encoding="utf-8") as f:
-                rows = json.load(f)
-            if isinstance(rows, list) and rows:
-                hits = sum(1 for r in rows if r.get("cache_hit") or r.get("detection_method") == "cache")
-                hit_rate_actual = hits / len(rows)
-        except Exception:
-            pass
+    rows = _read_all_monitoring_samples(proof_dir, "layout_fingerprint_cache")
+    if rows:
+        hits = sum(1 for r in rows if r.get("cache_hit") or r.get("detection_method") == "cache")
+        hit_rate_actual = hits / len(rows)
     if hit_rate_actual is None:
         try:
             from ocr_pipeline.detection.detection_router import DetectionRouter
@@ -404,16 +421,10 @@ def _monitoring_layout_cache(proof_dir: Path) -> dict:
 def _monitoring_completeness(proof_dir: Path) -> dict:
     """Completeness heuristics catching 90% of false negatives. Prefer per-sample aggregation from monitoring_metrics/."""
     actual = None
-    per_sample_path = _monitoring_metrics_dir(proof_dir) / "completeness_heuristics" / "completeness_heuristics_per_sample_ocr.json"
-    if per_sample_path.exists():
-        try:
-            with open(per_sample_path, "r", encoding="utf-8") as f:
-                rows = json.load(f)
-            if isinstance(rows, list) and rows:
-                caught = sum(1 for r in rows if r.get("heuristic_caught") or r.get("fn_caught", False))
-                actual = caught / len(rows)
-        except Exception:
-            pass
+    rows = _read_all_monitoring_samples(proof_dir, "completeness_heuristics")
+    if rows:
+        caught = sum(1 for r in rows if r.get("heuristic_caught") or r.get("fn_caught", False))
+        actual = caught / len(rows)
     if actual is None:
         metrics_path = proof_dir / "ocr_completeness_stats.json"
         if metrics_path.exists():
@@ -435,16 +446,10 @@ def _monitoring_completeness(proof_dir: Path) -> dict:
 def _monitoring_adversarial(proof_dir: Path) -> dict:
     """Adversarial testing 95% prompt injection resistance. Prefer per-sample from monitoring_metrics/."""
     actual = None
-    per_sample_path = _monitoring_metrics_dir(proof_dir) / "adversarial_testing" / "adversarial_testing_per_sample_rag.json"
-    if per_sample_path.exists():
-        try:
-            with open(per_sample_path, "r", encoding="utf-8") as f:
-                rows = json.load(f)
-            if isinstance(rows, list) and rows:
-                resisted = sum(1 for r in rows if r.get("resisted"))
-                actual = resisted / len(rows)
-        except Exception:
-            pass
+    rows = _read_all_monitoring_samples(proof_dir, "adversarial_testing")
+    if rows:
+        resisted = sum(1 for r in rows if r.get("resisted"))
+        actual = resisted / len(rows)
     if actual is None:
         try:
             from evaluation.system_tests import SystemTester
