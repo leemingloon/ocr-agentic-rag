@@ -24,6 +24,13 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 
+def _page_from_finqa_id(corpus_id: str):
+    """Extract page number from FinQA id (e.g. GS/2014/page_134 -> 134, ADI/2009/page_49.pdf-1 -> 49)."""
+    import re
+    m = re.search(r"page_(\d+)", str(corpus_id), re.I)
+    return int(m.group(1)) if m else None
+
+
 def build_finqa_chunks(train_qa_path: Path, table_aware: bool = False):
     """Build TextNode chunks from FinQA train_qa.json.
 
@@ -31,6 +38,8 @@ def build_finqa_chunks(train_qa_path: Path, table_aware: bool = False):
     is self-contained (row label + column: value). One chunk per table row (+ pre/post
     text chunks). Avoids GS/2014-style misattribution when the chunker splits at column
     boundaries. Requires re-running the full index build and replacing the pre-built bundle.
+
+    Returns (chunks, context_by_corpus, page_by_corpus) for preprocess_chunks_for_index.
     """
     from rag_system.chunking import DocumentChunker, serialize_table_to_rows
     from llama_index.core.schema import TextNode
@@ -42,10 +51,12 @@ def build_finqa_chunks(train_qa_path: Path, table_aware: bool = False):
     if isinstance(data, dict) and "data" in data:
         data = data["data"]
     if not isinstance(data, list):
-        return []
+        return [], {}, {}
 
     chunker = DocumentChunker(chunk_size=512, chunk_overlap=128)
     all_chunks = []
+    context_by_corpus = {}
+    page_by_corpus = {}
     for idx, entry in enumerate(data):
         pre = entry.get("pre_text") or []
         post = entry.get("post_text") or []
@@ -54,14 +65,20 @@ def build_finqa_chunks(train_qa_path: Path, table_aware: bool = False):
         post_str = "\n".join(post) if isinstance(post, list) else str(post)
         corpus_id = entry.get("id") or entry.get("filename", str(idx))
         meta = {"entry_id": idx, "source": "finqa_train", "corpus_id": corpus_id}
+        # Full doc context for section/unit inference (pre+post so table rows get doc-level section and units)
+        context_by_corpus[corpus_id] = f"{pre_str}\n\n{post_str}".strip()
+        page_num = _page_from_finqa_id(corpus_id)
+        if page_num is not None:
+            page_by_corpus[corpus_id] = page_num
 
         if table_aware and table and all(isinstance(r, (list, tuple)) for r in table):
             # Level 3: one self-contained chunk per table row (headers embedded)
             row_strings = serialize_table_to_rows(table, first_row_is_header=True)
-            for row_str in row_strings:
+            for row_idx, row_str in enumerate(row_strings):
                 if not row_str.strip():
                     continue
-                all_chunks.append(TextNode(text=row_str, metadata={**meta}))
+                row_meta = {**meta, "row_index": row_idx, "chunk_type": "table"}
+                all_chunks.append(TextNode(text=row_str, metadata=row_meta))
             # Pre/post as separate chunks so retrieval can still hit context
             if pre_str.strip():
                 all_chunks.extend(chunker.chunk_document(pre_str, metadata=meta))
@@ -81,7 +98,7 @@ def build_finqa_chunks(train_qa_path: Path, table_aware: bool = False):
             continue
         chunks = chunker.chunk_document(doc_text, metadata=meta)
         all_chunks.extend(chunks)
-    return all_chunks
+    return all_chunks, context_by_corpus, page_by_corpus
 
 
 def main():
@@ -105,18 +122,34 @@ def main():
         action="store_true",
         help="Serialize each table row with column headers inline (Level 3). One chunk per row; avoids row-split misattribution (see RAG_LESSONS.md). Requires replacing the pre-built index.",
     )
+    parser.add_argument(
+        "--no_dedup",
+        action="store_true",
+        help="Skip content-hash deduplication (keep all chunks). Default: deduplicate and set duplicate_count.",
+    )
     args = parser.parse_args()
 
     train_qa_path = args.train_qa if args.train_qa.is_absolute() else REPO_ROOT / args.train_qa
     output_dir = args.output if args.output.is_absolute() else REPO_ROOT / args.output
 
     print("Building FinQA chunks..." + (" (table_aware=row-level serialization)" if args.table_aware else ""))
-    chunks = build_finqa_chunks(train_qa_path, table_aware=args.table_aware)
+    chunks, context_by_corpus, page_by_corpus = build_finqa_chunks(train_qa_path, table_aware=args.table_aware)
     if not chunks:
         print("No chunks produced. Check train_qa.json path and content.")
         sys.exit(1)
     n_docs = len({(getattr(c, "metadata", None) or {}).get("corpus_id") for c in chunks})
-    print(f"Got {len(chunks)} chunks from {n_docs} documents.")
+    print(f"Got {len(chunks)} raw chunks from {n_docs} documents.")
+
+    # Pre-index steps: section tagging, unit parsing, provenance (page, table_id), content hash, dedup
+    from rag_system.index_preprocess import preprocess_chunks_for_index
+    chunks = preprocess_chunks_for_index(
+        chunks,
+        context_by_corpus=context_by_corpus,
+        page_by_corpus=page_by_corpus,
+        table_id_prefix_by_corpus={cid: cid for cid in context_by_corpus},
+        dedup=not args.no_dedup,
+    )
+    print(f"After section/units/provenance/dedup: {len(chunks)} chunks.")
 
     from rag_system.retrieval import HybridRetriever
 

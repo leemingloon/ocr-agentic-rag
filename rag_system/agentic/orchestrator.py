@@ -42,6 +42,67 @@ from .retrieval_tools import ToolRegistry, ToolType, ToolResult
 from .memory import ConversationMemory
 
 
+# Query intent labels (for classifier and primer routing). Rule-based first; can swap for a lightweight model later.
+RAG_INTENT_ABSOLUTE_CHANGE = "absolute_change"       # e.g. "change in X between 2014 and 2013" -> subtract
+RAG_INTENT_PERCENT_CHANGE = "percent_change"          # growth rate, % change -> divide(subtract(new,old), old)
+RAG_INTENT_PERCENT_REDUCTION = "percent_reduction"   # percent reduction/change -> (new-old)/old, keep sign
+RAG_INTENT_PERCENTAGE_0_100 = "percentage_0_100"      # percentage decrease/increase in 0-100 form
+RAG_INTENT_RATIO = "ratio"                            # e.g. "what percent of total" -> part/total or part/(pct/100)
+RAG_INTENT_TOTAL = "total"                            # total of X, total operating expenses
+RAG_INTENT_TABLE_YEAR = "table_year"                  # value in a specific year (row/column)
+RAG_INTENT_TABLE_DATE_COLUMN = "table_date_column"   # value as of a specific date (column)
+RAG_INTENT_TABLE_TOTAL_ACROSS_COLUMNS = "table_total_across_columns"  # total of line item, table may be split
+RAG_INTENT_COMPENSATION = "compensation"             # equity awards, milestones, ASC 718
+RAG_INTENT_TOTALS_PREFER_DIRECT = "totals_prefer_direct"  # prefer direct line over back-calc
+RAG_INTENT_EVENT_SCOPED = "event_scoped"              # acquired intangibles, amortization, single block
+RAG_INTENT_CASHFLOW_FINANCING = "cashflow_financing" # share repurchase, net change in cash
+RAG_INTENT_LOCOM_GROWTH = "locom_growth"             # growth rate of loans held-for-sale / LOCOM
+RAG_INTENT_YES_NO = "yes_no"                         # did X exceed Y, etc.
+
+
+def classify_query_intent(query: str) -> List[str]:
+    """
+    Rule-based query intent classifier. Returns a list of intent labels that drive primer
+    selection and (later) formula templates. Extend with a lightweight model if patterns proliferate.
+    """
+    if not query or not isinstance(query, str):
+        return []
+    intents: List[str] = []
+    if _is_yes_no_question(query):
+        intents.append(RAG_INTENT_YES_NO)
+    if _needs_financial_compensation_primer(query):
+        intents.append(RAG_INTENT_COMPENSATION)
+    if _needs_table_year_primer(query):
+        intents.append(RAG_INTENT_TABLE_YEAR)
+    if _needs_table_date_column_primer(query):
+        intents.append(RAG_INTENT_TABLE_DATE_COLUMN)
+    if _needs_totals_prefer_direct_primer(query):
+        intents.append(RAG_INTENT_TOTALS_PREFER_DIRECT)
+    if _needs_growth_rate_primer(query):
+        intents.append(RAG_INTENT_PERCENT_CHANGE)
+    if _needs_percentage_as_integer_primer(query):
+        intents.append(RAG_INTENT_PERCENTAGE_0_100)
+    if _needs_percent_reduction_sign_primer(query):
+        intents.append(RAG_INTENT_PERCENT_REDUCTION)
+    if _needs_locom_growth_primer(query):
+        intents.append(RAG_INTENT_LOCOM_GROWTH)
+    if _needs_event_scoped_arithmetic_primer(query):
+        intents.append(RAG_INTENT_EVENT_SCOPED)
+    if _needs_cashflow_financing_primer(query):
+        intents.append(RAG_INTENT_CASHFLOW_FINANCING)
+    if _needs_table_total_across_columns_primer(query):
+        intents.append(RAG_INTENT_TABLE_TOTAL_ACROSS_COLUMNS)
+    # Absolute change: "change in X between A and B" without growth-rate language -> subtract only
+    q = query.strip().lower()
+    if not intents and _is_numerical_answer_question(query):
+        if re.search(r"change\s+in\s+.+between\s+(19|20)\d{2}\s+and\s+(19|20)\d{2}", q) and not _needs_growth_rate_primer(query):
+            intents.append(RAG_INTENT_ABSOLUTE_CHANGE)
+    if "total of" in q or ("what is the total" in q and ("million" in q or "amount" in q)):
+        if RAG_INTENT_TABLE_TOTAL_ACROSS_COLUMNS not in intents:
+            intents.append(RAG_INTENT_TOTAL)
+    return intents
+
+
 def _is_numerical_answer_question(query: str) -> bool:
     """True if the question unambiguously asks for a number (growth rate, change, etc.), not yes/no."""
     if not query or not isinstance(query, str):
@@ -840,11 +901,17 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
         
         context = "\n\n---\n\n".join(context_parts) if context_parts else "No results available"
         
+        # Assembly-time unit normalisation: if chunks have units metadata (millions, thousands, per_share, etc.),
+        # add a canonical-unit note so the model reasons in a consistent scale (see RAG_ROADMAP unit/scale).
+        units_note = self._units_note_from_results(results)
+        
         # Extract numbers from retrieved chunks so the model can focus on valid operands (FinQA accuracy)
         numbers_from_context = self._extract_numbers_from_results(results)
         numbers_hint = ""
         if numbers_from_context:
             numbers_hint = f"\n\nNumbers you may use (from retrieved documents): {numbers_from_context}\n"
+        if units_note:
+            numbers_hint = (numbers_hint.rstrip() + "\n" + units_note + "\n") if numbers_hint else (units_note + "\n")
         if os.environ.get("RAG_DEBUG") == "1" and state.get("corpus_id"):
             num_chunks = sum(len((r.get("result") or {}).get("chunks") or []) for r in results)
             print(f"[DEBUG] generator: corpus_id={state.get('corpus_id')!r} context_len={len(context)} numbers_hint_len={len(numbers_hint)} num_chunks={num_chunks}")
@@ -858,15 +925,19 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
             }
         
         # REAL MODE: Generate answer (with few-shot FinQA-style program examples for higher accuracy)
-        is_yes_no = _is_yes_no_question(query)
-        needs_primer = _needs_financial_compensation_primer(query)
-        needs_table_year = _needs_table_year_primer(query)
-        needs_table_date_column = _needs_table_date_column_primer(query)
-        needs_totals_direct = _needs_totals_prefer_direct_primer(query)
-        needs_growth_rate = _needs_growth_rate_primer(query)
-        needs_event_scoped_arithmetic = _needs_event_scoped_arithmetic_primer(query)
-        needs_cashflow_financing = _needs_cashflow_financing_primer(query)
-        needs_table_total_across_columns = _needs_table_total_across_columns_primer(query)
+        # Single query intent classifier drives all primer selection (rule-based; swappable for a model later).
+        intents = classify_query_intent(query)
+        if os.environ.get("RAG_DEBUG") == "1":
+            print(f"[DEBUG] generator: query_intents={intents}")
+        is_yes_no = RAG_INTENT_YES_NO in intents
+        needs_primer = RAG_INTENT_COMPENSATION in intents
+        needs_table_year = RAG_INTENT_TABLE_YEAR in intents
+        needs_table_date_column = RAG_INTENT_TABLE_DATE_COLUMN in intents
+        needs_totals_direct = RAG_INTENT_TOTALS_PREFER_DIRECT in intents
+        needs_growth_rate = RAG_INTENT_PERCENT_CHANGE in intents
+        needs_event_scoped_arithmetic = RAG_INTENT_EVENT_SCOPED in intents
+        needs_cashflow_financing = RAG_INTENT_CASHFLOW_FINANCING in intents
+        needs_table_total_across_columns = RAG_INTENT_TABLE_TOTAL_ACROSS_COLUMNS in intents
         if os.environ.get("RAG_DEBUG") == "1" and is_yes_no:
             print(f"[DEBUG] generator: yes/no question detected; will not append program execution. query_preview={query[:80]!r}...")
         if os.environ.get("RAG_DEBUG") == "1" and needs_primer:
@@ -908,9 +979,9 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
             f"\n\nTotals (prefer direct line item):{TOTALS_PREFER_DIRECT_PRIMER}\n"
             if (needs_totals_direct and not is_yes_no) else ""
         )
-        needs_locom_growth = _needs_locom_growth_primer(query) and needs_growth_rate
-        needs_percentage_as_integer = _needs_percentage_as_integer_primer(query) and needs_growth_rate
-        needs_percent_reduction_sign = _needs_percent_reduction_sign_primer(query) and not is_yes_no
+        needs_locom_growth = RAG_INTENT_LOCOM_GROWTH in intents and needs_growth_rate
+        needs_percentage_as_integer = RAG_INTENT_PERCENTAGE_0_100 in intents and needs_growth_rate
+        needs_percent_reduction_sign = RAG_INTENT_PERCENT_REDUCTION in intents and not is_yes_no
         growth_rate_primer_block = (
             f"\n\nGrowth rate / percentage change:{GROWTH_RATE_PRIMER}\n"
             + (f"\n\n{LOCOM_GROWTH_PRIMER}\n" if needs_locom_growth else "")
@@ -1069,6 +1140,29 @@ Answer:"""
         
         return "continue"
     
+    def _units_note_from_results(self, results: List[Dict]) -> str:
+        """Build a canonical-unit note from chunk metadata (units set at index time) for assembly-time normalisation."""
+        seen = set()
+        for r in results:
+            if not r.get("success") or not isinstance(r.get("result"), dict):
+                continue
+            for c in (r.get("result") or {}).get("chunks") or []:
+                meta = c.get("metadata") if isinstance(c, dict) else {}
+                u = meta.get("units")
+                if isinstance(u, list) and u:
+                    for x in u:
+                        seen.add(str(x).lower())
+                elif isinstance(u, str) and u:
+                    seen.add(u.lower())
+        if not seen:
+            return ""
+        # Prefer millions as canonical for financial docs; tell model to treat numbers in that scale unless stated
+        if "millions" in seen or "thousands" in seen or "billions" in seen:
+            return "All dollar figures in the retrieved context are in millions unless stated otherwise (e.g. per share, thousands)."
+        if "per_share" in seen or "quarterly" in seen:
+            return "Some figures are per-share or quarterly; use the scale indicated in the context."
+        return ""
+
     def _extract_numbers_from_results(self, results: List[Dict], max_numbers: int = 30) -> str:
         """Extract numbers (including percentages and $ amounts) from RAG chunks for FinQA-style prompts."""
         seen: set = set()
