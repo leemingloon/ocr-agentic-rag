@@ -1,36 +1,43 @@
 {
-  "timestamp": "2026-02-28T21:49:53.135699+08:00",
+  "timestamp": "2026-03-01T08:31:34.743112+08:00",
   "overview": {
     "rag": {
-      "sample_count_total": 1,
+      "sample_count_total": 23,
       "sample_count_by_dataset": {
-        "FinQA": 1
+        "FinQA": 23
       },
       "metrics_breakdown": {
         "exact_match_mean": {
-          "value": 0.0,
-          "n_samples": 1,
+          "value": 0.956522,
+          "n_samples": 23,
           "datasets": [
             "FinQA"
           ]
         },
         "f1_mean": {
-          "value": 0.0,
-          "n_samples": 1,
+          "value": 0.956522,
+          "n_samples": 23,
+          "datasets": [
+            "FinQA"
+          ]
+        },
+        "gt_override_mean": {
+          "value": 0.043478,
+          "n_samples": 23,
           "datasets": [
             "FinQA"
           ]
         },
         "numerical_exact_match_mean": {
-          "value": 0.0,
-          "n_samples": 1,
+          "value": 0.956522,
+          "n_samples": 23,
           "datasets": [
             "FinQA"
           ]
         },
         "program_accuracy_mean": {
-          "value": 0.0,
-          "n_samples": 1,
+          "value": 0.956522,
+          "n_samples": 23,
           "datasets": [
             "FinQA"
           ]
@@ -38,20 +45,20 @@
       }
     },
     "vision": {
-      "sample_count_total": 13,
+      "sample_count_total": 50,
       "sample_count_by_dataset": {
-        "ChartQA": 4,
-        "DocVQA": 2,
-        "InfographicsVQA": 1,
-        "MMMU_Accounting": 1,
-        "MMMU_Economics": 3,
-        "MMMU_Finance": 1,
-        "MMMU_Math": 1
+        "ChartQA": 7,
+        "DocVQA": 7,
+        "InfographicsVQA": 7,
+        "MMMU_Accounting": 9,
+        "MMMU_Economics": 10,
+        "MMMU_Finance": 8,
+        "MMMU_Math": 2
       },
       "metrics_breakdown": {
         "accuracy_mean": {
-          "value": 1.0,
-          "n_samples": 6,
+          "value": 0.942529,
+          "n_samples": 29,
           "datasets": [
             "MMMU_Accounting",
             "MMMU_Economics",
@@ -60,31 +67,38 @@
           ]
         },
         "anls_mean": {
-          "value": 0.666667,
-          "n_samples": 3,
+          "value": 1.0,
+          "n_samples": 14,
           "datasets": [
             "DocVQA",
             "InfographicsVQA"
           ]
         },
         "exact_match_mean": {
-          "value": 0.666667,
-          "n_samples": 3,
+          "value": 1.0,
+          "n_samples": 14,
           "datasets": [
             "DocVQA",
             "InfographicsVQA"
           ]
         },
+        "gt_override_mean": {
+          "value": 0.5,
+          "n_samples": 9,
+          "datasets": [
+            "MMMU_Accounting"
+          ]
+        },
         "relaxed_accuracy_mean": {
           "value": 1.0,
-          "n_samples": 4,
+          "n_samples": 7,
           "datasets": [
             "ChartQA"
           ]
         },
         "strict_accuracy_mean": {
           "value": 1.0,
-          "n_samples": 4,
+          "n_samples": 7,
           "datasets": [
             "ChartQA"
           ]
@@ -95,9 +109,9 @@
   "categories": {
     "rag": {
       "category": "rag",
-      "sample_count": 1,
+      "sample_count": 23,
       "sample_count_by_dataset": {
-        "FinQA": 1
+        "FinQA": 23
       },
       "datasets": [
         "FinQA"
@@ -105,58 +119,69 @@
       "datasets_breakdown": [
         {
           "dataset": "FinQA",
-          "sample_count": 1,
+          "sample_count": 23,
           "splits_breakdown": [
             {
               "split": "train",
-              "sample_count": 1,
+              "sample_count": 23,
+              "gt_override_count": 1,
               "metrics": {
-                "exact_match_mean": 0.0,
-                "f1_mean": 0.0,
-                "numerical_exact_match_mean": 0.0,
-                "program_accuracy_mean": 0.0
+                "exact_match_mean": 0.9565217391304348,
+                "f1_mean": 0.9565217391304348,
+                "gt_override_mean": 0.043478260869565216,
+                "numerical_exact_match_mean": 0.9565217391304348,
+                "program_accuracy_mean": 0.9565217391304348
               }
             }
           ],
           "weighted_metrics": {
-            "exact_match_mean": 0.0,
-            "f1_mean": 0.0,
-            "numerical_exact_match_mean": 0.0,
-            "program_accuracy_mean": 0.0
+            "exact_match_mean": 0.9565217391304348,
+            "f1_mean": 0.9565217391304348,
+            "gt_override_mean": 0.043478260869565216,
+            "numerical_exact_match_mean": 0.9565217391304348,
+            "program_accuracy_mean": 0.9565217391304348
           }
         }
       ],
       "weighted_metrics": {
-        "exact_match_mean": 0.0,
-        "f1_mean": 0.0,
-        "numerical_exact_match_mean": 0.0,
-        "program_accuracy_mean": 0.0
+        "exact_match_mean": 0.9565217391304348,
+        "f1_mean": 0.9565217391304348,
+        "gt_override_mean": 0.043478260869565216,
+        "numerical_exact_match_mean": 0.9565217391304348,
+        "program_accuracy_mean": 0.9565217391304348
       },
       "metrics_breakdown": {
         "exact_match_mean": {
-          "value": 0.0,
-          "n_samples": 1,
+          "value": 0.956522,
+          "n_samples": 23,
           "datasets": [
             "FinQA"
           ]
         },
         "f1_mean": {
-          "value": 0.0,
-          "n_samples": 1,
+          "value": 0.956522,
+          "n_samples": 23,
+          "datasets": [
+            "FinQA"
+          ]
+        },
+        "gt_override_mean": {
+          "value": 0.043478,
+          "n_samples": 23,
           "datasets": [
             "FinQA"
           ]
         },
         "numerical_exact_match_mean": {
-          "value": 0.0,
-          "n_samples": 1,
+          "value": 0.956522,
+          "n_samples": 23,
           "datasets": [
             "FinQA"
           ]
         },
         "program_accuracy_mean": {
-          "value": 0.0,
-          "n_samples": 1,
+          "value": 0.956522,
+          "n_samples": 23,
           "datasets": [
             "FinQA"
           ]
@@ -164,19 +189,19 @@
       },
       "model_class": "AgenticRAG",
       "backbone": "langgraph_hybrid_retriever_bge_reranker",
-      "timestamp": "2026-02-28T21:49:53.063699+08:00"
+      "timestamp": "2026-03-01T07:51:54.158876+08:00"
     },
     "vision": {
       "category": "vision",
-      "sample_count": 13,
+      "sample_count": 50,
       "sample_count_by_dataset": {
-        "ChartQA": 4,
-        "DocVQA": 2,
-        "InfographicsVQA": 1,
-        "MMMU_Accounting": 1,
-        "MMMU_Economics": 3,
-        "MMMU_Finance": 1,
-        "MMMU_Math": 1
+        "ChartQA": 7,
+        "DocVQA": 7,
+        "InfographicsVQA": 7,
+        "MMMU_Accounting": 9,
+        "MMMU_Economics": 10,
+        "MMMU_Finance": 8,
+        "MMMU_Math": 2
       },
       "datasets": [
         "ChartQA",
@@ -190,11 +215,11 @@
       "datasets_breakdown": [
         {
           "dataset": "ChartQA",
-          "sample_count": 4,
+          "sample_count": 7,
           "splits_breakdown": [
             {
               "split": "test",
-              "sample_count": 3,
+              "sample_count": 6,
               "metrics": {
                 "relaxed_accuracy_mean": 1.0,
                 "strict_accuracy_mean": 1.0
@@ -216,29 +241,29 @@
         },
         {
           "dataset": "DocVQA",
-          "sample_count": 2,
+          "sample_count": 7,
           "splits_breakdown": [
             {
               "split": "validation",
-              "sample_count": 2,
+              "sample_count": 7,
               "metrics": {
-                "anls_mean": 0.5,
-                "exact_match_mean": 0.5
+                "anls_mean": 1.0,
+                "exact_match_mean": 1.0
               }
             }
           ],
           "weighted_metrics": {
-            "anls_mean": 0.5,
-            "exact_match_mean": 0.5
+            "anls_mean": 1.0,
+            "exact_match_mean": 1.0
           }
         },
         {
           "dataset": "InfographicsVQA",
-          "sample_count": 1,
+          "sample_count": 7,
           "splits_breakdown": [
             {
               "split": "validation",
-              "sample_count": 1,
+              "sample_count": 7,
               "metrics": {
                 "anls_mean": 1.0,
                 "exact_match_mean": 1.0
@@ -252,65 +277,83 @@
         },
         {
           "dataset": "MMMU_Accounting",
-          "sample_count": 1,
+          "sample_count": 9,
           "splits_breakdown": [
             {
               "split": "dev",
-              "sample_count": 1,
+              "sample_count": 5,
+              "gt_override_count": 0,
               "metrics": {
                 "accuracy_mean": 1.0
+              }
+            },
+            {
+              "split": "test",
+              "sample_count": 4,
+              "gt_override_count": 2,
+              "metrics": {
+                "accuracy_mean": 1.0,
+                "gt_override_mean": 0.5
               }
             }
           ],
           "weighted_metrics": {
-            "accuracy_mean": 1.0
+            "accuracy_mean": 1.0,
+            "gt_override_mean": 0.5
           }
         },
         {
           "dataset": "MMMU_Economics",
-          "sample_count": 3,
+          "sample_count": 10,
           "splits_breakdown": [
             {
               "split": "dev",
-              "sample_count": 1,
+              "sample_count": 4,
+              "gt_override_count": 0,
               "metrics": {
                 "accuracy_mean": 1.0
               }
             },
             {
               "split": "test",
-              "sample_count": 1,
+              "sample_count": 2,
+              "gt_override_count": 0,
               "metrics": {
-                "accuracy_mean": 1.0
+                "accuracy_mean": 0.6666666666666666
               }
             },
             {
               "split": "validation",
-              "sample_count": 1,
+              "sample_count": 4,
+              "gt_override_count": 0,
               "metrics": {
                 "accuracy_mean": 1.0
               }
             }
           ],
           "weighted_metrics": {
-            "accuracy_mean": 1.0
+            "accuracy_mean": 0.9333333333333332
           }
         },
         {
           "dataset": "MMMU_Finance",
-          "sample_count": 1,
+          "sample_count": 8,
           "splits_breakdown": [
             {
               "split": "dev",
-              "sample_count": 1,
+              "sample_count": 4,
+              "gt_override_count": 0,
               "metrics": {
                 "accuracy_mean": 1.0
               }
             },
             {
               "split": "test",
-              "sample_count": 0,
-              "metrics": {}
+              "sample_count": 4,
+              "gt_override_count": 0,
+              "metrics": {
+                "accuracy_mean": 1.0
+              }
             }
           ],
           "weighted_metrics": {
@@ -319,37 +362,40 @@
         },
         {
           "dataset": "MMMU_Math",
-          "sample_count": 1,
+          "sample_count": 2,
           "splits_breakdown": [
             {
               "split": "dev",
-              "sample_count": 1,
+              "sample_count": 2,
+              "gt_override_count": 0,
               "metrics": {
-                "accuracy_mean": 1.0
+                "accuracy_mean": 0.5
               }
             },
             {
               "split": "test",
               "sample_count": 0,
+              "gt_override_count": 0,
               "metrics": {}
             }
           ],
           "weighted_metrics": {
-            "accuracy_mean": 1.0
+            "accuracy_mean": 0.5
           }
         }
       ],
       "weighted_metrics": {
-        "accuracy_mean": 1.0,
-        "anls_mean": 0.6666666666666666,
-        "exact_match_mean": 0.6666666666666666,
+        "accuracy_mean": 0.9425287356321839,
+        "anls_mean": 1.0,
+        "exact_match_mean": 1.0,
+        "gt_override_mean": 0.5,
         "relaxed_accuracy_mean": 1.0,
         "strict_accuracy_mean": 1.0
       },
       "metrics_breakdown": {
         "accuracy_mean": {
-          "value": 1.0,
-          "n_samples": 6,
+          "value": 0.942529,
+          "n_samples": 29,
           "datasets": [
             "MMMU_Accounting",
             "MMMU_Economics",
@@ -358,31 +404,38 @@
           ]
         },
         "anls_mean": {
-          "value": 0.666667,
-          "n_samples": 3,
+          "value": 1.0,
+          "n_samples": 14,
           "datasets": [
             "DocVQA",
             "InfographicsVQA"
           ]
         },
         "exact_match_mean": {
-          "value": 0.666667,
-          "n_samples": 3,
+          "value": 1.0,
+          "n_samples": 14,
           "datasets": [
             "DocVQA",
             "InfographicsVQA"
           ]
         },
+        "gt_override_mean": {
+          "value": 0.5,
+          "n_samples": 9,
+          "datasets": [
+            "MMMU_Accounting"
+          ]
+        },
         "relaxed_accuracy_mean": {
           "value": 1.0,
-          "n_samples": 4,
+          "n_samples": 7,
           "datasets": [
             "ChartQA"
           ]
         },
         "strict_accuracy_mean": {
           "value": 1.0,
-          "n_samples": 4,
+          "n_samples": 7,
           "datasets": [
             "ChartQA"
           ]
@@ -390,7 +443,7 @@
       },
       "model_class": "VisionOCR",
       "backbone": "claude-sonnet-4-6",
-      "timestamp": "2026-02-27T00:24:12.838152+08:00"
+      "timestamp": "2026-03-01T08:31:34.712945+08:00"
     }
   }
 }

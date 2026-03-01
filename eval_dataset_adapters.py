@@ -1135,31 +1135,51 @@ class SROIEAdapter(OCRDatasetAdapter):
                 )
 
             split_path = Path().cwd() / self.FILE_MAPPING[split]["dataset_path"]
+            use_hf = self.data_source_from_hf_or_manual == "hf" or not split_path.exists()
 
-            # Load Parquet shards
-            rows = self._arrow_row_stream(split_path, max_samples=max_samples_per_split)
-
-            for idx, row in enumerate(rows):
-                # --- PIL in-memory conversion ---
-                img_field = row.get("image")
-                if isinstance(img_field, bytes):
-                    row["image"] = Image.open(io.BytesIO(img_field)).convert("RGB")
-
-                ocr_tokens = self._arrow_row_to_token_ocr(row)
-
-                if ocr_tokens is None:
-                    continue
-
-                sample = self._build_universal_ocr_sample(
-                    image=row.get("image"),
-                    ocr_tokens=ocr_tokens,
-                    token_labels=None,  # SROIE has no token-level labels
-                    document_entities=row.get("entities"),
-                    split=split,
-                    sample_id=row.get("key", f"{split}_{idx}")
-                )
-
-                all_samples.append(sample)
+            if use_hf:
+                # Load from HuggingFace when repo is HF or local path missing (e.g. notebook/Colab)
+                ds = load_dataset(self.hf_repo_name, split=split)
+                n = min(len(ds), max_samples_per_split or len(ds))
+                for idx in range(n):
+                    row = ds[idx]
+                    img = row.get("image")
+                    if img is None:
+                        continue
+                    if hasattr(img, "convert"):
+                        img = img.convert("RGB")
+                    row = {"image": img, "key": row.get("key", f"{split}_{idx}"), "entities": row.get("entities"), "words": row.get("words", []), "bboxes": row.get("bboxes", [])}
+                    ocr_tokens = self._arrow_row_to_token_ocr(row)
+                    if ocr_tokens is None:
+                        continue
+                    sample = self._build_universal_ocr_sample(
+                        image=row.get("image"),
+                        ocr_tokens=ocr_tokens,
+                        token_labels=None,
+                        document_entities=row.get("entities"),
+                        split=split,
+                        sample_id=row.get("key", f"{split}_{idx}")
+                    )
+                    all_samples.append(sample)
+            else:
+                # Load Parquet shards from local path
+                rows = self._arrow_row_stream(split_path, max_samples=max_samples_per_split)
+                for idx, row in enumerate(rows):
+                    img_field = row.get("image")
+                    if isinstance(img_field, bytes):
+                        row["image"] = Image.open(io.BytesIO(img_field)).convert("RGB")
+                    ocr_tokens = self._arrow_row_to_token_ocr(row)
+                    if ocr_tokens is None:
+                        continue
+                    sample = self._build_universal_ocr_sample(
+                        image=row.get("image"),
+                        ocr_tokens=ocr_tokens,
+                        token_labels=None,
+                        document_entities=row.get("entities"),
+                        split=split,
+                        sample_id=row.get("key", f"{split}_{idx}")
+                    )
+                    all_samples.append(sample)
 
         if max_samples_per_category:
             all_samples = all_samples[:max_samples_per_category]
@@ -1368,12 +1388,34 @@ class FUNSDAdapter(OCRDatasetAdapter):
 
             split_info = self.FILE_MAPPING[split]
             split_dir = Path().cwd() / split_info["dataset_path"]
-            print(split_dir)
-            if not split_dir.exists():
-                raise FileNotFoundError(f"Missing split directory: {split_dir}")
+            use_hf = self.data_source_from_hf_or_manual == "hf" or not split_dir.exists()
 
-            for sample in self._arrow_folder_samples(split_dir, split, max_samples_per_split):
-                all_samples.append(sample)
+            if use_hf:
+                ds = load_dataset(self.hf_repo_name, split=split)
+                n = min(len(ds), max_samples_per_split or len(ds))
+                for idx in range(n):
+                    row = ds[idx]
+                    img = row.get("image")
+                    if img is None:
+                        continue
+                    if hasattr(img, "convert"):
+                        img = img.convert("RGB")
+                    row = {"image": img, "id": row.get("id", str(idx)), "words": row.get("words", []), "bboxes": row.get("bboxes", []), "ner_tags": row.get("ner_tags")}
+                    ocr_tokens = self._arrow_row_to_token_ocr(row)
+                    if ocr_tokens is None:
+                        continue
+                    sample = self._build_universal_ocr_sample(
+                        image=row.get("image"),
+                        ocr_tokens=ocr_tokens,
+                        token_labels=row.get("ner_tags"),
+                        document_entities=None,
+                        split=split,
+                        sample_id=row.get("id", f"{split}_{idx}")
+                    )
+                    all_samples.append(sample)
+            else:
+                for sample in self._arrow_folder_samples(split_dir, split, max_samples_per_split):
+                    all_samples.append(sample)
 
             # # Load Parquet shards
             # rows = self._arrow_row_stream(split_dir, max_samples=max_samples_per_split)

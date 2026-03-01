@@ -1,5 +1,5 @@
 {
-  "anls_mean": 0.5,
-  "exact_match_mean": 0.5,
-  "sample_count": 2
+  "anls_mean": 1.0,
+  "exact_match_mean": 1.0,
+  "sample_count": 7
 }

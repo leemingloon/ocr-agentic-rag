@@ -5,6 +5,10 @@ Adaptive chunking that preserves document structure:
 - Tables kept intact
 - Lists split by semantic boundaries
 - Narrative text uses fixed-size chunks with overlap
+
+Level 3 (structure-aware): Use serialize_table_row / serialize_table_to_rows so each
+table row becomes a self-contained chunk with column headers embedded (avoids mislabeled
+values when the chunker splits at column boundaries — see RAG_LESSONS.md GS/2014 page_134).
 """
 
 import re
@@ -12,6 +16,63 @@ from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.schema import Document, TextNode
+
+
+def serialize_table_row(
+    headers: List[str],
+    row: List[str],
+    row_label: str = "",
+) -> str:
+    """Convert a table row into a self-contained text chunk with column labels inline.
+
+    Each value is paired with its column header so the chunk is unambiguous when
+    retrieved alone (avoids GS/2014-style misattribution where 22176 was labeled
+    as 'collateral posted' instead of 'net derivative liabilities').
+
+    Example:
+        headers = ["", "as of december 2014", "as of december 2013"]
+        row = ["net derivative liabilities", "$35764", "$22176"]
+        -> "net derivative liabilities | as of december 2014: $35764 | as of december 2013: $22176"
+    """
+    parts: List[str] = []
+    label = row_label.strip() if row_label else (str(row[0]).strip() if row else "")
+    if label:
+        parts.append(label)
+    # Pair column headers with values; first column is typically the row label so skip or use as label
+    for i in range(1, len(row)):
+        h = headers[i].strip() if i < len(headers) and headers[i] else ""
+        v = str(row[i]).strip()
+        if h:
+            parts.append(f"{h}: {v}")
+        else:
+            parts.append(v)
+    return " | ".join(parts)
+
+
+def serialize_table_to_rows(
+    table: List[List[str]],
+    first_row_is_header: bool = True,
+) -> List[str]:
+    """Turn a table (list of rows) into one self-contained string per data row.
+
+    If first_row_is_header, table[0] is the column headers and table[1:] are data rows;
+    each data row is serialized with serialize_table_row(headers, row, row_label=row[0]).
+    Returns a list of strings, one per data row, suitable for one chunk per row or
+    joining with newlines for downstream chunking.
+    """
+    if not table:
+        return []
+    headers = [str(c) for c in table[0]] if first_row_is_header else []
+    data_rows = table[1:] if first_row_is_header and len(table) > 1 else table
+    result = []
+    for row in data_rows:
+        if not isinstance(row, (list, tuple)):
+            result.append(str(row))
+            continue
+        row = [str(c) for c in row]
+        row_label = row[0] if row else ""
+        result.append(serialize_table_row(headers, row, row_label=row_label))
+    return result
 
 
 @dataclass

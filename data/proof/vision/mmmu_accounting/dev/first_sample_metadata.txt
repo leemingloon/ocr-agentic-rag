@@ -1,5 +1,0 @@
-MMMU_Accounting dev – first sample
-Multiple-choice options metadata: YES (in parquet 'options' column)
-options (string): ['$63,020', '$58,410', '$71,320', '$77,490']
-answer (correct letter): D
-Image: pictorial (table/chart). Saved as first_sample_image.png

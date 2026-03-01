@@ -14,6 +14,7 @@ Usage:
     )
 """
 
+import os
 from typing import List
 from sentence_transformers import CrossEncoder
 
@@ -33,6 +34,11 @@ class BGEReranker:
         Args:
             model_name: HuggingFace model name for reranking
         """
+        # Skip loading in debug to avoid OOM/segfault when embedding model already loaded (e.g. 16GB RAM)
+        if os.environ.get("RAG_DEBUG") == "1" or os.environ.get("RAG_SKIP_RERANKER", "").lower() in ("1", "true", "yes"):
+            print("⚠ Skipping reranker load (RAG_DEBUG or RAG_SKIP_RERANKER set; using retrieval order as-is)")
+            self.model = None
+            return
         try:
             print(f"Loading reranker model: {model_name}")
             self.model = CrossEncoder(model_name, max_length=512)

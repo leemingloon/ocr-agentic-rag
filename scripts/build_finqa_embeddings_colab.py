@@ -24,9 +24,15 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 
-def build_finqa_chunks(train_qa_path: Path):
-    """Build TextNode chunks from FinQA train_qa.json (same logic as eval_runner)."""
-    from rag_system.chunking import DocumentChunker
+def build_finqa_chunks(train_qa_path: Path, table_aware: bool = False):
+    """Build TextNode chunks from FinQA train_qa.json.
+
+    If table_aware=True, tables are serialized with serialize_table_to_rows so each row
+    is self-contained (row label + column: value). One chunk per table row (+ pre/post
+    text chunks). Avoids GS/2014-style misattribution when the chunker splits at column
+    boundaries. Requires re-running the full index build and replacing the pre-built bundle.
+    """
+    from rag_system.chunking import DocumentChunker, serialize_table_to_rows
     from llama_index.core.schema import TextNode
 
     if not train_qa_path.exists():
@@ -46,6 +52,23 @@ def build_finqa_chunks(train_qa_path: Path):
         table = entry.get("table") or entry.get("table_ori") or []
         pre_str = "\n".join(pre) if isinstance(pre, list) else str(pre)
         post_str = "\n".join(post) if isinstance(post, list) else str(post)
+        corpus_id = entry.get("id") or entry.get("filename", str(idx))
+        meta = {"entry_id": idx, "source": "finqa_train", "corpus_id": corpus_id}
+
+        if table_aware and table and all(isinstance(r, (list, tuple)) for r in table):
+            # Level 3: one self-contained chunk per table row (headers embedded)
+            row_strings = serialize_table_to_rows(table, first_row_is_header=True)
+            for row_str in row_strings:
+                if not row_str.strip():
+                    continue
+                all_chunks.append(TextNode(text=row_str, metadata={**meta}))
+            # Pre/post as separate chunks so retrieval can still hit context
+            if pre_str.strip():
+                all_chunks.extend(chunker.chunk_document(pre_str, metadata=meta))
+            if post_str.strip():
+                all_chunks.extend(chunker.chunk_document(post_str, metadata=meta))
+            continue
+
         table_str = ""
         if table:
             for row in table:
@@ -56,11 +79,7 @@ def build_finqa_chunks(train_qa_path: Path):
         doc_text = f"{pre_str}\n\n{table_str}\n\n{post_str}".strip()
         if not doc_text:
             continue
-        corpus_id = entry.get("id") or entry.get("filename", str(idx))
-        chunks = chunker.chunk_document(
-            doc_text,
-            metadata={"entry_id": idx, "source": "finqa_train", "corpus_id": corpus_id},
-        )
+        chunks = chunker.chunk_document(doc_text, metadata=meta)
         all_chunks.extend(chunks)
     return all_chunks
 
@@ -81,13 +100,18 @@ def main():
     )
     parser.add_argument("--batch_size", type=int, default=256, help="Embedding batch size (GPU: 256–512)")
     parser.add_argument("--cpu", action="store_true", help="Use CPU instead of GPU")
+    parser.add_argument(
+        "--table_aware",
+        action="store_true",
+        help="Serialize each table row with column headers inline (Level 3). One chunk per row; avoids row-split misattribution (see RAG_LESSONS.md). Requires replacing the pre-built index.",
+    )
     args = parser.parse_args()
 
     train_qa_path = args.train_qa if args.train_qa.is_absolute() else REPO_ROOT / args.train_qa
     output_dir = args.output if args.output.is_absolute() else REPO_ROOT / args.output
 
-    print("Building FinQA chunks...")
-    chunks = build_finqa_chunks(train_qa_path)
+    print("Building FinQA chunks..." + (" (table_aware=row-level serialization)" if args.table_aware else ""))
+    chunks = build_finqa_chunks(train_qa_path, table_aware=args.table_aware)
     if not chunks:
         print("No chunks produced. Check train_qa.json path and content.")
         sys.exit(1)

@@ -159,23 +159,25 @@ class VisionOCR:
     def extract_charts(
         self,
         image: np.ndarray,
-        question: Optional[str] = None
+        question: Optional[str] = None,
+        extra_instruction: Optional[str] = None,
     ) -> Dict:
         """
-        Extract and reason about charts/graphs
-        
+        Extract and reason about charts/graphs (or document QA when question is present).
+
         Args:
-            image: Document image with charts
-            question: Optional question about the chart
-            
+            image: Document image with charts or document
+            question: Optional question about the chart or document
+            extra_instruction: Optional primer to prepend (e.g. verbatim extraction rules for DocVQA)
+
         Returns:
             Chart data and insights
         """
         # Convert image to base64
         image_base64 = self._image_to_base64(image)
-        
-        # Create chart extraction prompt
-        prompt = f"""
+
+        # Create chart/document extraction prompt; prepend extra_instruction when provided (e.g. verbatim extraction)
+        base_prompt = f"""
 Analyze this chart or graph:
 
 1. Chart Type: (bar, line, pie, table, other)
@@ -189,6 +191,7 @@ Analyze this chart or graph:
 
 Provide a structured analysis.
 """
+        prompt = (extra_instruction.strip() + "\n\n" + base_prompt) if extra_instruction else base_prompt
         
         response = self.client.messages.create(
             model=self.model,
