@@ -91,6 +91,33 @@ class BGEReranker:
         # Return top K documents
         return [doc for doc, score in scored_docs[:top_k]]
 
+    def rerank_with_scores(
+        self,
+        query: str,
+        documents: List[str],
+        top_k: int = 5,
+    ) -> List[tuple]:
+        """
+        Rerank documents by relevance; return (document, score) tuples for thresholding.
+        """
+        if self.model is None or not documents:
+            return list(zip(documents[:top_k], [0.0] * min(len(documents), top_k)))
+        pairs = [[query, doc] for doc in documents]
+        try:
+            scores = self.model.predict(pairs)
+        except Exception as e:
+            print(f"⚠ Reranking failed: {e}, returning original order")
+            return list(zip(documents[:top_k], [0.0] * min(len(documents), top_k)))
+        if hasattr(scores, "tolist"):
+            scores = scores.tolist()
+        elif hasattr(scores, "__iter__") and not isinstance(scores, (list, tuple)):
+            scores = list(scores)
+        if len(scores) != len(documents):
+            scores = [0.0] * len(documents)
+        scored = list(zip(documents, scores))
+        scored.sort(key=lambda x: x[1], reverse=True)
+        return scored[:top_k]
+
 
 # Example usage
 if __name__ == "__main__":

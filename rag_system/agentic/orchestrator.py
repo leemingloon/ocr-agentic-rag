@@ -649,8 +649,16 @@ class AgenticRAG:
             print("🧪 Dry-run mode enabled: No API calls will be made")
             self.client = None
         
-        # Initialize tools
-        self.tools = ToolRegistry(retriever=retriever)
+        # Initialize tools (reranker for cross-encoder + relevance threshold for abstention)
+        try:
+            relevance_threshold = float(os.environ.get("RAG_RELEVANCE_THRESHOLD", "0") or "0")
+        except (TypeError, ValueError):
+            relevance_threshold = 0.0
+        self.tools = ToolRegistry(
+            retriever=retriever,
+            reranker=reranker,
+            relevance_threshold=relevance_threshold,
+        )
         
         # Initialize memory
         self.memory = ConversationMemory()
@@ -878,7 +886,20 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
         """
         query = state["query"]
         results = state["tool_results"]
-        
+
+        # Negative retrieval: if retrieval abstained (max relevance below threshold), return abstention
+        for r in results:
+            raw = r.get("result") if isinstance(r.get("result"), dict) else {}
+            if raw.get("abstention") == "INSUFFICIENT_RELEVANCE":
+                max_s = raw.get("max_relevance_score")
+                thresh = raw.get("relevance_threshold")
+                msg = f"INSUFFICIENT_RELEVANCE: max relevance score {max_s} below threshold {thresh}. No answer generated."
+                return {
+                    "answer": msg,
+                    "confidence": 0.0,
+                    "messages": state.get("messages", []) + [msg],
+                }
+
         # Format context so the LLM sees clear document text, not raw dicts
         context_parts = []
         for result in results:
@@ -898,6 +919,28 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
                     context_parts.append(f"Step {result['step'] + 1}: No chunks returned.")
             else:
                 context_parts.append(f"Step {result['step'] + 1}: {raw}")
+
+        # Multi-level header context: if any chunk has header_hierarchy, show document outline so model sees section structure
+        outline_parts = []
+        for r in results:
+            raw = r.get("result") if isinstance(r.get("result"), dict) else {}
+            for c in raw.get("chunks") or []:
+                meta = c.get("metadata") if isinstance(c, dict) else {}
+                hierarchy = meta.get("header_hierarchy")
+                if isinstance(hierarchy, list) and hierarchy:
+                    outline_parts.append(" > ".join(str(h) for h in hierarchy[:15]))
+                    break
+            if outline_parts:
+                break
+        if outline_parts:
+            context_parts.insert(0, f"Document outline (section hierarchy): {outline_parts[0]}\n")
+
+        # Cross-page note: when retrieval expanded to referenced pages, tell the model
+        for r in results:
+            raw = r.get("result") if isinstance(r.get("result"), dict) else {}
+            if raw.get("expanded_pages"):
+                context_parts.insert(1, f"Cross-page: passages referenced other pages; chunks from pages {raw['expanded_pages']} were included.\n")
+                break
         
         context = "\n\n---\n\n".join(context_parts) if context_parts else "No results available"
         
@@ -912,6 +955,21 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
             numbers_hint = f"\n\nNumbers you may use (from retrieved documents): {numbers_from_context}\n"
         if units_note:
             numbers_hint = (numbers_hint.rstrip() + "\n" + units_note + "\n") if numbers_hint else (units_note + "\n")
+        # Numerical grounding: if query needs a constant (e.g. statutory rate) and chunks don't provide it, inject hint
+        chunk_texts = []
+        for r in results:
+            raw = r.get("result") if isinstance(r.get("result"), dict) else {}
+            for c in raw.get("chunks") or []:
+                t = c.get("text") if isinstance(c, dict) else str(c)
+                if t:
+                    chunk_texts.append(t)
+        try:
+            from rag_system.financial_constants import detect_missing_constant
+            missing = detect_missing_constant(query, chunk_texts)
+            if missing and len(missing) >= 2:
+                numbers_hint = (numbers_hint.rstrip() + "\n" + missing[1] + "\n") if numbers_hint else (missing[1] + "\n")
+        except Exception:
+            pass
         if os.environ.get("RAG_DEBUG") == "1" and state.get("corpus_id"):
             num_chunks = sum(len((r.get("result") or {}).get("chunks") or []) for r in results)
             print(f"[DEBUG] generator: corpus_id={state.get('corpus_id')!r} context_len={len(context)} numbers_hint_len={len(numbers_hint)} num_chunks={num_chunks}")

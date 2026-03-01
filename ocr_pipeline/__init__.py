@@ -17,7 +17,7 @@ Recognition (Confidence-based):
 from .quality_assessment import ImageQualityAssessor
 from .template_detector import TemplateDetector
 from .detection import ClassicalDetector, PaddleOCRDetector, DetectionRouter
-from .recognition import TesseractOCR, HybridOCR
+from .recognition import TesseractOCR, HybridOCR, OCRResult, StandardOCROutput
 
 __version__ = "1.0.0"
 
@@ -29,4 +29,6 @@ __all__ = [
     "DetectionRouter",
     "TesseractOCR",
     "HybridOCR",
+    "OCRResult",
+    "StandardOCROutput",
 ]

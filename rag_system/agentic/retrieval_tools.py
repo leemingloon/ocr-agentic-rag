@@ -11,9 +11,40 @@ Provides tools for:
 import os
 import re
 import json
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Tuple
 from dataclasses import dataclass
 from enum import Enum
+
+# Section types for multi-hop retrieval (must match rag_system.index_preprocess)
+SECTION_INCOME_STATEMENT = "income_statement"
+SECTION_BALANCE_SHEET = "balance_sheet"
+SECTION_NOTES = "notes"
+
+
+def _infer_section_types_for_query(query: str) -> Optional[List[str]]:
+    """If query suggests multiple sections (multi-hop), return section_type list; else None."""
+    if not query or not isinstance(query, str):
+        return None
+    q = query.strip().lower()
+    sections = []
+    if re.search(r"income\s+statement|statement(s)?\s+of\s+operations|operations", q):
+        sections.append(SECTION_INCOME_STATEMENT)
+    if re.search(r"balance\s+sheet|financial\s+position|condition", q):
+        sections.append(SECTION_BALANCE_SHEET)
+    if re.search(r"\bnote\s+\d+|\bfootnote\b|notes\s+to", q):
+        sections.append(SECTION_NOTES)
+    if len(sections) >= 2 or (sections and re.search(r"compare|versus|vs\.|and\s+the\s+", q)):
+        return list(dict.fromkeys(sections))
+    if len(sections) == 1:
+        return sections
+    return None
+
+
+def _apply_bookends_order(chunks: List[Dict]) -> List[Dict]:
+    """Reorder so top-1 and top-2 are at start and end (lost-in-the-middle)."""
+    if len(chunks) <= 2:
+        return chunks
+    return [chunks[0]] + chunks[2:] + [chunks[1]]
 
 
 class ToolType(Enum):
@@ -41,16 +72,26 @@ class ToolRegistry:
     Tool Selection Accuracy: 92% (BIRD-SQL benchmark)
     """
     
-    def __init__(self, retriever=None, vector_store=None):
+    def __init__(
+        self,
+        retriever=None,
+        vector_store=None,
+        reranker=None,
+        relevance_threshold: float = 0.0,
+    ):
         """
-        Initialize tool registry
-        
+        Initialize tool registry.
+
         Args:
             retriever: HybridRetriever instance for RAG
             vector_store: Vector store for retrieval
+            reranker: Optional BGEReranker for cross-encoder reranking and scores
+            relevance_threshold: If > 0 and reranker used, abstain when max reranker score < this
         """
         self.retriever = retriever
         self.vector_store = vector_store
+        self.reranker = reranker
+        self.relevance_threshold = float(relevance_threshold) if relevance_threshold else 0.0
         
         # Tool definitions
         self.tools = {
@@ -194,54 +235,138 @@ class ToolRegistry:
             }
     
     def _rag_retrieval(self, query: str, top_k: int = 5, corpus_id: Optional[str] = None) -> Dict:
-        """Retrieve relevant chunks from knowledge base. If corpus_id is set, only chunks from that document are returned (e.g. FinQA); use larger top_k so the model sees more of the doc."""
+        """Retrieve, optionally rerank, apply bookends, and abstain if relevance below threshold."""
         if not self.retriever:
             return {
                 "query": query,
                 "chunks": [],
-                "error": "Retriever not initialized"
+                "error": "Retriever not initialized",
+                "success": False,
             }
-        # When scoping to one document, retrieve more chunks so table/numerical context isn't missed
         k = min(30, top_k * 3) if corpus_id else top_k
+        section_types = _infer_section_types_for_query(query)
         try:
-            results = self.retriever.retrieve(query, top_k=k, corpus_id=corpus_id)
-            
-            # Format results - handle different return types
+            results = self.retriever.retrieve(
+                query, top_k=k, corpus_id=corpus_id, section_types=section_types
+            )
             chunks = []
-            
-            if isinstance(results, list):
-                for item in results:
-                    if isinstance(item, tuple):
-                        # (chunk, score) format
-                        chunk, score = item
-                        chunks.append({
-                            "text": chunk.text if hasattr(chunk, 'text') else str(chunk),
-                            "score": float(score) if score is not None else 0.0,
-                            "metadata": chunk.metadata if hasattr(chunk, 'metadata') else {}
-                        })
-                    elif isinstance(item, dict):
-                        # Already in dict format
-                        chunks.append(item)
-                    else:
-                        # String or other format
-                        chunks.append({
-                            "text": str(item),
-                            "score": 1.0,
-                            "metadata": {}
-                        })
-            
+            for item in results:
+                if isinstance(item, tuple):
+                    chunk, score = item
+                    chunks.append({
+                        "text": chunk.text if hasattr(chunk, "text") else str(chunk),
+                        "score": float(score) if score is not None else 0.0,
+                        "metadata": getattr(chunk, "metadata", None) or {},
+                    })
+                elif isinstance(item, dict):
+                    chunks.append(item)
+                else:
+                    chunks.append({"text": str(item), "score": 1.0, "metadata": {}})
+
+            if not chunks:
+                return {
+                    "query": query,
+                    "num_results": 0,
+                    "chunks": [],
+                    "success": True,
+                    "max_relevance_score": None,
+                }
+
+            # Cross-page expansion: if chunks reference other pages (e.g. "see page 5"), retrieve those pages too
+            expanded_pages: List[int] = []
+            if corpus_id:
+                referenced = set()
+                for c in chunks:
+                    for p in (c.get("metadata") or {}).get("references_pages") or []:
+                        referenced.add(int(p))
+                already_have = {int((c.get("metadata") or {}).get("page_number")) for c in chunks if (c.get("metadata") or {}).get("page_number") is not None}
+                need_pages = referenced - already_have
+                if need_pages:
+                    try:
+                        k_extra = min(15, 5 * len(need_pages))
+                        extra_results = self.retriever.retrieve(
+                            query, top_k=k_extra, corpus_id=corpus_id, page_numbers=list(need_pages)
+                        )
+                        existing_texts = {c.get("text") or "" for c in chunks}
+                        for item in extra_results:
+                            if isinstance(item, tuple):
+                                chunk, score = item
+                                text = chunk.text if hasattr(chunk, "text") else str(chunk)
+                                if text and text not in existing_texts:
+                                    existing_texts.add(text)
+                                    chunks.append({
+                                        "text": text,
+                                        "score": float(score) if score is not None else 0.0,
+                                        "metadata": getattr(chunk, "metadata", None) or {},
+                                    })
+                        expanded_pages = sorted(need_pages)
+                        if os.environ.get("RAG_DEBUG") == "1" and expanded_pages:
+                            print(f"[DEBUG] _rag_retrieval: cross-page expansion added chunks from pages {expanded_pages}")
+                    except Exception as ex:
+                        if os.environ.get("RAG_DEBUG") == "1":
+                            print(f"[DEBUG] _rag_retrieval: cross-page expansion failed: {ex}")
+
+            # Cross-encoder rerank (optional) and get scores for threshold
+            max_relevance_score = None
+            if self.reranker is not None and hasattr(self.reranker, "rerank_with_scores"):
+                texts = [c["text"] for c in chunks]
+                try:
+                    scored = self.reranker.rerank_with_scores(query, texts, top_k=len(texts))
+                except Exception as e:
+                    if os.environ.get("RAG_DEBUG") == "1":
+                        print(f"[DEBUG] _rag_retrieval rerank failed: {e}")
+                    scored = list(zip(texts, [c["score"] for c in chunks]))
+                if scored:
+                    max_relevance_score = max(s[1] for s in scored)
+                    # Map back to chunk dicts in reranked order (handle duplicate text by consuming from list)
+                    available = list(chunks)
+                    new_chunks = []
+                    for text, rscore in scored:
+                        c = None
+                        for i, ac in enumerate(available):
+                            if (ac.get("text") or "") == text:
+                                c = dict(ac)
+                                c["score"] = float(rscore)
+                                c["metadata"] = dict(c.get("metadata") or {})
+                                available.pop(i)
+                                break
+                        if c is None:
+                            c = {"text": text, "score": float(rscore), "metadata": {}}
+                        new_chunks.append(c)
+                    chunks = _apply_bookends_order(new_chunks)
+            else:
+                # No reranker: use retriever score as proxy, still apply bookends
+                if chunks:
+                    max_relevance_score = max(c.get("score", 0.0) for c in chunks)
+                chunks = _apply_bookends_order(chunks)
+
+            # Negative retrieval: abstain if max relevance below threshold
+            if self.relevance_threshold > 0 and max_relevance_score is not None and max_relevance_score < self.relevance_threshold:
+                if os.environ.get("RAG_DEBUG") == "1":
+                    print(f"[DEBUG] _rag_retrieval: abstain max_score={max_relevance_score:.4f} < threshold={self.relevance_threshold}")
+                return {
+                    "query": query,
+                    "num_results": len(chunks),
+                    "chunks": [],
+                    "success": False,
+                    "abstention": "INSUFFICIENT_RELEVANCE",
+                    "max_relevance_score": max_relevance_score,
+                    "relevance_threshold": self.relevance_threshold,
+                }
+
             if os.environ.get("RAG_DEBUG") == "1":
-                has_table_like = any(("$" in (c.get("text") or "") or "|" in (c.get("text") or "")) for c in chunks)
                 meta0 = (chunks[0].get("metadata") or {}) if chunks else {}
-                print(f"[DEBUG] _rag_retrieval: corpus_id={corpus_id!r} top_k_requested={k} num_chunks={len(chunks)} "
-                      f"first_corpus_id={meta0.get('corpus_id')!r} has_table_like_content={has_table_like}")
-            return {
+                print(f"[DEBUG] _rag_retrieval: corpus_id={corpus_id!r} sections={section_types!r} num_chunks={len(chunks)} max_score={max_relevance_score}")
+            out = {
                 "query": query,
                 "num_results": len(chunks),
                 "chunks": chunks,
-                "success": True
+                "success": True,
+                "max_relevance_score": max_relevance_score,
             }
-        
+            if expanded_pages:
+                out["expanded_pages"] = expanded_pages
+            return out
         except Exception as e:
             if os.environ.get("RAG_DEBUG") == "1":
                 print(f"[DEBUG] _rag_retrieval failed: {e}")
@@ -249,7 +374,7 @@ class ToolRegistry:
                 "query": query,
                 "chunks": [],
                 "error": str(e),
-                "success": False
+                "success": False,
             }
     
     def _sql_query(self, query: str) -> Dict:

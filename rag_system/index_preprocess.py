@@ -94,6 +94,76 @@ def content_hash(text: str) -> str:
     return hashlib.sha256((text or "").strip().encode("utf-8")).hexdigest()[:16]
 
 
+def extract_section_header(context: str, max_len: int = 120) -> Optional[str]:
+    """
+    Extract a short section header from document context (e.g. "Note 5 - Debt") for chunk metadata.
+    """
+    if not context or not isinstance(context, str):
+        return None
+    lines = [ln.strip() for ln in context.split("\n") if ln.strip()]
+    for line in lines[:5]:  # first few lines only
+        if len(line) > max_len:
+            continue
+        if re.search(r"^note\s+\d+", line, re.I) or re.search(r"statement(s)?\s+of\s+(operations|financial)", line, re.I) or re.search(r"balance\s+sheet", line, re.I):
+            return line[:max_len]
+    return None
+
+
+# Patterns for multi-level header detection (order matters for hierarchy)
+_HEADER_PATTERNS = [
+    (r"^part\s+[IVXLCDMivxlcdm]+\s*[\.\-:]?\s*.+", 1),   # Part I, Part II
+    (r"^note\s+\d+\s*[\.\-:]?\s*.+", 2),                 # Note 5 - Debt
+    (r"^statement(s)?\s+of\s+(operations|comprehensive\s+income|financial\s+position|condition|cash\s+flows)", 2),
+    (r"^consolidated\s+balance\s+sheet", 2),
+    (r"^consolidated\s+statement(s)?\s+of\s+operations", 2),
+    (r"^balance\s+sheet", 2),
+    (r"^income\s+statement", 2),
+    (r"^#{1,6}\s+.+", 0),  # markdown # to ###### (level from length)
+]
+
+
+def extract_header_hierarchy(context: str, max_headers: int = 25) -> List[str]:
+    """
+    Extract ordered list of section headers from document context (multi-level).
+    Gives the model the full outline so chunk context is clear even when the
+    section title is far from the data in the source.
+    """
+    if not context or not isinstance(context, str):
+        return []
+    lines = [ln.strip() for ln in context.split("\n") if ln.strip()]
+    out: List[str] = []
+    for line in lines:
+        if len(out) >= max_headers:
+            break
+        for pat, _ in _HEADER_PATTERNS:
+            m = re.match(pat, line, re.I)
+            if m:
+                # Normalise: trim to 100 chars
+                out.append(line[:100].strip())
+                break
+    return out
+
+
+def extract_references_pages(text: str) -> List[int]:
+    """
+    Extract page numbers referenced in chunk text (e.g. "see page 5", "on page 3", "p. 12").
+    Used for cross-page number references: a figure on page 1 referenced on page 3.
+    """
+    if not text or not isinstance(text, str):
+        return []
+    seen: set = set()
+    out: List[int] = []
+    # "page 5", "on page 3", "see page 12", "(p. 4)", "p. 10"
+    for m in re.finditer(r"(?:^|\s)(?:see\s+)?(?:on\s+)?page\s+(\d+)|(?:^|\s)\(?p\.?\s*(\d+)\)?|(?:^|\s)p\.\s*(\d+)", text, re.I):
+        g = m.group(1) or m.group(2) or m.group(3)
+        if g:
+            n = int(g)
+            if n not in seen and 1 <= n <= 9999:
+                seen.add(n)
+                out.append(n)
+    return sorted(out)
+
+
 def add_section_and_units(
     chunks: List[Any],
     *,
@@ -110,6 +180,19 @@ def add_section_and_units(
         corpus_id = meta.get("corpus_id", "")
         context = (context_by_corpus or {}).get(corpus_id, "")
         meta["section_type"] = infer_section_type(text, context)
+        # Multi-level headers: full document outline so model sees section context
+        header_hierarchy = extract_header_hierarchy(context)
+        if header_hierarchy:
+            meta["header_hierarchy"] = header_hierarchy
+            meta["section_header"] = header_hierarchy[-1]  # innermost section
+        else:
+            section_header = extract_section_header(context)
+            if section_header:
+                meta["section_header"] = section_header
+        # Cross-page references: page numbers mentioned in this chunk (e.g. "see page 5")
+        ref_pages = extract_references_pages(text)
+        if ref_pages:
+            meta["references_pages"] = ref_pages
         # Units: from chunk text and from document context so table rows get doc-level units
         from_chunk = detect_units(text)
         from_doc = detect_units(context) if context else []

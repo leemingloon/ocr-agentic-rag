@@ -815,10 +815,14 @@ def run_model(sample: dict, category: str, dataset_name: str, debug: bool = Fals
             if "ocr" not in _OCR_HYBRID_CACHE:
                 _OCR_HYBRID_CACHE["ocr"] = HybridOCR(use_detection_router=True, use_vision_augmentation=False)
             ocr = _OCR_HYBRID_CACHE["ocr"]
-            # Use full PaddleOCR (det+rec) for OCR eval so scores reflect PaddleOCR and are comparable
-            out = ocr.process_document(image, force_paddleocr=True)
+            # OCR_EVAL_USE_TESSERACT=1: use Tesseract path (preprocessing, table-friendly, confidence flagging) first; PaddleOCR only as fallback.
+            # Default: force_paddleocr=True so eval uses full PaddleOCR (det+rec) when available.
+            force_paddle = os.environ.get("OCR_EVAL_USE_TESSERACT", "").strip().lower() not in ("1", "true", "yes")
+            out = ocr.process_document(image, force_paddleocr=force_paddle)
             text = out.get("text", "")
             metadata = out.get("metadata", {})
+            if out.get("low_confidence_words"):
+                metadata["low_confidence_words"] = out["low_confidence_words"]
             return {"answer": text or "", "metadata": metadata}
         except Exception as e:
             if debug:

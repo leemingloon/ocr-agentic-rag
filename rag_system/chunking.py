@@ -252,7 +252,7 @@ class DocumentChunker:
             return self._chunk_list(content, chunk_id_prefix, metadata)
         
         elif segment_type == "header":
-            # Keep headers with next section
+            # Keep headers with next section (no overlap)
             return [
                 TextNode(
                     text=content,
@@ -266,7 +266,7 @@ class DocumentChunker:
             ]
         
         else:
-            # Narrative text - use sentence splitter
+            # Narrative text only: use sentence splitter (overlap applied here; tables/headers have no overlap)
             doc = Document(text=content, metadata=metadata)
             nodes = self.sentence_splitter.get_nodes_from_documents([doc])
             
