@@ -17,7 +17,24 @@ import re
 from typing import Optional
 
 
-def _normalize_arg(s: str, step_results: list[float]) -> Optional[float]:
+def _looks_like_nested_program(s: str) -> bool:
+    """True if s is a single op(...) call (e.g. subtract(959.2, 991.1)), so we can execute it as nested."""
+    s = s.strip()
+    for op in ("add", "subtract", "multiply", "divide"):
+        if s.startswith(op + "(") and s.endswith(")"):
+            inner = s[len(op) + 1 : -1]
+            depth = 0
+            for c in inner:
+                if c == "(":
+                    depth += 1
+                elif c == ")":
+                    depth -= 1
+            if depth == 0:
+                return True
+    return False
+
+
+def _normalize_arg(s: str, step_results: list[float], _execute_finqa_program=None) -> Optional[float]:
     s = s.strip()
     if not s:
         return None
@@ -28,6 +45,9 @@ def _normalize_arg(s: str, step_results: list[float]) -> Optional[float]:
         if 0 <= idx < len(step_results):
             return step_results[idx]
         return None
+    # Nested op call (e.g. divide(subtract(new,old), old)): execute and use result
+    if _looks_like_nested_program(s) and _execute_finqa_program is not None:
+        return _execute_finqa_program(s)
     # Percentage: 23.6% or 23.6
     s_clean = s.replace(",", "").replace("$", "").strip()
     if "%" in s_clean:
@@ -99,8 +119,8 @@ def execute_finqa_program(program: str) -> Optional[float]:
         if not parsed:
             continue
         op, a_str, b_str = parsed
-        a = _normalize_arg(a_str, step_results)
-        b = _normalize_arg(b_str, step_results)
+        a = _normalize_arg(a_str, step_results, _execute_finqa_program=execute_finqa_program)
+        b = _normalize_arg(b_str, step_results, _execute_finqa_program=execute_finqa_program)
         if a is None or b is None:
             return None
         if op == "add":
@@ -143,20 +163,101 @@ def _find_program_candidates(text: str) -> list[str]:
     return candidates
 
 
-def extract_and_execute_program(text: str) -> Optional[float]:
-    """
-    Find a FinQA-style program in model output and execute it.
-    Looks for patterns like divide(9896, 23.6%) or add(1, 2), subtract(#0, 3).
+def _find_program_candidates_with_positions(text: str) -> list[tuple[str, int, int]]:
+    """Find each op(...) substring with (program, start, end) so we can detect adjacent chains."""
+    result = []
+    text_lower = text.lower()
+    for op in ("add", "subtract", "multiply", "divide"):
+        start = 0
+        while True:
+            i = text_lower.find(op + "(", start)
+            if i < 0:
+                break
+            j = i + len(op) + 1
+            depth = 1
+            while j < len(text) and depth > 0:
+                if text[j] == "(":
+                    depth += 1
+                elif text[j] == ")":
+                    depth -= 1
+                j += 1
+            if depth == 0:
+                result.append((text[i:j], i, j))
+            start = i + 1
+    return sorted(result, key=lambda x: x[1])
 
-    Returns the executed result if a program is found and runs successfully; else None.
+
+def _find_last_multistep_program(text: str) -> Optional[str]:
+    """
+    Find the last contiguous multi-step program (e.g. subtract(a,b), divide(#0,b))
+    so we execute the full chain and return the final step result, not the first.
     """
     if not text:
         return None
+    candidates = _find_program_candidates_with_positions(text)
+    if not candidates:
+        return None
+    # Start from the last candidate (by position in text)
+    last_prog, last_start, last_end = candidates[-1]
+    # Extend left: include any candidate that ends with ") " or ")," immediately before our start
+    parts = [last_prog]
+    pos_before = last_start
+    while True:
+        # Find the candidate that ends immediately before our current span (gap is only ", " or ",")
+        found = None
+        best_e = -1
+        for prog, s, e in candidates:
+            if e >= pos_before:
+                continue
+            gap = text[e:pos_before].strip()
+            if gap == "," or (gap.startswith(",") and gap.replace(",", "").strip() == ""):
+                if e > best_e:
+                    best_e = e
+                    found = (prog, s, e)
+        if not found:
+            break
+        prog, s, e = found
+        parts.insert(0, prog)
+        pos_before = s
+    if len(parts) == 1:
+        return parts[0]
+    return ", ".join(parts)
+
+
+def extract_and_execute_program(text: str) -> Optional[float]:
+    """
+    Find a FinQA-style program in model output and execute it.
+    Looks for patterns like divide(9896, 23.6%) or subtract(a,b), divide(#0,b).
+    For multi-step programs, executes the full chain and returns the **final** step result.
+    """
+    if not text:
+        return None
+
+    def _has_top_level_comma(s: str) -> bool:
+        depth = 0
+        for c in s:
+            if c == "(":
+                depth += 1
+            elif c == ")":
+                depth -= 1
+            elif c == "," and depth == 0:
+                return True
+        return False
+
+    # If model output has a comma-separated chain (e.g. subtract(a,b), divide(#0,b)), run that first for final result
+    multistep = _find_last_multistep_program(text)
+    if multistep and _has_top_level_comma(multistep):
+        result = execute_finqa_program(multistep)
+        if result is not None:
+            return result
     candidates = _find_program_candidates(text)
-    # Try each candidate (prefer last: model often gives program at end)
-    for program in reversed(candidates):
+    # Prefer longer (nested) expressions so divide(subtract(new,old), old) beats inner subtract(new,old)
+    for program in sorted(candidates, key=len, reverse=True):
         result = execute_finqa_program(program)
         if result is not None:
             return result
-    # Try full string (single step, no extra text)
+    if multistep:
+        result = execute_finqa_program(multistep)
+        if result is not None:
+            return result
     return execute_finqa_program(text.strip())

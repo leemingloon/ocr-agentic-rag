@@ -99,6 +99,7 @@ class HybridOCR:
         template_type: Optional[str] = None,
         boxes: Optional[List[Tuple[int, int, int, int]]] = None,
         enable_vision: bool = None,  # NEW: Override vision setting
+        force_paddleocr: bool = False,
     ) -> Dict:
         """
         Process document with hybrid OCR + optional vision
@@ -108,10 +109,14 @@ class HybridOCR:
             template_type: Optional template hint
             boxes: Optional pre-detected boxes
             enable_vision: Override vision augmentation setting
+            force_paddleocr: If True, run full PaddleOCR (det+rec) and return its text (for eval when scores are low)
             
         Returns:
             OCR results with metadata
         """
+        if force_paddleocr:
+            return self._process_with_paddleocr_full(image)
+
         # Determine if vision should be used
         use_vision = enable_vision if enable_vision is not None else self.use_vision_augmentation
         
@@ -244,6 +249,76 @@ class HybridOCR:
             }
         }
     
+    def _process_with_paddleocr_full(self, image: np.ndarray) -> Dict:
+        """
+        Run full PaddleOCR (detection + recognition) and return combined text.
+        Used when force_paddleocr=True (e.g. OCR eval to ensure PaddleOCR is used).
+        """
+        import time
+        start = time.time()
+        metadata = {
+            "detection_method": "paddleocr",
+            "recognition_engine": "paddleocr",
+            "detection_cost": 0.0,
+            "detection_time_ms": 0.0,
+            "vision_used": False,
+        }
+        paddle_ocr = None
+        if self.use_detection_router and getattr(self.detection_router, "paddleocr_detector", None):
+            det = self.detection_router.paddleocr_detector
+            if getattr(det, "mode", None) == "native" and getattr(det, "paddle_detector", None):
+                paddle_ocr = det.paddle_detector
+        if paddle_ocr is None:
+            try:
+                from ..detection.paddleocr_detector import PADDLEOCR_AVAILABLE, PaddleOCR
+                if PADDLEOCR_AVAILABLE and PaddleOCR is not None:
+                    paddle_ocr = PaddleOCR(
+                        use_angle_cls=True,
+                        lang="en",
+                        use_gpu=False,
+                        show_log=False,
+                    )
+            except Exception:
+                pass
+        if paddle_ocr is None:
+            # Fallback to normal pipeline when PaddleOCR not available
+            return self.process_document(image, force_paddleocr=False)
+
+        if len(image.shape) == 2:
+            import cv2
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+        try:
+            result = paddle_ocr.ocr(image, det=True, rec=True, cls=True)
+        except Exception:
+            result = None
+        elapsed_ms = (time.time() - start) * 1000
+        metadata["detection_time_ms"] = elapsed_ms
+
+        text_parts = []
+        conf_sum, conf_n = 0.0, 0
+        if result and len(result) > 0:
+            for line in result[0] or []:
+                if line and len(line) >= 2:
+                    rec = line[1]
+                    if isinstance(rec, (list, tuple)) and len(rec) >= 1:
+                        text_parts.append(str(rec[0]).strip())
+                        if len(rec) >= 2:
+                            try:
+                                conf_sum += float(rec[1])
+                                conf_n += 1
+                            except (TypeError, ValueError):
+                                pass
+        combined_text = "\n".join(p for p in text_parts if p)
+        confidence = (conf_sum / conf_n * 100.0) if conf_n else 85.0
+
+        return {
+            "text": combined_text,
+            "confidence": confidence,
+            "results": [],
+            "routing_stats": {"paddleocr_full": 1},
+            "metadata": metadata,
+        }
+
     def _process_with_boxes(
         self,
         image: np.ndarray,

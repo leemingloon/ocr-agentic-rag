@@ -1,0 +1,11 @@
+PaddleOCR + HybridOCR (SROIE & FUNSD) – run report
+============================================================
+SROIE samples processed: 5
+FUNSD samples processed: 5
+
+SROIE X00016469612: 107 chars
+SROIE X00016469619: 74 chars
+SROIE X00016469620: 94 chars
+FUNSD 0: 48 chars
+FUNSD 1: 225 chars
+FUNSD 2: 119 chars

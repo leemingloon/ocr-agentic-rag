@@ -24,9 +24,15 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 
-def build_tatqa_chunks(tatqa_dir: Path):
-    """Build TextNode chunks from TAT-QA train and dev JSONs (same logic as eval_runner)."""
-    from rag_system.chunking import DocumentChunker
+def build_tatqa_chunks(tatqa_dir: Path, table_aware: bool = False):
+    """Build TextNode chunks from TAT-QA train and dev JSONs.
+
+    If table_aware=True, tables are serialized with serialize_table_to_rows so each row
+    is self-contained (row label + column: value). One chunk per table row, then
+    paragraph chunks. Same Level 3 logic as FinQA (see RAG_LESSONS.md).
+    """
+    from rag_system.chunking import DocumentChunker, serialize_table_to_rows
+    from llama_index.core.schema import TextNode
 
     chunker = DocumentChunker(chunk_size=512, chunk_overlap=128)
     all_chunks = []
@@ -41,6 +47,27 @@ def build_tatqa_chunks(tatqa_dir: Path):
         for doc_idx, doc in enumerate(data):
             table = doc.get("table") or {}
             table_rows = table.get("table") if isinstance(table, dict) else table
+            corpus_id = table.get("uid") if isinstance(table, dict) else None
+            if not corpus_id:
+                corpus_id = f"tatqa_{split}_{doc_idx}"
+            meta = {"entry_id": doc_idx, "source": f"tatqa_{split}", "corpus_id": corpus_id}
+
+            if table_aware and isinstance(table_rows, list) and all(
+                isinstance(r, (list, tuple)) for r in table_rows
+            ):
+                row_strings = serialize_table_to_rows(table_rows, first_row_is_header=True)
+                for row_str in row_strings:
+                    if not row_str.strip():
+                        continue
+                    all_chunks.append(TextNode(text=row_str, metadata={**meta}))
+                paragraphs = doc.get("paragraphs") or []
+                para_str = "\n".join(
+                    p.get("text", "") for p in paragraphs if isinstance(p, dict)
+                )
+                if para_str.strip():
+                    all_chunks.extend(chunker.chunk_document(para_str, metadata=meta))
+                continue
+
             if isinstance(table_rows, list):
                 table_str = "\n".join(" | ".join(str(c) for c in row) for row in table_rows)
             else:
@@ -52,13 +79,7 @@ def build_tatqa_chunks(tatqa_dir: Path):
             doc_text = f"{table_str}\n\n{para_str}".strip()
             if not doc_text:
                 continue
-            corpus_id = table.get("uid") if isinstance(table, dict) else None
-            if not corpus_id:
-                corpus_id = f"tatqa_{split}_{doc_idx}"
-            chunks = chunker.chunk_document(
-                doc_text,
-                metadata={"entry_id": doc_idx, "source": f"tatqa_{split}", "corpus_id": corpus_id},
-            )
+            chunks = chunker.chunk_document(doc_text, metadata=meta)
             all_chunks.extend(chunks)
     return all_chunks
 
@@ -87,8 +108,8 @@ def main():
 
     output_dir = args.output if args.output.is_absolute() else REPO_ROOT / args.output
 
-    print("Building TAT-QA chunks...")
-    chunks = build_tatqa_chunks(tatqa_dir)
+    print("Building TAT-QA chunks..." + (" (table_aware=row-level serialization)" if args.table_aware else ""))
+    chunks = build_tatqa_chunks(tatqa_dir, table_aware=args.table_aware)
     if not chunks:
         print("No chunks produced. Ensure tatqa_dataset_train.json (and optionally dev) exist under data/rag/TAT-QA/.")
         sys.exit(1)

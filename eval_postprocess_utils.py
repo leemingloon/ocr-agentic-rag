@@ -337,14 +337,112 @@ class RagUtils(BaseUtils):
         return self.exact_match(prediction, reference)
 
 
+def _extract_yes_no_from_prediction(prediction: str | None) -> str | None:
+    """Extract the model's yes/no answer from a long prediction (e.g. 'the answer is **No**' or '... **no**' -> 'no')."""
+    if not prediction:
+        return None
+    text = str(prediction).strip().lower()
+    # Prefer conclusive phrases (answer is X, answer: X) then yes/no at end (allow markdown **yes**/**no**)
+    for pattern in [
+        r"(?:^|\s)(?:the\s+)?answer\s+is\s+(?:[\*\s]*)(yes|no)(?:[\*\s]*)(?:\s|$|[\.\)])",
+        r"(?:^|\s)answer\s*:\s*(?:[\*\s]*)(yes|no)(?:[\*\s]*)(?:\s|$|[\.\)])",
+        r"(?:^|\s)(yes|no)\s*$",
+        r"(yes|no)[\*\s]*$",  # "... **no**" or "... no" at end (markdown bold)
+        r"\*\*(yes|no)\*\*\s*$",  # exactly "**no**" or "**yes**" at end
+    ]:
+        m = re.search(pattern, text, re.IGNORECASE)
+        if m:
+            return m.group(1).lower()
+    # Last token after stripping asterisks/punctuation (e.g. "**no**" -> "no")
+    tokens = text.split()
+    if tokens:
+        last = tokens[-1].strip("*").rstrip(".*)")
+        if last in ("yes", "no"):
+            return last
+    return None
+
+
+def _last_number_in_text(text: str | None) -> float | None:
+    """Last number in text (by occurrence). Used to prefer final-answer number over in-context numbers."""
+    if not text:
+        return None
+    matches = list(re.finditer(r"-?\d+(?:\.\d+)?", str(text).replace(",", "")))
+    if not matches:
+        return None
+    try:
+        return float(matches[-1].group(0))
+    except (ValueError, IndexError):
+        return None
+
+
+def prediction_used_back_calc(prediction: str | None) -> bool:
+    """True if prediction appears to use percentage back-calculation (e.g. divide(..., %))."""
+    if not prediction:
+        return False
+    lower = prediction.lower()
+    return "divide" in lower and ("%" in lower or "percent" in lower)
+
+
 class FinQAUtils(RagUtils):
     """FinQA: numerical QA. Use strict numerical match for exact_match so we don't give
     credit when the prediction contains a different number (e.g. 3.9 in context) that
-    happens to be within 5% of the reference (3.8). Primary metric: numerical_exact_match."""
+    happens to be within 5% of the reference (3.8). Primary metric: numerical_exact_match.
+    When the model states the answer at the end (e.g. last line '3.8') but also mentions
+    '$3.8 million' earlier, the first-number extraction would wrongly scale to 3.8e6; we
+    also check the last number in the prediction so the final answer is counted correct."""
+
+    def numerical_exact_match(self, prediction: str | None, reference: str | None, tol: float = 1e-6) -> float:
+        r = self._safe_float(reference)
+        if r is None:
+            # For yes/no references, use same logic as exact_match so yes/no samples get 1.0 when correct
+            ref_str = str(reference).strip().lower() if reference else ""
+            if ref_str in ("yes", "no"):
+                extracted = _extract_yes_no_from_prediction(prediction)
+                if extracted is not None:
+                    return 1.0 if extracted == ref_str else 0.0
+            return float(self.normalize_text(prediction) == self.normalize_text(reference))
+        ref_str = str(reference).strip().lower()
+        # For decimal references (e.g. 0.53232), round prediction to ref decimals so computed/fallback
+        # values (e.g. 0.5323169340734545) match the GT
+        ref_decimals = 0
+        if "million" not in ref_str and "billion" not in ref_str and "thousand" not in ref_str and "." in ref_str:
+            ref_decimals = len(ref_str.split(".")[-1].replace(",", ""))
+        abs_tol = tol
+        if ref_decimals > 0:
+            abs_tol = max(tol, 10 ** (-ref_decimals))
+
+        def _close(a: float, b: float) -> bool:
+            if ref_decimals > 0:
+                return round(a, ref_decimals) == round(b, ref_decimals)
+            return math.isclose(a, b, rel_tol=tol, abs_tol=abs_tol)
+
+        # Standard: first number in prediction with scale (e.g. $3.8 million -> 3.8e6)
+        p_first = self._extract_number_and_scale(prediction)
+        if p_first is not None and _close(p_first, r):
+            return 1.0
+        # When reference is a plain number (no units), also accept if the last number in the
+        # prediction equals the reference (model often puts the answer at the end, e.g. "3.8")
+        p_last = None
+        if "million" not in ref_str and "billion" not in ref_str and "thousand" not in ref_str:
+            p_last = _last_number_in_text(prediction)
+            if p_last is not None and _close(p_last, r):
+                return 1.0
+        # Proportion/percentage equivalence: FinQA GT may be decimal (0.65273) while model returns percentage (65.27307) or vice versa
+        if p_first is not None and (_close(p_first / 100, r) or _close(p_first * 100, r)):
+            return 1.0
+        if p_last is not None and (_close(p_last / 100, r) or _close(p_last * 100, r)):
+            return 1.0
+        return 0.0
 
     def exact_match(self, prediction: str | None, reference: str | None, **kwargs: object) -> float:
         if self._safe_float(reference) is not None:
             return self.numerical_exact_match(prediction, reference)
+        # When reference is yes/no, extract the model's stated yes/no from the prediction for robust matching
+        ref_str = str(reference).strip().lower() if reference else ""
+        if ref_str in ("yes", "no"):
+            extracted = _extract_yes_no_from_prediction(prediction)
+            if extracted is not None:
+                return 1.0 if extracted == ref_str else 0.0
         return self.relaxed_exact_match(prediction, reference, **kwargs)
 
 

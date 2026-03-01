@@ -1,3 +1,5 @@
 {
-  "sample_count": 0
+  "accuracy_mean": 1.0,
+  "sample_count": 4,
+  "gt_override_count": 0
 }

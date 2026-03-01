@@ -4,6 +4,9 @@ OCR→Agentic RAG→Credit Risk Platform
 **Author:** Lee Ming Loon  
 **Status:** Deployed to AWS Sagemaker. Evaluating models on Local PC (in progress on evaluate_on_local branch). Finally, Production-ready prototype.
 
+**Interview demos:** Use the Jupyter notebooks (`.ipynb`) under the `notebooks/` folder.  
+**Demos:** Use model evaluation results (proof) in the `data/proof/` folder.
+
 > **Evaluation data:** Demos and notebooks in the `notebooks/` folder load model evaluation results from the `data/proof/` folder. Any metrics or scores cited in this repo that are not backed by current artifacts under `data/proof/` are placeholders and will be filled in as evaluation progresses.
 
 ---
