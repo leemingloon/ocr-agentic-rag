@@ -39,10 +39,10 @@ except ImportError:
 try:
     from paddleocr import PaddleOCR
     PADDLEOCR_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     PADDLEOCR_AVAILABLE = False
     PaddleOCR = None
-    print("PaddleOCR not available")
+    print("PaddleOCR not available:", e)
 
 
 class PaddleOCRDetector:
@@ -114,27 +114,30 @@ class PaddleOCRDetector:
             else:
                 print(f"PaddleOCR microservice unavailable at {self.service_url}")
         
-        # Priority 3: Try Native PaddleOCR
-        if PADDLEOCR_AVAILABLE:
+        # Priority 3: Try Native PaddleOCR (graceful skip so eval runner continues)
+        if PADDLEOCR_AVAILABLE and PaddleOCR is not None:
+            show_log = os.environ.get("PADDLEOCR_SHOW_LOG", "").lower() in ("1", "true", "yes")
             try:
                 print("Loading native PaddleOCR...")
-                print("  (First run will download models ~150MB)")
+                print("  (First run will download models ~150MB; set PADDLEOCR_SHOW_LOG=1 to see progress)")
                 self.paddle_detector = PaddleOCR(
                     use_angle_cls=True,
-                    lang='en',
+                    lang="en",
                     use_gpu=False,
-                    show_log=False,
+                    show_log=show_log,
                 )
                 self.mode = "native"
                 print("✓ Native PaddleOCR loaded")
-                print("  Tip: Run 'python scripts/convert_paddleocr_to_onnx.py' for 12x speedup")
+                print("  Tip: Run 'python scripts/pre_download_paddleocr_models.py' to pre-download; or scripts/convert_paddleocr_to_onnx.py for 12x speedup")
                 return
             except Exception as e:
                 print(f"✗ PaddleOCR initialization failed: {e}")
+                self.paddle_detector = None
+                self.mode = "failed"
+        else:
+            self.mode = "failed"
         
-        # All modes failed
-        print("✗ No PaddleOCR detection mode available")
-        self.mode = "failed"
+        print("✗ No PaddleOCR detection mode available (eval can continue with Tesseract/other engines)")
     
     def _check_service_health(self) -> bool:
         """Check if microservice is available"""

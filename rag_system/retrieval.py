@@ -182,6 +182,8 @@ class HybridRetriever:
         query: str,
         top_k: Optional[int] = None,
         corpus_id: Optional[str] = None,
+        section_types: Optional[List[str]] = None,
+        page_numbers: Optional[List[int]] = None,
     ) -> List[Tuple[TextNode, float]]:
         """
         Retrieve relevant chunks using hybrid search.
@@ -190,6 +192,8 @@ class HybridRetriever:
             query: Search query
             top_k: Optional override for number of results (default: use self.top_k_final)
             corpus_id: If set, keep only chunks whose metadata.corpus_id matches (e.g. FinQA document id)
+            section_types: If set, keep only chunks whose metadata.section_type is in this list (multi-hop)
+            page_numbers: If set (with corpus_id), keep only chunks whose metadata.page_number is in this list (cross-page expansion)
 
         Returns:
             List of (chunk, score) tuples
@@ -224,6 +228,34 @@ class HybridRetriever:
             if _rag_debug:
                 print(f"[DEBUG] retrieval: corpus_id={corpus_id!r} doc_chunk_count={len(corpus_id_indices)} (index has {len(self.chunks)} total chunks)")
 
+        # Optional section filter (multi-hop: e.g. income_statement, balance_sheet, notes)
+        if section_types is not None and section_types:
+            section_set = set(section_types)
+            section_filter = [
+                i for i in range(len(self.chunks))
+                if (getattr(self.chunks[i], "metadata", None) or {}).get("section_type") in section_set
+            ]
+            if not section_filter:
+                section_filter = None  # no chunks tagged; fall back to full index
+            elif _rag_debug:
+                print(f"[DEBUG] retrieval: section_types={section_types} -> {len(section_filter)} chunks")
+        else:
+            section_filter = None
+
+        # Optional page filter (cross-page: e.g. expand to referenced pages)
+        if page_numbers is not None and page_numbers:
+            page_set = set(int(p) for p in page_numbers)
+            page_filter = [
+                i for i in range(len(self.chunks))
+                if (getattr(self.chunks[i], "metadata", None) or {}).get("page_number") in page_set
+            ]
+            if not page_filter:
+                page_filter = None
+            elif _rag_debug:
+                print(f"[DEBUG] retrieval: page_numbers={page_numbers} -> {len(page_filter)} chunks")
+        else:
+            page_filter = None
+
         if corpus_id_indices is not None and len(corpus_id_indices) == 0:
             # Document has no chunks in index (e.g. empty doc or metadata mismatch); return empty
             if _rag_debug:
@@ -236,6 +268,10 @@ class HybridRetriever:
             if _rag_debug:
                 print(f"[DEBUG] retrieval: using corpus_id-restricted retrieval (rank only within doc)")
             idx_set = set(corpus_id_indices)
+            if section_filter is not None:
+                idx_set = idx_set & set(section_filter)
+            if page_filter is not None:
+                idx_set = idx_set & set(page_filter)
             # Sparse: BM25 scores for all, keep only doc chunks, sort by score
             tokenized_query = search_query.lower().split()
             all_scores = self.bm25_index.get_scores(tokenized_query)
@@ -265,6 +301,12 @@ class HybridRetriever:
             sparse_results = self._sparse_retrieve(search_query)
             # Step 2: Dense retrieval (BGE-M3)
             dense_results = self._dense_retrieve(search_query)
+            if section_filter is not None or page_filter is not None:
+                idx_set = set(section_filter) if section_filter is not None else set(range(len(self.chunks)))
+                if page_filter is not None:
+                    idx_set = idx_set & set(page_filter)
+                sparse_results = [(i, s) for i, s in sparse_results if i in idx_set]
+                dense_results = [(i, s) for i, s in dense_results if i in idx_set]
             # Step 3: Reciprocal Rank Fusion
             fused_results = self._reciprocal_rank_fusion(sparse_results, dense_results)
 

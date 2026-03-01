@@ -31,6 +31,24 @@ def _page_from_finqa_id(corpus_id: str):
     return int(m.group(1)) if m else None
 
 
+def _footnote_block_from_post(post_str: str, max_chars: int = 800) -> str:
+    """Extract a footnote block from post_text (e.g. (1) ... (2) ... or Note 1 ...) for appending to table chunk."""
+    if not post_str or not post_str.strip():
+        return ""
+    import re
+    # Match lines that look like footnote starters: (1), (2), Note 1, etc.
+    lines = post_str.strip().split("\n")
+    start = None
+    for i, line in enumerate(lines):
+        if re.match(r"^\s*\(\d+\)\s*|\s*note\s+\d+\s*[\.\-:]", line.strip(), re.I):
+            start = i
+            break
+    if start is None:
+        return ""
+    block = "\n".join(lines[start:]).strip()
+    return block[:max_chars] if len(block) > max_chars else block
+
+
 def build_finqa_chunks(train_qa_path: Path, table_aware: bool = False):
     """Build TextNode chunks from FinQA train_qa.json.
 
@@ -74,12 +92,18 @@ def build_finqa_chunks(train_qa_path: Path, table_aware: bool = False):
         if table_aware and table and all(isinstance(r, (list, tuple)) for r in table):
             # Level 3: one self-contained chunk per table row (headers embedded)
             row_strings = serialize_table_to_rows(table, first_row_is_header=True)
+            table_row_chunks = []
             for row_idx, row_str in enumerate(row_strings):
                 if not row_str.strip():
                     continue
                 row_meta = {**meta, "row_index": row_idx, "chunk_type": "table"}
-                all_chunks.append(TextNode(text=row_str, metadata=row_meta))
-            # Pre/post as separate chunks so retrieval can still hit context
+                table_row_chunks.append(TextNode(text=row_str, metadata=row_meta))
+            # Append footnotes to last table row chunk (parent table chunk)
+            footnote_block = _footnote_block_from_post(post_str)
+            if footnote_block and table_row_chunks:
+                last = table_row_chunks[-1]
+                last.text = (last.text or "").rstrip() + "\n\nFootnotes:\n" + footnote_block
+            all_chunks.extend(table_row_chunks)
             if pre_str.strip():
                 all_chunks.extend(chunker.chunk_document(pre_str, metadata=meta))
             if post_str.strip():

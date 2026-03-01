@@ -4,7 +4,9 @@ python-dotenv
 # OCR
 opencv-python
 pytesseract
-paddleocr
+# PaddleOCR: pin for stable CPU (2.6.1.3 + paddlepaddle 2.5.2); see data/proof/OCR_LESSONS.md
+paddleocr==2.6.1.3
+paddlepaddle==2.5.2
 onnxruntime
 
 # Multimodal Vision

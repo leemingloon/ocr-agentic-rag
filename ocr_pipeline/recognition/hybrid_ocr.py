@@ -201,17 +201,23 @@ class HybridOCR:
                 routed_results.append(result)
                 routing_stats["human_review"] += 1
         
-        # Step 5: Combine results
+        # Step 5: Combine results; pass through low_confidence_words from Tesseract (for eval/proof)
         combined_text = "\n".join(r.text for r in routed_results)
         avg_confidence = sum(r.confidence for r in routed_results) / len(routed_results) if routed_results else 0
-        
-        return {
+        low_confidence_words = []
+        for r in routed_results:
+            if getattr(r, "low_confidence_words", None):
+                low_confidence_words.extend(r.low_confidence_words)
+        out = {
             "text": combined_text,
             "confidence": avg_confidence,
             "results": routed_results,
             "routing_stats": routing_stats,
             "metadata": metadata,
         }
+        if low_confidence_words:
+            out["low_confidence_words"] = low_confidence_words
+        return out
     
     def process_with_vision(
         self,
