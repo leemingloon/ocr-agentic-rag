@@ -345,15 +345,18 @@ class HybridRetriever:
         for rank, (idx, score) in enumerate(dense_results):
             rrf_scores[idx] = rrf_scores.get(idx, 0) + 1 / (self.rrf_k + rank + 1)
         
-        # Sort by RRF score
-        sorted_indices = sorted(rrf_scores.items(), key=lambda x: x[1], reverse=True)
+        # Sort by RRF score (desc), then by duplicate_count (asc) to prefer primary source over duplicates
+        def _primary_sort(item):
+            idx, score = item
+            dup = (getattr(self.chunks[idx], "metadata", None) or {}).get("duplicate_count", 0)
+            return (-score, dup)
+        sorted_indices = sorted(rrf_scores.items(), key=_primary_sort)
         
         # Return chunks with scores
         results = [
-            (self.chunks[idx], score) 
+            (self.chunks[idx], score)
             for idx, score in sorted_indices
         ]
-        
         return results
 
     def save_index_bundle(
