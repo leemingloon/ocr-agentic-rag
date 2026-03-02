@@ -3349,7 +3349,7 @@ class LendingClubAdapter(BaseDatasetAdapter):
                     gold = 1 if str(answer).strip().lower() in ("chargedoff", "chargeoff") else 0
                 else:
                     gold = None
-                features = parse_query_to_features(query)
+                features = parse_query_to_features(query, use_no_leakage=True)
                 yield {
                     "input": {"features": features, "query": query},
                     "ground_truth": {"label": gold} if gold is not None else {},
