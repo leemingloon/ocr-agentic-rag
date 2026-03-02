@@ -22,6 +22,7 @@ from .tesseract_ocr import TesseractOCR, OCRResult
 from .vision_ocr import VisionOCR, VisionResult
 from ..detection.detection_router import DetectionRouter
 from ..quality_assessment import ImageQualityAssessor
+from ..preprocessing.document_preprocessor import preprocess_for_ocr
 
 
 class OCREngine(Enum):
@@ -59,10 +60,12 @@ class HybridOCR:
         use_detection_router: bool = True,
         use_vision_augmentation: bool = False,  # NEW
         vision_threshold: float = 60.0,  # NEW
+        preprocess_before_paddleocr: bool = True,
+        use_ensemble_for_accuracy: bool = False,
     ):
         """
         Initialize hybrid OCR
-        
+
         Args:
             tesseract_threshold: Accept Tesseract if confidence > this
             paddleocr_threshold: Accept PaddleOCR if confidence > this
@@ -70,6 +73,8 @@ class HybridOCR:
             use_detection_router: Use 3-tier detection
             use_vision_augmentation: Enable vision-language fallback (NEW)
             vision_threshold: Use vision if OCR confidence < this (NEW)
+            preprocess_before_paddleocr: Apply Otsu/deskew/300 DPI before PaddleOCR (better for scans/resumes).
+            use_ensemble_for_accuracy: If True, when force_paddleocr=True run both Tesseract and PaddleOCR and merge text for best coverage.
         """
         self.tesseract_threshold = tesseract_threshold
         self.paddleocr_threshold = paddleocr_threshold
@@ -77,6 +82,8 @@ class HybridOCR:
         self.use_detection_router = use_detection_router
         self.use_vision_augmentation = use_vision_augmentation
         self.vision_threshold = vision_threshold
+        self.preprocess_before_paddleocr = preprocess_before_paddleocr
+        self.use_ensemble_for_accuracy = use_ensemble_for_accuracy
         
         # Initialize engines
         self.tesseract = TesseractOCR()
@@ -115,6 +122,8 @@ class HybridOCR:
             OCR results with metadata
         """
         if force_paddleocr:
+            if self.use_ensemble_for_accuracy:
+                return self._process_ensemble_paddleocr_tesseract(image)
             return self._process_with_paddleocr_full(image)
 
         # Determine if vision should be used
@@ -259,6 +268,7 @@ class HybridOCR:
         """
         Run full PaddleOCR (detection + recognition) and return combined text.
         Used when force_paddleocr=True (e.g. OCR eval to ensure PaddleOCR is used).
+        Optionally preprocesses image (Otsu, deskew, 300 DPI) for better accuracy on scans/resumes.
         """
         import time
         start = time.time()
@@ -269,6 +279,20 @@ class HybridOCR:
             "detection_time_ms": 0.0,
             "vision_used": False,
         }
+        work_image = image.copy()
+        if self.preprocess_before_paddleocr:
+            try:
+                work_image = preprocess_for_ocr(
+                    work_image,
+                    binarise=True,
+                    deskew=True,
+                    normalise_dpi_value=True,
+                )
+            except Exception:
+                pass
+        if len(work_image.shape) == 2:
+            work_image = cv2.cvtColor(work_image, cv2.COLOR_GRAY2BGR)
+
         paddle_ocr = None
         if self.use_detection_router and getattr(self.detection_router, "paddleocr_detector", None):
             det = self.detection_router.paddleocr_detector
@@ -290,11 +314,8 @@ class HybridOCR:
             # Fallback to normal pipeline when PaddleOCR not available
             return self.process_document(image, force_paddleocr=False)
 
-        if len(image.shape) == 2:
-            import cv2
-            image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
         try:
-            result = paddle_ocr.ocr(image, det=True, rec=True, cls=True)
+            result = paddle_ocr.ocr(work_image, det=True, rec=True, cls=True)
         except Exception:
             result = None
         elapsed_ms = (time.time() - start) * 1000
@@ -323,6 +344,42 @@ class HybridOCR:
             "results": [],
             "routing_stats": {"paddleocr_full": 1},
             "metadata": metadata,
+        }
+
+    def _process_ensemble_paddleocr_tesseract(self, image: np.ndarray) -> Dict:
+        """
+        Run both Tesseract (with preprocessing) and PaddleOCR, then merge text for best coverage.
+        Use when use_ensemble_for_accuracy=True and force_paddleocr=True (e.g. resume / high-accuracy needs).
+        """
+        paddle_out = self._process_with_paddleocr_full(image)
+        tess_result = self._process_full_page(image, use_vision=False)
+        paddle_text = (paddle_out.get("text") or "").strip()
+        tess_text = (tess_result.text or "").strip()
+        seen = set()
+        lines_out = []
+        for block in (paddle_text.split("\n"), tess_text.split("\n")):
+            for line in block:
+                line = line.strip()
+                if not line:
+                    continue
+                key = line.lower().strip()
+                if key in seen:
+                    continue
+                seen.add(key)
+                lines_out.append(line)
+        merged_text = "\n".join(lines_out)
+        conf_p = paddle_out.get("confidence", 0) or 0
+        conf_t = getattr(tess_result, "confidence", 0) or 0
+        confidence = (conf_p + conf_t) / 2 if (conf_p or conf_t) else 85.0
+        meta = paddle_out.get("metadata", {}).copy()
+        meta["ensemble_used"] = True
+        meta["tesseract_confidence"] = conf_t
+        return {
+            "text": merged_text or paddle_text or tess_text,
+            "confidence": confidence,
+            "results": [],
+            "routing_stats": {"paddleocr_full": 1, "tesseract_ensemble": 1},
+            "metadata": meta,
         }
 
     def _process_with_boxes(

@@ -51,6 +51,7 @@ from eval_postprocess_utils import (
     FinQAUtils,
     InfographicsVQAUtils,
     MMMUUtils,
+    normalize_rag_prediction_to_gold_scale,
     prediction_used_back_calc,
     TATQAUtils,
     CreditRiskPDUtils,
@@ -218,7 +219,10 @@ def has_ground_truth(sample: dict, category: str) -> bool:
         return gt is not None and str(gt).strip() != ""
     if category in ("credit_risk_PD", "credit_risk_PD_quantum", "credit_risk_sentiment", "credit_risk_sentiment_finbert", "credit_risk_memo_generator"):
         if isinstance(gt, dict):
-            val = gt.get("label") or gt.get("answer") or gt.get("reference")
+            # Use .get() and explicit None check so label=0 (non-default) is not treated as missing
+            val = gt.get("label")
+            if val is None:
+                val = gt.get("answer") or gt.get("reference")
         else:
             val = gt
         return val is not None and str(val).strip() != ""
@@ -875,12 +879,13 @@ def run_model(sample: dict, category: str, dataset_name: str, debug: bool = Fals
                 "reasoning": str(out.get("plan", [])),
             }
         except Exception as e:
+            err_msg = str(e).encode("ascii", "replace").decode("ascii")
             if debug:
-                print(f"[DEBUG] RAG inference failed: {e}")
+                print(f"[DEBUG] RAG inference failed: {err_msg}")
             return {
                 "answer": "",
                 "sources": [],
-                "error": f"rag_inference_failed:{e}",
+                "error": f"rag_inference_failed:{err_msg}",
             }
 
     if category == "credit_risk_PD":
@@ -1044,7 +1049,7 @@ def evaluate_vision_sample(
     options_list = sample.get("metadata", {}).get("options_list")
     sample_id = sample.get("metadata", {}).get("sample_id")
 
-    # Known bad GT (e.g. MMMU annotation errors): score against correct_answer and flag for reporting
+    # Vision (MMMU): known bad GT — score against correct_answer and set gt_override=1 for reporting.
     gt_override_used = False
     effective_gt = gt_answer
     if sample_id and sample_id in KNOWN_BAD_GROUND_TRUTH:
@@ -1126,14 +1131,12 @@ def evaluate_vision_sample(
                     pred_answer = mapped_letter
 
     if gt_override_used and effective_gt is None:
-        # No correct option (e.g. duplicate options + wrong GT); do not penalize
-        acc = 1.0
+        acc = 1.0  # No correct option (e.g. duplicate options + wrong GT); do not penalize
     else:
         acc = utils.accuracy(pred_answer, effective_gt, options_list=options_list)
     if debug:
         print(
-            f"[DEBUG] vision_eval_metrics dataset={dataset_name} "
-            f"accuracy={acc}"
+            f"[DEBUG] vision_eval_metrics dataset={dataset_name} accuracy={acc}"
             + (f" gt_override=1 (effective_gt={effective_gt!r})" if gt_override_used else "")
         )
     out = {"accuracy": acc}
@@ -1159,6 +1162,27 @@ def _rag_prediction_is_error_or_refusal(pred_answer: str) -> bool:
         "configuration or implementation issue",
     ]
     return any(phrase in lower for phrase in error_phrases)
+
+
+def _rag_parse_gold_program_operands(program: str | list | None) -> list[str]:
+    """Extract numeric operands from a FinQA-style gold program string, e.g. 'divide(7991, 21367)' -> ['7991', '21367'].
+    Excludes result references (#0, #1, ...) so we do not require literal '0' in context for divide(#0, const_2)."""
+    if program is None:
+        return []
+    if isinstance(program, list):
+        program = str(program)
+    s = str(program).strip()
+    # Strip result references (#0, #1, ...) so their digits are not treated as document operands
+    s = re.sub(r"#\d+", "#ref", s)
+    # Match numbers used as arguments: digits, optional commas, optional decimal
+    operands = re.findall(r"\b(\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+(?:\.\d+)?)\b", s)
+    # Also normalized without commas for search
+    out = []
+    for x in operands:
+        out.append(x.replace(",", ""))
+        if "," in x:
+            out.append(x)
+    return list(dict.fromkeys(out))  # dedup, preserve order
 
 
 def _rag_debug_index_diagnostic(
@@ -1251,41 +1275,24 @@ def _rag_debug_index_diagnostic(
         for idx, preview in chunks_with_gt:
             c = chunks[idx] if idx < len(chunks) else None
             in_retrieved = (getattr(c, "text", "")[:200] in full_context) if c else False
-            print(f"[DEBUG] RAG index diagnostic: chunk {idx} CONTAINS GT → in_retrieved_context={in_retrieved} preview={preview!r}")
+            print(f"[DEBUG] RAG index diagnostic: chunk {idx} CONTAINS GT -> in_retrieved_context={in_retrieved} preview={preview!r}")
     else:
         print(f"[DEBUG] RAG index diagnostic: no chunk in doc contains GT (chunking may have dropped it)")
     if implied_vals and chunks_with_implied:
-        print(f"[DEBUG] RAG index diagnostic: implied values (from context±GT)={implied_vals[:6]}")
+        print(f"[DEBUG] RAG index diagnostic: implied values (from context+/-GT)={implied_vals[:6]}")
         for idx, preview in chunks_with_implied:
             text = getattr(chunks[idx], "text", None) or ""
             in_retrieved = (text[:200] in full_context) if text else False
-            print(f"[DEBUG] RAG index diagnostic: chunk {idx} CONTAINS implied value → in_retrieved_context={in_retrieved} preview={preview!r}")
+            print(f"[DEBUG] RAG index diagnostic: chunk {idx} CONTAINS implied value -> in_retrieved_context={in_retrieved} preview={preview!r}")
     elif implied_vals:
-        print(f"[DEBUG] RAG index diagnostic: implied values={implied_vals[:6]} → no chunk contains them (missing row in index)")
+        print(f"[DEBUG] RAG index diagnostic: implied values={implied_vals[:6]} -> no chunk contains them (missing row in index)")
 
 
-def _load_rag_gt_overrides(dataset_name: str) -> dict[str, str]:
-    """Load RAG GT overrides from data/proof/rag/<dataset>/gt_overrides.json.
-    Values may be string (override answer) or dict with 'answer' or 'override' key."""
-    path = Path("data/proof") / "rag" / dataset_name.lower() / "gt_overrides.json"
-    if not path.exists():
-        return {}
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        out = {}
-        for k, v in data.items():
-            if isinstance(v, dict):
-                val = str(v.get("answer") or v.get("override") or "")
-            elif isinstance(v, str):
-                val = v
-            else:
-                continue
-            if val:
-                out[str(k)] = val
-        return out
-    except Exception:
-        return {}
+# RAG samples evaluated against dataset GT only; some are labeled as suspect GT for reporting.
+# Keys: sample_id; values: short label for failure_reason (e.g. "suspect_gt").
+RAG_SUSPECT_GT_SAMPLE_LABELS: dict[str, str] = {
+    "C/2010/page_272.pdf-1": "suspect_gt",  # LOCOM growth: model 0.5625 correct; dataset GT 0.97656 likely annotation error
+}
 
 
 def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug: bool = False) -> dict[str, float]:
@@ -1295,22 +1302,26 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
     gt_answer = gt_obj.get("answer") if isinstance(gt_obj, dict) else gt_obj
     options_list = sample.get("metadata", {}).get("options_list")
     sample_id = sample.get("metadata", {}).get("sample_id", "")
-    gt_override_used = False
-    overrides = _load_rag_gt_overrides(dataset_name)
-    if sample_id and sample_id in overrides:
-        gt_answer = overrides[sample_id]
-        gt_override_used = True
-        if debug:
-            print(f"[DEBUG] RAG gt_override: sample_id={sample_id!r} using override gt={gt_answer!r}")
 
     # Do not give credit when the model reported a retrieval/system error or refusal
     if _rag_prediction_is_error_or_refusal(pred_answer):
-        return {
+        out = {
             "program_accuracy": 0.0,
             "numerical_exact_match": 0.0,
             "f1": 0.0,
             "exact_match": 0.0,
         }
+        if hasattr(utils, "numerical_near_match"):
+            out["numerical_near_match"] = 0.0
+        return out
+
+    # TAT-QA (and similar): normalize bare numeric prediction to gold scale/format so 50 -> $0.5 million when gold is $0.5 million
+    if dataset_name == "TATQA" and gt_answer is not None:
+        normalized = normalize_rag_prediction_to_gold_scale(pred_answer, gt_answer)
+        if normalized is not None:
+            pred_answer = normalized
+            if debug:
+                print(f"[DEBUG] RAG TATQA scale normalization applied -> pred_answer={pred_answer!r}")
 
     exact = utils.exact_match(pred_answer, gt_answer, options_list=options_list)
     # Debug: yes/no mismatch — drill down when model's yes/no differs from gold
@@ -1353,6 +1364,11 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
     f1 = max(token_f1, exact)
 
     num_match = utils.numerical_exact_match(pred_answer, gt_answer)
+    num_near = (
+        utils.numerical_near_match(pred_answer, gt_answer, rel_tol=0.01)
+        if hasattr(utils, "numerical_near_match")
+        else None
+    )
     # Debug: on numerical exact_match failure, log full retrieved context (for totals/back-calc debugging)
     if debug and num_match == 0 and gt_answer is not None:
         try:
@@ -1371,25 +1387,55 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
             if context_parts:
                 full_context = "\n\n---\n\n".join(context_parts)
                 sample_id_debug = sample.get("metadata", {}).get("sample_id", "")
-                print(f"[DEBUG] RAG numerical_exact_match=0 sample_id={sample_id_debug!r} gt={gt_answer!r}")
-                print(f"[DEBUG] RAG full context (first 4000 chars):\n{full_context[:4000]}")
-                if len(full_context) > 4000:
-                    print(f"[DEBUG] ... (context total {len(full_context)} chars)")
-                # Index diagnostic: is GT or implied value (e.g. 22176) in the doc's chunks? In retrieved context?
                 gt_obj_debug = sample.get("ground_truth", {})
                 corpus_id_debug = gt_obj_debug.get("corpus_id") if isinstance(gt_obj_debug, dict) else None
+
+                print(f"[DEBUG] RAG numerical_exact_match=0 sample_id={sample_id_debug!r} gt={gt_answer!r}")
+                if isinstance(gt_obj_debug, dict) and gt_obj_debug.get("program") is not None:
+                    gold_prog = gt_obj_debug.get("program")
+                    print(f"[DEBUG] RAG gold program: {gold_prog}")
+                    # Gold program operands: are they in the context the model saw?
+                    operands = _rag_parse_gold_program_operands(gold_prog)
+                    segments = [p.strip() for p in full_context.split("\n\n---\n\n") if p.strip()]
+                    # Dedupe operands by numeric value so we don't report "7991" twice
+                    seen_vals = set()
+                    for op in operands:
+                        op_plain = op.replace(",", "")
+                        if op_plain in seen_vals:
+                            continue
+                        seen_vals.add(op_plain)
+                        pat = r"\b" + re.escape(op_plain) + r"\b"
+                        in_which = [i for i, seg in enumerate(segments) if re.search(pat, seg)]
+                        if in_which:
+                            print(f"[DEBUG] RAG gold operand {op_plain!r} IN context (segment indices {in_which})")
+                        else:
+                            print(f"[DEBUG] RAG gold operand {op_plain!r} NOT in context -> model cannot compute gold program")
+
+                # Per-chunk lengths and preview (so we see truncation / missing columns)
+                print(f"[DEBUG] RAG context assembly: {len(context_parts)} chunks, total {len(full_context)} chars")
+                for i, part in enumerate(context_parts):
+                    prev = (part[:100] + "…").replace("\n", " ") if len(part) > 100 else part.replace("\n", " ")
+                    print(f"[DEBUG] RAG chunk {i}: len={len(part)} preview={prev!r}")
+
+                print(f"[DEBUG] RAG full context (first 6000 chars):\n{full_context[:6000]}")
+                if len(full_context) > 6000:
+                    print(f"[DEBUG] ... (context total {len(full_context)} chars)")
+
+                # Index diagnostic: is GT or implied value in the doc's chunks? In retrieved context?
                 _rag_debug_index_diagnostic(
                     dataset_name, corpus_id_debug, gt_answer, full_context, sample_id=sample_id_debug
                 )
 
-    return {
+    out = {
         "program_accuracy": utils.program_accuracy(pred_answer, gt_answer),
         "numerical_exact_match": num_match,
         "f1": f1,
         "exact_match": exact,
         "used_back_calc": 1 if prediction_used_back_calc(pred_answer) else 0,
-        "gt_override": 1 if gt_override_used else 0,
     }
+    if num_near is not None:
+        out["numerical_near_match"] = num_near
+    return out
 
 
 def evaluate_credit_risk_pd_sample(prediction: dict, sample: dict) -> dict[str, float]:
@@ -1453,9 +1499,31 @@ def _samples_filename(dataset_name: str, split_name: str) -> str:
     return f"{dataset_name.lower()}_{split_name}_samples.json"
 
 
+def _find_split_for_sample_id(proof_dir: Path, category: str, dataset_name: str, sample_id: str) -> str | None:
+    """Find which split contains the given sample_id by scanning existing *_samples.json under proof_dir."""
+    dataset_dir = proof_dir / category.lower() / dataset_name.lower()
+    if not dataset_dir.exists():
+        return None
+    for split_dir in dataset_dir.iterdir():
+        if not split_dir.is_dir():
+            continue
+        split_name = split_dir.name
+        path = split_dir / _samples_filename(dataset_name, split_name)
+        if not path.exists():
+            continue
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                rows = json.load(f)
+        except Exception:
+            continue
+        if any(str(r.get("sample_id")) == sample_id for r in (rows if isinstance(rows, list) else [])):
+            return split_name
+    return None
+
+
 # Diagnostic-only per-sample keys: do not include in split/dataset _mean aggregation (not "higher is better")
 METRIC_KEYS_EXCLUDE_FROM_AGGREGATE = {"used_back_calc"}
-# Keys where missing value is treated as 0 so mean is over ALL samples (e.g. gt_override: only some rows have it)
+# Keys where missing value is treated as 0 so mean is over ALL samples (e.g. gt_override: vision MMMU only)
 METRIC_KEYS_MISSING_AS_ZERO = {"gt_override"}
 
 
@@ -1521,12 +1589,18 @@ def migrate_prediction_errors_from_per_sample(proof_dir: Path | str = "data/proo
                     err_by_id[str(r.get("sample_id"))] = r
                 with open(prediction_error_path, "w", encoding="utf-8") as f:
                     json.dump(list(err_by_id.values()), f, ensure_ascii=False, indent=2)
+                if cat_dir.name == "rag":
+                    for row in ok_rows:
+                        m = row.get("metrics")
+                        if isinstance(m, dict) and "gt_override" in m:
+                            row["metrics"] = {k: v for k, v in m.items() if k != "gt_override"}
                 with open(per_sample_path, "w", encoding="utf-8") as f:
                     json.dump(ok_rows, f, ensure_ascii=False, indent=2)
                 split_metric_rows = [r.get("metrics") or {} for r in ok_rows if r.get("metrics")]
                 split_avg = aggregate_metrics(split_metric_rows)
                 split_avg["sample_count"] = len(ok_rows)
-                split_avg["gt_override_count"] = int(sum((m.get("gt_override", 0) or 0) for m in split_metric_rows))
+                if cat_dir.name != "rag":
+                    split_avg["gt_override_count"] = int(sum((m.get("gt_override", 0) or 0) for m in split_metric_rows))
                 avg_path = split_dir / f"{ds_dir.name.lower()}_{split_dir.name}_avg.json"
                 with open(avg_path, "w", encoding="utf-8") as f:
                     json.dump(split_avg, f, ensure_ascii=False, indent=2)
@@ -1585,6 +1659,7 @@ def evaluate_dataset(
     generate_png=False,
     generate_metadata=False,
     force_reeval=False,
+    run_sample_id: str | None = None,
 ):
     """Streamed evaluation over adapter.load_split(...), row-by-row.
 
@@ -1595,6 +1670,8 @@ def evaluate_dataset(
     When dataset_split is set (e.g. from --split dev): only load and evaluate that split.
     When force_reeval=True: re-run model/API for every sample (ignore existing per_sample
     predictions). Use after changing prompts or index to get new predictions.
+    When run_sample_id is set: only run that one sample (must exist in an existing *_samples.json);
+    result is merged in-place (same position in JSON/txt, no duplicate). Requires dataset_split to be set.
     """
     # Pass category limit as None so the adapter keeps streaming rows; we enforce
     # max_samples_per_category in the loop by breaking after that many *evaluated* samples.
@@ -1670,11 +1747,15 @@ def evaluate_dataset(
             skipped_no_ground_truth += 1
             continue
 
-        if max_samples_per_category is not None and len(per_sample_rows) >= max_samples_per_category:
-            break
-
         split_name = sample.get("metadata", {}).get("split") or "unknown"
         sample_id = str(sample.get("metadata", {}).get("sample_id"))
+
+        # When run_sample_id is set, only process that one sample; skip others.
+        if run_sample_id is not None and sample_id != run_sample_id:
+            continue
+
+        if max_samples_per_category is not None and len(per_sample_rows) >= max_samples_per_category:
+            break
 
         # Lazily load already-evaluated IDs for this split (only from per_sample; do NOT skip samples in prediction_error.json so they get re-evaluated)
         # When force_reeval=True, do not load existing IDs so every sample runs (new predictions).
@@ -1691,22 +1772,16 @@ def evaluate_dataset(
                     pass
             existing_ids_by_split[split_name] = ids
 
-        # Skip if this sample_id was already evaluated in a previous run (unless force_reeval)
-        if not force_reeval and sample_id in existing_ids_by_split.get(split_name, set()):
-            if debug:
-                print(
-                    f"[DEBUG] {dataset_name} sample={sample_id} split={split_name} "
-                    f"skip_reason=already_evaluated"
-                )
+        # Skip if this sample_id was already evaluated in a previous run (unless force_reeval or run_sample_id re-run)
+        if (
+            not force_reeval
+            and sample_id in existing_ids_by_split.get(split_name, set())
+            and not (run_sample_id and sample_id == run_sample_id)
+        ):
             continue
 
         # Respect per-split evaluation budget based on *new* samples only.
         if max_samples_per_split is not None and evaluated_per_split[split_name] >= max_samples_per_split:
-            if debug:
-                print(
-                    f"[DEBUG] {dataset_name} sample={sample_id} split={split_name} "
-                    f"skip_reason=split_budget_exhausted"
-                )
             continue
 
         split_dir = dataset_proof_dir / split_name
@@ -1846,12 +1921,18 @@ def evaluate_dataset(
                 "sample_id": meta.get("sample_id"),
                 "options_list": meta.get("options_list"),
             }
+        # RAG: label known suspect-GT failures (evaluated against dataset GT only, no override)
+        if category == "rag" and sample_id and sample_id in RAG_SUSPECT_GT_SAMPLE_LABELS:
+            row["failure_label"] = RAG_SUSPECT_GT_SAMPLE_LABELS[sample_id]
 
         per_sample_rows.append(row)
         split_rows.setdefault(split_name, []).append(row)
 
+        if run_sample_id is not None:
+            break
+
     if not any_sample:
-        print(f"⚠️ Dataset {dataset_name} skipped (empty).")
+        print(f"Warning: Dataset {dataset_name} skipped (empty).")
         return None
 
     if debug:
@@ -1921,6 +2002,12 @@ def evaluate_dataset(
         if existing_rows and len(combined_ok) < len(existing_rows):
             print(f"[WARN] Would shrink {per_sample_path} from {len(existing_rows)} to {len(combined_ok)} rows; skipping write to avoid data loss.")
             continue
+        # RAG: do not store gt_override in samples; strip so the metric does not exist in FinQA etc.
+        if category == "rag":
+            for row in combined_ok:
+                m = row.get("metrics")
+                if isinstance(m, dict) and "gt_override" in m:
+                    row["metrics"] = {k: v for k, v in m.items() if k != "gt_override"}
         with open(per_sample_path, "w", encoding="utf-8") as f:
             json.dump(combined_ok, f, ensure_ascii=False, indent=2)
 
@@ -1976,8 +2063,8 @@ def evaluate_dataset(
         else:
             split_avg = aggregate_metrics(split_metric_rows)
             split_avg["sample_count"] = len(rows_from_file)
-        # Evaluation counter: number of samples scored with known-bad-GT override (vision/MMMU, RAG)
-        split_avg["gt_override_count"] = int(sum((m.get("gt_override", 0) or 0) for m in split_metric_rows))
+        if category != "rag":
+            split_avg["gt_override_count"] = int(sum((m.get("gt_override", 0) or 0) for m in split_metric_rows))
         split_avgs[split_name] = split_avg
 
         avg_path = split_dir / f"{dataset_name.lower()}_{split_name}_avg.json"
@@ -2036,32 +2123,30 @@ def evaluate_dataset(
             denom += count
         dataset_weighted_metrics[key] = num / denom if denom else 0.0
 
-    # Per-split breakdown for interpretability (split -> count + metrics + gt_override_count)
+    # Per-split breakdown for interpretability (split -> count + metrics [+ gt_override_count for non-RAG])
     splits_breakdown = []
     for split_name in sorted(split_avgs_from_files.keys()):
         avg = split_avgs_from_files[split_name]
         metrics = {k: v for k, v in avg.items() if k.endswith("_mean")}
-        splits_breakdown.append({
-            "split": split_name,
-            "sample_count": avg.get("sample_count", 0),
-            "gt_override_count": avg.get("gt_override_count", 0),
-            "metrics": metrics,
-        })
+        entry = {"split": split_name, "sample_count": avg.get("sample_count", 0), "metrics": metrics}
+        if category != "rag":
+            entry["gt_override_count"] = avg.get("gt_override_count", 0)
+        splits_breakdown.append(entry)
 
-    dataset_gt_override_total = sum(avg.get("gt_override_count", 0) for avg in split_avgs_from_files.values())
     dataset_payload = {
         "dataset": dataset_name,
         "sample_count": dataset_total_from_files,
-        "gt_override_count": dataset_gt_override_total,
         "splits": sorted(split_avgs_from_files.keys()),
         "splits_breakdown": splits_breakdown,
-        "skipped_no_ground_truth": skipped_no_ground_truth,
-        "prediction_error_counts": dict(prediction_error_counter),
-        "model_class": model_meta["model_class"],
-        "backbone": model_meta["backbone"],
-        "timestamp": singapore_now_iso(),
-        "weighted_metrics": dataset_weighted_metrics,
     }
+    if category != "rag":
+        dataset_payload["gt_override_count"] = sum(avg.get("gt_override_count", 0) for avg in split_avgs_from_files.values())
+    dataset_payload["skipped_no_ground_truth"] = skipped_no_ground_truth
+    dataset_payload["prediction_error_counts"] = dict(prediction_error_counter)
+    dataset_payload["model_class"] = model_meta["model_class"]
+    dataset_payload["backbone"] = model_meta["backbone"]
+    dataset_payload["timestamp"] = singapore_now_iso()
+    dataset_payload["weighted_metrics"] = dataset_weighted_metrics
 
     dataset_weighted_path = dataset_proof_dir / f"{dataset_name.lower()}_avg.json"
     with open(dataset_weighted_path, "w", encoding="utf-8") as f:
@@ -2250,6 +2335,7 @@ def main(
     generate_png=False,
     generate_metadata=False,
     force_reeval=False,
+    run_sample_id: str | None = None,
 ):
     # Migrate existing per_sample files: move prediction_error rows to prediction_error.json
     migrate_prediction_errors_from_per_sample(Path("data/proof"))
@@ -2275,7 +2361,7 @@ def main(
                     cwd=str(repo_root),
                 )
                 if rc != 0:
-                    print(f"⚠️ generate_pq_first_5_rows.py exited with {rc}. OCR evaluation may fall back to HuggingFace in adapters.")
+                    print(f"Warning: generate_pq_first_5_rows.py exited with {rc}. OCR evaluation may fall back to HuggingFace in adapters.")
 
         print(f"\n=== CATEGORY: {category.upper()} ===")
         dataset_summaries = []
@@ -2286,7 +2372,7 @@ def main(
 
             adapter_cls = ADAPTER_REGISTRY.get(dataset_name)
             if not adapter_cls:
-                print(f"⚠️ Adapter class not found for {dataset_name}, skipping")
+                print(f"Warning: Adapter class not found for {dataset_name}, skipping")
                 continue
 
             adapter = adapter_cls(
@@ -2308,6 +2394,7 @@ def main(
                 generate_png=generate_png,
                 generate_metadata=generate_metadata,
                 force_reeval=force_reeval,
+                run_sample_id=run_sample_id,
             )
             if summary and summary["sample_count"] > 0:
                 dataset_summaries.append(summary)
@@ -2317,8 +2404,8 @@ def main(
             refresh_category_weighted_avg_from_files(category)
             write_eval_summary()
 
-        # Adversarial testing runs only when --category rag (not for vision/ocr/other). Skip when --debug to avoid loading embedding+reranker twice (OOM/segfault on 16GB).
-        if run_category and run_category.lower() == "rag" and not debug:
+        # Adversarial testing runs only when --category rag (not for vision/ocr/other). Skip when --debug or single-sample run to avoid loading embedding+reranker twice (OOM/segfault on 16GB).
+        if run_category and run_category.lower() == "rag" and not debug and not run_sample_id:
             try:
                 from eval_monitoring_metrics import run_adversarial_rag_samples, write_monitoring_proof
             except Exception:
@@ -2476,6 +2563,9 @@ def run_reevaluate_only(
                 }
                 metrics = evaluate_rag_sample(dataset_name, prediction, sample, debug=False)
                 row["metrics"] = metrics
+                sid = str(row.get("sample_id") or "")
+                if sid in RAG_SUSPECT_GT_SAMPLE_LABELS:
+                    row["failure_label"] = RAG_SUSPECT_GT_SAMPLE_LABELS[sid]
         elif category.lower() == "vision":
             if dataset_name not in VISION_UTILS:
                 print(f"[reevaluate_only] Unsupported vision dataset: {dataset}; skipping.")
@@ -2558,6 +2648,11 @@ def run_reevaluate_only(
             print(f"[reevaluate_only] Unsupported category for re-eval: {category}; skipping.")
             continue
 
+        if category.lower() == "rag":
+            for row in rows:
+                m = row.get("metrics")
+                if isinstance(m, dict) and "gt_override" in m:
+                    row["metrics"] = {k: v for k, v in m.items() if k != "gt_override"}
         with open(per_sample_path, "w", encoding="utf-8") as f:
             json.dump(rows, f, ensure_ascii=False, indent=2)
         updated_splits.append((split_name, split_dir, rows))
@@ -2575,7 +2670,8 @@ def run_reevaluate_only(
         split_metric_rows = [r.get("metrics") or {} for r in rows if not r.get("prediction_error")]
         split_avg = aggregate_metrics(split_metric_rows)
         split_avg["sample_count"] = len([r for r in rows if not r.get("prediction_error")])
-        split_avg["gt_override_count"] = int(sum((m.get("gt_override", 0) or 0) for m in split_metric_rows))
+        if category.lower() != "rag":
+            split_avg["gt_override_count"] = int(sum((m.get("gt_override", 0) or 0) for m in split_metric_rows))
         split_avgs_from_files[split_name] = split_avg
         avg_path = split_dir / f"{dataset_name.lower()}_{split_name}_avg.json"
         with open(avg_path, "w", encoding="utf-8") as f:
@@ -2595,24 +2691,27 @@ def run_reevaluate_only(
         )
         dataset_weighted_metrics[key] = num / dataset_total if dataset_total else 0.0
 
-    dataset_gt_override_total = sum(avg.get("gt_override_count", 0) for avg in split_avgs_from_files.values())
+    splits_breakdown = [
+        {
+            "split": s,
+            "sample_count": split_avgs_from_files[s].get("sample_count", 0),
+            "metrics": {k: v for k, v in split_avgs_from_files[s].items() if k.endswith("_mean")},
+        }
+        for s in sorted(split_avgs_from_files.keys())
+    ]
+    if category.lower() != "rag":
+        for entry in splits_breakdown:
+            entry["gt_override_count"] = split_avgs_from_files[entry["split"]].get("gt_override_count", 0)
     dataset_payload = {
         "dataset": dataset_name,
         "sample_count": dataset_total,
-        "gt_override_count": dataset_gt_override_total,
         "splits": sorted(split_avgs_from_files.keys()),
-        "splits_breakdown": [
-            {
-                "split": s,
-                "sample_count": split_avgs_from_files[s].get("sample_count", 0),
-                "gt_override_count": split_avgs_from_files[s].get("gt_override_count", 0),
-                "metrics": {k: v for k, v in split_avgs_from_files[s].items() if k.endswith("_mean")},
-            }
-            for s in sorted(split_avgs_from_files.keys())
-        ],
+        "splits_breakdown": splits_breakdown,
         "weighted_metrics": dataset_weighted_metrics,
         "timestamp": singapore_now_iso(),
     }
+    if category.lower() != "rag":
+        dataset_payload["gt_override_count"] = sum(avg.get("gt_override_count", 0) for avg in split_avgs_from_files.values())
     dataset_avg_path = dataset_proof_dir / f"{dataset_name.lower()}_avg.json"
     with open(dataset_avg_path, "w", encoding="utf-8") as f:
         json.dump(dataset_payload, f, ensure_ascii=False, indent=2)
@@ -2683,16 +2782,21 @@ def export_predictions_txt(
         if not isinstance(rows, list) or not rows:
             continue
 
-        # Evaluation counter: samples scored with known-bad-GT override (vision/MMMU, RAG)
-        gt_override_count = int(sum((row.get("metrics") or {}).get("gt_override", 0) for row in rows))
+        try:
+            rel = per_sample_path.relative_to(proof_dir)
+            is_rag = len(rel.parts) >= 1 and rel.parts[0] == "rag"
+        except ValueError:
+            is_rag = False
 
-        # Output in same folder; name: e.g. chartqa_test_samples.json -> chartqa_test_predictions.txt
         stem = per_sample_path.stem
         base_name = stem.replace("_samples", "") if stem.endswith("_samples") else stem
         txt_name = f"{base_name}_predictions.txt"
         out_path = per_sample_path.parent / txt_name
 
-        lines = [f"gt_override_count: {gt_override_count}", ""]
+        lines = []
+        if not is_rag:
+            gt_override_count = int(sum((row.get("metrics") or {}).get("gt_override", 0) for row in rows))
+            lines = [f"gt_override_count: {gt_override_count}", ""]
         for i, row in enumerate(rows):
             if i > 0:
                 lines.append("")
@@ -2716,8 +2820,14 @@ def export_predictions_txt(
                 lines.append(f"prediction_error: {row.get('prediction_error')}")
             met = row.get("metrics") or {}
             if met:
+                if is_rag:
+                    met = {k: v for k, v in met.items() if k != "gt_override"}
+                if met:
+                    lines.append("-" * 72)
+                    lines.append("metrics: " + json.dumps(met, ensure_ascii=False))
+            if row.get("failure_label"):
                 lines.append("-" * 72)
-                lines.append("metrics: " + json.dumps(met, ensure_ascii=False))
+                lines.append("failure_label: " + str(row.get("failure_label")))
             lines.append("=" * 72)
 
         with open(out_path, "w", encoding="utf-8") as f:
@@ -2769,7 +2879,39 @@ if __name__ == "__main__":
         action="store_true",
         help="Re-run model/API for every sample (ignore already-evaluated). Use after changing prompts or index to get new predictions.",
     )
+    parser.add_argument(
+        "--sample_id",
+        type=str,
+        default=None,
+        help="Run evaluation for this single sample only. Updates the existing row in-place (no duplicate). Requires --category and --dataset. Example: --category rag --dataset FinQA --sample_id 'C/2010/page_272.pdf-1'",
+    )
     args = parser.parse_args()
+
+    if args.sample_id:
+        if not args.category or not args.dataset:
+            print("--sample_id requires --category and --dataset (e.g. --category rag --dataset FinQA --sample_id 'C/2010/page_272.pdf-1')")
+            raise SystemExit(1)
+        proof_dir = Path("data/proof")
+        split_found = _find_split_for_sample_id(proof_dir, args.category, args.dataset, args.sample_id)
+        if split_found is None:
+            print(f"No existing samples file found containing sample_id={args.sample_id!r}. Run a full eval first so the sample exists in data/proof/{args.category}/{args.dataset}/<split>/*_samples.json")
+            raise SystemExit(1)
+        main(
+            max_samples_per_split=None,
+            max_samples_per_category=None,
+            run_category=args.category,
+            run_dataset=args.dataset,
+            run_split=split_found,
+            only_gt=True,
+            debug=args.debug,
+            generate_png=args.generate_png,
+            generate_metadata=args.generate_metadata,
+            force_reeval=False,
+            run_sample_id=args.sample_id,
+        )
+        # Single-sample run: always refresh predictions.txt so the updated row appears in place (no duplicate).
+        export_predictions_txt(proof_dir, category=args.category, dataset=args.dataset)
+        raise SystemExit(0)
 
     if args.reevaluate_only:
         if not args.category or not args.dataset:

@@ -83,6 +83,7 @@ def _parse_lendingclub_query_text(query: str) -> Dict[str, Any]:
         key_raw = m.group(1).strip().lower()
         val_raw = m.group(2).strip().strip("'\" ")
         canonical = QUERY_FIELD_ALIASES.get(key_raw, key_raw)
+        # Keep string values for fields that need categorical/date/employment parsing
         if canonical in (
             "addr_state",
             "grade",
@@ -92,6 +93,7 @@ def _parse_lendingclub_query_text(query: str) -> Dict[str, Any]:
             "application_type",
             "issue_d",
             "earliest_cr_line",
+            "emp_length",  # e.g. "10+Years", "<1Year" -> _emp_length_to_months()
         ):
             out[canonical] = val_raw
         else:
@@ -110,7 +112,7 @@ def _emp_length_to_months(s: Any) -> float:
         return 120.0
     if "<1" in t or "n/a" in t:
         return 6.0
-    m = re.search(r"(\d+)\s*year", t)
+    m = re.search(r"(\d+)\s*years?", t, re.IGNORECASE)
     if m:
         return float(m.group(1)) * 12.0
     return np.nan

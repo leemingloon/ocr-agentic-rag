@@ -632,38 +632,6 @@ def write_proof_summary_md(proof_dir: Path | None = None) -> None:
         f"- Evaluate lambeq or DisCoPy for QDisCoCirc, PennyLane/Qiskit simulators on Financial PhraseBank, FiQA; F1 {sent_f1}/MSE benchmarking vs classical {sent_fb_f1}.",
     ]
 
-    # RAG GT overrides: list any data/proof/rag/<dataset>/gt_overrides.json entries for audit
-    rag_overrides_lines = []
-    rag_dir = proof_dir / "rag"
-    if rag_dir.exists():
-        for dataset_dir in sorted(rag_dir.iterdir()):
-            if not dataset_dir.is_dir():
-                continue
-            overrides_path = dataset_dir / "gt_overrides.json"
-            if not overrides_path.exists():
-                continue
-            try:
-                with open(overrides_path, "r", encoding="utf-8") as f:
-                    overrides = json.load(f)
-            except Exception:
-                continue
-            dataset_name = dataset_dir.name
-            for sample_id, val in (overrides or {}).items():
-                if isinstance(val, dict):
-                    override_answer = val.get("answer") or val.get("override")
-                    original_gt = val.get("original_gt")
-                    reason = val.get("reason")
-                    part = f"- {dataset_name} `{sample_id}`"
-                    if original_gt is not None and override_answer is not None:
-                        part += f": original {original_gt} → {override_answer}"
-                    elif override_answer is not None:
-                        part += f": override → {override_answer}"
-                    if reason:
-                        part += f" ({reason})"
-                    rag_overrides_lines.append(part)
-                elif isinstance(val, str):
-                    rag_overrides_lines.append(f"- {dataset_name} `{sample_id}`: override → {val}")
-
     filled_lines = [
         "# Proof summary (auto-generated)",
         "",
@@ -682,22 +650,6 @@ def write_proof_summary_md(proof_dir: Path | None = None) -> None:
         *template_bullets,
         "",
     ]
-    if rag_overrides_lines:
-        idx = filled_lines.index("---")
-        second_dash = filled_lines.index("---", idx + 1)
-        filled_lines = (
-            filled_lines[:second_dash]
-            + [
-                "",
-                "## RAG GT overrides",
-                "",
-                "Samples with suspect dataset GT; scoring uses override answer. See `data/proof/rag/<dataset>/gt_overrides.json`.",
-                "",
-                *rag_overrides_lines,
-                "",
-            ]
-            + filled_lines[second_dash:]
-        )
     proof_dir.mkdir(parents=True, exist_ok=True)
     with open(md_path, "w", encoding="utf-8") as f:
         f.write("\n".join(filled_lines))

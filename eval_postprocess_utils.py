@@ -375,6 +375,51 @@ def _last_number_in_text(text: str | None) -> float | None:
         return None
 
 
+def _first_number_in_text(text: str | None) -> float | None:
+    """First number in text. Used to get the numeric value from gold answers like '$0.5 million'."""
+    if not text:
+        return None
+    match = re.search(r"-?\d+(?:\.\d+)?", str(text).replace(",", ""))
+    if not match:
+        return None
+    try:
+        return float(match.group(0))
+    except (ValueError, IndexError):
+        return None
+
+
+def normalize_rag_prediction_to_gold_scale(pred_answer: str | None, gt_answer: object) -> str | None:
+    """When prediction is a bare number and gold has a formatted financial answer ($X million), normalize
+    pred to that scale so exact_match and numerical_exact_match can pass (TAT-QA / FinQA scale binding).
+    E.g. pred '... 50 ...' and gt '$0.5 million' -> return '$0.5 million' (50/100 = 0.5).
+    Returns None if no normalization applied (caller keeps original pred_answer)."""
+    if not pred_answer or not gt_answer or not isinstance(gt_answer, str):
+        return None
+    gt_str = str(gt_answer).strip()
+    # Only when gold looks like formatted financial (e.g. $X million, $X billion)
+    if "$" not in gt_str or ("million" not in gt_str.lower() and "billion" not in gt_str.lower() and "thousand" not in gt_str.lower()):
+        return None
+    gold_num = _first_number_in_text(gt_str)
+    pred_num = _last_number_in_text(pred_answer)  # program execution puts answer at end
+    if gold_num is None or pred_num is None:
+        return None
+    # Find scale factor k such that pred_num/k ≈ gold_num (table in different units than display)
+    for k in (1, 10, 100, 1000, 0.1):
+        if k == 0:
+            continue
+        scaled = pred_num / k
+        if math.isclose(scaled, gold_num, rel_tol=0.02, abs_tol=0.02):
+            formatted = str(round(scaled, 6)).rstrip("0").rstrip(".")
+            normalized = re.sub(r"-?\d+(?:\.\d+)?", formatted, gt_str, count=1)
+            return normalized
+    # Same scale: pred_num ≈ gold_num
+    if math.isclose(pred_num, gold_num, rel_tol=0.02, abs_tol=0.02):
+        formatted = str(round(pred_num, 6)).rstrip("0").rstrip(".")
+        normalized = re.sub(r"-?\d+(?:\.\d+)?", formatted, gt_str, count=1)
+        return normalized
+    return None
+
+
 def prediction_used_back_calc(prediction: str | None) -> bool:
     """True if prediction appears to use percentage back-calculation (e.g. divide(..., %))."""
     if not prediction:
@@ -432,6 +477,33 @@ class FinQAUtils(RagUtils):
             return 1.0
         if p_last is not None and (_close(p_last / 100, r) or _close(p_last * 100, r)):
             return 1.0
+        return 0.0
+
+    def numerical_near_match(
+        self, prediction: str | None, reference: str | None, rel_tol: float = 0.01
+    ) -> float:
+        """1.0 if prediction is within rel_tol (default 1%) of reference numerically; else 0.0.
+        Uses same extraction as numerical_exact_match (first/last number, proportion/percentage).
+        Surfaces 'correct reasoning, wrong-but-reasonable operand' (e.g. table row vs prose) as near-correct."""
+        if self.numerical_exact_match(prediction, reference) == 1.0:
+            return 1.0
+        r = self._safe_float(reference)
+        if r is None:
+            return 0.0
+        ref_str = str(reference).strip().lower() if reference else ""
+        # Same extraction as numerical_exact_match: first number with scale, then last number for plain ref
+        p_first = self._extract_number_and_scale(prediction)
+        p_last = None
+        if "million" not in ref_str and "billion" not in ref_str and "thousand" not in ref_str:
+            p_last = _last_number_in_text(prediction)
+        for p_val in (p_first, p_last):
+            if p_val is None:
+                continue
+            denom = max(abs(r), 1e-9)
+            if abs(p_val - r) / denom <= rel_tol:
+                return 1.0
+            if abs(p_val / 100 - r) / denom <= rel_tol or abs(p_val * 100 - r) / denom <= rel_tol:
+                return 1.0
         return 0.0
 
     def exact_match(self, prediction: str | None, reference: str | None, **kwargs: object) -> float:

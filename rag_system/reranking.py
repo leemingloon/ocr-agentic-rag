@@ -34,18 +34,21 @@ class BGEReranker:
         Args:
             model_name: HuggingFace model name for reranking
         """
-        # Skip loading in debug to avoid OOM/segfault when embedding model already loaded (e.g. 16GB RAM)
-        if os.environ.get("RAG_DEBUG") == "1" or os.environ.get("RAG_SKIP_RERANKER", "").lower() in ("1", "true", "yes"):
-            print("⚠ Skipping reranker load (RAG_DEBUG or RAG_SKIP_RERANKER set; using retrieval order as-is)")
+        # Skip loading in debug to avoid OOM when embedding model already loaded (e.g. 16GB RAM).
+        # Set RAG_USE_RERANKER=1 to force loading even when RAG_DEBUG=1 (recommended for numeric tables).
+        force_reranker = os.environ.get("RAG_USE_RERANKER", "").strip().lower() in ("1", "true", "yes")
+        skip = (os.environ.get("RAG_DEBUG") == "1" and not force_reranker) or os.environ.get("RAG_SKIP_RERANKER", "").lower() in ("1", "true", "yes")
+        if skip:
+            print("Warning: Skipping reranker load (RAG_DEBUG or RAG_SKIP_RERANKER set; using retrieval order as-is)")
             self.model = None
             return
         try:
             print(f"Loading reranker model: {model_name}")
             self.model = CrossEncoder(model_name, max_length=512)
-            print("✓ Reranker loaded successfully")
+            print("Reranker loaded successfully")
         except Exception as e:
-            print(f"⚠ Could not load reranker: {e}")
-            print("⚠ Using fallback (no reranking)")
+            print(f"Warning: Could not load reranker: {e}")
+            print("Warning: Using fallback (no reranking)")
             self.model = None
     
     def rerank(
@@ -79,7 +82,7 @@ class BGEReranker:
         try:
             scores = self.model.predict(pairs)
         except Exception as e:
-            print(f"⚠ Reranking failed: {e}, returning original order")
+            print(f"Warning: Reranking failed: {e}, returning original order")
             return documents[:top_k]
         
         # Combine documents with scores
@@ -106,7 +109,7 @@ class BGEReranker:
         try:
             scores = self.model.predict(pairs)
         except Exception as e:
-            print(f"⚠ Reranking failed: {e}, returning original order")
+            print(f"Warning: Reranking failed: {e}, returning original order")
             return list(zip(documents[:top_k], [0.0] * min(len(documents), top_k)))
         if hasattr(scores, "tolist"):
             scores = scores.tolist()
