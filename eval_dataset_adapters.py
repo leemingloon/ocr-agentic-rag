@@ -2884,6 +2884,10 @@ class FinQAAdapter(BaseDatasetAdapter):
                     if max_samples_per_split is not None and idx >= max_samples_per_split:
                         break
                     query, gt_answer = _entry_to_query_and_answer(entry)
+                    qa = entry.get("qa") or {}
+                    gold_program = qa.get("program")
+                    if isinstance(gold_program, list):
+                        gold_program = str(gold_program) if gold_program else None
                     yield {
                         "input": {
                             "query": query,
@@ -2894,6 +2898,7 @@ class FinQAAdapter(BaseDatasetAdapter):
                             "score": None,
                             "query_id": idx,
                             "corpus_id": entry.get("id") or entry.get("filename"),
+                            **({"program": gold_program} if gold_program is not None else {}),
                         },
                         "metadata": {
                             "dataset": self.dataset_name,

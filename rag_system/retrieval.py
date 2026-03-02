@@ -10,6 +10,7 @@ CPU-only / low-RAM: set RAG_FAST_EMBEDDINGS=1 to use a small, fast model
 
 import os
 import re
+import sys
 import numpy as np
 import faiss
 from typing import List, Dict, Tuple, Optional
@@ -21,6 +22,33 @@ from llama_index.core.schema import TextNode
 _USE_FAST_EMBEDDINGS = os.environ.get("RAG_FAST_EMBEDDINGS", "").strip().lower() in ("1", "true", "yes")
 _FAST_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 _DEFAULT_MODEL = "BAAI/bge-m3"
+
+
+def _load_sentence_transformer_quiet(model_name: str, device: str, **kwargs) -> "SentenceTransformer":
+    """Load SentenceTransformer with progress/output suppressed so eval debug logs stay visible."""
+    prev_tqdm = os.environ.get("TQDM_DISABLE")
+    prev_hf = os.environ.get("HF_HUB_DISABLE_PROGRESS_BARS")
+    os.environ["TQDM_DISABLE"] = "1"
+    os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
+    _stdout, _stderr = sys.stdout, sys.stderr
+    try:
+        sys.stdout = open(os.devnull, "w")
+        sys.stderr = open(os.devnull, "w")
+        return SentenceTransformer(model_name, device=device, **kwargs)
+    finally:
+        if sys.stdout != _stdout and getattr(sys.stdout, "close", None):
+            sys.stdout.close()
+        if sys.stderr != _stderr and getattr(sys.stderr, "close", None):
+            sys.stderr.close()
+        sys.stdout, sys.stderr = _stdout, _stderr
+        if prev_tqdm is None:
+            os.environ.pop("TQDM_DISABLE", None)
+        else:
+            os.environ["TQDM_DISABLE"] = prev_tqdm
+        if prev_hf is None:
+            os.environ.pop("HF_HUB_DISABLE_PROGRESS_BARS", None)
+        else:
+            os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = prev_hf
 
 
 def _expand_query_for_totals(query: str) -> Optional[str]:
@@ -40,6 +68,28 @@ def _expand_query_for_totals(query: str) -> Optional[str]:
             + " total revenue consolidated statements of operations income statement statements of operations"
         )
     return None
+
+
+def _expand_query_for_table_year(query: str) -> Optional[str]:
+    """Expand query for table/year questions so embedding matches balance sheet table headers and years.
+    Prepends keywords like 'balance sheet', years, and line-item terms to improve retrieval."""
+    if not query or not isinstance(query, str):
+        return None
+    q = query.strip().lower()
+    # Require at least one year mention
+    years = list(re.findall(r"\b(19|20)\d{2}\b", q))
+    if not years:
+        return None
+    # Table/section cues
+    if "balance sheet" in q or "consolidated balance" in q or "carrying amount" in q:
+        table_hint = "balance sheet"
+    elif "income" in q or "revenue" in q or "operations" in q or "statement" in q:
+        table_hint = "income statement"
+    else:
+        table_hint = "table"
+    year_str = " and ".join(sorted(set(years))[:3])  # e.g. "2007 and 2008"
+    primer = f"Extract row values for {year_str} from the {table_hint}. "
+    return primer + query
 
 
 def _chunk_contains_direct_total(chunk: TextNode) -> bool:
@@ -119,15 +169,15 @@ class HybridRetriever:
         model_to_load = _FAST_MODEL if _USE_FAST_EMBEDDINGS else (embedding_model or _DEFAULT_MODEL)
         if _USE_FAST_EMBEDDINGS:
             print(f"[RAG] Using fast CPU embedding model: {model_to_load} (RAG_FAST_EMBEDDINGS=1)")
-        # Load on CPU or GPU (GPU recommended for building large indices, e.g. Colab)
+        # Load on CPU or GPU (progress bars disabled so eval debug logs stay visible)
         print(f"Loading embedding model: {model_to_load} (device={self._device})")
         try:
             if self._device == "cuda":
-                self.embed_model = SentenceTransformer(model_to_load, device="cuda")
+                self.embed_model = _load_sentence_transformer_quiet(model_to_load, "cuda")
             else:
-                self.embed_model = SentenceTransformer(model_to_load, device="cpu", backend="onnx")
+                self.embed_model = _load_sentence_transformer_quiet(model_to_load, "cpu", backend="onnx")
         except Exception:
-            self.embed_model = SentenceTransformer(model_to_load, device=self._device)
+            self.embed_model = _load_sentence_transformer_quiet(model_to_load, self._device)
         
         # Will be initialized when index is built
         self.bm25_index = None
@@ -204,9 +254,10 @@ class HybridRetriever:
         _rag_debug = os.environ.get("RAG_DEBUG") == "1"
 
         # Expand query for "total operating expenses" / "total revenue" so we surface consolidated statement chunks
-        search_query = _expand_query_for_totals(query) or query
+        # Also expand for table/year (balance sheet, years) to improve embedding match to table headers
+        search_query = _expand_query_for_table_year(query) or _expand_query_for_totals(query) or query
         if _rag_debug and search_query != query:
-            print(f"[DEBUG] retrieval: expanded query for totals (len {len(query)} -> {len(search_query)})")
+            print(f"[DEBUG] retrieval: expanded query (len {len(query)} -> {len(search_query)})")
 
         # When corpus_id is set (e.g. FinQA), restrict retrieval to that document first so we don't
         # miss its chunks (they may rank outside top-k when competing with the full index).
@@ -296,6 +347,19 @@ class HybridRetriever:
             if _rag_debug:
                 k_final = top_k if top_k is not None else self.top_k_final
                 print(f"[DEBUG] retrieval: corpus_id-restricted returned {len(fused_results)} chunks (requested top_k={k_final})")
+            # Hybrid fallback: when corpus-restricted returns 0 (e.g. section filter too strict or weak match), run global retrieval and keep doc chunks so we still return something from the right document
+            if len(fused_results) == 0 and corpus_id_indices:
+                fallback_k = max(50, (top_k or self.top_k_final) * 2)
+                sparse_global = self._sparse_retrieve(search_query)
+                dense_global = self._dense_retrieve(search_query)
+                fused_global = self._reciprocal_rank_fusion(sparse_global, dense_global)
+                idx_set_doc = set(corpus_id_indices)
+                # Keep only chunks that belong to this document (by index: chunks in fused_global are self.chunks from global ranking)
+                chunk_idx_in_corpus = {id(c): i for i, c in enumerate(self.chunks)}
+                fused_results = [(c, s) for c, s in fused_global if chunk_idx_in_corpus.get(id(c)) in idx_set_doc]
+                fused_results = fused_results[:fallback_k]
+                if _rag_debug:
+                    print(f"[DEBUG] retrieval: hybrid fallback (global then filter to doc) returned {len(fused_results)} chunks")
         else:
             # Step 1: Sparse retrieval (BM25)
             sparse_results = self._sparse_retrieve(search_query)
@@ -456,11 +520,11 @@ class HybridRetriever:
             meta = json.load(f)
         model_name = meta.get("embedding_model", _DEFAULT_MODEL)
         dim = meta["dimension"]
-        # Load embedding model for query encoding (CPU is fine for single-query)
+        # Load embedding model for query encoding (progress bars disabled so eval debug logs stay visible)
         use_cuda = (device == "cuda")
         if device is None:
             use_cuda = False
-        self.embed_model = SentenceTransformer(model_name, device="cuda" if use_cuda else "cpu")
+        self.embed_model = _load_sentence_transformer_quiet(model_name, "cuda" if use_cuda else "cpu")
         # Load FAISS
         self.faiss_index = faiss.read_index(str(p / "faiss.index"))
         with open(p / "chunk_texts.pkl", "rb") as f:

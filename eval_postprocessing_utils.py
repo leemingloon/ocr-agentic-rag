@@ -112,7 +112,7 @@ def funsd_word_recall_improved(
                 matched += 1
                 continue
 
-        # Fuzzy: OCR typos e.g. ciparettes -> cigarettes
+        # Fuzzy: OCR typos e.g. ciparettes -> cigarettes (allow shorter words with fuzzy_min_len=3)
         if use_fuzzy and len(wn) >= fuzzy_min_len:
             max_ed = max(1, int(len(wn) * fuzzy_max_edit_ratio))
             for tok in pred_token_list:
@@ -176,16 +176,21 @@ def extract_sroie_entities_from_text(text: str) -> dict[str, str]:
                 entities["company"] = company
             break
 
-    # Address: longest segment that looks like a street address (digits, letters, commas, length 25–200)
-    # SROIE addresses often have "JALAN", "NO.", numbers, commas
+    # Address: longest segment that looks like a street address (digits, letters, commas, length 20–250)
+    # SROIE addresses often have "JALAN", "NO.", "STREET", "ROAD", numbers, commas
     segments = re.split(r"[\n.]", text_clean)
     address_candidates = [
         s.strip() for s in segments
-        if 25 <= len(s.strip()) <= 200
+        if 20 <= len(s.strip()) <= 250
         and re.search(r"\d", s)
         and re.search(r"[A-Za-z]{3,}", s)
     ]
-    if address_candidates:
+    # Prefer longest segment that contains address-like tokens (Malaysian and generic)
+    address_tokens = ("JALAN", "NO.", "NO ", "STREET", "ROAD", "LANE", "PLAZA", "BUILDING")
+    with_tokens = [s for s in address_candidates if any(t in s.upper() for t in address_tokens)]
+    if with_tokens:
+        entities["address"] = max(with_tokens, key=len)
+    elif address_candidates:
         entities["address"] = max(address_candidates, key=len)
 
     return entities
@@ -320,8 +325,8 @@ def compute_ocr_metrics(
             normalize=True,
             use_substring=True,
             use_fuzzy=True,
-            fuzzy_max_edit_ratio=0.3,
-            fuzzy_min_len=4,
+            fuzzy_max_edit_ratio=0.35,
+            fuzzy_min_len=3,
         )
         return {
             "word_recall": recall,

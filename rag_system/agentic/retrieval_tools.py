@@ -243,7 +243,8 @@ class ToolRegistry:
                 "error": "Retriever not initialized",
                 "success": False,
             }
-        k = min(30, top_k * 3) if corpus_id else top_k
+        # Use larger k for corpus-scoped retrieval (50) so table/year chunks are not missed; otherwise use top_k (default 5)
+        k = 50 if corpus_id else (top_k or 5)
         section_types = _infer_section_types_for_query(query)
         try:
             results = self.retriever.retrieve(
