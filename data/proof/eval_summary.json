@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-02T14:31:30.502771+08:00",
+  "timestamp": "2026-03-02T15:22:14.865063+08:00",
   "overview": {
     "credit_risk_pd": {
       "sample_count_total": 2686,
@@ -237,7 +237,7 @@
       },
       "model_class": "PDModel",
       "backbone": "xgboost",
-      "timestamp": "2026-03-02T12:46:26.457415+08:00"
+      "timestamp": "2026-03-02T15:22:14.847063+08:00"
     },
     "rag": {
       "category": "rag",
