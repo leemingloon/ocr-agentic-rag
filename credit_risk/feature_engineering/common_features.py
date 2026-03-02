@@ -5,13 +5,18 @@ Shared by classical (XGBoost) and quantum (QSVM, VQC/QNN) PD models. Consumes ei
 - A pandas DataFrame with LoanStats3a-style columns (from CSV), or
 - A dict of raw fields (e.g. parsed from LendingClub benchmark query text).
 
-Fifteen high-impact features: interactions, ratios, binning, domain-inspired.
-Designed for PD prediction and compatible with streaming evaluation (one row at a time).
+Two modes:
+- build_features_from_dict: 15 features (includes grade_num, int_rate_high; legacy/benchmark).
+- build_features_from_dict_no_leakage: bank-grade, origination-only features (excludes grade,
+  sub_grade, int_rate as "using the answer"; adds revol_util_bucket, credit_history_months,
+  purpose_risk_code, home_ownership_risk_code, dti_to_income, payment_to_income_monthly,
+  purpose_x_home_ownership). Use for training and production PD.
 """
 
 from __future__ import annotations
 
 import re
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
@@ -41,6 +46,8 @@ QUERY_FIELD_ALIASES = {
     "revolvingutilizationrate": "revol_util",
     "totalaccounts": "total_acc",
     "verificationstatus": "verification_status",
+    "earliestcrline": "earliest_cr_line",
+    "issuedate": "issue_d",
 }
 
 
@@ -61,18 +68,31 @@ def _safe_float(x: Any) -> float:
 def _parse_lendingclub_query_text(query: str) -> Dict[str, Any]:
     """
     Parse LendingClub benchmark query string into a flat dict of raw fields.
-    Example: "addressState: ga, annualIncome: 66400.00, ..." -> {"addr_state": "ga", "annual_inc": 66400.0, ...}
+    Benchmark format often has "Text: ' addressState: fl, annualIncome: 97000, ... '." — we extract
+    only that segment so key: value pairs are parsed correctly (no spurious matches from "Answer:", etc.).
     """
     out: Dict[str, Any] = {}
     if not query or not isinstance(query, str):
         return out
+    # Extract the feature block between "Text: '" and "'." or "'\n" if present
+    text_match = re.search(r"Text:\s*['\"]([^'\"]+)['\"]", query, re.IGNORECASE | re.DOTALL)
+    parse_text = text_match.group(1).strip() if text_match else query
     # Extract "key: value" pairs; key may be camelCase, value numeric or string
     pattern = r"(\w+)\s*:\s*([^,\n]+)"
-    for m in re.finditer(pattern, query, re.IGNORECASE):
+    for m in re.finditer(pattern, parse_text, re.IGNORECASE):
         key_raw = m.group(1).strip().lower()
-        val_raw = m.group(2).strip().strip("'\"")
+        val_raw = m.group(2).strip().strip("'\" ")
         canonical = QUERY_FIELD_ALIASES.get(key_raw, key_raw)
-        if canonical in ("addr_state", "grade", "home_ownership", "verification_status", "purpose", "application_type"):
+        if canonical in (
+            "addr_state",
+            "grade",
+            "home_ownership",
+            "verification_status",
+            "purpose",
+            "application_type",
+            "issue_d",
+            "earliest_cr_line",
+        ):
             out[canonical] = val_raw
         else:
             out[canonical] = _safe_float(val_raw)
@@ -106,6 +126,64 @@ def _grade_to_ordinal(s: Any) -> float:
     return np.nan
 
 
+def _parse_lendingclub_date(s: Any) -> Optional[datetime]:
+    """Parse LendingClub date string (e.g. 'Dec-2018', 'Jan-2015') to datetime. Returns None if invalid."""
+    if s is None or (isinstance(s, float) and np.isnan(s)):
+        return None
+    t = str(s).strip()
+    if not t:
+        return None
+    try:
+        return datetime.strptime(t, "%b-%Y")
+    except ValueError:
+        return None
+
+
+# Purpose risk: higher = typically more default-prone (domain heuristic)
+PURPOSE_RISK = {
+    "debt_consolidation": 2,
+    "credit_card": 2,
+    "other": 1,
+    "home_improvement": 1,
+    "major_purchase": 1,
+    "small_business": 2,
+    "car": 1,
+    "medical": 1,
+    "wedding": 0,
+    "moving": 1,
+    "vacation": 0,
+    "house": 1,
+    "renewable_energy": 1,
+    "educational": 1,
+}
+
+# Home ownership risk: rent > mortgage > own (typical ordering)
+HOME_OWNERSHIP_RISK = {
+    "rent": 2,
+    "mortgage": 1,
+    "own": 0,
+    "any": 0,
+    "none": 0,
+    "other": 1,
+}
+
+
+def _purpose_risk_code(s: Any) -> float:
+    """Map purpose string to numeric risk code (0-2). Missing -> 1."""
+    if s is None or (isinstance(s, float) and np.isnan(s)):
+        return 1.0
+    key = str(s).strip().lower().replace(" ", "_")
+    return float(PURPOSE_RISK.get(key, 1))
+
+
+def _home_ownership_risk_code(s: Any) -> float:
+    """Map home_ownership to numeric risk code. Missing -> 1."""
+    if s is None or (isinstance(s, float) and np.isnan(s)):
+        return 1.0
+    key = str(s).strip().lower()
+    return float(HOME_OWNERSHIP_RISK.get(key, 1))
+
+
 def build_features_from_dict(raw: Dict[str, Any]) -> Dict[str, float]:
     """
     Build 15 PD features from a single row (dict of raw fields).
@@ -134,11 +212,22 @@ def build_features_from_dict(raw: Dict[str, Any]) -> Dict[str, float]:
     # 1. Debt-to-income (use as-is if present)
     dti_ratio = dti if not np.isnan(dti) else np.nan
 
-    # 2. Installment-to-income ratio
+    # 2. Installment-to-income ratio (annual: installment / annual_inc)
     if annual_inc and annual_inc > 0 and not np.isnan(installment):
         installment_to_income = installment / annual_inc
     else:
         installment_to_income = np.nan
+
+    # 2b. Payment burden: monthly payment / monthly income = installment / (annual_inc/12)
+    if annual_inc and annual_inc > 0 and not np.isnan(installment):
+        payment_to_income_monthly = (installment * 12.0) / annual_inc
+    else:
+        payment_to_income_monthly = np.nan
+
+    # 2c. DTI as leverage (already a ratio; normalize to decimal if stored as percent)
+    dti_to_income = dti_ratio if not np.isnan(dti_ratio) else np.nan
+    if dti_to_income is not None and not np.isnan(dti_to_income) and dti_to_income > 1.0:
+        dti_to_income = dti_to_income / 100.0  # e.g. 18.5 -> 0.185
 
     # 3. FICO mid (average of low/high)
     if not np.isnan(fico_low) and not np.isnan(fico_high):
@@ -204,7 +293,9 @@ def build_features_from_dict(raw: Dict[str, Any]) -> Dict[str, float]:
 
     return {
         "dti_ratio": dti_ratio,
+        "dti_to_income": dti_to_income,
         "installment_to_income": installment_to_income,
+        "payment_to_income_monthly": payment_to_income_monthly,
         "fico_mid": fico_mid,
         "revol_util_pct": revol_util_pct,
         "loan_to_income": loan_to_income,
@@ -219,6 +310,77 @@ def build_features_from_dict(raw: Dict[str, Any]) -> Dict[str, float]:
         "dti_high": dti_high,
         "composite_risk": composite_risk,
     }
+
+
+# Ordered list of feature names for no-leakage (origination-only) PD model.
+FEATURE_NAMES_NO_LEAKAGE = [
+    "dti_ratio",
+    "dti_to_income",
+    "installment_to_income",
+    "payment_to_income_monthly",
+    "fico_mid",
+    "revol_util_pct",
+    "revol_util_bucket",
+    "loan_to_income",
+    "emp_months",
+    "delinq_flag",
+    "inq_6m",
+    "acc_util",
+    "revol_bal_log",
+    "fico_subprime",
+    "dti_high",
+    "credit_history_months",
+    "purpose_risk_code",
+    "home_ownership_risk_code",
+    "purpose_x_home_ownership",
+]
+
+
+def build_features_from_dict_no_leakage(raw: Dict[str, Any]) -> Dict[str, float]:
+    """
+    Build origination-only PD features (no grade, sub_grade, int_rate).
+    Adds: revol_util_bucket, credit_history_months, purpose_risk_code, home_ownership_risk_code.
+    Use for training and production to avoid leakage and "using the answer".
+    """
+    feats = build_features_from_dict(raw)
+    get = lambda k: raw.get(k, np.nan)
+    getf = lambda k: _safe_float(get(k))
+
+    revol_util = getf("revol_util")
+    revol_util_pct = feats["revol_util_pct"]
+    if revol_util_pct is not None and not np.isnan(revol_util_pct):
+        if revol_util_pct < 0.3:
+            revol_util_bucket = 0.0
+        elif revol_util_pct <= 0.6:
+            revol_util_bucket = 1.0
+        else:
+            revol_util_bucket = 2.0
+    else:
+        revol_util_bucket = np.nan
+
+    issue_d = _parse_lendingclub_date(get("issue_d"))
+    earliest_cr = _parse_lendingclub_date(get("earliest_cr_line"))
+    if issue_d and earliest_cr:
+        delta = (issue_d - earliest_cr).days
+        credit_history_months = delta / 30.4375  # approximate month length
+        if credit_history_months < 0:
+            credit_history_months = 0.0
+    else:
+        credit_history_months = np.nan
+
+    purpose_risk_code = _purpose_risk_code(get("purpose"))
+    home_ownership_risk_code = _home_ownership_risk_code(get("home_ownership"))
+    purpose_x_home_ownership = purpose_risk_code * home_ownership_risk_code
+
+    out = {k: feats[k] for k in FEATURE_NAMES_NO_LEAKAGE if k in feats}
+    out["revol_util_bucket"] = revol_util_bucket
+    out["credit_history_months"] = credit_history_months
+    out["purpose_risk_code"] = purpose_risk_code
+    out["home_ownership_risk_code"] = home_ownership_risk_code
+    out["purpose_x_home_ownership"] = purpose_x_home_ownership
+    # dti_to_income and payment_to_income_monthly come from feats (build_features_from_dict)
+    # Ensure order and only no-leakage keys (drop grade_num, int_rate_high, composite_risk)
+    return {k: out[k] for k in FEATURE_NAMES_NO_LEAKAGE if k in out}
 
 
 def build_features_from_dataframe(df: pd.DataFrame) -> pd.DataFrame:
@@ -236,18 +398,39 @@ def build_features_from_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def build_features_from_dataframe_no_leakage(df: pd.DataFrame) -> pd.DataFrame:
+    """Build origination-only (no-leakage) PD features from a DataFrame."""
+    raw_list = []
+    for _, row in df.iterrows():
+        raw = row.to_dict()
+        raw_list.append(build_features_from_dict_no_leakage(raw))
+    return pd.DataFrame(raw_list)
+
+
 def get_feature_names() -> List[str]:
     """Return the ordered list of feature names produced by build_*."""
     return list(build_features_from_dict({}).keys())
 
 
-def parse_query_to_features(query: str, fill_missing: float = 0.0) -> Dict[str, float]:
+def get_feature_names_no_leakage() -> List[str]:
+    """Return the ordered list of origination-only (no-leakage) feature names."""
+    return list(FEATURE_NAMES_NO_LEAKAGE)
+
+
+def parse_query_to_features(
+    query: str, fill_missing: float = 0.0, use_no_leakage: bool = False
+) -> Dict[str, float]:
     """
     Parse LendingClub benchmark query text and return a feature dict suitable for predict_pd.
     Replaces NaN with fill_missing so the model always receives numeric values.
+    If use_no_leakage=True, returns origination-only features (same set as get_feature_names_no_leakage).
     """
     raw = _parse_lendingclub_query_text(query)
-    feats = build_features_from_dict(raw)
+    feats = (
+        build_features_from_dict_no_leakage(raw)
+        if use_no_leakage
+        else build_features_from_dict(raw)
+    )
     for k in feats:
         v = feats[k]
         if isinstance(v, (float, np.floating)) and np.isnan(v):

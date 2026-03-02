@@ -1,6 +1,42 @@
 {
-  "timestamp": "2026-03-01T08:31:34.743112+08:00",
+  "timestamp": "2026-03-02T11:48:43.459267+08:00",
   "overview": {
+    "credit_risk_pd": {
+      "sample_count_total": 6,
+      "sample_count_by_dataset": {
+        "LendingClub": 6
+      },
+      "metrics_breakdown": {
+        "auc_roc_mean": {
+          "value": 0.5,
+          "n_samples": 6,
+          "datasets": [
+            "LendingClub"
+          ]
+        },
+        "f1_mean": {
+          "value": 0.0,
+          "n_samples": 6,
+          "datasets": [
+            "LendingClub"
+          ]
+        },
+        "precision_mean": {
+          "value": 0.0,
+          "n_samples": 6,
+          "datasets": [
+            "LendingClub"
+          ]
+        },
+        "recall_mean": {
+          "value": 0.0,
+          "n_samples": 6,
+          "datasets": [
+            "LendingClub"
+          ]
+        }
+      }
+    },
     "rag": {
       "sample_count_total": 23,
       "sample_count_by_dataset": {
@@ -107,6 +143,102 @@
     }
   },
   "categories": {
+    "credit_risk_pd": {
+      "category": "credit_risk_PD",
+      "sample_count": 6,
+      "sample_count_by_dataset": {
+        "LendingClub": 6
+      },
+      "datasets": [
+        "LendingClub"
+      ],
+      "datasets_breakdown": [
+        {
+          "dataset": "LendingClub",
+          "sample_count": 6,
+          "splits_breakdown": [
+            {
+              "split": "test",
+              "sample_count": 2,
+              "gt_override_count": 0,
+              "metrics": {
+                "auc_roc_mean": 0.5,
+                "f1_mean": 0.0,
+                "precision_mean": 0.0,
+                "recall_mean": 0.0
+              }
+            },
+            {
+              "split": "train",
+              "sample_count": 2,
+              "gt_override_count": 0,
+              "metrics": {
+                "auc_roc_mean": 0.5,
+                "f1_mean": 0.0,
+                "precision_mean": 0.0,
+                "recall_mean": 0.0
+              }
+            },
+            {
+              "split": "valid",
+              "sample_count": 2,
+              "gt_override_count": 0,
+              "metrics": {
+                "auc_roc_mean": 0.5,
+                "f1_mean": 0.0,
+                "precision_mean": 0.0,
+                "recall_mean": 0.0
+              }
+            }
+          ],
+          "weighted_metrics": {
+            "auc_roc_mean": 0.5,
+            "f1_mean": 0.0,
+            "precision_mean": 0.0,
+            "recall_mean": 0.0
+          }
+        }
+      ],
+      "weighted_metrics": {
+        "auc_roc_mean": 0.5,
+        "f1_mean": 0.0,
+        "precision_mean": 0.0,
+        "recall_mean": 0.0
+      },
+      "metrics_breakdown": {
+        "auc_roc_mean": {
+          "value": 0.5,
+          "n_samples": 6,
+          "datasets": [
+            "LendingClub"
+          ]
+        },
+        "f1_mean": {
+          "value": 0.0,
+          "n_samples": 6,
+          "datasets": [
+            "LendingClub"
+          ]
+        },
+        "precision_mean": {
+          "value": 0.0,
+          "n_samples": 6,
+          "datasets": [
+            "LendingClub"
+          ]
+        },
+        "recall_mean": {
+          "value": 0.0,
+          "n_samples": 6,
+          "datasets": [
+            "LendingClub"
+          ]
+        }
+      },
+      "model_class": "PDModel",
+      "backbone": "xgboost",
+      "timestamp": "2026-03-02T11:48:43.401274+08:00"
+    },
     "rag": {
       "category": "rag",
       "sample_count": 23,

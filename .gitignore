@@ -43,6 +43,7 @@ env/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+notebooks/runs/
 
 # Models
 models/*.onnx
