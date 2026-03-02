@@ -55,6 +55,10 @@ def serialize_table_to_rows(
 ) -> List[str]:
     """Turn a table (list of rows) into one self-contained string per data row.
 
+    Table row integrity: each row is one string with ALL columns (no mid-row split).
+    Chunk boundaries must fall between complete rows so that multi-year columns
+    (e.g. 2018 and 2017) stay in the same chunk (see HII/2018/page_64 backlog portion).
+
     If first_row_is_header, table[0] is the column headers and table[1:] are data rows;
     each data row is serialized with serialize_table_row(headers, row, row_label=row[0]).
     Returns a list of strings, one per data row, suitable for one chunk per row or

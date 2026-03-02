@@ -3325,8 +3325,33 @@ class LendingClubAdapter(BaseDatasetAdapter):
         only_splits_with_gt=False,
         **kwargs,
     ):
-        """Stream samples from parquet (test/valid per FILE_MAPPING). One row at a time; parse query text to features."""
+        """Stream samples from parquet (test/valid per FILE_MAPPING). One row at a time; parse query text to features.
+        When max_samples_per_split is set, samples are drawn in a stratified way (both gold=0 and gold=1) so that
+        AUC-ROC is defined (otherwise the first N rows might be single-class and auc_roc_mean would be 0.5).
+        """
         from credit_risk.feature_engineering.common_features import parse_query_to_features
+        import random
+
+        def _row_to_sample(row, split: str, idx: int):
+            query = row.get("query") or ""
+            gold = row.get("gold")
+            answer = row.get("answer")
+            if gold is not None and hasattr(gold, "item"):
+                gold = int(gold.item())
+            elif answer is not None:
+                gold = 1 if str(answer).strip().lower() in ("chargedoff", "chargeoff") else 0
+            else:
+                gold = None
+            features = parse_query_to_features(query, use_no_leakage=True)
+            return {
+                "input": {"features": features, "query": query},
+                "ground_truth": {"label": gold} if gold is not None else {},
+                "metadata": {
+                    "dataset": self.dataset_name,
+                    "split": split,
+                    "sample_id": row.get("id") or f"{split}_{idx}",
+                },
+            }
 
         splits_to_load = (
             [dataset_split] if dataset_split is not None
@@ -3339,26 +3364,45 @@ class LendingClubAdapter(BaseDatasetAdapter):
             split_path = Path().cwd() / self.FILE_MAPPING[split]["dataset_path"]
             if not split_path.exists():
                 continue
+
+            if max_samples_per_split is not None and max_samples_per_split > 0:
+                # Stratified sampling: collect both classes so AUC is defined
+                cap = min(2 * max_samples_per_split + 5000, 100_000)
+                neg, pos = [], []
+                for idx, row in enumerate(self._arrow_row_stream(split_path, max_samples=cap)):
+                    gold = row.get("gold")
+                    if gold is not None and hasattr(gold, "item"):
+                        gold = int(gold.item())
+                    elif row.get("answer") is not None:
+                        gold = 1 if str(row.get("answer", "")).strip().lower() in ("chargedoff", "chargeoff") else 0
+                    else:
+                        gold = None
+                    if gold is None:
+                        continue
+                    sample = _row_to_sample(row, split, idx)
+                    if gold == 1:
+                        pos.append(sample)
+                    else:
+                        neg.append(sample)
+                    if len(pos) + len(neg) >= max_samples_per_split * 2:
+                        break
+                # Yield up to max_samples_per_split, balancing both classes
+                n_neg = min(len(neg), (max_samples_per_split + 1) // 2)
+                n_pos = min(len(pos), max_samples_per_split - n_neg)
+                if n_neg + n_pos < max_samples_per_split and (len(neg) + len(pos)) >= max_samples_per_split:
+                    n_neg = min(len(neg), max_samples_per_split - n_pos)
+                rng = random.Random(42)
+                neg_sub = rng.sample(neg, n_neg) if len(neg) > n_neg else neg
+                pos_sub = rng.sample(pos, n_pos) if len(pos) > n_pos else pos
+                for s in (neg_sub + pos_sub)[:max_samples_per_split]:
+                    yield s
+                    emitted += 1
+                    if max_samples_per_category is not None and emitted >= max_samples_per_category:
+                        return
+                continue
+
             for idx, row in enumerate(self._arrow_row_stream(split_path, max_samples=max_samples_per_split)):
-                query = row.get("query") or ""
-                gold = row.get("gold")
-                answer = row.get("answer")
-                if gold is not None and hasattr(gold, "item"):
-                    gold = int(gold.item())
-                elif answer is not None:
-                    gold = 1 if str(answer).strip().lower() in ("chargedoff", "chargeoff") else 0
-                else:
-                    gold = None
-                features = parse_query_to_features(query, use_no_leakage=True)
-                yield {
-                    "input": {"features": features, "query": query},
-                    "ground_truth": {"label": gold} if gold is not None else {},
-                    "metadata": {
-                        "dataset": self.dataset_name,
-                        "split": split,
-                        "sample_id": row.get("id") or f"{split}_{idx}",
-                    },
-                }
+                yield _row_to_sample(row, split, idx)
                 emitted += 1
                 if max_samples_per_category is not None and emitted >= max_samples_per_category:
                     return

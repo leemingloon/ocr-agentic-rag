@@ -887,7 +887,9 @@ def run_model(sample: dict, category: str, dataset_name: str, debug: bool = Fals
         features = sample_input.get("features") or {}
         try:
             repo_root = Path(__file__).resolve().parent
-            model_path = repo_root / "models" / "pd" / "pd_model_local_v1.pkl"
+            v2_path = repo_root / "models" / "pd" / "pd_model_local_v2.pkl"
+            v1_path = repo_root / "models" / "pd" / "pd_model_local_v1.pkl"
+            model_path = v2_path if v2_path.exists() else v1_path
             cache_key = str(model_path)
             if cache_key not in _PD_MODEL_CACHE:
                 from credit_risk.models.pd_model import PDModel
@@ -903,8 +905,10 @@ def run_model(sample: dict, category: str, dataset_name: str, debug: bool = Fals
             else:
                 pd_prob = 0.0
         except Exception as e:
+            print(f"[PD inference failed] {type(e).__name__}: {e}")
             if debug:
-                print(f"[DEBUG] PD inference failed: {e}")
+                import traceback
+                traceback.print_exc()
             pd_prob = 0.0
         binary_pred = 1 if pd_prob >= 0.5 else 0
         return {
@@ -1260,20 +1264,6 @@ def _rag_debug_index_diagnostic(
         print(f"[DEBUG] RAG index diagnostic: implied values={implied_vals[:6]} → no chunk contains them (missing row in index)")
 
 
-def _load_rag_chunking_failures(dataset_name: str) -> dict[str, dict]:
-    """Load RAG chunking failures from data/proof/rag/<dataset>/chunking_failures.json.
-    Keys are sample_id; values are {reason, gt, recoverable}. Used to tag known chunking bugs."""
-    path = Path("data/proof") / "rag" / dataset_name.lower() / "chunking_failures.json"
-    if not path.exists():
-        return {}
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return {str(k): v for k, v in (data or {}).items() if isinstance(v, dict)}
-    except Exception:
-        return {}
-
-
 def _load_rag_gt_overrides(dataset_name: str) -> dict[str, str]:
     """Load RAG GT overrides from data/proof/rag/<dataset>/gt_overrides.json.
     Values may be string (override answer) or dict with 'answer' or 'override' key."""
@@ -1392,9 +1382,6 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
                     dataset_name, corpus_id_debug, gt_answer, full_context, sample_id=sample_id_debug
                 )
 
-    chunking_failures = _load_rag_chunking_failures(dataset_name)
-    chunking_failure_tag = 1 if (sample_id and sample_id in chunking_failures) else 0
-
     return {
         "program_accuracy": utils.program_accuracy(pred_answer, gt_answer),
         "numerical_exact_match": num_match,
@@ -1402,7 +1389,6 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
         "exact_match": exact,
         "used_back_calc": 1 if prediction_used_back_calc(pred_answer) else 0,
         "gt_override": 1 if gt_override_used else 0,
-        "chunking_failure": chunking_failure_tag,
     }
 
 
@@ -1469,8 +1455,8 @@ def _samples_filename(dataset_name: str, split_name: str) -> str:
 
 # Diagnostic-only per-sample keys: do not include in split/dataset _mean aggregation (not "higher is better")
 METRIC_KEYS_EXCLUDE_FROM_AGGREGATE = {"used_back_calc"}
-# Keys where missing value is treated as 0 so mean is over ALL samples (e.g. gt_override, chunking_failure: only some rows have it after it was added)
-METRIC_KEYS_MISSING_AS_ZERO = {"gt_override", "chunking_failure"}
+# Keys where missing value is treated as 0 so mean is over ALL samples (e.g. gt_override: only some rows have it)
+METRIC_KEYS_MISSING_AS_ZERO = {"gt_override"}
 
 
 def aggregate_metrics(per_sample_scores: list[dict[str, float]]) -> dict[str, float]:
@@ -1598,6 +1584,7 @@ def evaluate_dataset(
     debug=False,
     generate_png=False,
     generate_metadata=False,
+    force_reeval=False,
 ):
     """Streamed evaluation over adapter.load_split(...), row-by-row.
 
@@ -1606,6 +1593,8 @@ def evaluate_dataset(
     When only_gt=False: load all splits from FILE_MAPPING (samples without GT are
     still skipped for inference but splits are streamed).
     When dataset_split is set (e.g. from --split dev): only load and evaluate that split.
+    When force_reeval=True: re-run model/API for every sample (ignore existing per_sample
+    predictions). Use after changing prompts or index to get new predictions.
     """
     # Pass category limit as None so the adapter keeps streaming rows; we enforce
     # max_samples_per_category in the loop by breaking after that many *evaluated* samples.
@@ -1688,11 +1677,12 @@ def evaluate_dataset(
         sample_id = str(sample.get("metadata", {}).get("sample_id"))
 
         # Lazily load already-evaluated IDs for this split (only from per_sample; do NOT skip samples in prediction_error.json so they get re-evaluated)
+        # When force_reeval=True, do not load existing IDs so every sample runs (new predictions).
         if split_name not in existing_ids_by_split:
             split_dir = dataset_proof_dir / split_name
             per_sample_path = split_dir / _samples_filename(dataset_name, split_name)
             ids = set()
-            if per_sample_path.exists():
+            if not force_reeval and per_sample_path.exists():
                 try:
                     with open(per_sample_path, "r", encoding="utf-8") as f:
                         for row in json.load(f):
@@ -1701,8 +1691,8 @@ def evaluate_dataset(
                     pass
             existing_ids_by_split[split_name] = ids
 
-        # Skip if this sample_id was already evaluated in a previous run
-        if sample_id in existing_ids_by_split.get(split_name, set()):
+        # Skip if this sample_id was already evaluated in a previous run (unless force_reeval)
+        if not force_reeval and sample_id in existing_ids_by_split.get(split_name, set()):
             if debug:
                 print(
                     f"[DEBUG] {dataset_name} sample={sample_id} split={split_name} "
@@ -2259,6 +2249,7 @@ def main(
     debug=False,
     generate_png=False,
     generate_metadata=False,
+    force_reeval=False,
 ):
     # Migrate existing per_sample files: move prediction_error rows to prediction_error.json
     migrate_prediction_errors_from_per_sample(Path("data/proof"))
@@ -2316,6 +2307,7 @@ def main(
                 debug=debug,
                 generate_png=generate_png,
                 generate_metadata=generate_metadata,
+                force_reeval=force_reeval,
             )
             if summary and summary["sample_count"] > 0:
                 dataset_summaries.append(summary)
@@ -2770,7 +2762,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--reevaluate_only",
         action="store_true",
-        help="Re-run evaluation on existing per-sample predictions only (no model/API). Updates metrics in samples JSON and avg files. Requires --category and --dataset.",
+        help="Re-run evaluation on existing per-sample predictions only (no model/API). Updates metrics in samples JSON and avg files. Does NOT re-call the model. Requires --category and --dataset.",
+    )
+    parser.add_argument(
+        "--force_reeval",
+        action="store_true",
+        help="Re-run model/API for every sample (ignore already-evaluated). Use after changing prompts or index to get new predictions.",
     )
     args = parser.parse_args()
 
@@ -2800,6 +2797,7 @@ if __name__ == "__main__":
         debug=args.debug,
         generate_png=args.generate_png,
         generate_metadata=args.generate_metadata,
+        force_reeval=args.force_reeval,
     )
 
     if args.export_predictions_txt:

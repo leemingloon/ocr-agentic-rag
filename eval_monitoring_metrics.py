@@ -664,38 +664,6 @@ def write_proof_summary_md(proof_dir: Path | None = None) -> None:
                 elif isinstance(val, str):
                     rag_overrides_lines.append(f"- {dataset_name} `{sample_id}`: override → {val}")
 
-    # RAG chunking failures (known): list data/proof/rag/<dataset>/chunking_failures.json for audit
-    chunking_failures_lines = []
-    if rag_dir.exists():
-        for dataset_dir in sorted(rag_dir.iterdir()):
-            if not dataset_dir.is_dir():
-                continue
-            cf_path = dataset_dir / "chunking_failures.json"
-            if not cf_path.exists():
-                continue
-            try:
-                with open(cf_path, "r", encoding="utf-8") as f:
-                    cf = json.load(f)
-            except Exception:
-                continue
-            dataset_name = dataset_dir.name
-            for sample_id, val in (cf or {}).items():
-                if isinstance(val, dict):
-                    reason = val.get("reason") or ""
-                    gt = val.get("gt")
-                    recoverable = val.get("recoverable", False)
-                    part = f"- {dataset_name} `{sample_id}`"
-                    if gt is not None:
-                        part += f" (gt={gt})"
-                    part += f": {reason}"
-                    if recoverable:
-                        part += " [recoverable]"
-                    else:
-                        part += " [not recoverable without table-aware chunking]"
-                    chunking_failures_lines.append(part)
-                else:
-                    chunking_failures_lines.append(f"- {dataset_name} `{sample_id}`: (no reason)")
-
     filled_lines = [
         "# Proof summary (auto-generated)",
         "",
@@ -730,23 +698,6 @@ def write_proof_summary_md(proof_dir: Path | None = None) -> None:
             ]
             + filled_lines[second_dash:]
         )
-    if chunking_failures_lines:
-        idx = filled_lines.index("---")
-        second_dash = filled_lines.index("---", idx + 1)
-        filled_lines = (
-            filled_lines[:second_dash]
-            + [
-                "",
-                "## RAG chunking failures (known)",
-                "",
-                "Samples where the index diagnostic confirmed a chunking bug (e.g. table row split so value is mislabeled). Not recoverable without table-aware chunking. See `data/proof/rag/<dataset>/chunking_failures.json`.",
-                "",
-                *chunking_failures_lines,
-                "",
-            ]
-            + filled_lines[second_dash:]
-        )
-
     proof_dir.mkdir(parents=True, exist_ok=True)
     with open(md_path, "w", encoding="utf-8") as f:
         f.write("\n".join(filled_lines))

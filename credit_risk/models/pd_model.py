@@ -68,6 +68,24 @@ except ImportError:
     print("Warning: boto3 not available (S3 disabled)")
 
 
+class _StackedPDWrapper:
+    """Wrapper for notebook-trained XGB+LightGBM stacked model so pkl can be loaded from eval_runner (not just __main__)."""
+    def __init__(self, xgb_model, lgb_model, meta):
+        self.xgb_model = xgb_model
+        self.lgb_model = lgb_model
+        self.meta = meta
+
+    def predict_proba(self, X):
+        X_arr = X.values if hasattr(X, "values") else X
+        p1 = self.xgb_model.predict_proba(X)[:, 1]
+        p2 = self.lgb_model.predict(X_arr)
+        p = self.meta.predict_proba(np.column_stack([p1, p2]))[:, 1]
+        return np.column_stack([1 - p, p])
+
+    def predict(self, X):
+        return (self.predict_proba(X)[:, 1] >= 0.5).astype(int)
+
+
 class PDModel:
     """
     Probability of Default (PD) prediction model
@@ -206,11 +224,18 @@ class PDModel:
         
         # Select only model features
         X = X[self.feature_names]
-        
-        # Predict
-        pd_prob = self.model.predict_proba(X)[0, 1]
-        
-        return float(pd_prob)
+
+        # Predict (with explicit logging on failure for debugging all-zero predictions)
+        try:
+            proba = self.model.predict_proba(X)
+            if proba.ndim == 2 and proba.shape[1] >= 2:
+                pd_prob = float(proba[0, 1])
+            else:
+                pd_prob = float(proba.ravel()[0]) if proba.size else 0.0
+            return pd_prob
+        except Exception as e:
+            print(f"[predict_pd ERROR] {type(e).__name__}: {e}")
+            return 0.0
     
     def get_top_drivers(
         self,
@@ -330,6 +355,11 @@ class PDModel:
         Args:
             filepath: Local file path
         """
+        # Allow pkls saved from notebook (__main__._StackedPDWrapper) to load when we run from eval_runner
+        import sys
+        main_module = sys.modules.get("__main__")
+        if main_module is not None and not hasattr(main_module, "_StackedPDWrapper"):
+            setattr(main_module, "_StackedPDWrapper", _StackedPDWrapper)
         model_data = joblib.load(filepath)
         
         self.model = model_data["model"]
