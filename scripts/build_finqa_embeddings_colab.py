@@ -149,7 +149,7 @@ def main():
     parser.add_argument(
         "--no_dedup",
         action="store_true",
-        help="Skip content-hash deduplication (keep all chunks). Default: deduplicate and set duplicate_count.",
+        help="Skip content-hash deduplication (keep all chunks). Use when reindexing if you suspect dedup causes missing chunks for some corpus_ids (e.g. multiple entries sharing the same table). Default: deduplicate.",
     )
     args = parser.parse_args()
 

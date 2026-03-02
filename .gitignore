@@ -80,7 +80,8 @@ temp/
 .coverage
 htmlcov/
 
-# Documentation builds
+# Documentation
+docs/
 docs/_build/
 
 # Large model files (will be downloaded in SageMaker)

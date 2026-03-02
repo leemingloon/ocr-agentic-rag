@@ -104,16 +104,23 @@ def classify_query_intent(query: str) -> List[str]:
 
 
 def _is_numerical_answer_question(query: str) -> bool:
-    """True if the question unambiguously asks for a number (growth rate, change, etc.), not yes/no."""
+    """True if the question unambiguously asks for a number (growth rate, change, ratio, etc.), not yes/no."""
     if not query or not isinstance(query, str):
         return False
     q = query.strip().lower()
+    # Ratio / portion questions: must be checked so they are NOT classified as yes_no (they need program execution).
+    ratio_phrases = (
+        "what portion", "what percent", "what fraction", "what share",
+        "what proportion", "how much of", "what part of",
+    )
+    if any(p in q for p in ratio_phrases):
+        return True
     numerical_phrases = (
         "growth rate", "percentage change", "percent change", "rate of change",
         "increase from", "decrease from", "change from", "from 20", "from 19",
         "what is the", "how much did", "how much was", "what was the",
         "what is the change", "what is the increase", "what is the decrease",
-        "by how much", "by what percent", "what percent", "how many",
+        "by how much", "by what percent", "how many",
         "net change in cash", "cash from financing", "financing activity",
         "share repurchase", "affected by",
     )
@@ -900,21 +907,34 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
                     "messages": state.get("messages", []) + [msg],
                 }
 
-        # Format context so the LLM sees clear document text, not raw dicts
+        # Format context so the LLM sees clear document text, not raw dicts.
+        # Apply chunk-boundary truncation: never slice mid-chunk (avoids cutting table rows).
+        # When we retrieved the full doc (corpus_id set and all chunks from one result), use a high budget.
+        MAX_CONTEXT_CHARS_PARTIAL = 4224
+        MAX_CONTEXT_CHARS_FULL_DOC = 8000
         context_parts = []
         for result in results:
             if not result.get("success"):
                 continue
             raw = result["result"]
             if isinstance(raw, dict) and "chunks" in raw:
-                # RAG result: show chunk texts so the model can use them
                 chunks = raw.get("chunks") or []
                 if chunks:
-                    doc_parts = []
-                    for i, c in enumerate(chunks, 1):
-                        text = c.get("text") if isinstance(c, dict) else str(c)
-                        doc_parts.append(f"[Document {i}]\n{text}")
-                    context_parts.append("Retrieved documents:\n\n" + "\n\n".join(doc_parts))
+                    doc_parts = [f"[Document {i}]\n{c.get('text') if isinstance(c, dict) else str(c)}" for i, c in enumerate(chunks, 1)]
+                    # Chunk-boundary truncation: include whole chunks only
+                    corpus_id = state.get("corpus_id") if state else None
+                    is_full_doc = bool(corpus_id and len(chunks) >= 1)
+                    max_chars = MAX_CONTEXT_CHARS_FULL_DOC if is_full_doc else MAX_CONTEXT_CHARS_PARTIAL
+                    selected = []
+                    total = 0
+                    sep_len = len("\n\n")
+                    for part in doc_parts:
+                        need = len(part) + (sep_len if selected else 0)
+                        if total + need > max_chars and selected:
+                            break
+                        selected.append(part)
+                        total += need
+                    context_parts.append("Retrieved documents:\n\n" + "\n\n".join(selected))
                 else:
                     context_parts.append(f"Step {result['step'] + 1}: No chunks returned.")
             else:
@@ -943,6 +963,9 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
                 break
         
         context = "\n\n---\n\n".join(context_parts) if context_parts else "No results available"
+        # Single-doc retrieval: when all chunks are from one corpus, pass full context (no truncation) so
+        # multi-year table rows (e.g. 2018 and 2017 columns) are available. If a future cap is added,
+        # use a high limit (e.g. 60_000 chars) for single-corpus results.
         
         # Assembly-time unit normalisation: if chunks have units metadata (millions, thousands, per_share, etc.),
         # add a canonical-unit note so the model reasons in a consistent scale (see RAG_ROADMAP unit/scale).
@@ -1095,9 +1118,11 @@ Information:
 
 Instructions: Provide a direct answer.{yes_no_instruction}
 - For numerical questions: Prefer outputting a one-line program we will execute: add(a,b), subtract(a,b), multiply(a,b), divide(a,b). Use numbers from the documents. For percentage use divide(part, 23.6%) meaning part/(23.6/100). Multi-step: subtract(19201, 23280), divide(#0, 23280) where #0 is the first result.
+- When both a precise table value and a rounded prose value appear (e.g. table shows 22995 and text says "approximately $23 billion"), always use the precise table value for calculations.
 - Otherwise state the final number clearly (e.g. "The total operating expenses were 41932 million.").
 - For "percent of total" problems: total = component / (percent/100), e.g. divide(9896, 23.6%).
 - When the question specifies a year (e.g. "in 2018" or "for 2018"), use the table row or figure that matches that year; do not use percentages or figures from other years.
+- When the question does **not** specify a year and the table or context has multiple years (e.g. 2018 and 2017), compute the answer for **all** available periods. Present the **earliest** period's result as the primary answer (FinQA annotations often use the earlier/comparison year for "portion" and ratio questions).
 - For "as of [date]" percentage questions: if the numerator or denominator for the query date cannot be determined from the context (e.g. fragmented table), output **INSUFFICIENT_DATA** instead of guessing or using a value from another date.
 - When the question asks for a single figure (e.g. "what is the interest expense in 2009?") and the documents mention that number only in a sensitivity or "would change by $X million" context, still report that number as the answer (e.g. X or "X million")—do not say the figure is "not provided" if it appears in the text.
 
