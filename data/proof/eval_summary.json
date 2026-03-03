@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-03T06:35:12.923018+08:00",
+  "timestamp": "2026-03-03T07:44:14.846067+08:00",
   "overview": {
     "credit_risk_pd": {
       "sample_count_total": 13453,
@@ -38,46 +38,46 @@
       }
     },
     "rag": {
-      "sample_count_total": 81,
+      "sample_count_total": 82,
       "sample_count_by_dataset": {
-        "FinQA": 78,
+        "FinQA": 79,
         "TATQA": 3
       },
       "metrics_breakdown": {
         "exact_match_mean": {
-          "value": 0.901235,
-          "n_samples": 81,
+          "value": 0.902439,
+          "n_samples": 82,
           "datasets": [
             "FinQA",
             "TATQA"
           ]
         },
         "f1_mean": {
-          "value": 0.901235,
-          "n_samples": 81,
+          "value": 0.902439,
+          "n_samples": 82,
           "datasets": [
             "FinQA",
             "TATQA"
           ]
         },
         "numerical_exact_match_mean": {
-          "value": 0.888889,
-          "n_samples": 81,
+          "value": 0.890244,
+          "n_samples": 82,
           "datasets": [
             "FinQA",
             "TATQA"
           ]
         },
         "numerical_near_match_mean": {
-          "value": 0.923077,
-          "n_samples": 78,
+          "value": 0.924051,
+          "n_samples": 79,
           "datasets": [
             "FinQA"
           ]
         },
         "program_accuracy_mean": {
-          "value": 0.901235,
-          "n_samples": 81,
+          "value": 0.902439,
+          "n_samples": 82,
           "datasets": [
             "FinQA",
             "TATQA"
@@ -246,9 +246,9 @@
     },
     "rag": {
       "category": "rag",
-      "sample_count": 81,
+      "sample_count": 82,
       "sample_count_by_dataset": {
-        "FinQA": 78,
+        "FinQA": 79,
         "TATQA": 3
       },
       "datasets": [
@@ -258,26 +258,26 @@
       "datasets_breakdown": [
         {
           "dataset": "FinQA",
-          "sample_count": 78,
+          "sample_count": 79,
           "splits_breakdown": [
             {
               "split": "train",
-              "sample_count": 78,
+              "sample_count": 79,
               "metrics": {
-                "exact_match_mean": 0.9102564102564102,
-                "f1_mean": 0.9102564102564102,
-                "numerical_exact_match_mean": 0.9102564102564102,
-                "numerical_near_match_mean": 0.9230769230769231,
-                "program_accuracy_mean": 0.9102564102564102
+                "exact_match_mean": 0.9113924050632911,
+                "f1_mean": 0.9113924050632911,
+                "numerical_exact_match_mean": 0.9113924050632911,
+                "numerical_near_match_mean": 0.9240506329113924,
+                "program_accuracy_mean": 0.9113924050632911
               }
             }
           ],
           "weighted_metrics": {
-            "exact_match_mean": 0.9102564102564102,
-            "f1_mean": 0.9102564102564102,
-            "numerical_exact_match_mean": 0.9102564102564102,
-            "numerical_near_match_mean": 0.9230769230769231,
-            "program_accuracy_mean": 0.9102564102564102
+            "exact_match_mean": 0.9113924050632911,
+            "f1_mean": 0.9113924050632911,
+            "numerical_exact_match_mean": 0.9113924050632911,
+            "numerical_near_match_mean": 0.9240506329113924,
+            "program_accuracy_mean": 0.9113924050632911
           }
         },
         {
@@ -304,47 +304,47 @@
         }
       ],
       "weighted_metrics": {
-        "exact_match_mean": 0.9012345679012346,
-        "f1_mean": 0.9012345679012346,
-        "numerical_exact_match_mean": 0.8888888888888888,
-        "numerical_near_match_mean": 0.9230769230769231,
-        "program_accuracy_mean": 0.9012345679012346
+        "exact_match_mean": 0.9024390243902439,
+        "f1_mean": 0.9024390243902439,
+        "numerical_exact_match_mean": 0.8902439024390244,
+        "numerical_near_match_mean": 0.9240506329113924,
+        "program_accuracy_mean": 0.9024390243902439
       },
       "metrics_breakdown": {
         "exact_match_mean": {
-          "value": 0.901235,
-          "n_samples": 81,
+          "value": 0.902439,
+          "n_samples": 82,
           "datasets": [
             "FinQA",
             "TATQA"
           ]
         },
         "f1_mean": {
-          "value": 0.901235,
-          "n_samples": 81,
+          "value": 0.902439,
+          "n_samples": 82,
           "datasets": [
             "FinQA",
             "TATQA"
           ]
         },
         "numerical_exact_match_mean": {
-          "value": 0.888889,
-          "n_samples": 81,
+          "value": 0.890244,
+          "n_samples": 82,
           "datasets": [
             "FinQA",
             "TATQA"
           ]
         },
         "numerical_near_match_mean": {
-          "value": 0.923077,
-          "n_samples": 78,
+          "value": 0.924051,
+          "n_samples": 79,
           "datasets": [
             "FinQA"
           ]
         },
         "program_accuracy_mean": {
-          "value": 0.901235,
-          "n_samples": 81,
+          "value": 0.902439,
+          "n_samples": 82,
           "datasets": [
             "FinQA",
             "TATQA"
@@ -353,7 +353,7 @@
       },
       "model_class": "AgenticRAG",
       "backbone": "langgraph_hybrid_retriever_bge_reranker",
-      "timestamp": "2026-03-03T06:35:12.900020+08:00"
+      "timestamp": "2026-03-03T07:44:14.829808+08:00"
     },
     "vision": {
       "category": "vision",

@@ -69,17 +69,26 @@ except ImportError:
 
 
 class _StackedPDWrapper:
-    """Wrapper for notebook-trained XGB+LightGBM stacked model so pkl can be loaded from eval_runner (not just __main__)."""
-    def __init__(self, xgb_model, lgb_model, meta):
+    """Wrapper for notebook-trained XGB+LightGBM(+CatBoost) stacked model so pkl can be loaded from eval_runner (not just __main__).
+    Supports 2-way (xgb, lgb) or 3-way (xgb, lgb, catboost) stacking."""
+    def __init__(self, xgb_model, lgb_model, meta, catboost_model=None):
         self.xgb_model = xgb_model
         self.lgb_model = lgb_model
         self.meta = meta
+        self.catboost_model = catboost_model
 
     def predict_proba(self, X):
         X_arr = X.values if hasattr(X, "values") else X
         p1 = self.xgb_model.predict_proba(X)[:, 1]
         p2 = self.lgb_model.predict(X_arr)
-        p = self.meta.predict_proba(np.column_stack([p1, p2]))[:, 1]
+        if hasattr(self.lgb_model, "predict_proba"):
+            _p2 = self.lgb_model.predict_proba(X_arr)
+            p2 = _p2[:, 1] if _p2.ndim >= 2 else _p2
+        stack_input = [p1, p2]
+        if self.catboost_model is not None:
+            p3 = self.catboost_model.predict_proba(X_arr)[:, 1] if hasattr(self.catboost_model, "predict_proba") else self.catboost_model.predict(X_arr)
+            stack_input.append(p3)
+        p = self.meta.predict_proba(np.column_stack(stack_input))[:, 1]
         return np.column_stack([1 - p, p])
 
     def predict(self, X):
