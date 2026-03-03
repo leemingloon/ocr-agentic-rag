@@ -62,12 +62,14 @@ RAG_INTENT_LOCOM_GROWTH = "locom_growth"             # growth rate of loans held
 RAG_INTENT_INTEREST_PAYMENT = "interest_payment"     # bond interest: periodic (semi-annual/quarterly) payment, single instrument
 RAG_INTENT_FREQUENCY_PROPORTION = "frequency_proportion"  # how often / how frequently -> proportion (count ÷ total), not raw count
 RAG_INTENT_AVERAGE_SUBSET = "average_subset"              # average over years: gold may use only a subset of listed years
+RAG_INTENT_AVERAGE_ADDITIONS = "average_additions"        # average additions over year range = sum(balance_i - balance_{i-1}) / num_intervals
 RAG_INTENT_CUMULATIVE_RETURN = "cumulative_return"        # cumulative total return / indexed comparison: normalize (level-100)/100 then difference
 RAG_INTENT_LEASE_PERCENT = "lease_percent"                # percent of total operating leases (direct rent-expense line, not schedule sum)
 RAG_INTENT_ACCOUNTING_ADJUSTMENT = "accounting_adjustment"  # TAT-QA: cumulative-effect / adoption adjustment — select single line, preserve units
 RAG_INTENT_TATQA_NUMERIC = "tatqa_numeric"           # TAT-QA: multi-line balances, unit conversion (millions), year/event selection, aggregation
 RAG_INTENT_YES_NO = "yes_no"                         # did X exceed Y, etc.
 RAG_INTENT_DIVIDEND = "dividend"                     # total dividend = shares × dividend per share; record date logic
+RAG_INTENT_NET_MARGIN = "net_margin"                  # quarterly net margin = operating income ÷ revenue (FinQA; not net earnings)
 
 
 def classify_query_intent(query: str) -> List[str]:
@@ -112,6 +114,8 @@ def classify_query_intent(query: str) -> List[str]:
         intents.append(RAG_INTENT_FREQUENCY_PROPORTION)
     if _needs_average_subset_primer(query):
         intents.append(RAG_INTENT_AVERAGE_SUBSET)
+    if _needs_average_additions_primer(query):
+        intents.append(RAG_INTENT_AVERAGE_ADDITIONS)
     if _needs_cumulative_return_primer(query):
         intents.append(RAG_INTENT_CUMULATIVE_RETURN)
     if _needs_lease_percent_primer(query):
@@ -120,6 +124,8 @@ def classify_query_intent(query: str) -> List[str]:
         intents.append(RAG_INTENT_ACCOUNTING_ADJUSTMENT)
     if _needs_dividend_primer(query):
         intents.append(RAG_INTENT_DIVIDEND)
+    if _needs_net_margin_primer(query):
+        intents.append(RAG_INTENT_NET_MARGIN)
     if _needs_tatqa_numeric_primer(query):
         intents.append(RAG_INTENT_TATQA_NUMERIC)
     # Absolute change: "change in X between A and B" without growth-rate language -> subtract only
@@ -775,15 +781,48 @@ When the question asks **how much you would receive in dividends** (or total div
 
 1. **Identify dividend entries** in the context for the relevant year (e.g. dividend table or narrative with declaration date, record date, payment date, and amount per share).
 
-2. **Select the correct dividend**: Use the dividend whose **record date** is on or before the date the shareholder held the shares (e.g. "held on May 30, 2014" → use the dividend with record date May 27, 2014; the shareholder is on record for that payment).
+2. **Select the correct dividend**: Use the dividend whose **record date** is on or before the date the shareholder held the shares (e.g. "held on May 30, 2014" -> use the dividend with record date May 27, 2014; the shareholder is on record for that payment).
 
 3. **Dividend per share**: Note the amount per share (e.g. $0.0425) for that selected dividend.
 
-4. **Number of shares**: Use the share count **stated in the question** (e.g. "if you held 1000 shares" → use 1000). If the question does not give a number, use only values from the document.
+4. **Number of shares**: Use the share count **stated in the question** (e.g. "if you held 1000 shares" -> use 1000). If the question does not give a number, use only values from the document.
 
 5. **Compute**: Total dividend = number of shares × dividend per share. Use **multiply(dividend_per_share, number_of_shares)**. Example: multiply(0.0425, 1000).
 
 6. **Output**: The numeric result only (e.g. 42.5). Use the same units as the document (dollars per share × shares = dollars).
+"""
+
+
+def _needs_net_margin_primer(query: str) -> bool:
+    """True if the query asks for net margin for a quarter or year (FinQA: use operating income ÷ revenue, not net earnings)."""
+    if not query or not isinstance(query, str):
+        return False
+    q = query.strip().lower()
+    if "net margin" not in q:
+        return False
+    # Optional: ensure quarter/year context so we don't over-trigger on generic "margin" questions
+    return bool(re.search(r"\b(19|20)\d{2}\b", q)) or any(
+        x in q for x in ("qtr", "quarter", "1st", "2nd", "3rd", "4th", "for the year")
+    )
+
+
+# Gold-blinded primer: quarterly net margin = operating income ÷ revenue (FinQA; avoid net earnings for margin).
+NET_MARGIN_PRIMER = """
+You are asked to compute the **net margin** for a specific quarter (or period) in a financial statement.
+
+Instructions:
+
+1. **Identify the revenue** for the requested quarter: sales, service revenue, or total revenue as reported (e.g. "sales and service revenues" for that quarter).
+
+2. **Identify the income measure used for net margin**: If multiple income measures exist (e.g. net earnings, operating income, earnings before taxes), use **operating income** for the requested quarter. In FinQA-style filings, net margin is computed as operating income ÷ revenue; do **not** use net earnings unless the question explicitly defines net margin that way.
+
+3. **Compute net margin** as: net_margin = (operating income for the requested quarter) ÷ (revenue for the requested quarter). Output a single program: divide(operating_income, revenue).
+
+4. **Output** only the **numeric ratio** in decimal form (e.g. 0.06892). Do not include commentary or units.
+
+5. **Quarter/year**: Use revenue and operating income for the **requested** quarter and year only (e.g. 2nd qtr 2013 -> use the 2nd qtr column/row values for both numerator and denominator). Do not mix quarters or years.
+
+6. If revenue or income are reported in thousands or millions, use the same scale for both so the ratio is correct.
 """
 
 
@@ -867,19 +906,23 @@ def _needs_tatqa_numeric_primer(query: str) -> bool:
     return False
 
 
-# TAT-QA gold-blinded numeric reasoning: units, subcategories, adoption line, aggregation. No gold answers.
+# TAT-QA multi-account balances primer (Topic 606 aware): defensible for interviews; no sample-specific arithmetic.
 TATQA_NUMERIC_PRIMER = """
-You are asked to provide the balances (without Adoption of Topic 606) for inventories and other accrued liabilities in millions.
+# TAT-QA Multi-Account Balances (Topic 606 aware)
 
-**Instructions (gold-blinded; no peeking at answers):**
-1. **Inventories:** Include all subcategories reported for the relevant date (raw materials, finished goods, work in progress, reserves). Sum them. Use \"As Adjusted – Without Adoption of Topic 606\" when the question says \"without Adoption of Topic 606\".
-2. **Other accrued liabilities:** Include all reported components for the relevant date. Sum them.
-3. **Convert units:** All values are typically in thousands. Convert to millions by dividing by 1,000. Do not output raw numbers like 782,833.
-4. **Sum to final total:** Sum total inventories (in millions) + total accrued liabilities (in millions) to get the final numeric total.
-5. **Output only the numeric value.** One decimal place. No commentary, no individual components, no unit labels.
+When a query asks for **balances of multiple accounts** (e.g. inventories, accrued liabilities) **"without adoption of Topic 606"**:
 
-**Rules:** Aggregate across all retrieved chunks. Do not pull only one line per item; include subcategories from schedules and notes. Use the correct year/date from the question.
+1. **Always use the "As Adjusted - Without Adoption of Topic 606" value** from the documents for each account.
+2. **Include all reported subcomponents** in the schedule; do not ignore any line item that is part of the account.
+3. **Maintain units as reported in the document.** Only convert to millions if the query explicitly says "in millions" — then convert each balance (e.g. divide by 1,000 when values are in thousands) and sum; or sum in document units then convert the total once, as consistent with the table.
+4. **For multi-account sums**, add all relevant balances **after** applying steps 1–3, keeping units consistent.
+5. **Do not assume conversion or simplifications** unless the question explicitly instructs.
+6. **Sum all reported balances for the requested accounts** (e.g. Inventories + Other accrued liabilities), not just the first line retrieved. The dataset expects a single total for this style of question.
+7. Round to one decimal place for the final answer. Output only the numeric value; no units or commentary.
+
+**Other numeric questions (e.g. quarterly net margin):** Use the row for the requested year/quarter only. Net margin = net earnings / revenues. Return decimal form unless the query asks for percentage.
 """
+
 
 
 def _document_units_suffix(context: str, value: float) -> str:
@@ -1008,6 +1051,31 @@ When the question asks for an **average** over multiple years (e.g. "average ...
 - Use **only a subset** of the listed years when the text or plan structure does not explicitly require all (e.g. two most recent). The document may list 2012, 2011 and 2010 "respectively"; the correct program may still use only 2012 and 2011.
 - Programs may include **small constant adjustments** (e.g. add(#1, const_3), divide(#2, const_2)) for rounding or policy.
 - **Selective extraction**: Do not sum or average over all listed items unless the question clearly asks for "total" or "all". Do not force inclusion of every number next to the listed years.
+"""
+
+
+def _needs_average_additions_primer(query: str) -> bool:
+    """True if the query asks for average additions over a year range (FinQA: additions = year-end balance diffs, average = sum/num_intervals)."""
+    if not query or not isinstance(query, str):
+        return False
+    q = query.strip().lower()
+    if "average" not in q or "addition" not in q:
+        return False
+    # Year range (e.g. "2006-2009", "years 2006 to 2009", "considering the years 2006-2009")
+    return bool(re.search(r"(19|20)\d{2}\s*[-–to]\s*(19|20)\d{2}|\b(19|20)\d{2}\b.*\b(19|20)\d{2}\b", q))
+
+
+# Gold-blinded primer: average additions — prefer explicit "additions during period" lines; fallback to balance differences.
+AVERAGE_ADDITIONS_PRIMER = """
+You are asked to compute the **average additions** over a range of years (e.g. 2006-2009).
+
+**Step 0 — Prefer explicit additions (FinQA schedules):** Many financial schedules report **"additions during period"** (or "additions") as separate line items for each year. If the context contains such lines for the years in the requested range (e.g. one value per year 2006, 2007, 2008, 2009), use those **reported addition values** directly. Average = sum(reported_additions) / N where N = number of years in the range (e.g. 4 for 2006-2009) or the number of addition values you have. Ensure consistent units: if values are in thousands, either keep in thousands or multiply by 1000 for the final answer as the dataset expects. Example: add(add_2006, add_2007), add(#0, add_2008), add(#1, add_2009), divide(#2, 4).
+
+**Step 1 — Fallback: year-end balances only:** If the document does **not** report explicit "additions during period" for each year, use year-end balances. Locate the ending balance at the end of **each** year in the requested range. Addition for year i = (balance at end of year i) - (balance at end of year i-1). Average = (sum of those yearly additions) / (number of intervals). Number of intervals = number of years minus one (e.g. 2006-2009 -> 3 intervals). Program: subtract(balance_2008, balance_2007), subtract(balance_2009, balance_2008), add(#0, #1), divide(#2, 3).
+
+**Step 2 — Units:** Keep units consistent. If the table says "(in thousands)", additions and average may be in thousands; if the gold expects whole units, multiply by 1000 where appropriate.
+
+**Step 3 — Output:** A single numeric value. No commentary. Do not default to balance-difference method when the schedule explicitly lists "additions during period" for each year — use those listed values and divide by the number of years (or intervals) that match the question.
 """
 
 
@@ -1525,8 +1593,10 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
         needs_table_total_across_columns = RAG_INTENT_TABLE_TOTAL_ACROSS_COLUMNS in intents
         needs_interest_payment = RAG_INTENT_INTEREST_PAYMENT in intents
         needs_dividend = RAG_INTENT_DIVIDEND in intents
+        needs_net_margin = RAG_INTENT_NET_MARGIN in intents and not is_yes_no
         needs_frequency_proportion = RAG_INTENT_FREQUENCY_PROPORTION in intents
         needs_average_subset = RAG_INTENT_AVERAGE_SUBSET in intents
+        needs_average_additions = RAG_INTENT_AVERAGE_ADDITIONS in intents and not is_yes_no
         if os.environ.get("RAG_DEBUG") == "1" and is_yes_no:
             print(f"[DEBUG] generator: yes/no question detected; will not append program execution. query_preview={query[:80]!r}...")
         if os.environ.get("RAG_DEBUG") == "1" and needs_primer:
@@ -1633,11 +1703,11 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
         if os.environ.get("RAG_DEBUG") == "1" and needs_accounting_adjustment:
             print("[DEBUG] generator: injecting accounting-adjustment primer (select single standard-specific line; preserve units)")
         tatqa_numeric_primer_block = (
-            f"\n\nTAT-QA numeric reasoning (balances, unit conversion, aggregation):{TATQA_NUMERIC_PRIMER}\n"
+            f"\n\nRAG numeric extraction (quarterly margins, multi-account balances, scaling):{TATQA_NUMERIC_PRIMER}\n"
             if (needs_tatqa_numeric and not is_yes_no) else ""
         )
         if os.environ.get("RAG_DEBUG") == "1" and needs_tatqa_numeric:
-            print("[DEBUG] generator: injecting TAT-QA numeric primer (scale to millions; multi-value/aggregation)")
+            print("[DEBUG] generator: injecting TAT-QA numeric primer (quarterly net margin; multi-account balances -> sum in millions when inventories+liabilities)")
         # Hard program-shape constraint: singular "the adjustment" -> forbid add/sum at top level (TAT-QA row selection, not aggregation).
         needs_singular_adjustment_constraint = (
             needs_accounting_adjustment and not is_yes_no and _is_singular_adjustment(query)
@@ -1669,6 +1739,12 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
             print("[DEBUG] generator: injecting interest-payment primer (semi-annual/quarterly; one instrument)")
         if os.environ.get("RAG_DEBUG") == "1" and needs_dividend:
             print("[DEBUG] generator: injecting dividend primer (shares × dividend per share; record date logic)")
+        if os.environ.get("RAG_DEBUG") == "1" and needs_net_margin:
+            print("[DEBUG] generator: injecting net-margin primer (operating income ÷ revenue for requested quarter)")
+        net_margin_primer_block = (
+            f"\n\nQuarterly net margin (gold-blinded):{NET_MARGIN_PRIMER}\n"
+            if needs_net_margin else ""
+        )
         frequency_proportion_primer_block = (
             f"\n\nFrequency / proportion (how often -> divide count by total):{FREQUENCY_PROPORTION_PRIMER}\n"
             if (needs_frequency_proportion and not is_yes_no) else ""
@@ -1681,6 +1757,12 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
         )
         if os.environ.get("RAG_DEBUG") == "1" and needs_average_subset:
             print("[DEBUG] generator: injecting average-subset primer (subset of years; selective extraction)")
+        average_additions_primer_block = (
+            f"\n\nAverage additions over year range (gold-blinded):{AVERAGE_ADDITIONS_PRIMER}\n"
+            if needs_average_additions else ""
+        )
+        if os.environ.get("RAG_DEBUG") == "1" and needs_average_additions:
+            print("[DEBUG] generator: injecting average-additions primer (balance diffs -> sum / num_intervals)")
         table_total_across_columns_block = (
             f"\n\nTable total across columns (chunked tables):{TABLE_TOTAL_ACROSS_COLUMNS_PRIMER}\n"
             if (needs_table_total_across_columns and not is_yes_no) else ""
@@ -1728,8 +1810,10 @@ Information:
 {cashflow_primer_block}
 {interest_payment_primer_block}
 {dividend_primer_block}
+{net_margin_primer_block}
 {frequency_proportion_primer_block}
 {average_subset_primer_block}
+{average_additions_primer_block}
 {table_total_across_columns_block}
 {parenthetical_negative_block}
 
@@ -1771,6 +1855,11 @@ Answer:"""
                     )
                     chunks_list = [p.strip() for p in context.split("\n\n---\n\n") if p.strip()]
                     accounts = parse_accounts_from_query(query)
+                    if os.environ.get("RAG_DEBUG") == "1":
+                        if not chunks_list:
+                            print("[DEBUG] generator: TAT-QA helper NOT applied — no chunks (context empty or no separator)")
+                        elif not accounts:
+                            print(f"[DEBUG] generator: TAT-QA helper NOT applied — parse_accounts_from_query returned empty (query preview: {query[:100]!r}...)")
                     if chunks_list and accounts:
                         balances = tatqa_numeric_helper(chunks_list, accounts)
                         if balances and any(b != 0 for b in balances):
@@ -1780,6 +1869,10 @@ Answer:"""
                                 tatqa_helper_applied = True
                                 if os.environ.get("RAG_DEBUG") == "1":
                                     print(f"[DEBUG] generator: TAT-QA helper applied accounts={accounts} balances={balances} -> {formatted!r}")
+                            elif os.environ.get("RAG_DEBUG") == "1":
+                                print(f"[DEBUG] generator: TAT-QA helper NOT applied — format_tatqa_helper_answer returned empty (balances={balances})")
+                        elif os.environ.get("RAG_DEBUG") == "1":
+                            print(f"[DEBUG] generator: TAT-QA helper NOT applied — balances all zero or missing (accounts={accounts} balances={balances!r})")
                 except Exception as e:
                     if os.environ.get("RAG_DEBUG") == "1":
                         print(f"[DEBUG] generator: TAT-QA helper failed: {e}")

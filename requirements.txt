@@ -31,6 +31,7 @@ langchain-anthropic
 xgboost
 scikit-learn
 lightgbm
+catboost
 
 # Credit Risk - NLP (NEW)
 transformers

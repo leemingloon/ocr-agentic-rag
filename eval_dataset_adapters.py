@@ -2790,6 +2790,10 @@ class FinQAAdapter(BaseDatasetAdapter):
 
     FILE_MAPPING points to the JSON file path. No parquet is used.
     Source: Official FinQA from https://github.com/czyssrs/FinQA (dataset/train.json).
+
+    Only the train split is configured. Official FinQA has train/dev/test; we evaluate on train
+    only (index is built from train, and we do not load a test split — test-set ground truth
+    may be public or held-out depending on source; this codebase uses train for both indexing and eval).
     """
     FILE_MAPPING = {
         "train": {
@@ -3068,9 +3072,12 @@ class TATQAAdapter(BaseDatasetAdapter):
     data/rag/TAT-QA/tatqa_dataset_test_gold.json,
     data/rag/TAT-QA/tatqa_dataset_test.json,
     data/rag/TAT-QA/tatqa_dataset_train.json.
-    There are only these 4 json files (dev, test, ground truth for test, train) under TAT-QA/ folder, 
+    There are only these 4 json files (dev, test, ground truth for test, train) under TAT-QA/ folder,
     and they all follow the same schema structure as above, but with different samples.
 
+    We evaluate on test only (FILE_MAPPING and SPLITS_WITH_GT). The RAG retriever index must be built
+    from test documents (tatqa_dataset_test_gold.json) so retrieval can find the right context for
+    each test question. Train and dev are not used for evaluation in this codebase.
 
     FILE_MAPPING below only serves to provide the path right down to the split level.
     For each split, the actual loading logic in load_split() must handle the pathing,

@@ -518,8 +518,79 @@ class FinQAUtils(RagUtils):
         return self.relaxed_exact_match(prediction, reference, **kwargs)
 
 
+def rag_numerical_match_debug_info(
+    prediction: str | None, reference: str | None, dataset_name: str
+) -> str:
+    """Return debug string for numerical_exact_match=0 drill-down (scale, multi-value, extracted numbers)."""
+    pred_str = str(prediction).strip() if prediction else ""
+    ref_str = str(reference).strip() if reference else ""
+    pred_tail = (pred_str[-280] if len(pred_str) > 280 else pred_str).replace("\n", " ")
+    lines = [
+        f"pred_tail={pred_tail!r}",
+        f"gt={ref_str!r}",
+    ]
+    ref_multi = _parse_multi_value_numbers(ref_str or None)
+    pred_multi = _parse_multi_value_numbers(pred_str or None)
+    if dataset_name == "TATQA":
+        lines.append(f"ref_parsed_as_multi={ref_multi!r} pred_parsed_as_multi={pred_multi!r}")
+        if ref_multi is not None and pred_multi is None:
+            lines.append("hint: GT is multi-value (comma-separated); pred did not parse as multi-value")
+        elif ref_multi is None and pred_multi is not None:
+            lines.append("hint: pred is multi-value but GT is single; dataset may expect one number (e.g. sum)")
+    pred_last = _last_number_in_text(pred_str)
+    ref_single = None
+    if ref_str:
+        try:
+            ref_single = float(ref_str.replace(",", "").replace("$", "").replace("%", "").strip())
+        except (ValueError, TypeError):
+            ref_single = _first_number_in_text(ref_str)
+    lines.append(f"extracted: pred_last_number={pred_last!r} ref_single={ref_single!r}")
+    if ref_single is not None and pred_last is not None and ref_single != 0:
+        ratio = pred_last / ref_single
+        if abs(ratio - 1000.0) < 10 or abs(ratio - 0.001) < 0.0001:
+            lines.append("hint: possible scale mismatch (pred/ref ≈ 1000 or 0.001 — check millions vs thousands)")
+        elif abs(ratio - 100.0) < 1 or abs(ratio - 0.01) < 0.001:
+            lines.append("hint: possible scale mismatch (pred/ref ≈ 100 or 0.01 — check percentage vs decimal)")
+    return " | ".join(lines)
+
+
+def _parse_multi_value_numbers(s: str | None) -> list[float] | None:
+    """Parse comma-separated numeric values (e.g. '782.833, 106.836'). Returns list of 2+ floats or None.
+    Uses ', ' (comma-space) to detect multi-value so '1,568.6' (thousands separator) stays single."""
+    if not s or not isinstance(s, str):
+        return None
+    s = s.strip()
+    if ", " not in s:
+        return None
+    parts = [p.strip() for p in s.split(",")]
+    if len(parts) < 2:
+        return None
+    out = []
+    for p in parts:
+        if not p:
+            return None
+        cleaned = p.replace("$", "").replace("%", "").strip()
+        try:
+            out.append(float(cleaned.replace(",", "")))
+        except ValueError:
+            return None
+    return out if len(out) >= 2 else None
+
+
 class TATQAUtils(RagUtils):
-    pass
+    """TAT-QA: supports single-value and multi-value (comma-separated) numerical comparison."""
+
+    def numerical_exact_match(self, prediction: str | None, reference: str | None, tol: float = 1e-6) -> float:
+        ref_multi = _parse_multi_value_numbers(str(reference) if reference else None)
+        if ref_multi is not None and len(ref_multi) >= 2:
+            pred_multi = _parse_multi_value_numbers(prediction)
+            if pred_multi is not None and len(pred_multi) == len(ref_multi):
+                for p, r in zip(pred_multi, ref_multi):
+                    if not math.isclose(p, r, rel_tol=tol, abs_tol=max(tol, 1e-6)):
+                        return 0.0
+                return 1.0
+            return 0.0
+        return super().numerical_exact_match(prediction, reference, tol=tol)
 
 
 # -------------------------------------------------------------------------

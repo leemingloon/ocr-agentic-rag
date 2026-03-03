@@ -315,6 +315,8 @@ def build_features_from_dict(raw: Dict[str, Any]) -> Dict[str, float]:
 
 
 # Ordered list of feature names for no-leakage (origination-only) PD model.
+# New HF-compatible derived features: log_annual_inc, loan_to_income_bucket, fico_range,
+# fico_bucket, emp_length_years, emp_home_interaction, revol_util_per_acc.
 FEATURE_NAMES_NO_LEAKAGE = [
     "dti_ratio",
     "dti_to_income",
@@ -324,17 +326,24 @@ FEATURE_NAMES_NO_LEAKAGE = [
     "revol_util_pct",
     "revol_util_bucket",
     "loan_to_income",
+    "loan_to_income_bucket",
     "emp_months",
+    "emp_length_years",
     "delinq_flag",
     "inq_6m",
     "acc_util",
     "revol_bal_log",
+    "revol_util_per_acc",
     "fico_subprime",
+    "fico_range",
+    "fico_bucket",
     "dti_high",
     "credit_history_months",
     "purpose_risk_code",
     "home_ownership_risk_code",
     "purpose_x_home_ownership",
+    "emp_home_interaction",
+    "log_annual_inc",
 ]
 
 
@@ -374,13 +383,61 @@ def build_features_from_dict_no_leakage(raw: Dict[str, Any]) -> Dict[str, float]
     home_ownership_risk_code = _home_ownership_risk_code(get("home_ownership"))
     purpose_x_home_ownership = purpose_risk_code * home_ownership_risk_code
 
+    # New HF-compatible derived features (origination-only)
+    annual_inc = getf("annual_inc")
+    log_annual_inc = np.log1p(max(0.0, annual_inc)) if annual_inc is not None and not np.isnan(annual_inc) and annual_inc >= 0 else np.nan
+
+    loan_to_income = feats.get("loan_to_income", np.nan)
+    if loan_to_income is not None and not np.isnan(loan_to_income):
+        if loan_to_income < 0.2:
+            loan_to_income_bucket = 0.0
+        elif loan_to_income <= 0.5:
+            loan_to_income_bucket = 1.0
+        elif loan_to_income <= 1.0:
+            loan_to_income_bucket = 2.0
+        else:
+            loan_to_income_bucket = 3.0
+    else:
+        loan_to_income_bucket = np.nan
+
+    fico_low = getf("fico_low")
+    fico_high = getf("fico_high")
+    fico_mid = feats.get("fico_mid", np.nan)
+    if fico_low is not None and fico_high is not None and not np.isnan(fico_low) and not np.isnan(fico_high):
+        fico_range = fico_high - fico_low
+    else:
+        fico_range = np.nan
+
+    if fico_mid is not None and not np.isnan(fico_mid):
+        fico_bucket = float(int(fico_mid // 20))
+    else:
+        fico_bucket = np.nan
+
+    emp_months = feats.get("emp_months", np.nan)
+    emp_length_years = emp_months / 12.0 if emp_months is not None and not np.isnan(emp_months) else np.nan
+
+    if emp_length_years is not None and not np.isnan(emp_length_years) and home_ownership_risk_code is not None and not np.isnan(home_ownership_risk_code):
+        emp_bucket = int(emp_length_years)
+        emp_home_interaction = emp_bucket * home_ownership_risk_code
+    else:
+        emp_home_interaction = np.nan
+
+    total_acc = getf("total_acc")
+    revol_util_per_acc = revol_util_pct / max(total_acc, 1.0) if (revol_util_pct is not None and not np.isnan(revol_util_pct) and total_acc is not None and not np.isnan(total_acc)) else np.nan
+
     out = {k: feats[k] for k in FEATURE_NAMES_NO_LEAKAGE if k in feats}
     out["revol_util_bucket"] = revol_util_bucket
     out["credit_history_months"] = credit_history_months
     out["purpose_risk_code"] = purpose_risk_code
     out["home_ownership_risk_code"] = home_ownership_risk_code
     out["purpose_x_home_ownership"] = purpose_x_home_ownership
-    # dti_to_income and payment_to_income_monthly come from feats (build_features_from_dict)
+    out["loan_to_income_bucket"] = loan_to_income_bucket
+    out["fico_range"] = fico_range
+    out["fico_bucket"] = fico_bucket
+    out["emp_length_years"] = emp_length_years
+    out["emp_home_interaction"] = emp_home_interaction
+    out["revol_util_per_acc"] = revol_util_per_acc
+    out["log_annual_inc"] = log_annual_inc
     # Ensure order and only no-leakage keys (drop grade_num, int_rate_high, composite_risk)
     return {k: out[k] for k in FEATURE_NAMES_NO_LEAKAGE if k in out}
 

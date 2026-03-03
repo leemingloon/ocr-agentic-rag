@@ -53,6 +53,7 @@ from eval_postprocess_utils import (
     MMMUUtils,
     normalize_rag_prediction_to_gold_scale,
     prediction_used_back_calc,
+    rag_numerical_match_debug_info,
     TATQAUtils,
     CreditRiskPDUtils,
     CreditRiskSentimentUtils,
@@ -705,15 +706,19 @@ def _build_finqa_corpus_chunks(debug: bool = False) -> list:
 
 
 def _build_tatqa_corpus_chunks(debug: bool = False) -> list:
-    """Load TAT-QA train and dev JSONs and return list of TextNode chunks for retrieval index.
-    Each doc's table + paragraphs are combined and chunked. corpus_id = table uid per doc."""
+    """Load TAT-QA test JSON and return list of TextNode chunks for retrieval index.
+    We evaluate on test only (SPLITS_WITH_GT={'test'}), so the index must be built from test
+    documents so retrieval can find the right context for each test question. Train/dev are not
+    used for eval and are not included. Each doc's table + paragraphs are combined and chunked.
+    corpus_id = table uid per doc."""
     from rag_system.chunking import DocumentChunker
 
     repo_root = Path(__file__).resolve().parent
     tatqa_dir = repo_root / "data" / "rag" / "TAT-QA"
     chunker = DocumentChunker(chunk_size=512, chunk_overlap=128)
     all_chunks = []
-    for split, filename in [("train", "tatqa_dataset_train.json"), ("dev", "tatqa_dataset_dev.json")]:
+    # Build from test only: we evaluate on test (only split with GT in our adapter), so index must contain test docs.
+    for split, filename in [("test", "tatqa_dataset_test_gold.json")]:
         path = tatqa_dir / filename
         if not path.exists():
             continue
@@ -788,7 +793,7 @@ def _get_rag_retriever_for_dataset(dataset_name: str, debug: bool = False):
             chunks = _build_tatqa_corpus_chunks(debug=debug)
             if not chunks:
                 if debug:
-                    print("[DEBUG] RAG TATQA: no chunks from TAT-QA train/dev; index will be empty (retrieve will fail)")
+                    print("[DEBUG] RAG TATQA: no chunks from TAT-QA test; index will be empty (retrieve will fail)")
             else:
                 if debug:
                     meta = lambda c: getattr(c, "metadata", None) or {}
@@ -873,6 +878,8 @@ def run_model(sample: dict, category: str, dataset_name: str, debug: bool = Fals
                         t = (r0["chunks"][0].get("text") or "")[:200]
                         first_preview = t.replace("\n", " ") + ("..." if len(t) >= 200 else "")
                 print(f"[DEBUG] RAG result: {num_chunks} chunks retrieved; first_chunk_preview={first_preview!r}")
+                if num_chunks == 0:
+                    print("[DEBUG] RAG result: 0 chunks — retrieval returned nothing; check index, corpus_id, and query")
             return {
                 "answer": out.get("answer") or "",
                 "sources": out.get("tool_results", []),
@@ -1185,6 +1192,78 @@ def _rag_parse_gold_program_operands(program: str | list | None) -> list[str]:
     return list(dict.fromkeys(out))  # dedup, preserve order
 
 
+# TAT-QA index is built from test only (see _build_tatqa_corpus_chunks). We evaluate on test, so index = test docs.
+TATQA_INDEX_FILES = ("tatqa_dataset_test_gold.json",)
+
+
+def _tatqa_find_gt_in_source(repo_root: Path, gt_answer: Any) -> list[tuple[str, int, str]]:
+    """Search TAT-QA raw JSON (train, dev, test) for gt_answer. Returns [(filename, doc_idx, corpus_id), ...]."""
+    if gt_answer is None:
+        return []
+    gt_str = str(gt_answer).strip()
+    gt_plain = gt_str.replace(",", "")
+    tatqa_dir = repo_root / "data" / "rag" / "TAT-QA"
+    hits = []
+    for filename in ("tatqa_dataset_train.json", "tatqa_dataset_dev.json", "tatqa_dataset_test.json", "tatqa_dataset_test_gold.json"):
+        path = tatqa_dir / filename
+        if not path.exists():
+            continue
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception:
+            continue
+        if not isinstance(data, list):
+            continue
+        for doc_idx, doc in enumerate(data):
+            table = doc.get("table") or {}
+            corpus_id = table.get("uid") if isinstance(table, dict) else None
+            if not corpus_id:
+                corpus_id = f"tatqa_{filename.replace('.json', '')}_{doc_idx}"
+            doc_str = json.dumps(doc)
+            if gt_str in doc_str or gt_plain in doc_str.replace(",", ""):
+                hits.append((filename, doc_idx, str(corpus_id)))
+    return hits
+
+
+def _tatqa_get_retrieved_corpus_ids(prediction: dict) -> list[str]:
+    """Extract corpus_id from each chunk in prediction['sources']. Returns list of unique corpus_ids."""
+    ids = []
+    for s in prediction.get("sources") or []:
+        res = s.get("result") if isinstance(s.get("result"), dict) else {}
+        for ch in res.get("chunks") or []:
+            cid = ch.get("metadata", {}).get("corpus_id") if isinstance(ch, dict) else None
+            if cid and cid not in ids:
+                ids.append(cid)
+    return ids
+
+
+def _rag_tatqa_source_index_retrieval_log(
+    repo_root: Path,
+    gt_answer: Any,
+    prediction: dict,
+    sample_id: str = "",
+) -> None:
+    """Log where GT appears in TAT-QA source, whether that doc is in the index, and which docs were retrieved.
+    Helps distinguish: missing from source vs test doc not in index vs retrieval returned wrong doc."""
+    hits = _tatqa_find_gt_in_source(repo_root, gt_answer)
+    retrieved_ids = _tatqa_get_retrieved_corpus_ids(prediction)
+    in_index_files = set(TATQA_INDEX_FILES)
+    print("[DEBUG] RAG TAT-QA source/index/retrieval diagnostic:")
+    print(f"[DEBUG]   index built from: {list(in_index_files)}")
+    print(f"[DEBUG]   retrieved chunk corpus_ids: {retrieved_ids[:15]}{'...' if len(retrieved_ids) > 15 else ''}")
+    if not hits:
+        print(f"[DEBUG]   GT={gt_answer!r} NOT found in any TAT-QA raw file (train/dev/test) → missing from source or wrong format")
+        return
+    for filename, doc_idx, corpus_id in hits[:5]:
+        # Index is built from test_gold; test.json has same docs (no answers), so treat both as in-index for test.
+        in_index = filename in in_index_files or (filename == "tatqa_dataset_test.json" and "tatqa_dataset_test_gold.json" in in_index_files)
+        in_retrieved = corpus_id in retrieved_ids
+        print(f"[DEBUG]   GT found in: file={filename!r} doc_idx={doc_idx} corpus_id={corpus_id!r} in_index={in_index} in_retrieved={in_retrieved}")
+    if hits and not any(cid in retrieved_ids for _f, _i, cid in hits):
+        print("[DEBUG]   conclusion: GT doc not in retrieved context (test doc not in index, or retrieval ranked other docs higher)")
+
+
 def _rag_debug_index_diagnostic(
     dataset_name: str,
     corpus_id: str | None,
@@ -1369,6 +1448,23 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
         if hasattr(utils, "numerical_near_match")
         else None
     )
+    # Debug: on numerical_exact_match=0, log drill-down (extracted values, scale hint, multi-value parse)
+    if debug and num_match == 0 and gt_answer is not None:
+        try:
+            float(str(gt_answer).strip().replace(",", ""))
+        except ValueError:
+            pass
+        else:
+            info = rag_numerical_match_debug_info(pred_answer, gt_answer, dataset_name)
+            print(f"[DEBUG] RAG numerical_exact_match=0 drill-down: {info}")
+        # TAT-QA: where is GT in source? in index? which docs were retrieved? (missing vs indexing vs retrieval)
+        if dataset_name == "TATQA":
+            _rag_tatqa_source_index_retrieval_log(
+                Path(__file__).resolve().parent,
+                gt_answer,
+                prediction,
+                sample.get("metadata", {}).get("sample_id", ""),
+            )
     # Debug: on numerical exact_match failure, log full retrieved context (for totals/back-calc debugging)
     if debug and num_match == 0 and gt_answer is not None:
         try:
@@ -1981,7 +2077,8 @@ def evaluate_dataset(
         ok_rows = [r for r in new_rows if not r.get("prediction_error")]
         err_rows = [r for r in new_rows if r.get("prediction_error")]
 
-        # Per-sample: merge new ok_rows with existing (append/update by sample_id). Never overwrite with fewer rows.
+        # Per-sample: merge new ok_rows and err_rows with existing (append/update by sample_id).
+        # Include err_rows so failed samples are recorded and skipped on next run (avoids infinite retry on same sample).
         existing_rows: list[dict] = []
         if per_sample_path.exists():
             try:
@@ -1996,6 +2093,9 @@ def evaluate_dataset(
             sid = str(row.get("sample_id"))
             by_id[sid] = row
         for row in ok_rows:
+            sid = str(row.get("sample_id"))
+            by_id[sid] = row
+        for row in err_rows:
             sid = str(row.get("sample_id"))
             by_id[sid] = row
         combined_ok = list(by_id.values())
@@ -2147,6 +2247,50 @@ def evaluate_dataset(
     dataset_payload["backbone"] = model_meta["backbone"]
     dataset_payload["timestamp"] = singapore_now_iso()
     dataset_payload["weighted_metrics"] = dataset_weighted_metrics
+
+    # Bootstrap 95% CI for AUC (credit_risk_PD / credit_risk_PD_quantum)
+    if category in ("credit_risk_PD", "credit_risk_PD_quantum") and dataset_weighted_metrics.get("auc_roc_mean") is not None:
+        y_true_ci: list = []
+        y_score_ci: list = []
+        for split_dir in dataset_proof_dir.iterdir():
+            if not split_dir.is_dir():
+                continue
+            per_path = split_dir / _samples_filename(dataset_name, split_dir.name)
+            if not per_path.exists():
+                continue
+            try:
+                with open(per_path, "r", encoding="utf-8") as f:
+                    rows = json.load(f)
+            except Exception:
+                continue
+            for row in rows:
+                if row.get("prediction_error"):
+                    continue
+                m = row.get("metrics") or {}
+                gt, pd_prob = m.get("gt_binary"), m.get("pd_prob")
+                if gt is not None and pd_prob is not None:
+                    y_true_ci.append(gt)
+                    y_score_ci.append(float(pd_prob))
+        if len(y_true_ci) >= 2:
+            import random
+            try:
+                from sklearn.metrics import roc_auc_score
+                rng = random.Random(42)
+                aucs_b: list[float] = []
+                n_b = len(y_true_ci)
+                for _ in range(1000):
+                    idx = [rng.randint(0, n_b - 1) for _ in range(n_b)]
+                    y_b = [y_true_ci[i] for i in idx]
+                    s_b = [y_score_ci[i] for i in idx]
+                    try:
+                        aucs_b.append(roc_auc_score(y_b, s_b))
+                    except ValueError:
+                        aucs_b.append(0.5)
+                aucs_b.sort()
+                dataset_payload["auc_roc_mean_ci_low"] = aucs_b[int(0.025 * 1000)]
+                dataset_payload["auc_roc_mean_ci_high"] = aucs_b[int(0.975 * 1000)]
+            except Exception:
+                pass
 
     dataset_weighted_path = dataset_proof_dir / f"{dataset_name.lower()}_avg.json"
     with open(dataset_weighted_path, "w", encoding="utf-8") as f:

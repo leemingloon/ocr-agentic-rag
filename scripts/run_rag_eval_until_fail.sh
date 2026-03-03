@@ -36,6 +36,7 @@ if [[ $RUN_FINQA -eq 0 && $RUN_TATQA -eq 0 ]]; then
 fi
 
 # Run one dataset until the latest evaluated sample has any metric != 1. Returns 0 when should stop, 1 when should continue.
+# Stops when: (1) latest sample has any metric != 1, or (2) no progress (run evaluated 0 new samples) to avoid infinite loop.
 run_dataset_until_fail() {
   local DATASET="$1"
   # Proof samples path: data/proof/rag/<dataset_lower>/<split>/<dataset>_<split>_samples.json
@@ -44,6 +45,32 @@ run_dataset_until_fail() {
   local CMD="python eval_runner.py --category rag --dataset $DATASET --max_split 1 --max_category 1 --debug --export_predictions_txt"
 
   while true; do
+    # Capture last block sample_id BEFORE run to detect "no progress" (all samples already evaluated).
+    LAST_SAMPLE_BEFORE=$(python -c "
+import glob
+import os
+samples_dir = '''$SAMPLES_DIR'''
+pred_candidates = glob.glob(os.path.join(samples_dir, '*', '*_predictions.txt')) if os.path.isdir(samples_dir) else []
+if not pred_candidates:
+    print('')
+    exit(0)
+latest_pred = max(pred_candidates, key=os.path.getmtime)
+with open(latest_pred, encoding='utf-8') as f:
+    content = f.read()
+blocks = [b.strip() for b in content.split('========') if b.strip()]
+if not blocks:
+    print('')
+    exit(0)
+last_block = blocks[-1]
+for line in last_block.splitlines():
+    line = line.strip()
+    if line.startswith('sample_id:'):
+        print(line.split('sample_id:', 1)[1].strip())
+        break
+else:
+    print('')
+" 2>/dev/null || true)
+
     echo "=== Running: $CMD ==="
     $CMD 2>&1 | tee "$LOG"
     CONTINUE=$(python -c "
@@ -65,11 +92,15 @@ if pred_candidates:
     # Use most recently modified predictions file (just written by this run)
     latest_pred = max(pred_candidates, key=os.path.getmtime)
     try:
-        with open(latest_pred) as f:
+        with open(latest_pred, encoding='utf-8') as f:
             content = f.read()
         blocks = [b.strip() for b in content.split('========') if b.strip()]
         if blocks:
             last_block = blocks[-1]
+            # If last sample had prediction_error, it is now recorded so next run will skip it; continue to advance.
+            if 'prediction_error:' in last_block:
+                print('CONTINUE')
+                sys.exit(0)
             for line in last_block.splitlines():
                 line = line.strip()
                 if line.startswith('metrics:'):
@@ -84,7 +115,7 @@ if pred_candidates:
 # Fallback: get last sample from log and metrics from samples JSON (fails when corpus_id=None)
 if metrics is None:
     log_path = '''$LOG'''
-    with open(log_path) as f:
+    with open(log_path, encoding='utf-8', errors='replace') as f:
         log = f.read()
     m = list(re.finditer(r\"\\[DEBUG\\] RAG query corpus_id='([^']+)'\", log))
     if not m:
@@ -104,7 +135,7 @@ if metrics is None:
         sys.exit(1)
     for path in candidates:
         try:
-            with open(path) as f:
+            with open(path, encoding='utf-8') as f:
                 data = json.load(f)
         except Exception:
             continue
@@ -126,6 +157,35 @@ print('CONTINUE' if all_one else 'STOP')
 ")
     if [[ "$CONTINUE" != "CONTINUE" ]]; then
       echo "Latest evaluated sample does not have all metrics 1. Stopping $DATASET."
+      return 0
+    fi
+    # No progress check: if this run evaluated 0 new samples, last block sample_id is unchanged → stop to avoid infinite loop.
+    LAST_SAMPLE_AFTER=$(python -c "
+import glob
+import os
+samples_dir = '''$SAMPLES_DIR'''
+pred_candidates = glob.glob(os.path.join(samples_dir, '*', '*_predictions.txt')) if os.path.isdir(samples_dir) else []
+if not pred_candidates:
+    print('')
+    exit(0)
+latest_pred = max(pred_candidates, key=os.path.getmtime)
+with open(latest_pred, encoding='utf-8') as f:
+    content = f.read()
+blocks = [b.strip() for b in content.split('========') if b.strip()]
+if not blocks:
+    print('')
+    exit(0)
+last_block = blocks[-1]
+for line in last_block.splitlines():
+    line = line.strip()
+    if line.startswith('sample_id:'):
+        print(line.split('sample_id:', 1)[1].strip())
+        break
+else:
+    print('')
+" 2>/dev/null || true)
+    if [[ -n "$LAST_SAMPLE_BEFORE" && -n "$LAST_SAMPLE_AFTER" && "$LAST_SAMPLE_BEFORE" == "$LAST_SAMPLE_AFTER" ]]; then
+      echo "No progress (last sample unchanged: $LAST_SAMPLE_AFTER). All samples likely evaluated. Stopping $DATASET."
       return 0
     fi
     echo "Latest sample: all metrics 1. Running again..."
