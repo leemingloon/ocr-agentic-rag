@@ -141,6 +141,17 @@ def main():
     n_docs = len({(getattr(c, "metadata", None) or {}).get("corpus_id") for c in chunks})
     print(f"Got {len(chunks)} raw chunks from {n_docs} documents.")
 
+    # Fallback corpus_id consistency: when table has no uid we use tatqa_{split}_{doc_idx}.
+    # Adapter and eval_runner._build_tatqa_corpus_chunks must use the same split order and enumerate(data).
+    # This assert is a build-time sanity check (each fallback doc got at least one chunk), not a correctness
+    # guarantee — it won't catch wrong-id assignment from split-order mismatch. Real check: single-sample rerun.
+    fallback_cids = {c for c in context_by_corpus if isinstance(c, str) and c.startswith("tatqa_")}
+    n_fallback_docs = len(fallback_cids)
+    n_fallback_chunks = sum(1 for c in chunks if (getattr(c, "metadata", None) or {}).get("corpus_id") in fallback_cids)
+    if n_fallback_docs > 0:
+        print(f"Fallback corpus_id: {n_fallback_docs} docs, {n_fallback_chunks} chunks (tatqa_<split>_<doc_idx>). Keep split/file/doc order in sync with TATQAAdapter.")
+    assert n_fallback_chunks >= (n_fallback_docs if n_fallback_docs else 0), "Fallback-id chunks should cover all fallback docs."
+
     # Pre-index steps: section tagging, unit parsing, provenance (table_id), content hash, dedup
     from rag_system.index_preprocess import preprocess_chunks_for_index
     chunks = preprocess_chunks_for_index(

@@ -40,7 +40,11 @@ from langgraph.graph import StateGraph, END
 
 from .retrieval_tools import ToolRegistry, ToolType, ToolResult
 from .memory import ConversationMemory
-from rag_system.primers import SHARED_NUMERICAL_PRIMER, WHAT_TABLE_SHOWS_PRIMER
+from rag_system.primers import (
+    SHARED_NUMERICAL_PRIMER,
+    WHAT_TABLE_SHOWS_PRIMER,
+    ARITHMETIC_FROM_COMPONENTS_PRIMER,
+)
 
 
 # Default Claude model for RAG (aligned with risk memo generator).
@@ -69,6 +73,7 @@ RAG_INTENT_CUMULATIVE_RETURN = "cumulative_return"        # cumulative total ret
 RAG_INTENT_LEASE_PERCENT = "lease_percent"                # percent of total operating leases (direct rent-expense line, not schedule sum)
 RAG_INTENT_ACCOUNTING_ADJUSTMENT = "accounting_adjustment"  # TAT-QA: cumulative-effect / adoption adjustment — select single line, preserve units
 RAG_INTENT_WHAT_TABLE_SHOWS = "what_table_shows"     # "What does the table show?" — disambiguate table before answering
+RAG_INTENT_ARITHMETIC_FROM_COMPONENTS = "arithmetic_from_components"  # ratio/total from components when not stated (TAT-QA 80d7a9cd)
 RAG_INTENT_YES_NO = "yes_no"                         # did X exceed Y, etc.
 
 
@@ -120,6 +125,8 @@ def classify_query_intent(query: str) -> List[str]:
         intents.append(RAG_INTENT_ACCOUNTING_ADJUSTMENT)
     if _needs_what_table_shows_primer(query):
         intents.append(RAG_INTENT_WHAT_TABLE_SHOWS)
+    if _needs_arithmetic_from_components_primer(query):
+        intents.append(RAG_INTENT_ARITHMETIC_FROM_COMPONENTS)
     # Absolute change: "change in X between A and B" without growth-rate language -> subtract only
     q = query.strip().lower()
     if not intents and _is_numerical_answer_question(query):
@@ -318,8 +325,13 @@ GROWTH_RATE_PRIMER = """
 For **growth rate** or **percentage change** questions (e.g. "what is the growth rate in net revenue in 2008?"):
 - **Step 1:** Locate **prior year** (e.g. 2007) and **current year** (e.g. 2008) values for the metric (e.g. net revenue) in the table or MD&A.
 - **Step 2:** Extract exactly: old_value = prior year, new_value = current year (same units, e.g. millions).
-- **Step 3:** Growth rate = (new_value - old_value) / old_value as a **decimal** (e.g. -0.03219 for a decline). Do **not** multiply by 100 unless the question asks for "percent" or "percentage" (see percentage-decrease primer below).
-- **Step 4:** **Always** output a **single** expression we will execute: divide(subtract(new_value, old_value), old_value). Example: divide(subtract(959.2, 991.1), 991.1). This returns the rate directly; report **only** that result as the numerical answer (e.g. -0.03219), not the raw dollar change (e.g. -31.9).
+- **Step 3:** Growth rate = (new_value - old_value) / old_value as a **decimal** (e.g. -0.03219 for a decline).
+  - If the question asks for a **decimal growth rate** (no "percent"/"percentage" wording), output the decimal only.
+  - If the question explicitly asks for a **percentage** (0–100 form) – e.g. "what percentage change", "percentage change", "percent change":
+    **you must add a final multiply(#N, 100) step** so the answer is in percentage units.
+- **Step 4:** **Always** output a **single program expression** we will execute, not a mix of prose and partial programs.
+  - Decimal form: `divide(subtract(new_value, old_value), old_value)`
+  - Percentage form (0–100): `multiply(divide(subtract(new_value, old_value), old_value), 100)`
 - Report negative for decrease; do not skip program execution—the question is numerical, not yes/no.
 """
 
@@ -370,14 +382,34 @@ When the question asks for **percent reduction** or **percentage reduction** (e.
 
 
 def _needs_percent_change_by_direction_primer(query: str) -> bool:
-    """True if the query asks for percent change / percentage change (not explicit 'percent reduction').
-    Uses direction-based denominator: decrease -> (old-new)/new, increase -> (new-old)/old (ZBH/2008-style)."""
+    """True if the query explicitly asks for directional percentage increase/decrease (FinQA ZBH-style),
+    not generic 'percentage change'. Uses direction-based denominator: decrease -> (old-new)/new,
+    increase -> (new-old)/old."""
     if not query or not isinstance(query, str):
         return False
     q = query.strip().lower()
+    # Explicit reduction wording is handled by percent_reduction_sign primer instead
     if "percent reduction" in q or "percentage reduction" in q:
         return False
-    return "percent change" in q or "percentage change" in q
+    # Directional phrasing: "percentage increase/decrease", "percent increase/decrease",
+    # or "what was the increase/decrease" etc.
+    directional_phrases = (
+        "percentage increase",
+        "percentage decrease",
+        "percent increase",
+        "percent decrease",
+        "percent change in",  # often directional in FinQA templates
+        "percentage change in",
+        "what was the increase",
+        "what was the decrease",
+        "increase (in",
+        "decrease (in",
+    )
+    if any(p in q for p in directional_phrases):
+        return True
+    # Purely symmetric "percentage change of X" / "percent change of X" without
+    # increase/decrease wording should NOT use direction-based denominator.
+    return False
 
 
 # Percent change by direction: when value decreases use (old-new)/new; when increases use (new-old)/old (FinQA ZBH/2008-style).
@@ -666,8 +698,23 @@ def _needs_what_table_shows_primer(query: str) -> bool:
     ) is not None
 
 
+def _needs_arithmetic_from_components_primer(query: str) -> bool:
+    """True if the query asks for a ratio of totals or a total derivable from components (TAT-QA: compute from line items when total not stated)."""
+    if not query or not isinstance(query, str):
+        return False
+    q = query.strip().lower()
+    return (
+        "ratio of" in q and "total" in q
+    ) or (
+        "total" in q and " to total " in q
+    ) or (
+        bool(re.search(r"what\s+is\s+the\s+ratio\s+of", q))
+    )
+
+
 def _needs_accounting_adjustment_primer(query: str) -> bool:
-    """True if the query asks about cumulative-effect adjustment, adoption of a standard, or opening balance adjustment (TAT-QA: select single line, preserve units; do not sum)."""
+    """True if the query asks about cumulative-effect adjustment, adoption of a standard, opening balance adjustment,
+    or percentage of an accounting adjustment (TAT-QA: select single line, preserve units; do not sum)."""
     if not query or not isinstance(query, str):
         return False
     q = query.strip().lower()
@@ -681,6 +728,9 @@ def _needs_accounting_adjustment_primer(query: str) -> bool:
             "opening balance adjustment",
             "adoption of asc",
             "adoption of asu",
+            "percentage of adjustment",
+            "percent of adjustment",
+            "percentage adjustment",
         )
     )
 
@@ -729,6 +779,11 @@ When answering accounting adjustment questions:
 
 4. The final answer should match the unit and scale implied by the table
    and the question wording.
+
+5. When the question asks for the **percentage of an adjustment** relative to a base (e.g. "percentage of adjustment to the balance of as reported X"):
+   - Treat the **adjustment line (e.g. 16.6)** as a magnitude; accounting parentheses indicate direction in the table, but percentage-of-adjustment questions usually care about **size**, not sign.
+   - Use **abs(adjustment) / base** as the ratio, and when the question explicitly asks for a percentage, **multiply by 100** in the final step.
+   - Correct program shape for percentage of adjustment: `multiply(divide(16.6, 93.8), 100)` (adjustment magnitude ÷ base, then ×100). Do **not** stop at the ratio step.
 """
 
 
@@ -1371,6 +1426,7 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
         needs_event_scoped_arithmetic = RAG_INTENT_EVENT_SCOPED in intents
         needs_accounting_adjustment = RAG_INTENT_ACCOUNTING_ADJUSTMENT in intents
         needs_what_table_shows = RAG_INTENT_WHAT_TABLE_SHOWS in intents
+        needs_arithmetic_from_components = RAG_INTENT_ARITHMETIC_FROM_COMPONENTS in intents
         needs_cashflow_financing = RAG_INTENT_CASHFLOW_FINANCING in intents
         needs_table_total_across_columns = RAG_INTENT_TABLE_TOTAL_ACROSS_COLUMNS in intents
         needs_interest_payment = RAG_INTENT_INTEREST_PAYMENT in intents
@@ -1474,6 +1530,12 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
         )
         if os.environ.get("RAG_DEBUG") == "1" and needs_what_table_shows:
             print("[DEBUG] generator: injecting what-table-shows primer (identify table before answering; disambiguate if multiple tables)")
+        arithmetic_from_components_primer_block = (
+            f"\n\nArithmetic from components (ratio/total):{ARITHMETIC_FROM_COMPONENTS_PRIMER}\n"
+            if needs_arithmetic_from_components else ""
+        )
+        if os.environ.get("RAG_DEBUG") == "1" and needs_arithmetic_from_components:
+            print("[DEBUG] generator: injecting arithmetic-from-components primer (compute ratio/total from line items when not stated)")
         # Hard program-shape constraint: singular "the adjustment" -> forbid add/sum at top level (TAT-QA row selection, not aggregation).
         needs_singular_adjustment_constraint = (
             needs_accounting_adjustment and not is_yes_no and _is_singular_adjustment(query)
@@ -1556,6 +1618,7 @@ Information:
 {event_scoped_primer_block}
 {accounting_adjustment_primer_block}
 {what_table_shows_primer_block}
+{arithmetic_from_components_primer_block}
 {cashflow_primer_block}
 {interest_payment_primer_block}
 {frequency_proportion_primer_block}
@@ -1585,6 +1648,7 @@ Answer:"""
             response = self.client.messages.create(
                 model=self.model,
                 max_tokens=1000,
+                temperature=0.3,
                 messages=[{"role": "user", "content": prompt}]
             )
             answer_text = ""

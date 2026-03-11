@@ -3185,9 +3185,14 @@ class TATQAAdapter(BaseDatasetAdapter):
                     data = json.load(f)
 
                 sample_idx = 0
-                for doc in data:
+                # Fallback corpus_id (tatqa_{split}_{doc_idx}) must match indexer iteration order.
+                # Same split order and same enumerate(data) per file as build_tatqa_embeddings_colab.py and _build_tatqa_corpus_chunks.
+                for doc_idx, doc in enumerate(data):
                     table = doc.get("table", {})
                     paragraphs = doc.get("paragraphs", [])
+                    corpus_id = table.get("uid") if isinstance(table, dict) else None
+                    if not corpus_id:
+                        corpus_id = f"tatqa_{split}_{doc_idx}"
                     for q in doc.get("questions", []):
                         if max_samples_per_split is not None and sample_idx >= max_samples_per_split:
                             break
@@ -3207,6 +3212,9 @@ class TATQAAdapter(BaseDatasetAdapter):
                                 "answer": str(answer),
                                 "scale": q.get("scale", ""),
                                 "derivation": q.get("derivation", ""),
+                                "corpus_id": corpus_id,
+                                "answer_type": q.get("answer_type") or "",
+                                "answer_from": q.get("answer_from") or "",
                             },
                             "metadata": {
                                 "dataset": self.dataset_name,

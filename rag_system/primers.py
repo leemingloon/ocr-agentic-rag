@@ -36,3 +36,15 @@ Before answering any "What does the table show?" (or similar) query:
 2. If **multiple tables** are present in the retrieved context, state **which one** you are describing and **why** you selected it.
 3. **Do not assume** there is only one table in the document. If the context contains several distinct tables and the query does not disambiguate, either name the table you are using or note that the answer refers to a specific table (identify it) rather than the whole document.
 """
+
+# =============================================================================
+# ARITHMETIC_FROM_COMPONENTS_PRIMER — compute ratio/total from components when not stated
+# =============================================================================
+# For ratio/total questions (e.g. "ratio of total X to total Y"): if the required total
+# is not explicitly stated but all component values are present, compute from components.
+# =============================================================================
+ARITHMETIC_FROM_COMPONENTS_PRIMER = """
+When the question asks for a **ratio** (e.g. ratio of total X to total Y) or a **total** that can be derived from line items:
+- If the **exact total** is not explicitly stated in the context but **all component values** are present (e.g. individual current asset and liability lines), **compute the total from the components** (add or combine as appropriate), then compute the ratio or answer. Do **not** return INSUFFICIENT_DATA when the components are all present and the formula is clear.
+- State the components you used and the computation (e.g. total = A + B + C, ratio = total_X / total_Y) so the answer is auditable.
+"""

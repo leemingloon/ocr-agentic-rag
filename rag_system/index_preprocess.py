@@ -258,6 +258,133 @@ def deduplicate_chunks(
     return out
 
 
+def _augment_tatqa_table_rows(chunks: List[Any]) -> None:
+    """
+    TAT-QA-specific table-row enrichment for better retrieval over financial tables.
+    Adds:
+    - row_type: 'section_header' | 'total' | 'detail'
+    - section: section name propagated from section header rows
+    - section_total_preview: numeric value from nearest total row in same section
+    - has_footnote: True when row appears to contain a footnote marker (e.g. '*', '†')
+    """
+    # Group table rows by corpus_id for TAT-QA sources
+    by_corpus: Dict[str, List[tuple[int, Any]]] = {}
+    for idx, c in enumerate(chunks):
+        meta = getattr(c, "metadata", None) or {}
+        source = (meta.get("source") or "") if isinstance(meta.get("source"), str) else str(meta.get("source") or "")
+        if not source.startswith("tatqa_"):
+            continue
+        chunk_type = meta.get("chunk_type") or ""
+        if "table" not in str(chunk_type):
+            continue
+        cid = meta.get("corpus_id") or ""
+        if not cid:
+            continue
+        by_corpus.setdefault(cid, []).append((idx, c))
+
+    num_pattern = re.compile(r"-?\d+(?:\.\d+)?")
+
+    for cid, rows in by_corpus.items():
+        # Sort by explicit row_index when present, otherwise keep original order
+        rows_sorted = sorted(
+            rows,
+            key=lambda pair: (getattr(pair[1], "metadata", None) or {}).get("row_index", pair[0]),
+        )
+        # First pass: classify rows and assign section names
+        section_name: Optional[str] = None
+        total_indices_by_section: Dict[str, List[int]] = {}
+        total_value_by_row: Dict[int, Optional[float]] = {}
+        section_by_row: Dict[int, Optional[str]] = {}
+        row_type_by_row: Dict[int, str] = {}
+
+        for idx, c in rows_sorted:
+            meta = getattr(c, "metadata", None) or {}
+            text = getattr(c, "text", "") or ""
+            # Row label = text before first '|' (if any)
+            parts = text.split("|", 1)
+            label = parts[0].strip() if parts else ""
+            has_number = bool(num_pattern.search(text.replace(",", "")))
+            pipe_count = text.count("|")
+
+            # Heuristic: section header row has label, no numbers, and either ends with ':' or has few columns
+            is_section_header = bool(
+                label
+                and not has_number
+                and (label.endswith(":") or pipe_count <= 1)
+            )
+            label_lower = label.lower()
+            is_total = (
+                not is_section_header
+                and (
+                    "total" in label_lower
+                    or "subtotal" in label_lower
+                    or label_lower.startswith("net ")
+                    or label_lower.endswith(" net")
+                )
+            )
+
+            if is_section_header:
+                row_type = "section_header"
+                section_name = label
+            elif is_total:
+                row_type = "total"
+            else:
+                row_type = "detail"
+
+            row_type_by_row[idx] = row_type
+            section_by_row[idx] = section_name
+            meta["row_type"] = row_type
+            if section_name:
+                meta["section"] = section_name
+
+            # Capture total-row numeric value for later preview
+            if is_total and has_number:
+                nums = num_pattern.findall(text.replace(",", ""))
+                total_val: Optional[float] = None
+                if nums:
+                    try:
+                        total_val = float(nums[-1])
+                    except ValueError:
+                        total_val = None
+                total_value_by_row[idx] = total_val
+                if section_name:
+                    total_indices_by_section.setdefault(section_name, []).append(idx)
+
+            # Footnote / asterisk handling
+            has_footnote = any(ch in text for ch in ("*", "†", "‡"))
+            if has_footnote and has_number:
+                meta["has_footnote"] = True
+
+            c.metadata = meta
+
+        # Second pass: assign section_total_preview to detail rows
+        for idx, c in rows_sorted:
+            if row_type_by_row.get(idx) != "detail":
+                continue
+            sec = section_by_row.get(idx)
+            if not sec:
+                continue
+            total_rows = total_indices_by_section.get(sec) or []
+            if not total_rows:
+                continue
+            # Find nearest prior total row within same section
+            nearest_total_idx: Optional[int] = None
+            for t_idx in sorted(total_rows):
+                if t_idx < idx:
+                    nearest_total_idx = t_idx
+                else:
+                    break
+            if nearest_total_idx is None:
+                continue
+            total_val = total_value_by_row.get(nearest_total_idx)
+            if total_val is None:
+                continue
+            meta = getattr(c, "metadata", None) or {}
+            # Store as simple preview string so it remains model-friendly
+            meta["section_total_preview"] = total_val
+            c.metadata = meta
+
+
 def preprocess_chunks_for_index(
     chunks: List[Any],
     *,
@@ -267,7 +394,7 @@ def preprocess_chunks_for_index(
     dedup: bool = True,
 ) -> List[Any]:
     """
-    Full preprocessing pipeline: section + units, provenance, content hash, dedup.
+    Full preprocessing pipeline: section + units, provenance, optional dataset-specific enrichments, content hash, dedup.
     Returns the list of chunks to pass to retriever.build_index() (may be smaller if dedup=True).
     """
     if not chunks:
@@ -278,6 +405,8 @@ def preprocess_chunks_for_index(
         page_by_corpus=page_by_corpus,
         table_id_prefix_by_corpus=table_id_prefix_by_corpus,
     )
+    # TAT-QA row-level enrichment: row_type/section/section_total_preview/has_footnote for table-aware builds.
+    _augment_tatqa_table_rows(chunks)
     for c in chunks:
         meta = getattr(c, "metadata", None) or {}
         meta["content_hash"] = content_hash(getattr(c, "text", "") or "")

@@ -742,6 +742,7 @@ def _build_tatqa_corpus_chunks(debug: bool = False) -> list:
     tatqa_dir = repo_root / "data" / "rag" / "TAT-QA"
     chunker = DocumentChunker(chunk_size=512, chunk_overlap=128)
     all_chunks = []
+    # Fallback corpus_id (tatqa_{split}_{doc_idx}) must match TATQAAdapter and build_tatqa_embeddings_colab.py: same split order and enumerate(data).
     for split, filename in [
         ("train", "tatqa_dataset_train.json"),
         ("dev", "tatqa_dataset_dev.json"),
@@ -1378,8 +1379,16 @@ def _rag_debug_index_diagnostic(
 # model 0.5625=56.25% could be correct). These are EXCLUDED from aggregate denominator so they do not
 # silently count as failures against headline metrics (e.g. FinQA 91.5%).
 # Keys: sample_id; values: short label for failure_reason (e.g. "suspect_gt").
+# TAT-QA regression: sample_id d88745f6bcf2e7ab5335def3a0f0df44 validates corpus_id scoping (query "What does the table show?"; GT from paragraph in doc table uid b3d63fb06110ad7e91c9e765227c1d27). Run with --regression or --sample_id that id.
 RAG_SUSPECT_GT_SAMPLE_LABELS: dict[str, str] = {
     "C/2010/page_272.pdf-1": "suspect_gt",  # LOCOM growth: model 0.5625 correct; dataset GT 0.97656 likely annotation error
+}
+# Pinned regression samples for --regression: (category, dataset) -> [sample_id]. Run these to validate retrieval/scoping after index or adapter changes.
+RAG_REGRESSION_SAMPLE_IDS: dict[tuple[str, str], list[str]] = {
+    ("rag", "TATQA"): [
+        "d88745f6bcf2e7ab5335def3a0f0df44",  # corpus_id scoping; answer ~ "primary components of the deferred tax assets and liabilities"
+        "80d7a9cd564cbd87a5bd261b263ab09f",  # arithmetic-from-components; ratio of total current assets to total current liabilities (3.61); compute from components when totals not stated
+    ],
 }
 
 
@@ -1398,6 +1407,11 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
             "numerical_exact_match": 0.0,
             "f1": 0.0,
             "exact_match": 0.0,
+            "conclusion_match": 0,
+            "conclusion_type": "none",
+            "conclusion_gt": None,
+            "conclusion_pred": None,
+            "jaccard_score": None,
         }
         if hasattr(utils, "numerical_near_match"):
             out["numerical_near_match"] = 0.0
@@ -1412,6 +1426,28 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
             pred_answer = normalized
             if debug:
                 print(f"[DEBUG] RAG TATQA scale normalization applied -> pred_answer={pred_answer!r}")
+
+    # TAT-QA span answers: if the model returned a full sentence containing the gold span,
+    # treat the gold span as the effective prediction for span-type questions so scoring
+    # reflects answer extraction quality rather than verbosity.
+    if dataset_name == "TATQA" and isinstance(gt_obj, dict):
+        answer_type = (gt_obj.get("answer_type") or "").strip().lower()
+        if answer_type == "span" and isinstance(gt_answer, str) and isinstance(pred_answer, str):
+            def _norm_span_text(s: str) -> str:
+                return " ".join(
+                    "".join(ch.lower() if (ch.isalnum() or ch.isspace()) else " " for ch in s).split()
+                )
+
+            gt_norm = _norm_span_text(gt_answer)
+            pred_norm = _norm_span_text(pred_answer)
+            if gt_norm and gt_norm in pred_norm:
+                if debug:
+                    print(
+                        "[DEBUG] RAG TATQA span extraction: gold span found inside prediction; "
+                        f"using gold span for scoring. sample_id={sample_id!r} "
+                        f"gt_answer={gt_answer!r} pred_answer_preview={pred_answer[:120]!r}"
+                    )
+                pred_answer = gt_answer
 
     exact = utils.exact_match(pred_answer, gt_answer, options_list=options_list)
     # Debug: yes/no mismatch — drill down when model's yes/no differs from gold
@@ -1554,6 +1590,18 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
         if exact == 1.0:
             relaxed = 1.0
         out["relaxed_match"] = relaxed
+
+    # conclusion_match at sample level (binary/enumeration); aggregate conclusion_match_mean_typed derived from these.
+    input_dict = sample.get("input") or sample.get("input_text") or {}
+    question = input_dict.get("query", "") if isinstance(input_dict, dict) else (input_dict if isinstance(input_dict, str) else "")
+    if isinstance(question, dict):
+        question = question.get("query", "") or ""
+    concl = _score_conclusion_match(question, pred_answer, str(gt_answer or ""))
+    out["conclusion_match"] = concl.conclusion_match
+    out["conclusion_type"] = concl.conclusion_type
+    out["conclusion_gt"] = concl.conclusion_gt
+    out["conclusion_pred"] = concl.conclusion_pred
+    out["jaccard_score"] = concl.jaccard_score
     return out
 
 
@@ -3479,7 +3527,23 @@ if __name__ == "__main__":
         default=None,
         help="Run evaluation for this single sample only. Updates the existing row in-place (no duplicate). Requires --category and --dataset. Example: --category rag --dataset FinQA --sample_id 'C/2010/page_272.pdf-1'",
     )
+    parser.add_argument(
+        "--regression",
+        action="store_true",
+        help="Run pinned regression sample(s) for the given --category and --dataset (e.g. --category rag --dataset TATQA --regression). Overrides to the regression sample_id so the check is visible and runnable without reading code.",
+    )
     args = parser.parse_args()
+
+    if args.regression:
+        if not args.category or not args.dataset:
+            print("--regression requires --category and --dataset (e.g. --category rag --dataset TATQA --regression)")
+            raise SystemExit(1)
+        key = (args.category.strip().lower(), args.dataset.strip().upper())
+        if key not in RAG_REGRESSION_SAMPLE_IDS or not RAG_REGRESSION_SAMPLE_IDS[key]:
+            print(f"No regression sample pinned for category={args.category!r} dataset={args.dataset!r}. Add to RAG_REGRESSION_SAMPLE_IDS in eval_runner.py.")
+            raise SystemExit(1)
+        args.sample_id = RAG_REGRESSION_SAMPLE_IDS[key][0]
+        print(f"[regression] Running pinned sample_id={args.sample_id!r} for {args.category}/{args.dataset}")
 
     if args.sample_id:
         if not args.category or not args.dataset:

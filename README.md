@@ -9,24 +9,16 @@ OCR→Agentic RAG→Credit Risk Platform
 **Vision** *_samples.json files under `data/proof/vision/` folder.
 **OCR** *_samples.json files under `data/proof/ocr/` folder. [IN PROGRESS]
 
-**Interview demos:** Use the Jupyter notebooks (`.ipynb`) under the `notebooks/` folder.  
+**Demos:** Jupyter notebooks (`.ipynb`) under the `notebooks/` folder. [IN PROGRESS]
 **Demos:** Use model evaluation results (proof) in the `data/proof/` folder.
 
-> **Evaluation data:** Demos and notebooks in the `notebooks/` folder load model evaluation results from the `data/proof/` folder. Any metrics or scores cited in this repo that are not backed by current artifacts under `data/proof/` are placeholders and will be filled in as evaluation progresses.
+> **Evaluation data:** Demos and notebooks in the `notebooks/` folder load model evaluation results from the `data/proof/` folder.
 
 ---
 
 ## 🎯 Project Overview
 
 End-to-end pipeline: **OCR → Agentic RAG → Multimodal Vision → Credit Risk**
-
-### Key Achievements
-
-- E2E fidelity (image → answer) — *see `data/proof/`*
-- STP (straight-through processing) — *TBD*
-- Cost per document — *TBD*
-- Benchmarks: OCR, Vision, RAG, Credit Risk — *proof under `data/proof/`*
-- MAS FEAT: audit trails, prompt versioning — *TBD*
 
 ---
 
@@ -306,7 +298,7 @@ python run_e2e.py --mode production --eval
 - **LLM:** Claude Sonnet 4
 
 ### Multimodal
-- **Vision Model:** Claude 4.6 Sonnet Vision
+- **Vision Model:** Claude 4.6 Sonnet
 - **Chart Understanding:** Vision-first (95% accuracy)
 
 ### Credit Risk (NEW)
