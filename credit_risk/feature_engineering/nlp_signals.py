@@ -102,8 +102,15 @@ class NLPSignalExtractor:
         else:
             self.s3_client = None
         
-        # Load model
-        self.sentiment_model = self._load_model()
+        # Load model (prefer SentimentPipeline with failure-mode fixes when local)
+        self._sentiment_pipeline = None
+        if mode == "local":
+            try:
+                from credit_risk.sentiment import SentimentPipeline, SentimentPipelineConfig
+                self._sentiment_pipeline = SentimentPipeline(SentimentPipelineConfig())
+            except Exception:
+                pass
+        self.sentiment_model = self._load_model() if self._sentiment_pipeline is None else None
         
         # Negative keywords (covenant breach, restructuring, etc.)
         self.negative_keywords = [
@@ -295,10 +302,25 @@ class NLPSignalExtractor:
         
         # Recency-weighted sentiment
         weights = np.exp(-np.arange(len(sentiments)) * recency_decay)
+        def _score_val(s):
+            if s["label"] == "positive":
+                return s["score"]
+            if s["label"] == "negative":
+                return -s["score"]
+            return 0.0
         weighted_sentiment = np.average(
-            [s["score"] if s["label"] == "positive" else -s["score"] for s in sentiments],
+            [_score_val(s) for s in sentiments],
             weights=weights
         )
+        # Downstream PD: sentiment_score (numeric), sentiment_confidence (avg), sentiment_flags (any)
+        avg_confidence = np.average([s.get("confidence", 0.5) for s in sentiments]) if sentiments else 0.5
+        all_flags = {}
+        for s in sentiments:
+            for k, v in (s.get("flags") or {}).items():
+                if v and k not in all_flags:
+                    all_flags[k] = True
+        if not all_flags:
+            all_flags = {"negation": False, "conditional": False, "numeric_comparison": False, "hedged": False}
         
         # Trend determination
         if weighted_sentiment < -0.2:
@@ -320,30 +342,36 @@ class NLPSignalExtractor:
                 "trend": trend,
                 "sample_size": len(documents),
             },
+            "sentiment_score": weighted_sentiment,
+            "sentiment_confidence": float(avg_confidence),
+            "sentiment_flags": all_flags,
             "entities": entities,
             "warning_flags": warning_flags,
         }
     
     def _get_sentiment(self, text: str) -> Dict:
         """
-        Get sentiment for single text
-        
-        Args:
-            text: Text to analyze
-            
+        Get sentiment for single text.
+        Prefers SentimentPipeline (negation/conditional/numeric/hedge/ABSA) when available.
         Returns:
-            {"label": "positive/negative/neutral", "score": 0.0-1.0}
+            {"label": "positive/negative/neutral", "score": 0.0-1.0, "confidence": float, "flags": dict}
         """
+        if self._sentiment_pipeline is not None:
+            try:
+                out = self._sentiment_pipeline.predict(text[:2000])
+                label = out.get("sentence_sentiment", "neutral")
+                conf = out.get("confidence", 0.5)
+                # "score" is magnitude for recency weighting; sign from label in _score_val
+                score = 0.7 if label in ("positive", "negative") else 0.5
+                return {"label": label, "score": score, "confidence": conf, "flags": out.get("flags", {})}
+            except Exception:
+                pass
         if self.sentiment_model is None:
-            # Fallback: rule-based
             return self._rule_based_sentiment(text)
-        
         try:
-            # Truncate to 512 tokens
             result = self.sentiment_model(text[:2000])[0]
             return result
-        except Exception as e:
-            # Fallback
+        except Exception:
             return self._rule_based_sentiment(text)
     
     def _rule_based_sentiment(self, text: str) -> Dict:

@@ -12,11 +12,43 @@ Usage:
         documents=["doc1", "doc2", "doc3"],
         top_k=5
     )
+
+LOGGING RULE: Do not print or log "Loading ... model", "loaded successfully", or any
+model-weight loading messages to stdout/stderr. They hide evaluation and debug logs.
+Load silently; use RAG_DEBUG or explicit flags for diagnostics.
 """
 
 import os
+import sys
 from typing import List
 from sentence_transformers import CrossEncoder
+
+
+def _load_cross_encoder_quiet(model_name: str, **kwargs) -> "CrossEncoder":
+    """Load CrossEncoder with progress/output suppressed so eval debug logs stay visible."""
+    prev_tqdm = os.environ.get("TQDM_DISABLE")
+    prev_hf = os.environ.get("HF_HUB_DISABLE_PROGRESS_BARS")
+    os.environ["TQDM_DISABLE"] = "1"
+    os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
+    _stdout, _stderr = sys.stdout, sys.stderr
+    try:
+        sys.stdout = open(os.devnull, "w")
+        sys.stderr = open(os.devnull, "w")
+        return CrossEncoder(model_name, **kwargs)
+    finally:
+        if sys.stdout is not _stdout and getattr(sys.stdout, "close", None):
+            sys.stdout.close()
+        if sys.stderr is not _stderr and getattr(sys.stderr, "close", None):
+            sys.stderr.close()
+        sys.stdout, sys.stderr = _stdout, _stderr
+        if prev_tqdm is None:
+            os.environ.pop("TQDM_DISABLE", None)
+        else:
+            os.environ["TQDM_DISABLE"] = prev_tqdm
+        if prev_hf is None:
+            os.environ.pop("HF_HUB_DISABLE_PROGRESS_BARS", None)
+        else:
+            os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = prev_hf
 
 
 class BGEReranker:
@@ -34,18 +66,15 @@ class BGEReranker:
         Args:
             model_name: HuggingFace model name for reranking
         """
-        # Skip loading in debug to avoid OOM when embedding model already loaded (e.g. 16GB RAM).
-        # Set RAG_USE_RERANKER=1 to force loading even when RAG_DEBUG=1 (recommended for numeric tables).
-        force_reranker = os.environ.get("RAG_USE_RERANKER", "").strip().lower() in ("1", "true", "yes")
-        skip = (os.environ.get("RAG_DEBUG") == "1" and not force_reranker) or os.environ.get("RAG_SKIP_RERANKER", "").lower() in ("1", "true", "yes")
+        # Only skip when explicitly requested (e.g. to save memory). Table-style finance QA benefits from reranker.
+        # Set RAG_SKIP_RERANKER=1 to skip loading when needed (e.g. 16GB RAM with embedding model already loaded).
+        skip = os.environ.get("RAG_SKIP_RERANKER", "").strip().lower() in ("1", "true", "yes")
         if skip:
-            print("Warning: Skipping reranker load (RAG_DEBUG or RAG_SKIP_RERANKER set; using retrieval order as-is)")
             self.model = None
             return
         try:
-            print(f"Loading reranker model: {model_name}")
-            self.model = CrossEncoder(model_name, max_length=512)
-            print("Reranker loaded successfully")
+            # No loading logs here; see module LOGGING RULE. Suppress tqdm/transformers output via _load_cross_encoder_quiet.
+            self.model = _load_cross_encoder_quiet(model_name, max_length=512)
         except Exception as e:
             print(f"Warning: Could not load reranker: {e}")
             print("Warning: Using fallback (no reranking)")

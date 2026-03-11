@@ -11,6 +11,11 @@ Two modes:
   sub_grade, int_rate as "using the answer"; adds revol_util_bucket, credit_history_months,
   purpose_risk_code, home_ownership_risk_code, dti_to_income, payment_to_income_monthly,
   purpose_x_home_ownership). Use for training and production PD.
+
+V2 feature set (additive, still no-leakage):
+- Adds one-hot encodings for key categoricals (purpose, home_ownership, verification_status,
+  addr_state, application_type, initial_list_status). Excludes grade/sub_grade/int_rate.
+- Adds a small set of raw origination numerics when present (e.g. term_months).
 """
 
 from __future__ import annotations
@@ -22,6 +27,23 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 
+
+# Post-origination fields to NEVER use (data leakage — only exist after loan is active)
+POST_ORIGINATION_BLOCKLIST = {
+    "lastpaymentamount",
+    "last_pymnt_amnt",
+    "lastpaymentdate",
+    "last_pymnt_d",
+    "total_pymnt",
+    "totalpayment",
+    "recoveries",
+    "outstandingprincipal",
+    "outstanding_principal",
+    "outprincipal",
+    "out_prcp",
+    "next_pymnt_d",
+    "collection_recovery_fee",
+}
 
 # CamelCase / variant names in benchmark query text -> canonical snake_case for feature pipeline
 QUERY_FIELD_ALIASES = {
@@ -36,7 +58,7 @@ QUERY_FIELD_ALIASES = {
     "inquiriesin6months": "inq_last_6mths",
     "installment": "installment",
     "interestrate": "int_rate",
-    "lastpaymentamount": "last_pymnt_amnt",
+    # lastPaymentAmount intentionally EXCLUDED — post-origination, causes leakage
     "loanamount": "loan_amnt",
     "loanapplicationtype": "application_type",
     "loanpurpose": "purpose",
@@ -65,11 +87,34 @@ def _safe_float(x: Any) -> float:
         return np.nan
 
 
+def _strip_blocklist_from_query_text(text: str) -> str:
+    """
+    Remove post-origination key: value pairs from the feature block string.
+    Belt-and-suspenders: ensures blocklist fields never reach the parser output.
+    """
+    if not text or not isinstance(text, str):
+        return text
+    # Match "key: value" pairs; remove if key (lowercase) is in blocklist
+    def _repl(m: re.Match) -> str:
+        key_lower = m.group(1).strip().lower()
+        if key_lower in POST_ORIGINATION_BLOCKLIST:
+            return ""  # Remove this pair (leave trailing comma for next pair)
+        return m.group(0)
+    pattern = r"(\w+)\s*:\s*[^,\n]+"
+    result = re.sub(pattern, _repl, text, flags=re.IGNORECASE)
+    # Clean up double commas or ", ," left by removals
+    result = re.sub(r",\s*,", ",", result)
+    result = re.sub(r"^\s*,\s*", "", result)
+    result = re.sub(r",\s*$", "", result)
+    return result
+
+
 def _parse_lendingclub_query_text(query: str) -> Dict[str, Any]:
     """
     Parse LendingClub benchmark query string into a flat dict of raw fields.
     Benchmark format often has "Text: ' addressState: fl, annualIncome: 97000, ... '." — we extract
     only that segment so key: value pairs are parsed correctly (no spurious matches from "Answer:", etc.).
+    Post-origination fields (lastPaymentAmount, etc.) are stripped from the string before parsing.
     """
     out: Dict[str, Any] = {}
     if not query or not isinstance(query, str):
@@ -77,10 +122,14 @@ def _parse_lendingclub_query_text(query: str) -> Dict[str, Any]:
     # Extract the feature block between "Text: '" and "'." or "'\n" if present
     text_match = re.search(r"Text:\s*['\"]([^'\"]+)['\"]", query, re.IGNORECASE | re.DOTALL)
     parse_text = text_match.group(1).strip() if text_match else query
+    # Strip blocklist fields from string before parsing (ensures no leakage)
+    parse_text = _strip_blocklist_from_query_text(parse_text)
     # Extract "key: value" pairs; key may be camelCase, value numeric or string
     pattern = r"(\w+)\s*:\s*([^,\n]+)"
     for m in re.finditer(pattern, parse_text, re.IGNORECASE):
         key_raw = m.group(1).strip().lower()
+        if key_raw in POST_ORIGINATION_BLOCKLIST:
+            continue  # Skip post-origination fields (e.g. lastPaymentAmount) — leakage
         val_raw = m.group(2).strip().strip("'\" ")
         canonical = QUERY_FIELD_ALIASES.get(key_raw, key_raw)
         # Keep string values for fields that need categorical/date/employment parsing
@@ -169,12 +218,151 @@ HOME_OWNERSHIP_RISK = {
     "other": 1,
 }
 
+# ----------------------------
+# V2 categorical vocabularies
+# ----------------------------
+# NOTE: These are intentionally "small and stable" vocabularies so inference can be deterministic.
+# Unknown / missing values map to UNK (i.e., all zeros except addr_state__UNK where applicable).
+
+_PURPOSE_VOCAB = [
+    "debt_consolidation",
+    "credit_card",
+    "home_improvement",
+    "major_purchase",
+    "small_business",
+    "car",
+    "medical",
+    "moving",
+    "vacation",
+    "house",
+    "wedding",
+    "renewable_energy",
+    "educational",
+    "other",
+]
+
+_HOME_OWNERSHIP_VOCAB = ["rent", "mortgage", "own", "any", "none", "other"]
+_VERIFICATION_STATUS_VOCAB = ["verified", "source_verified", "not_verified"]
+_APPLICATION_TYPE_VOCAB = ["individual", "joint_app"]
+_INITIAL_LIST_STATUS_VOCAB = ["f", "w"]
+
+# 50 states + DC; (no territories by default). Keep stable for training/inference.
+_ADDR_STATE_VOCAB = [
+    "AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA",
+    "MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX",
+    "UT","VT","VA","WA","WV","WI","WY",
+]
+
+
+def _norm_verification_status(s: Any) -> str | None:
+    if s is None or (isinstance(s, float) and np.isnan(s)):
+        return None
+    t = str(s).strip().lower()
+    if not t:
+        return None
+    # LC uses "Source Verified" / "Not Verified" / "Verified"
+    t = t.replace("-", " ").replace("/", " ")
+    t = re.sub(r"\s+", " ", t).strip()
+    if t == "source verified":
+        return "source_verified"
+    if t == "not verified":
+        return "not_verified"
+    if t == "verified":
+        return "verified"
+    return None
+
+
+def _norm_application_type(s: Any) -> str | None:
+    if s is None or (isinstance(s, float) and np.isnan(s)):
+        return None
+    t = str(s).strip().lower()
+    if not t:
+        return None
+    t = re.sub(r"\s+", " ", t)
+    if t in ("individual",):
+        return "individual"
+    if t in ("joint app", "joint"):
+        return "joint_app"
+    return None
+
+
+def _norm_initial_list_status(s: Any) -> str | None:
+    if s is None or (isinstance(s, float) and np.isnan(s)):
+        return None
+    t = str(s).strip().lower()
+    if t in ("f", "w"):
+        return t
+    return None
+
+
+def _norm_home_ownership(s: Any) -> str | None:
+    if s is None or (isinstance(s, float) and np.isnan(s)):
+        return None
+    t = str(s).strip().lower()
+    if not t:
+        return None
+    t = t.replace("-", "_").replace(" ", "_")
+    # map common LC variants
+    if t in ("rent", "mortgage", "own", "any", "none", "other"):
+        return t
+    return None
+
+
+def _norm_purpose(s: Any) -> str | None:
+    if s is None or (isinstance(s, float) and np.isnan(s)):
+        return None
+    t = _camel_to_snake(s)
+    t = str(t).strip().lower()
+    if not t:
+        return None
+    # map common variants
+    if t in _PURPOSE_VOCAB:
+        return t
+    # Some datasets use 'debt_consolidation' vs 'debt_consolidation' already handled.
+    return "other"
+
+
+def _norm_addr_state(s: Any) -> str | None:
+    if s is None or (isinstance(s, float) and np.isnan(s)):
+        return None
+    t = str(s).strip().upper()
+    if not t:
+        return None
+    if t in _ADDR_STATE_VOCAB:
+        return t
+    return "UNK"
+
+
+def _parse_term_months(x: Any) -> float:
+    """Parse LC term like '36 months' -> 36. NaN if missing/invalid."""
+    if x is None or (isinstance(x, float) and np.isnan(x)):
+        return np.nan
+    if isinstance(x, (int, float)):
+        v = float(x)
+        return v if v > 0 else np.nan
+    t = str(x).strip().lower()
+    if not t:
+        return np.nan
+    m = re.search(r"(\d+)", t)
+    if not m:
+        return np.nan
+    try:
+        v = float(m.group(1))
+        return v if v > 0 else np.nan
+    except Exception:
+        return np.nan
+
+
+def _camel_to_snake(s: str) -> str:
+    """Convert camelCase or PascalCase to snake_case for HF benchmark compatibility."""
+    return re.sub(r"([a-z])([A-Z])", r"\1_\2", str(s)).lower().replace(" ", "_")
+
 
 def _purpose_risk_code(s: Any) -> float:
-    """Map purpose string to numeric risk code (0-2). Missing -> 1."""
+    """Map purpose string to numeric risk code (0-2). Missing -> 1. HF uses camelCase (e.g. debtConsolidation)."""
     if s is None or (isinstance(s, float) and np.isnan(s)):
         return 1.0
-    key = str(s).strip().lower().replace(" ", "_")
+    key = _camel_to_snake(s)
     return float(PURPOSE_RISK.get(key, 1))
 
 
@@ -191,7 +379,9 @@ def build_features_from_dict(raw: Dict[str, Any]) -> Dict[str, float]:
     Build 15 PD features from a single row (dict of raw fields).
     Used when streaming parquet rows or when inference receives one sample.
     Missing keys yield NaN; caller or downstream fills with 0 or median as needed.
+    Post-origination fields (last_pymnt_amnt, etc.) are explicitly dropped to prevent leakage.
     """
+    raw = {k: v for k, v in raw.items() if k.lower() not in POST_ORIGINATION_BLOCKLIST}
     get = lambda k: raw.get(k, np.nan)
     getf = lambda k: _safe_float(get(k))
 
@@ -262,6 +452,9 @@ def build_features_from_dict(raw: Dict[str, Any]) -> Dict[str, float]:
     # 9. Inquiries in 6m (count)
     inq_6m = inq_last_6mths if inq_last_6mths is not None and not np.isnan(inq_last_6mths) else 0.0
 
+    # 9b. Derogatory composite: delinquency + inquiries (credit history depth)
+    derog_composite = (delinq_2yrs if delinq_2yrs is not None and not np.isnan(delinq_2yrs) else 0.0) + inq_6m
+
     # 10. Accounts utilization (open/total); avoid div by zero
     if total_acc and total_acc > 0 and open_acc is not None and not np.isnan(open_acc):
         acc_util = open_acc / total_acc
@@ -305,6 +498,7 @@ def build_features_from_dict(raw: Dict[str, Any]) -> Dict[str, float]:
         "emp_months": emp_months,
         "delinq_flag": delinq_flag,
         "inq_6m": inq_6m,
+        "derog_composite": derog_composite,
         "acc_util": acc_util,
         "int_rate_high": int_rate_high,
         "revol_bal_log": revol_bal_log,
@@ -331,6 +525,7 @@ FEATURE_NAMES_NO_LEAKAGE = [
     "emp_length_years",
     "delinq_flag",
     "inq_6m",
+    "derog_composite",
     "acc_util",
     "revol_bal_log",
     "revol_util_per_acc",
@@ -344,7 +539,104 @@ FEATURE_NAMES_NO_LEAKAGE = [
     "purpose_x_home_ownership",
     "emp_home_interaction",
     "log_annual_inc",
+    "is_missing_dti",
+    "is_missing_credit_history",
 ]
+
+
+def _v2_onehot_feature_names() -> list[str]:
+    names: list[str] = []
+    names += [f"purpose__{c}" for c in _PURPOSE_VOCAB]
+    names += [f"home_ownership__{c}" for c in _HOME_OWNERSHIP_VOCAB]
+    names += [f"verification_status__{c}" for c in _VERIFICATION_STATUS_VOCAB]
+    names += [f"application_type__{c}" for c in _APPLICATION_TYPE_VOCAB]
+    names += [f"initial_list_status__{c}" for c in _INITIAL_LIST_STATUS_VOCAB]
+    # addr_state: fixed list + UNK bucket
+    names += [f"addr_state__{c}" for c in _ADDR_STATE_VOCAB] + ["addr_state__UNK"]
+    return names
+
+
+FEATURE_NAMES_NO_LEAKAGE_V2 = (
+    list(FEATURE_NAMES_NO_LEAKAGE)
+    + [
+        # Raw origination numerics (when present)
+        "term_months",
+        "open_acc_raw",
+        "total_acc_raw",
+        "pub_rec_raw",
+        "pub_rec_bankruptcies_raw",
+        "mort_acc_raw",
+        "mo_sin_old_il_acct_raw",
+        "mo_sin_old_rev_tl_op_raw",
+    ]
+    + _v2_onehot_feature_names()
+)
+
+
+def build_features_from_dict_no_leakage_v2(raw: Dict[str, Any]) -> Dict[str, float]:
+    """
+    V2 additive no-leakage feature set:
+    - Starts from build_features_from_dict_no_leakage (V1).
+    - Adds stable one-hot encodings for key categoricals.
+    - Adds a few raw origination numeric fields when present (kept as NaN if missing).
+
+    Still excludes grade/sub_grade/int_rate and post-origination fields.
+    """
+    # Base v1 no-leakage features
+    out = build_features_from_dict_no_leakage(raw)
+
+    get = lambda k: raw.get(k, np.nan)
+    getf = lambda k: _safe_float(get(k))
+
+    # Raw numeric origination fields (only when present; NaN otherwise)
+    out["term_months"] = _parse_term_months(get("term"))
+    out["open_acc_raw"] = getf("open_acc")
+    out["total_acc_raw"] = getf("total_acc")
+    out["pub_rec_raw"] = getf("pub_rec")
+    out["pub_rec_bankruptcies_raw"] = getf("pub_rec_bankruptcies")
+    out["mort_acc_raw"] = getf("mort_acc")
+    out["mo_sin_old_il_acct_raw"] = getf("mo_sin_old_il_acct")
+    out["mo_sin_old_rev_tl_op_raw"] = getf("mo_sin_old_rev_tl_op")
+
+    # One-hot categoricals (stable vocab)
+    purpose = _norm_purpose(get("purpose"))
+    home = _norm_home_ownership(get("home_ownership"))
+    verif = _norm_verification_status(get("verification_status"))
+    app = _norm_application_type(get("application_type"))
+    ils = _norm_initial_list_status(get("initial_list_status"))
+    st = _norm_addr_state(get("addr_state"))
+
+    # Initialize all one-hot keys to 0 for deterministic output.
+    for name in _v2_onehot_feature_names():
+        out[name] = 0.0
+
+    if purpose in _PURPOSE_VOCAB:
+        out[f"purpose__{purpose}"] = 1.0
+    if home in _HOME_OWNERSHIP_VOCAB:
+        out[f"home_ownership__{home}"] = 1.0
+    if verif in _VERIFICATION_STATUS_VOCAB:
+        out[f"verification_status__{verif}"] = 1.0
+    if app in _APPLICATION_TYPE_VOCAB:
+        out[f"application_type__{app}"] = 1.0
+    if ils in _INITIAL_LIST_STATUS_VOCAB:
+        out[f"initial_list_status__{ils}"] = 1.0
+    if st is None:
+        out["addr_state__UNK"] = 1.0
+    elif st == "UNK":
+        out["addr_state__UNK"] = 1.0
+    else:
+        out[f"addr_state__{st}"] = 1.0
+
+    # Ensure order & only v2 keys
+    return {k: out.get(k, 0.0) for k in FEATURE_NAMES_NO_LEAKAGE_V2}
+
+
+def build_features_from_dataframe_no_leakage_v2(df: pd.DataFrame) -> pd.DataFrame:
+    """Build V2 additive no-leakage features from a DataFrame."""
+    raw_list = []
+    for _, row in df.iterrows():
+        raw_list.append(build_features_from_dict_no_leakage_v2(row.to_dict()))
+    return pd.DataFrame(raw_list)
 
 
 def build_features_from_dict_no_leakage(raw: Dict[str, Any]) -> Dict[str, float]:
@@ -438,6 +730,10 @@ def build_features_from_dict_no_leakage(raw: Dict[str, Any]) -> Dict[str, float]
     out["emp_home_interaction"] = emp_home_interaction
     out["revol_util_per_acc"] = revol_util_per_acc
     out["log_annual_inc"] = log_annual_inc
+    # Phase 1.1 optional: is_missing flags for HF-missing fields (model learns different behavior)
+    dti_ratio_val = feats.get("dti_ratio", np.nan)
+    out["is_missing_dti"] = 1.0 if (dti_ratio_val is None or (isinstance(dti_ratio_val, float) and np.isnan(dti_ratio_val))) else 0.0
+    out["is_missing_credit_history"] = 1.0 if (credit_history_months is None or (isinstance(credit_history_months, float) and np.isnan(credit_history_months))) else 0.0
     # Ensure order and only no-leakage keys (drop grade_num, int_rate_high, composite_risk)
     return {k: out[k] for k in FEATURE_NAMES_NO_LEAKAGE if k in out}
 
@@ -476,22 +772,51 @@ def get_feature_names_no_leakage() -> List[str]:
     return list(FEATURE_NAMES_NO_LEAKAGE)
 
 
+def get_feature_names_no_leakage_v2() -> List[str]:
+    """Return the ordered list of V2 additive origination-only (no-leakage) feature names."""
+    return list(FEATURE_NAMES_NO_LEAKAGE_V2)
+
+
+def sanitize_query_for_display(query: str) -> str:
+    """
+    Return query string with post-origination fields stripped from the Text block.
+    Use when storing/displaying samples so proof files show a clean, no-leakage input.
+    """
+    if not query or not isinstance(query, str):
+        return query
+    text_match = re.search(r"(Text:\s*['\"])([^'\"]+)(['\"])", query, re.IGNORECASE | re.DOTALL)
+    if not text_match:
+        return query
+    prefix, block, suffix = text_match.group(1), text_match.group(2), text_match.group(3)
+    stripped_block = _strip_blocklist_from_query_text(block.strip()).strip()
+    return query[: text_match.start()] + prefix + stripped_block + suffix + query[text_match.end() :]
+
+
 def parse_query_to_features(
-    query: str, fill_missing: float = 0.0, use_no_leakage: bool = False
+    query: str,
+    fill_missing: Union[float, Dict[str, float]] = 0.0,
+    use_no_leakage: bool = False,
+    feature_version: str = "v1",
 ) -> Dict[str, float]:
     """
     Parse LendingClub benchmark query text and return a feature dict suitable for predict_pd.
     Replaces NaN with fill_missing so the model always receives numeric values.
     If use_no_leakage=True, returns origination-only features (same set as get_feature_names_no_leakage).
+    fill_missing: float for uniform fill, or dict of {feature_name: value} for per-feature median imputation.
     """
     raw = _parse_lendingclub_query_text(query)
-    feats = (
-        build_features_from_dict_no_leakage(raw)
-        if use_no_leakage
-        else build_features_from_dict(raw)
-    )
+    if use_no_leakage:
+        if str(feature_version).lower() in ("v2", "2", "no_leakage_v2"):
+            feats = build_features_from_dict_no_leakage_v2(raw)
+        else:
+            feats = build_features_from_dict_no_leakage(raw)
+    else:
+        feats = build_features_from_dict(raw)
     for k in feats:
         v = feats[k]
         if isinstance(v, (float, np.floating)) and np.isnan(v):
-            feats[k] = fill_missing
+            if isinstance(fill_missing, dict):
+                feats[k] = fill_missing.get(k, 0.0)
+            else:
+                feats[k] = fill_missing
     return feats

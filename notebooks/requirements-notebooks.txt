@@ -1,4 +1,4 @@
-# Dependencies for PD & QNLP notebooks (01–04)
+# Dependencies for PD, Quantum, FinBERT & QNLP notebooks (01–06)
 # Install from repo root: pip install -r notebooks/requirements-notebooks.txt
 # Or install main repo deps first: pip install -r requirements.txt
 
@@ -7,19 +7,33 @@ pandas>=1.5.0
 numpy>=1.21.0
 scikit-learn>=1.0.0
 xgboost>=1.7.0
+lightgbm>=4.0.0
 catboost>=1.2.0
 scipy>=1.9.0
 joblib>=1.2.0
 optuna>=3.0.0
 
-# Parquet I/O (notebook 01 output / 02–03 input)
+# Parquet I/O (notebook 01 output / 02–04 input)
 pyarrow>=10.0.0
 
-# Quantum PD (notebook 03)
+# Quantum PD (notebook 02b)
 pennylane>=0.32.0
 
-# QNLP sentiment (notebook 04) – optional
+# FP/FiQA feature engineering (notebook 03) – canonical train/val/test
+# Uses pandas, pyarrow (above)
+
+# FinBERT sentiment (notebook 04a) – fine-tuning + failure-mode fixes
+transformers>=4.30.0
+datasets>=2.14.0
+accelerate>=0.20.0
+# Optional: negation/conditional/ABSA (pip install spacy && python -m spacy download en_core_web_sm)
+spacy>=3.5.0
+
+# QNLP sentiment (notebook 04b) – optional
 lambeq>=0.3.0
 
 # Plotting (notebook 01 optional)
 matplotlib>=3.5.0
+
+# PD ANN comparison (notebook 02a)
+torch>=2.0.0

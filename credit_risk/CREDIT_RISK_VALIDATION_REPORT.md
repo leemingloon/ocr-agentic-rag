@@ -1,6 +1,6 @@
 # PD Model – Validation Report (Template)
 
-This document provides a **validation report** for the PD (Probability of Default) model used in this repository. It aligns with MRM expectations: purpose, data, methodology, performance, stability (PSI), back-testing, and monitoring. Reproducible numbers are in **`notebooks/02_pd_xgboost_training.ipynb`** (Section 4: credit metrics; Section 6: model card).
+This document provides a **validation report** for the PD (Probability of Default) model used in this repository. It aligns with MRM expectations: purpose, data, methodology, performance, stability (PSI), back-testing, and monitoring. Reproducible numbers are in **`notebooks/02a_pd_xgboost_training.ipynb`** (Section 4: credit metrics; Section 6: model card).
 
 ---
 
@@ -14,10 +14,10 @@ This document provides a **validation report** for the PD (Probability of Defaul
 
 ## 2. Data and methodology
 
-- **Data source:** Lending Club **LoanStats3a**; engineered features from `01_lendingclub_feature_engineering.ipynb`, then `lendingclub_engineered.parquet`.
-- **Feature set:** No-leakage set from `credit_risk.feature_engineering.common_features.get_feature_names_no_leakage()`.
+- **Data source:** Lending Club **LoanStats3a**; engineered features from `01_pd_lendingclub_feature_engineering.ipynb`, then `lendingclub_engineered.parquet`.
+- **Feature set:** No-leakage **V2** set from `credit_risk.feature_engineering.common_features.get_feature_names_no_leakage_v2()` (adds one-hot categoricals like `purpose`, `home_ownership`, `verification_status`, `addr_state`, etc., while still excluding LC risk outputs `grade/sub_grade/int_rate`).
 - **Splits:** Out-of-time when available (train: 2007–2015, val: 2016, test: 2017–2018); otherwise random 70/15/15 train/val/test, stratified.
-- **Methodology:** XGBoost (and optional LightGBM stacking), tuned with **Optuna** (stratified 5‑fold CV, early stopping) to maximize AUC-ROC; refit on train+val for final artifact. Class imbalance handled via `scale_pos_weight` and threshold tuning (no SMOTE).
+- **Methodology:** XGBoost (and optional LightGBM stacking), tuned with **Optuna** (stratified 5‑fold CV, early stopping) to maximize AUC-ROC; refit on train+val for final artifact. Class imbalance handled via `scale_pos_weight` and threshold tuning (no SMOTE). A train-only screening step drops high-missingness features and prunes highly correlated pairs (keep higher K‑S).
 - **Default definition:** Charged Off / Default / Late 31–120 days vs Fully Paid.
 
 ---
@@ -72,7 +72,7 @@ Back-test is **realised default rate by score decile** (low to high PD). The mod
 
 ## 7. References
 
-- **Model development:** `notebooks/02_pd_xgboost_training.ipynb` (Sections 1–6).
+- **Model development:** `notebooks/02a_pd_xgboost_training.ipynb` (Sections 1–6).
 - **Model card:** Section 6 of the same notebook (dataset, leakage exclusions, limitations, monitoring, top drivers, MAS FEAT).
 - **Regulatory context:** `CREDIT_RISK_REGULATORY_CONTEXT.md` (IFRS 9, ECL, Basel, stress, MRM).
 - **PD model code:** `credit_risk/models/pd_model.py`.

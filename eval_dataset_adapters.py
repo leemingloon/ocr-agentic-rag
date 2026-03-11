@@ -24,6 +24,23 @@ from datasets import load_dataset, load_from_disk
 from scipy.optimize import linear_sum_assignment
 
 
+# Max pixel dimension for OCR images to avoid MemoryError when loading many samples (e.g. on Windows)
+OCR_IMAGE_MAX_DIMENSION = 2048
+
+
+def _resize_pil_image_if_large(img: Image.Image, max_dimension: int = OCR_IMAGE_MAX_DIMENSION) -> Image.Image:
+    """Resize PIL Image so longest side is at most max_dimension. Reduces memory for OCR eval."""
+    if not isinstance(img, Image.Image) or max_dimension <= 0:
+        return img
+    w, h = img.size
+    if w <= max_dimension and h <= max_dimension:
+        return img
+    scale = max_dimension / max(w, h)
+    new_w = max(1, int(round(w * scale)))
+    new_h = max(1, int(round(h * scale)))
+    return img.resize((new_w, new_h), Image.LANCZOS)
+
+
 def _parse_options_list(value):  # noqa: ANN001, ANN201
     """Parse options from parquet (string like \"['$63,020', ...]\" or list) into a Python list. Returns None if missing/invalid."""
     if value is None:
@@ -221,7 +238,8 @@ class BaseDatasetAdapter:
                     pass
                 else:
                     row["image"] = None  # fallback for unexpected types
-                
+                if row.get("image") is not None:
+                    row["image"] = _resize_pil_image_if_large(row["image"])
                 yield row
 
                 count += 1
@@ -1148,6 +1166,7 @@ class SROIEAdapter(OCRDatasetAdapter):
                         continue
                     if hasattr(img, "convert"):
                         img = img.convert("RGB")
+                    img = _resize_pil_image_if_large(img)
                     row = {"image": img, "key": row.get("key", f"{split}_{idx}"), "entities": row.get("entities"), "words": row.get("words", []), "bboxes": row.get("bboxes", [])}
                     ocr_tokens = self._arrow_row_to_token_ocr(row)
                     if ocr_tokens is None:
@@ -1167,7 +1186,7 @@ class SROIEAdapter(OCRDatasetAdapter):
                 for idx, row in enumerate(rows):
                     img_field = row.get("image")
                     if isinstance(img_field, bytes):
-                        row["image"] = Image.open(io.BytesIO(img_field)).convert("RGB")
+                        row["image"] = _resize_pil_image_if_large(Image.open(io.BytesIO(img_field)).convert("RGB"))
                     ocr_tokens = self._arrow_row_to_token_ocr(row)
                     if ocr_tokens is None:
                         continue
@@ -1400,6 +1419,7 @@ class FUNSDAdapter(OCRDatasetAdapter):
                         continue
                     if hasattr(img, "convert"):
                         img = img.convert("RGB")
+                    img = _resize_pil_image_if_large(img)
                     row = {"image": img, "id": row.get("id", str(idx)), "words": row.get("words", []), "bboxes": row.get("bboxes", []), "ner_tags": row.get("ner_tags")}
                     ocr_tokens = self._arrow_row_to_token_ocr(row)
                     if ocr_tokens is None:
@@ -2790,10 +2810,6 @@ class FinQAAdapter(BaseDatasetAdapter):
 
     FILE_MAPPING points to the JSON file path. No parquet is used.
     Source: Official FinQA from https://github.com/czyssrs/FinQA (dataset/train.json).
-
-    Only the train split is configured. Official FinQA has train/dev/test; we evaluate on train
-    only (index is built from train, and we do not load a test split — test-set ground truth
-    may be public or held-out depending on source; this codebase uses train for both indexing and eval).
     """
     FILE_MAPPING = {
         "train": {
@@ -3072,12 +3088,9 @@ class TATQAAdapter(BaseDatasetAdapter):
     data/rag/TAT-QA/tatqa_dataset_test_gold.json,
     data/rag/TAT-QA/tatqa_dataset_test.json,
     data/rag/TAT-QA/tatqa_dataset_train.json.
-    There are only these 4 json files (dev, test, ground truth for test, train) under TAT-QA/ folder,
+    There are only these 4 json files (dev, test, ground truth for test, train) under TAT-QA/ folder, 
     and they all follow the same schema structure as above, but with different samples.
 
-    We evaluate on test only (FILE_MAPPING and SPLITS_WITH_GT). The RAG retriever index must be built
-    from test documents (tatqa_dataset_test_gold.json) so retrieval can find the right context for
-    each test question. Train and dev are not used for evaluation in this codebase.
 
     FILE_MAPPING below only serves to provide the path right down to the split level.
     For each split, the actual loading logic in load_split() must handle the pathing,
@@ -3354,7 +3367,11 @@ class LendingClubAdapter(BaseDatasetAdapter):
                 gold = 1 if str(answer).strip().lower() in ("chargedoff", "chargeoff") else 0
             else:
                 gold = None
-            features = parse_query_to_features(query, use_no_leakage=True)
+            features = parse_query_to_features(
+                query,
+                use_no_leakage=True,
+                feature_version="v2",
+            )
             return {
                 "input": {"features": features, "query": query},
                 "ground_truth": {"label": gold} if gold is not None else {},
@@ -3739,11 +3756,11 @@ class FinanceBenchAdapter(BaseDatasetAdapter):
     and serves to extract structured data based on a schema shared across all samples within the same file type.
     """
     FILE_MAPPING = {
-        "default": {
+        "train": {
             "format": "folder",
             "dataset_path": "data/credit_risk_memo_generator/FinanceBench/train",
             "ground_truth_path": None,
-            "notes": "Single parquet file under 'train'; no official splits"
+            "notes": "Single parquet file under train/"
         }
     }
     def __init__(
@@ -3780,7 +3797,7 @@ class FinanceBenchAdapter(BaseDatasetAdapter):
         **kwargs,
     ):
         """Stream samples from parquet (train per FILE_MAPPING). Context = concatenated evidence text."""
-        split_name = dataset_split or self.dataset_split or "default"
+        split_name = dataset_split or self.dataset_split or "train"
         splits_to_load = [split_name] if split_name in self.FILE_MAPPING else list(self.FILE_MAPPING.keys())
         emitted = 0
         for split in splits_to_load:

@@ -317,10 +317,14 @@ class CreditRiskPipeline:
             trends = self.trend_engine.detect_deterioration(historical_financials)
             features.update(trends)
         
-        # 3. NLP sentiment
+        # 3. NLP sentiment (score, confidence, flags for PD / failure-mode awareness)
         if news_articles:
             nlp_signals = self.nlp_extractor.extract_signals(news_articles)
             features["news_sentiment"] = nlp_signals["news_sentiment"]["score"]
+            if "sentiment_confidence" in nlp_signals:
+                features["sentiment_confidence"] = nlp_signals["sentiment_confidence"]
+            if "sentiment_flags" in nlp_signals:
+                features["sentiment_flags"] = nlp_signals["sentiment_flags"]
         else:
             features["news_sentiment"] = 0.0  # Neutral
         

@@ -1,10 +1,12 @@
 """
-Document preprocessing for OCR: binarisation, deskew, DPI normalisation.
+Document preprocessing for OCR: binarisation, deskew, DPI normalisation, morphology.
 
 Preprocessing matters enormously for Tesseract on financial documents.
 - Binarisation (Otsu) gives clean black/white for character recognition.
 - Deskewing corrects slight rotations from scanning.
 - 300 DPI minimum ensures Tesseract has enough resolution.
+- Morphological cleanup (closing/opening) connects broken strokes and removes noise;
+  especially important for receipts (thermal, faded) and invoices.
 """
 from __future__ import annotations
 
@@ -16,6 +18,9 @@ from typing import Tuple
 TARGET_DPI = 300
 # Assumed DPI when unknown (e.g. in-memory image); will scale to TARGET_DPI
 ASSUMED_DPI = 150
+# Morphology kernel size for receipt/invoice cleanup (small = connect broken strokes, remove speckle)
+MORPH_CLOSE_KERNEL = (2, 2)
+MORPH_OPEN_KERNEL = (1, 1)
 
 
 def binarise_otsu(image: np.ndarray) -> np.ndarray:
@@ -102,26 +107,65 @@ def normalise_dpi(
     return cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_CUBIC)
 
 
+def morphology_cleanup(
+    image: np.ndarray,
+    *,
+    close_kernel: Tuple[int, int] = MORPH_CLOSE_KERNEL,
+    open_kernel: Tuple[int, int] = MORPH_OPEN_KERNEL,
+    apply_close: bool = True,
+    apply_open: bool = True,
+) -> np.ndarray:
+    """
+    Morphological cleanup for receipts/invoices: connect broken character strokes and remove small noise.
+
+    - Closing (dilation then erosion) with a small kernel fills gaps in characters (e.g. thermal receipts).
+    - Opening (erosion then dilation) with a tiny kernel removes isolated speckle without harming text.
+
+    Use after binarisation. Applies to both receipts and invoices; especially helpful for low-quality scans.
+    """
+    if image.size == 0:
+        return image
+    out = image.copy()
+    if len(out.shape) == 3:
+        out = cv2.cvtColor(out, cv2.COLOR_BGR2GRAY)
+    # Otsu gives text=0 (black), background=255. OpenCV morphology treats 255 as foreground;
+    # invert so text becomes 255, then we close (connect text), open (remove speckle), then invert back.
+    inverted = np.median(out) > 127
+    if inverted:
+        out = cv2.bitwise_not(out)
+    if apply_close and close_kernel[0] > 0 and close_kernel[1] > 0:
+        k = cv2.getStructuringElement(cv2.MORPH_RECT, close_kernel)
+        out = cv2.morphologyEx(out, cv2.MORPH_CLOSE, k)
+    if apply_open and open_kernel[0] > 0 and open_kernel[1] > 0:
+        k = cv2.getStructuringElement(cv2.MORPH_RECT, open_kernel)
+        out = cv2.morphologyEx(out, cv2.MORPH_OPEN, k)
+    if inverted:
+        out = cv2.bitwise_not(out)
+    return out
+
+
 def preprocess_for_ocr(
     image: np.ndarray,
     *,
     binarise: bool = True,
     deskew: bool = True,
     normalise_dpi_value: bool = True,
+    morphology_cleanup_enabled: bool = True,
     target_dpi: int = TARGET_DPI,
     assumed_dpi: int = ASSUMED_DPI,
 ) -> np.ndarray:
     """
-    Full preprocessing pipeline for OCR: normalise DPI → deskew → binarise.
+    Full preprocessing pipeline for OCR: normalise DPI → deskew → binarise → morphology.
 
     Order: DPI first (so deskew and binarise work on correct scale), then
-    deskew, then binarise (Otsu).
+    deskew, then binarise (Otsu), then optional morphological cleanup (for receipts/invoices).
 
     Args:
         image: BGR or grayscale image.
         binarise: Apply Otsu binarisation.
         deskew: Apply deskew.
         normalise_dpi_value: Scale to target_dpi.
+        morphology_cleanup_enabled: Apply closing/opening to connect broken strokes and remove noise (receipts/invoices).
         target_dpi: Target DPI (default 300).
         assumed_dpi: Assumed current DPI when unknown.
 
@@ -137,4 +181,6 @@ def preprocess_for_ocr(
         out = deskew_image(out)
     if binarise:
         out = binarise_otsu(out)
+    if morphology_cleanup_enabled and binarise:
+        out = morphology_cleanup(out, apply_close=True, apply_open=True)
     return out

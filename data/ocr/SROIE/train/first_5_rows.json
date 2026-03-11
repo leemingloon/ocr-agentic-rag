@@ -1,6 +1,6 @@
 [
   {
-    "image": "Image in byte format, that need to be converted to <PIL.Image.Image>",
+    "image": "<PIL.Image.Image (from bytes)>",
     "key": "X00016469612",
     "image_size": {
       "width": 463,
@@ -326,7 +326,7 @@
     ]
   },
   {
-    "image": "Image in byte format, that need to be converted to <PIL.Image.Image>",
+    "image": "<PIL.Image.Image (from bytes)>",
     "key": "X00016469619",
     "image_size": {
       "width": 439,
@@ -680,7 +680,7 @@
     ]
   },
   {
-    "image": "Image in byte format, that need to be converted to <PIL.Image.Image>",
+    "image": "<PIL.Image.Image (from bytes)>",
     "key": "X00016469620",
     "image_size": {
       "width": 459,
@@ -1076,7 +1076,7 @@
     ]
   },
   {
-    "image": "Image in byte format, that need to be converted to <PIL.Image.Image>",
+    "image": "<PIL.Image.Image (from bytes)>",
     "key": "X00016469622",
     "image_size": {
       "width": 461,
@@ -1514,7 +1514,7 @@
     ]
   },
   {
-    "image": "Image in byte format, that need to be converted to <PIL.Image.Image>",
+    "image": "<PIL.Image.Image (from bytes)>",
     "key": "X00016469623",
     "image_size": {
       "width": 463,

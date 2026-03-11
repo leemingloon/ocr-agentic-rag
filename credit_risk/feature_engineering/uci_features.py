@@ -5,7 +5,7 @@ Dataset: UCI ML Repository "Default of Credit Card Clients" (Taiwan).
 Target: default payment next month (1 = default, 0 = non-default).
 Features: application/demographic and repayment history (PAY_0–PAY_6); no post-default
 billing/payment amounts in the no-leakage set so the pipeline is suitable for training
-and evaluation (e.g. 04_uci_feature_engineering.ipynb → XGBoost).
+and evaluation (e.g. pd_uci_feature_engineering.ipynb → XGBoost).
 """
 
 from typing import List

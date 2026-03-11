@@ -78,6 +78,9 @@ except ImportError:
 from .prompt_registry import PromptRegistry
 from .safety_filter import SafetyFilter
 
+# Default Claude model for memo generation (aligned with RAG backbone).
+DEFAULT_MEMO_MODEL = "claude-sonnet-4-6"
+
 
 class RiskMemoGenerator:
     """
@@ -102,18 +105,21 @@ class RiskMemoGenerator:
         mode: Literal["local", "sagemaker", "production"] = "local",
         s3_bucket: Optional[str] = None,
         s3_memos_prefix: str = "risk_memos/",
-        local_memos_dir: str = "data/risk_memos"
+        local_memos_dir: str = "data/risk_memos",
+        model: Optional[str] = None,
     ):
         """
         Initialize risk memo generator
-        
+
         Args:
             mode: Execution mode (local/sagemaker/production)
             s3_bucket: S3 bucket for memo storage (SageMaker mode)
             s3_memos_prefix: S3 prefix for memo files
             local_memos_dir: Local directory for memo caching
+            model: Claude model for generation (default: DEFAULT_MEMO_MODEL)
         """
         self.mode = mode
+        self.model = model if model is not None else DEFAULT_MEMO_MODEL
         self.s3_bucket = s3_bucket
         self.s3_memos_prefix = s3_memos_prefix
         if mode == "sagemaker":
@@ -272,7 +278,7 @@ class RiskMemoGenerator:
         # Step 3: Generate
         try:
             response = self.llm.messages.create(
-                model="claude-sonnet-4-20250514",
+                model=self.model,
                 max_tokens=2000,
                 messages=[{"role": "user", "content": prompt}]
             )

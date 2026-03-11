@@ -4,7 +4,7 @@ Optional one-off script: load pd_model_local_v1.pkl (saved from notebook with __
 with the sys.modules hack, then re-save as pd_model_local_v2.pkl so the class is serialized under
 credit_risk.models.pd_model._StackedPDWrapper.
 
-The notebook (02_pd_xgboost_training) now imports _StackedPDWrapper from credit_risk.models.pd_model
+The notebook (02a_pd_xgboost_training) now imports _StackedPDWrapper from credit_risk.models.pd_model
 before saving, so newly saved v1.pkl files load in eval_runner without this script. Use this script
 only if you have an existing v1.pkl that was saved before that notebook change.
 

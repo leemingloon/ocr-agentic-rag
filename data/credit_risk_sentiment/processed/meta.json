@@ -1,0 +1,14 @@
+{
+  "n_train": 893,
+  "n_val": 112,
+  "n_test": 112,
+  "random_state": 42,
+  "version": "1.0",
+  "n_total": 1117,
+  "n_train_FinancialPhraseBank": 799,
+  "n_train_FiQA": 94,
+  "n_val_FinancialPhraseBank": 100,
+  "n_val_FiQA": 12,
+  "n_test_FinancialPhraseBank": 101,
+  "n_test_FiQA": 11
+}

@@ -375,6 +375,10 @@ class PDModel:
         self.feature_names = model_data["feature_names"]
         self.params = model_data.get("params", self.params)
         self.metadata = model_data.get("metadata", {})
+        # Phase 2: optional calibration (apply if calibrator saved with model)
+        if "calibrator" in model_data:
+            from credit_risk.models.pd_calibration import CalibratedPDWrapper
+            self.model = CalibratedPDWrapper(self.model, model_data["calibrator"])
         
         # Initialize SHAP explainer
         if XGBOOST_AVAILABLE:

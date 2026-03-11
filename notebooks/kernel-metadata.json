@@ -1,0 +1,13 @@
+{
+  "id": "leemingloon/00-pd-homecredit-lstm-kaggle",
+  "title": "00-pd-homecredit-lstm-kaggle",
+  "code_file": "00_pd_homecredit_lstm_kaggle.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": false,
+  "dataset_sources": [],
+  "competition_sources": ["home-credit-default-risk"],
+  "kernel_sources": []
+}

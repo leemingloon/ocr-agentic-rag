@@ -41,6 +41,9 @@ env/
 *.swo
 *~
 
+# Windows: accidental files named nul (device name) in any subdirectory
+**/nul
+
 # Jupyter Notebook
 .ipynb_checkpoints
 notebooks/runs/
@@ -61,6 +64,12 @@ data/faiss_index/*
 # Output
 output/*
 !output/.gitkeep
+# Kaggle kernels output (kaggle kernels output <id> -p ./kaggle_outputs)
+kaggle_outputs/
+# Local / project
+.cursor/
+.eval_milestones_reached
+RESUME_BULLETS.md
 logs/*
 !logs/.gitkeep
 
@@ -213,7 +222,15 @@ mini.py
 data/rag/FinQA/train/finqa_retriever_index/
 
 # Windows startup / MCP (local only, not for SageMaker or repo)
-scripts/start_cursor_mcp_with_env.ps1
-scripts/StartCursorMCP.bat
+scripts/start_mcp_with_env.ps1
+scripts/StartMCP.bat
 scripts/install_mcp_startup.ps1
 scripts/MCP_STARTUP.md
+
+# FinBERT model files
+models/sentiment/finbert_tuned_v1/model.safetensors
+models/sentiment/finbert_tuned_v1/tonkenizer.json
+
+# TATQA index files
+data/rag/TAT-QA/tatqa_retriever_index_dev_train_no_gt/
+data/rag/TAT-QA/tatqa_retriever_index_dev_train_no_gt_aft_dedup/

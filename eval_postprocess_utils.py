@@ -1,4 +1,10 @@
-"""Utility classes for post-processing model outputs and computing evaluation metrics."""
+"""Utility classes for post-processing model outputs and computing evaluation metrics.
+
+ENCODING RULE (Windows cp1252 safety): Do not use Unicode symbols in any string that may be
+printed to stdout/stderr or included in debug output (e.g. rag_numerical_match_debug_info).
+Use ASCII only: e.g. "~" not "≈", "-" not "—", "->" not "→". This prevents UnicodeEncodeError
+when the eval runner or other scripts print these strings on Windows (cp1252 console).
+"""
 
 from __future__ import annotations
 
@@ -548,49 +554,164 @@ def rag_numerical_match_debug_info(
     if ref_single is not None and pred_last is not None and ref_single != 0:
         ratio = pred_last / ref_single
         if abs(ratio - 1000.0) < 10 or abs(ratio - 0.001) < 0.0001:
-            lines.append("hint: possible scale mismatch (pred/ref ≈ 1000 or 0.001 — check millions vs thousands)")
+            lines.append("hint: possible scale mismatch (pred/ref ~ 1000 or 0.001 - check millions vs thousands)")
         elif abs(ratio - 100.0) < 1 or abs(ratio - 0.01) < 0.001:
-            lines.append("hint: possible scale mismatch (pred/ref ≈ 100 or 0.01 — check percentage vs decimal)")
+            lines.append("hint: possible scale mismatch (pred/ref ~ 100 or 0.01 - check percentage vs decimal)")
     return " | ".join(lines)
 
 
 def _parse_multi_value_numbers(s: str | None) -> list[float] | None:
-    """Parse comma-separated numeric values (e.g. '782.833, 106.836'). Returns list of 2+ floats or None.
-    Uses ', ' (comma-space) to detect multi-value so '1,568.6' (thousands separator) stays single."""
+    """Parse comma-separated numeric values (e.g. '782.833, 106.836' or '1,568.6, 690.5'). Returns list of 2+ floats or None.
+    Splits on ', ' (comma-space) so '1,568.6' (thousands separator) stays a single value per segment."""
     if not s or not isinstance(s, str):
         return None
     s = s.strip()
     if ", " not in s:
         return None
-    parts = [p.strip() for p in s.split(",")]
+    parts = [p.strip() for p in s.split(", ")]
     if len(parts) < 2:
         return None
     out = []
     for p in parts:
         if not p:
             return None
-        cleaned = p.replace("$", "").replace("%", "").strip()
+        cleaned = p.replace("$", "").replace("%", "").replace(",", "").strip()
+        # Strip trailing non-numeric (e.g. '690.5**' from markdown)
+        cleaned = re.sub(r"[^\d.-].*$", "", cleaned)
         try:
-            out.append(float(cleaned.replace(",", "")))
+            out.append(float(cleaned))
         except ValueError:
-            return None
+            num = _first_number_in_text(p)
+            if num is not None:
+                out.append(num)
+            else:
+                return None
     return out if len(out) >= 2 else None
 
 
+# Pattern for a number with optional thousands comma and optional decimal (e.g. 1,568.6 or 690.5)
+_NUMBER_WITH_COMMA_RE = re.compile(r"-?\d+(?:,\d{3})*(?:\.\d+)?")
+
+
+def _last_n_numbers_in_text(s: str | None, n: int = 2) -> list[float] | None:
+    """Extract the last n numbers (with optional thousands comma) from text. Returns list of n floats or None."""
+    if not s or not isinstance(s, str):
+        return None
+    matches = _NUMBER_WITH_COMMA_RE.findall(s.replace(" ", ""))
+    if len(matches) < n:
+        return None
+    out = []
+    for m in matches[-n:]:
+        try:
+            out.append(float(m.replace(",", "")))
+        except ValueError:
+            return None
+    return out
+
+
+def _parse_multi_value_numbers_from_tail(s: str | None, tail_chars: int = 320) -> list[float] | None:
+    """Try to parse comma-separated numeric values from the end of the string (answer often at tail).
+    Use when full prediction has many ', ' so _parse_multi_value_numbers fails; the numerical answer line is usually last.
+    Uses last 2 numbers from tail (with thousands comma) so '1,568.6, 690.5' -> [1568.6, 690.5]."""
+    if not s or not isinstance(s, str):
+        return None
+    tail = s.strip()[-tail_chars:] if len(s) > tail_chars else s.strip()
+    parsed = _parse_multi_value_numbers(tail)
+    if parsed is not None and len(parsed) == 2:
+        return parsed
+    if parsed is not None and len(parsed) > 2:
+        return _last_n_numbers_in_text(tail, n=2)
+    return _last_n_numbers_in_text(tail, n=2)
+
+
+def _ref_decimal_places(ref_str: str) -> int:
+    """Infer display decimal places from reference (e.g. '17.7' -> 1, '1,568.6' -> 1). Used for rounding tolerance."""
+    if not ref_str or "." not in ref_str:
+        return 0
+    return len(ref_str.split(".")[-1].replace(",", "").replace("$", "").replace("%", "").strip())
+
+
 class TATQAUtils(RagUtils):
-    """TAT-QA: supports single-value and multi-value (comma-separated) numerical comparison."""
+    """TAT-QA: supports single-value and multi-value (comma-separated) numerical comparison.
+    Uses reference decimal places for rounding tolerance so --reevaluate_only can score correctly
+    without re-running the model (e.g. pred 17.69723 vs ref 17.7 -> match when rounded to 1 decimal)."""
 
     def numerical_exact_match(self, prediction: str | None, reference: str | None, tol: float = 1e-6) -> float:
         ref_multi = _parse_multi_value_numbers(str(reference) if reference else None)
         if ref_multi is not None and len(ref_multi) >= 2:
             pred_multi = _parse_multi_value_numbers(prediction)
+            if pred_multi is None and prediction:
+                pred_multi = _parse_multi_value_numbers_from_tail(prediction)
             if pred_multi is not None and len(pred_multi) == len(ref_multi):
                 for p, r in zip(pred_multi, ref_multi):
                     if not math.isclose(p, r, rel_tol=tol, abs_tol=max(tol, 1e-6)):
                         return 0.0
                 return 1.0
             return 0.0
+        ref_str = str(reference).strip() if reference else ""
+        try:
+            ref_single = float(ref_str.replace(",", "").replace("$", "").replace("%", ""))
+        except (ValueError, TypeError, AttributeError):
+            ref_single = None
+        ref_decimals = _ref_decimal_places(ref_str)
+
+        def _close_to_ref(pred_val: float) -> bool:
+            if ref_single is None:
+                return False
+            if ref_decimals > 0:
+                return round(pred_val, ref_decimals) == round(ref_single, ref_decimals)
+            return math.isclose(pred_val, ref_single, rel_tol=tol, abs_tol=max(tol, 1e-6))
+
+        # Single-value reference: accept if prediction is "a, b" and first value matches (respectively GT sometimes only lists first)
+        pred_multi = _parse_multi_value_numbers(prediction)
+        if pred_multi is None and prediction:
+            pred_multi = _parse_multi_value_numbers_from_tail(prediction)
+        if pred_multi is not None and len(pred_multi) >= 1 and ref_single is not None:
+            if _close_to_ref(pred_multi[0]):
+                return 1.0
+        # Single-value: accept if last number in prediction matches reference when rounded to ref decimals (e.g. 17.69723 vs 17.7)
+        p_last = _last_number_in_text(prediction)
+        if p_last is not None and ref_single is not None and _close_to_ref(p_last):
+            return 1.0
         return super().numerical_exact_match(prediction, reference, tol=tol)
+
+    def numerical_near_match(
+        self, prediction: str | None, reference: str | None, rel_tol: float = 0.01
+    ) -> float:
+        """1.0 if prediction is within rel_tol (default 1%) of reference numerically; else 0.0.
+        Phase 3c: Same ±1% tolerance as FinQA. Handles single-value and multi-value (comma-separated)."""
+        if self.numerical_exact_match(prediction, reference) == 1.0:
+            return 1.0
+        ref_multi = _parse_multi_value_numbers(str(reference) if reference else None)
+        if ref_multi is not None and len(ref_multi) >= 2:
+            pred_multi = _parse_multi_value_numbers(prediction)
+            if pred_multi is None and prediction:
+                pred_multi = _parse_multi_value_numbers_from_tail(prediction)
+            if pred_multi is not None and len(pred_multi) == len(ref_multi):
+                for p, r in zip(pred_multi, ref_multi):
+                    denom = max(abs(r), 1e-9)
+                    if abs(p - r) / denom > rel_tol:
+                        return 0.0
+                return 1.0
+            return 0.0
+        ref_str = str(reference).strip() if reference else ""
+        try:
+            ref_single = float(ref_str.replace(",", "").replace("$", "").replace("%", ""))
+        except (ValueError, TypeError, AttributeError):
+            return 0.0
+        p_last = _last_number_in_text(prediction)
+        if p_last is not None:
+            denom = max(abs(ref_single), 1e-9)
+            if abs(p_last - ref_single) / denom <= rel_tol:
+                return 1.0
+        pred_multi = _parse_multi_value_numbers(prediction)
+        if pred_multi is None and prediction:
+            pred_multi = _parse_multi_value_numbers_from_tail(prediction)
+        if pred_multi is not None and len(pred_multi) >= 1:
+            denom = max(abs(ref_single), 1e-9)
+            if abs(pred_multi[0] - ref_single) / denom <= rel_tol:
+                return 1.0
+        return 0.0
 
 
 # -------------------------------------------------------------------------
@@ -666,6 +787,27 @@ class CreditRiskPDUtils(CreditRiskUtils):
         try:
             from scipy import stats
             return float(stats.ks_2samp(ref_scores, current_scores).statistic)
+        except Exception:
+            return 0.0
+
+    @staticmethod
+    def ks_discriminative(y_true: list[int], y_score: list[float]) -> float:
+        """
+        KS statistic for PD model discriminative power: max distance between
+        positive vs negative class score distributions. Bank-grade target > 0.35.
+        """
+        if not y_true or not y_score or len(y_true) != len(y_score):
+            return 0.0
+        try:
+            import numpy as np
+            from scipy import stats
+            y_true_arr = np.asarray(y_true)
+            y_score_arr = np.asarray(y_score, dtype=float)
+            pos_probs = y_score_arr[y_true_arr == 1]
+            neg_probs = y_score_arr[y_true_arr == 0]
+            if len(pos_probs) == 0 or len(neg_probs) == 0:
+                return 0.0
+            return float(stats.ks_2samp(pos_probs, neg_probs).statistic)
         except Exception:
             return 0.0
 

@@ -6,6 +6,10 @@ with Reciprocal Rank Fusion for optimal results.
 
 CPU-only / low-RAM: set RAG_FAST_EMBEDDINGS=1 to use a small, fast model
 (all-MiniLM-L6-v2). Install onnxruntime for extra speed: pip install onnxruntime
+
+LOGGING RULE: Do not print or log "Loading ... model", "Loaded index", or any model-weight
+loading messages to stdout/stderr. These flood the console and hide evaluation/debug logs.
+Load models silently; use RAG_DEBUG or explicit debug flags for diagnostics.
 """
 
 import os
@@ -167,10 +171,7 @@ class HybridRetriever:
 
         # Optional: use small fast model on CPU / low-RAM (set RAG_FAST_EMBEDDINGS=1)
         model_to_load = _FAST_MODEL if _USE_FAST_EMBEDDINGS else (embedding_model or _DEFAULT_MODEL)
-        if _USE_FAST_EMBEDDINGS:
-            print(f"[RAG] Using fast CPU embedding model: {model_to_load} (RAG_FAST_EMBEDDINGS=1)")
-        # Load on CPU or GPU (progress bars disabled so eval debug logs stay visible)
-        print(f"Loading embedding model: {model_to_load} (device={self._device})")
+        # Load on CPU or GPU (no loading logs - see module docstring LOGGING RULE)
         try:
             if self._device == "cuda":
                 self.embed_model = _load_sentence_transformer_quiet(model_to_load, "cuda")
@@ -343,6 +344,13 @@ class HybridRetriever:
                 reverse=True,
             )
             dense_results = doc_dense[: self.top_k_dense]
+            if _rag_debug:
+                for label, res in [("sparse (BM25)", sparse_results[:5]), ("dense (BGE-M3)", dense_results[:5])]:
+                    print(f"[DEBUG] retrieval: corpus_id pre-fusion {label} top {len(res)}:")
+                    for rank, (idx, score) in enumerate(res, 1):
+                        text = getattr(self.chunks[idx], "text", "") or "" if idx < len(self.chunks) else ""
+                        preview = (text[:180] + "…").replace("\n", " ") if len(text) > 180 else text.replace("\n", " ")
+                        print(f"[DEBUG]   {rank} idx={idx} score={score:.4f} preview={preview!r}")
             fused_results = self._reciprocal_rank_fusion(sparse_results, dense_results)
             if _rag_debug:
                 k_final = top_k if top_k is not None else self.top_k_final
@@ -365,6 +373,15 @@ class HybridRetriever:
             sparse_results = self._sparse_retrieve(search_query)
             # Step 2: Dense retrieval (BGE-M3)
             dense_results = self._dense_retrieve(search_query)
+            if _rag_debug:
+                for label, res in [("sparse (BM25)", sparse_results[:5]), ("dense (BGE-M3)", dense_results[:5])]:
+                    print(f"[DEBUG] retrieval: pre-fusion {label} top {len(res)}:")
+                    for rank, (idx, score) in enumerate(res, 1):
+                        text = getattr(self.chunks[idx], "text", "") or "" if idx < len(self.chunks) else ""
+                        meta = getattr(self.chunks[idx], "metadata", None) or {} if idx < len(self.chunks) else {}
+                        cid = meta.get("corpus_id", "")
+                        preview = (text[:180] + "…").replace("\n", " ") if len(text) > 180 else text.replace("\n", " ")
+                        print(f"[DEBUG]   {rank} idx={idx} score={score:.4f} corpus_id={cid!r} preview={preview!r}")
             if section_filter is not None or page_filter is not None:
                 idx_set = set(section_filter) if section_filter is not None else set(range(len(self.chunks)))
                 if page_filter is not None:
@@ -388,7 +405,16 @@ class HybridRetriever:
 
         # Step 5: Return top-k (caller may pass top_k, e.g. agentic retrieval_tools)
         k = top_k if top_k is not None else self.top_k_final
-        return fused_results[:k]
+        to_return = fused_results[:k]
+        if _rag_debug and to_return:
+            print(f"[DEBUG] retrieval: pre_rerank (RRF) top {min(10, len(to_return))} (requested k={k}):")
+            for rank, (chunk, score) in enumerate(to_return[:10], 1):
+                text = getattr(chunk, "text", "") or ""
+                meta = getattr(chunk, "metadata", None) or {}
+                cid = meta.get("corpus_id", "")
+                preview = (text[:200] + "…").replace("\n", " ") if len(text) > 200 else text.replace("\n", " ")
+                print(f"[DEBUG]   {rank} score={score:.4f} corpus_id={cid!r} len={len(text)} preview={preview!r}")
+        return to_return
     
     def _sparse_retrieve(self, query: str) -> List[Tuple[int, float]]:
         """
@@ -538,7 +564,6 @@ class HybridRetriever:
         # Rebuild BM25
         tokenized_corpus = [t.lower().split() for t in self.chunk_texts]
         self.bm25_index = BM25Okapi(tokenized_corpus)
-        print(f"Loaded index bundle from {dir_path} ({len(self.chunks)} chunks, model={model_name})")
 
     def save_index(self, path: str):
         """Save FAISS index only to a single file (legacy). Prefer save_index_bundle for full save."""

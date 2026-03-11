@@ -1,8 +1,13 @@
 OCR→Agentic RAG→Credit Risk Platform
 
-**Complete Document Intelligence + Credit Risk System**  
+**Document Intelligence + Credit Risk System**  
 **Author:** Lee Ming Loon  
-**Status:** Deployed to AWS Sagemaker. Evaluating models on Local PC (in progress on evaluate_on_local branch). Finally, Production-ready prototype.
+**Status:** Deployed to AWS Sagemaker. Evaluated models on Local PC.
+
+**Credit risk:** 00-04z Jupyter notebooks (`.ipynb`) under the `notebooks/` folder.
+**RAG** *_samples.json files under `data/proof/rag/` folder.
+**Vision** *_samples.json files under `data/proof/vision/` folder.
+**OCR** *_samples.json files under `data/proof/ocr/` folder. [IN PROGRESS]
 
 **Interview demos:** Use the Jupyter notebooks (`.ipynb`) under the `notebooks/` folder.  
 **Demos:** Use model evaluation results (proof) in the `data/proof/` folder.

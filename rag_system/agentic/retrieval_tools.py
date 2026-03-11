@@ -234,7 +234,7 @@ class ToolRegistry:
                 "error": "Could not parse as math expression. Provide numbers and operators (e.g. 100 + 50)."
             }
     
-    def _rag_retrieval(self, query: str, top_k: int = 5, corpus_id: Optional[str] = None) -> Dict:
+    def _rag_retrieval(self, query: str, top_k: int = 15, corpus_id: Optional[str] = None) -> Dict:
         """Retrieve, optionally rerank, apply bookends, and abstain if relevance below threshold."""
         if not self.retriever:
             return {
@@ -243,12 +243,24 @@ class ToolRegistry:
                 "error": "Retriever not initialized",
                 "success": False,
             }
-        # Use larger k for corpus-scoped retrieval (50) so table/year chunks are not missed; otherwise use top_k (default 5)
-        k = 50 if corpus_id else (top_k or 5)
+        # Env override for retrieval depth (table rows often chunk separately; 15 improves recall).
+        env_k = os.environ.get("RAG_TOP_K", "").strip()
+        if env_k.isdigit():
+            top_k = int(env_k)
+        # Use larger k for corpus-scoped retrieval (50) so table/year chunks are not missed; otherwise use top_k (default 15)
+        k = 50 if corpus_id else (top_k or 15)
         section_types = _infer_section_types_for_query(query)
+        # Query rewriting: for "percent change" + "adjusted", append table keywords to improve recall (As Reported / Topic 606 chunks).
+        retrieval_query = query
+        if corpus_id is None and query:
+            q_lower = query.strip().lower()
+            if "percent change" in q_lower and ("adjust" in q_lower or "adjusted" in q_lower):
+                retrieval_query = f"{query.strip()} As Reported Balances without Adoption Topic 606"
+                if os.environ.get("RAG_DEBUG") == "1":
+                    print(f"[DEBUG] _rag_retrieval: query rewrite for percent-change+adjusted -> {retrieval_query[:80]!r}...")
         try:
             results = self.retriever.retrieve(
-                query, top_k=k, corpus_id=corpus_id, section_types=section_types
+                retrieval_query, top_k=k, corpus_id=corpus_id, section_types=section_types
             )
             chunks = []
             for item in results:
@@ -335,11 +347,28 @@ class ToolRegistry:
                             c = {"text": text, "score": float(rscore), "metadata": {}}
                         new_chunks.append(c)
                     chunks = _apply_bookends_order(new_chunks)
+                    if os.environ.get("RAG_DEBUG") == "1" and new_chunks:
+                        print(f"[DEBUG] retrieval_tools: post_rerank top {min(10, len(new_chunks))}:")
+                        for rank, c in enumerate(new_chunks[:10], 1):
+                            text_preview = (c.get("text") or "")[:200]
+                            if len(c.get("text") or "") > 200:
+                                text_preview += "…"
+                            text_preview = text_preview.replace("\n", " ")
+                            score = c.get("score")
+                            cid = (c.get("metadata") or {}).get("corpus_id", "")
+                            print(f"[DEBUG]   {rank} rerank_score={score} corpus_id={cid!r} preview={text_preview!r}")
             else:
                 # No reranker: use retriever score as proxy, still apply bookends
                 if chunks:
                     max_relevance_score = max(c.get("score", 0.0) for c in chunks)
                 chunks = _apply_bookends_order(chunks)
+                if os.environ.get("RAG_DEBUG") == "1" and chunks:
+                    print(f"[DEBUG] retrieval_tools: post_rerank (no reranker, retriever score) top {min(10, len(chunks))}:")
+                    for rank, c in enumerate(chunks[:10], 1):
+                        text_preview = (c.get("text") or "")[:200].replace("\n", " ")
+                        if len(c.get("text") or "") > 200:
+                            text_preview += "…"
+                        print(f"[DEBUG]   {rank} score={c.get('score')} preview={text_preview!r}")
 
             # Negative retrieval: abstain if max relevance below threshold
             if self.relevance_threshold > 0 and max_relevance_score is not None and max_relevance_score < self.relevance_threshold:

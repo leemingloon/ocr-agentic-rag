@@ -25,11 +25,15 @@ if str(REPO_ROOT) not in sys.path:
 
 
 def build_tatqa_chunks(tatqa_dir: Path, table_aware: bool = False):
-    """Build TextNode chunks from TAT-QA test JSON.
+    """Build TextNode chunks from TAT-QA train, dev, and test JSONs.
 
-    We evaluate on test only, so the index must be built from test documents
-    (tatqa_dataset_test_gold.json) so retrieval can find the right context for each test question.
-    Train/dev are not used for evaluation in this codebase.
+    The index is built from all splits (train, dev, test) so the full corpus is
+    available for retrieval. Evaluation uses the test split only; having train/dev
+    in the index avoids missing context when documents overlap or when you want
+    a single consistent index.
+
+    Splits and files: train (tatqa_dataset_train.json), dev (tatqa_dataset_dev.json),
+    test (tatqa_dataset_test_gold.json). Missing files are skipped.
 
     If table_aware=True, tables are serialized with serialize_table_to_rows so each row
     is self-contained (row label + column: value). One chunk per table row, then
@@ -43,7 +47,12 @@ def build_tatqa_chunks(tatqa_dir: Path, table_aware: bool = False):
     chunker = DocumentChunker(chunk_size=512, chunk_overlap=128)
     all_chunks = []
     context_by_corpus = {}
-    for split, filename in [("test", "tatqa_dataset_test_gold.json")]:
+    splits_and_files = [
+        ("train", "tatqa_dataset_train.json"),
+        ("dev", "tatqa_dataset_dev.json"),
+        ("test", "tatqa_dataset_test_gold.json"),
+    ]
+    for split, filename in splits_and_files:
         path = tatqa_dir / filename
         if not path.exists():
             continue
@@ -124,10 +133,10 @@ def main():
 
     output_dir = args.output if args.output.is_absolute() else REPO_ROOT / args.output
 
-    print("Building TAT-QA chunks from test only (tatqa_dataset_test_gold.json)..." + (" (table_aware=row-level serialization)" if args.table_aware else ""))
+    print("Building TAT-QA chunks from all splits (train, dev, test)..." + (" (table_aware=row-level serialization)" if args.table_aware else ""))
     chunks, context_by_corpus = build_tatqa_chunks(tatqa_dir, table_aware=args.table_aware)
     if not chunks:
-        print("No chunks produced. Ensure tatqa_dataset_test_gold.json exists under data/rag/TAT-QA/ (run section 2 to download).")
+        print("No chunks produced. Ensure data/rag/TAT-QA/ has at least one of: tatqa_dataset_train.json, tatqa_dataset_dev.json, tatqa_dataset_test_gold.json (run section 2 to download).")
         sys.exit(1)
     n_docs = len({(getattr(c, "metadata", None) or {}).get("corpus_id") for c in chunks})
     print(f"Got {len(chunks)} raw chunks from {n_docs} documents.")

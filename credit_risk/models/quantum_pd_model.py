@@ -1,7 +1,7 @@
 """
 Quantum PD (Probability of Default) model for eval_runner.
 
-Loads the VQC artifact saved by notebook 03_pd_quantum_training.ipynb
+Loads the VQC artifact saved by notebook 02c_pd_quantum_qvc_training.ipynb
 (models/pd/pd_quantum_vqc_v1.pkl) and exposes predict_pd(features) compatible
 with the same feature dict as PDModel (15 LendingClub features). Uses the
 saved 6 quantum features + scaler + params to run the circuit on CPU (PennyLane default.qubit).

@@ -40,7 +40,11 @@ from langgraph.graph import StateGraph, END
 
 from .retrieval_tools import ToolRegistry, ToolType, ToolResult
 from .memory import ConversationMemory
+from rag_system.primers import SHARED_NUMERICAL_PRIMER, WHAT_TABLE_SHOWS_PRIMER
 
+
+# Default Claude model for RAG (aligned with risk memo generator).
+DEFAULT_RAG_MODEL = "claude-sonnet-4-6"
 
 # Query intent labels (for classifier and primer routing). Rule-based first; can swap for a lightweight model later.
 RAG_INTENT_ABSOLUTE_CHANGE = "absolute_change"       # e.g. "change in X between 2014 and 2013" -> subtract
@@ -56,20 +60,16 @@ RAG_INTENT_TABLE_TOTAL_ACROSS_COLUMNS = "table_total_across_columns"  # total of
 RAG_INTENT_COMPENSATION = "compensation"             # equity awards, milestones, ASC 718
 RAG_INTENT_TOTALS_PREFER_DIRECT = "totals_prefer_direct"  # prefer direct line over back-calc
 RAG_INTENT_EVENT_SCOPED = "event_scoped"              # acquired intangibles, amortization, single block
-RAG_INTENT_ACQUISITION_NON_GOODWILL = "acquisition_non_goodwill"  # cost of acquisition not goodwill/intangible; choose earliest acquisition
 RAG_INTENT_CASHFLOW_FINANCING = "cashflow_financing" # share repurchase, net change in cash
 RAG_INTENT_LOCOM_GROWTH = "locom_growth"             # growth rate of loans held-for-sale / LOCOM
 RAG_INTENT_INTEREST_PAYMENT = "interest_payment"     # bond interest: periodic (semi-annual/quarterly) payment, single instrument
 RAG_INTENT_FREQUENCY_PROPORTION = "frequency_proportion"  # how often / how frequently -> proportion (count ÷ total), not raw count
 RAG_INTENT_AVERAGE_SUBSET = "average_subset"              # average over years: gold may use only a subset of listed years
-RAG_INTENT_AVERAGE_ADDITIONS = "average_additions"        # average additions over year range = sum(balance_i - balance_{i-1}) / num_intervals
 RAG_INTENT_CUMULATIVE_RETURN = "cumulative_return"        # cumulative total return / indexed comparison: normalize (level-100)/100 then difference
 RAG_INTENT_LEASE_PERCENT = "lease_percent"                # percent of total operating leases (direct rent-expense line, not schedule sum)
 RAG_INTENT_ACCOUNTING_ADJUSTMENT = "accounting_adjustment"  # TAT-QA: cumulative-effect / adoption adjustment — select single line, preserve units
-RAG_INTENT_TATQA_NUMERIC = "tatqa_numeric"           # TAT-QA: multi-line balances, unit conversion (millions), year/event selection, aggregation
+RAG_INTENT_WHAT_TABLE_SHOWS = "what_table_shows"     # "What does the table show?" — disambiguate table before answering
 RAG_INTENT_YES_NO = "yes_no"                         # did X exceed Y, etc.
-RAG_INTENT_DIVIDEND = "dividend"                     # total dividend = shares × dividend per share; record date logic
-RAG_INTENT_NET_MARGIN = "net_margin"                  # quarterly net margin = operating income ÷ revenue (FinQA; not net earnings)
 
 
 def classify_query_intent(query: str) -> List[str]:
@@ -102,8 +102,6 @@ def classify_query_intent(query: str) -> List[str]:
         intents.append(RAG_INTENT_LOCOM_GROWTH)
     if _needs_event_scoped_arithmetic_primer(query):
         intents.append(RAG_INTENT_EVENT_SCOPED)
-    if _needs_acquisition_non_goodwill_primer(query):
-        intents.append(RAG_INTENT_ACQUISITION_NON_GOODWILL)
     if _needs_cashflow_financing_primer(query):
         intents.append(RAG_INTENT_CASHFLOW_FINANCING)
     if _needs_table_total_across_columns_primer(query):
@@ -114,20 +112,14 @@ def classify_query_intent(query: str) -> List[str]:
         intents.append(RAG_INTENT_FREQUENCY_PROPORTION)
     if _needs_average_subset_primer(query):
         intents.append(RAG_INTENT_AVERAGE_SUBSET)
-    if _needs_average_additions_primer(query):
-        intents.append(RAG_INTENT_AVERAGE_ADDITIONS)
     if _needs_cumulative_return_primer(query):
         intents.append(RAG_INTENT_CUMULATIVE_RETURN)
     if _needs_lease_percent_primer(query):
         intents.append(RAG_INTENT_LEASE_PERCENT)
     if _needs_accounting_adjustment_primer(query):
         intents.append(RAG_INTENT_ACCOUNTING_ADJUSTMENT)
-    if _needs_dividend_primer(query):
-        intents.append(RAG_INTENT_DIVIDEND)
-    if _needs_net_margin_primer(query):
-        intents.append(RAG_INTENT_NET_MARGIN)
-    if _needs_tatqa_numeric_primer(query):
-        intents.append(RAG_INTENT_TATQA_NUMERIC)
+    if _needs_what_table_shows_primer(query):
+        intents.append(RAG_INTENT_WHAT_TABLE_SHOWS)
     # Absolute change: "change in X between A and B" without growth-rate language -> subtract only
     q = query.strip().lower()
     if not intents and _is_numerical_answer_question(query):
@@ -159,8 +151,6 @@ def _is_numerical_answer_question(query: str) -> bool:
         "by how much", "by what percent", "how many",
         "net change in cash", "cash from financing", "financing activity",
         "share repurchase", "affected by",
-        "how much would you receive", "how much would you get", "how much do you receive",
-        "how much in dividend", "receive in dividend", "dividend would you receive",
     )
     if any(p in q for p in numerical_phrases):
         return True
@@ -179,17 +169,13 @@ def _is_yes_no_question(query: str) -> bool:
     # Do not treat as yes/no when the question clearly asks for a numerical answer (e.g. growth rate, change)
     if _is_numerical_answer_question(query):
         return False
-    # TAT-QA: "what are the balances ... in millions ... respectively?" → numeric list/total, not yes/no
-    if "balances" in q and ("in millions" in q or "respectively" in q):
-        return False
-    if "in millions" in q and "respectively" in q:
-        return False
     # Aggregation: "what was total X", "sum of", "combined", "difference", "average" → numeric, not yes/no (PNC/2013-style)
     aggregation_keywords = ("total", "sum", "combined", "together", "difference", "average")
     if any(a in q for a in aggregation_keywords):
         return False
-    # "If you held X shares ... how much would you receive in dividend" → numerical amount, not yes/no (FinQA CDW-style)
-    if "how much" in q and ("receive" in q or "get " in q or "dividend" in q):
+    # Descriptive/definition questions: "what does the table show?", "what does the chart show?" → not yes/no
+    # These ask for a summary/description, not a binary answer; misrouting causes truncated predictions.
+    if re.search(r"what\s+does\s+.+?(show|display|indicate|represent)\b", q):
         return False
     # Common yes/no starters (FinQA / TAT-QA style)
     starters = (
@@ -395,13 +381,11 @@ def _needs_percent_change_by_direction_primer(query: str) -> bool:
 
 
 # Percent change by direction: when value decreases use (old-new)/new; when increases use (new-old)/old (FinQA ZBH/2008-style).
-# Output in 0–100 form (multiply by 100) so the answer matches FinQA gold (e.g. 3.53735 for 3.54%).
 PERCENT_CHANGE_BY_DIRECTION_PRIMER = """
 When the question asks for **percent change** or **percentage change** (from year A to year B) - and does **not** explicitly say "percent reduction":
-- **If the value decreased** (earlier year > later year): compute **(old - new) / new**. Use **divide(subtract(old_value, new_value), new_value)**. The **ending (later) year** value is the denominator.
+- **If the value decreased** (earlier year > later year, e.g. 2006=3.0, 2007=2.6): compute **(old - new) / new** and report as a **positive** number (percent reduction magnitude). Use **divide(subtract(old_value, new_value), new_value)**. Example: subtract(3.0, 2.6), divide(#0, 2.6) -> 0.15385. The **ending (later) year** value is the denominator.
 - **If the value increased** (later year > earlier year): compute **(new - old) / old**. Use **divide(subtract(new_value, old_value), old_value)**.
-- **Output in 0–100 form**: FinQA expects the answer as a percentage (e.g. 3.53735 for 3.54%), not a decimal (0.03537). Add a final step: **multiply(#1, 100)** where #1 is the divide result. Example: subtract(85936, 83000), divide(#0, 83000), multiply(#1, 100) -> 3.53735.
-- Do not use (new-old)/old for decreases; use (old-new)/new so the result is positive and matches the benchmark.
+- FinQA often uses the **later year as denominator** when the change is a decrease; do not use (new-old)/old for decreases (that gives a negative growth rate and does not match the benchmark).
 """
 
 
@@ -434,17 +418,6 @@ When the question asks for **difference in cumulative total return**, **five-yea
 # Gold-blind numerical reasoning (FinQA/TAT-QA): derive from context only; one task type; executor result is final.
 FINQA_GOLDBLIND_NUMERICAL_PRIMER = """
 **Gold-blind rules (you do not know the gold answer).** (1) Identify the numeric task type first: absolute adjustment, difference in returns / outperformance, percent change, growth rate, or ending balance. Do not mix task types. (2) For cumulative return / outperformance: Return_X = (Ending_X - 100) / 100, Return_Y = (Ending_Y - 100) / 100, Outperformance = Return_X - Return_Y. Never subtract raw index levels. (3) For accounting adjustments: use only the single adjustment line tied to the question; do not sum multiple adjustments unless the question says "total" or "combined". (4) If your program executes successfully, the executor output is the answer; do not reinterpret or replace it with heuristics. (5) Units: preserve the document unit (millions, thousands, index base 100); do not rescale unless the question asks.
-"""
-
-
-# Reusable gold-blinded primer for percent-change and aggregation (FinQA/TAT-QA).
-NUMERIC_REASONING_PRIMER = """
-**Numeric reasoning (gold-blinded):**
-1. **Unit handling**: Dollar figures are often in thousands unless stated otherwise. Convert to millions only when the question asks for "in millions". Preserve document units otherwise.
-2. **Value selection**: Use the rows or sections explicitly requested (e.g. "total recurring capital expenditures", "inventories", "other accrued liabilities"). For totals, use the totals row when available.
-3. **Aggregation**: If the question implies aggregation (e.g. "inventories and accrued liabilities"), sum all relevant subcategories before further calculation.
-4. **Percent change**: Identify old value (earlier year) and new value (later year). Use the correct formula (increase: (new-old)/old; decrease: (old-new)/new per direction primer). Output in 0–100 form (multiply by 100) when the question asks for "percent change" or "percentage change".
-5. **Output**: Return only the final numeric value required. Round to at least 5 decimal places when the question asks for percent. Do not use or peek at any gold answer.
 """
 
 
@@ -515,56 +488,11 @@ def _extract_date_column_percentage_fallback(context: str, query: str, executed_
         return None
 
 
-def compute_percent_change(
-    old_value: float,
-    new_value: float,
-    unit_scale: float = 1.0,
-    as_percent: bool = False,
-) -> float:
-    """
-    Compute percent change between two values with consistent units (RAG/FinQA).
-
-    Args:
-        old_value: Value at the earlier period.
-        new_value: Value at the later period.
-        unit_scale: Scale factor (e.g. 1e3 if in thousands); applied to both, so ratio is unchanged.
-        as_percent: If True return 0–100 form (e.g. 394.596); if False return decimal (e.g. 3.94596).
-
-    Returns:
-        Percent change in decimal form by default; in 0–100 form if as_percent=True.
-    """
-    old_scaled = old_value * unit_scale
-    new_scaled = new_value * unit_scale
-    if abs(old_scaled) < 1e-12:
-        return 0.0
-    pct = (new_scaled - old_scaled) / old_scaled
-    return pct * 100.0 if as_percent else pct
-
-
-def postprocess_percent_change(
-    pred_answer: float,
-    old_value: Optional[float] = None,
-    new_value: Optional[float] = None,
-    unit_scale: float = 1.0,
-) -> float:
-    """
-    Correct RAG/FinQA percent-change predictions to decimal form and avoid double-scaling.
-
-    - If old_value and new_value are provided, recompute (new-old)/old (unit_scale cancels).
-    - If pred_answer > 10, treat as mistakenly in percent form and convert to decimal (divide by 100).
-    """
-    if old_value is not None and new_value is not None and abs(old_value * unit_scale) > 1e-12:
-        return compute_percent_change(old_value, new_value, unit_scale=unit_scale, as_percent=False)
-    if pred_answer > 10:
-        return pred_answer / 100.0
-    return pred_answer
-
-
 def _extract_growth_rate_fallback(text: str, context: str) -> Optional[float]:
     """
     For growth-rate questions: if the model did not output an executable program but mentioned
-    two numbers (e.g. 2007 then 2008 value), compute (new - old) / old in decimal form.
-    Uses first two decimals in order of appearance; keeps units consistent (no double-scaling).
+    two numbers (e.g. 2007 then 2008 value), compute (new - old) / old.
+    Uses first two decimals in order of appearance (tables often list prior year then current year).
     """
     def extract_decimals_in_order(s: str) -> list[float]:
         if not s:
@@ -584,7 +512,7 @@ def _extract_growth_rate_fallback(text: str, context: str) -> Optional[float]:
     if len(decimals) >= 2:
         old_val, new_val = decimals[0], decimals[1]
         if abs(old_val) > 1e-6:
-            return compute_percent_change(old_val, new_val, unit_scale=1.0, as_percent=False)
+            return (new_val - old_val) / old_val
     return None
 
 
@@ -726,104 +654,16 @@ For questions about **acquired intangibles**, **customer-related / network locat
 """
 
 
-def _needs_acquisition_non_goodwill_primer(query: str) -> bool:
-    """True if the query asks for the portion of acquisition cost that is NOT goodwill and intangible assets (FinQA WRK-style: choose earliest acquisition with all numbers)."""
+def _needs_what_table_shows_primer(query: str) -> bool:
+    """True if the query asks what the table shows (ambiguous — document may have multiple tables; force explicit table identification)."""
     if not query or not isinstance(query, str):
         return False
     q = query.strip().lower()
-    if "acquisition" not in q and "acquired" not in q:
-        return False
-    return (
-        "not goodwill" in q
-        or "not goodwill and" in q
-        or ("goodwill" in q and "intangible" in q and ("cost" in q or "price" in q or "how much" in q))
-    )
-
-
-# Gold-blinded primer: portion of acquisition cost that is not goodwill/intangible; select by document order (FinQA WRK/2018).
-# FinQA convention: "not goodwill and intangible assets" often means purchase price − intangibles only (one line item).
-ACQUISITION_NON_GOODWILL_PRIMER = """
-You are asked to compute the portion of an acquisition cost that was **not** goodwill or intangible assets. Follow these rules:
-
-1. **Select the correct acquisition**:
-   - Prefer the acquisition **explicitly referenced in the question** or **nearest in context**.
-   - If the question does not specify (e.g. "the acquisition"), choose the **first acquisition in the document** (by order of appearance) for which purchase price and allocation (goodwill/intangibles) are provided.
-   - Do **not** pick the largest, the latest by date, or any acquisition not fully described.
-
-2. **Extract numbers** for that acquisition only: total purchase price, and the **intangible assets** amount (one line or sum of intangible components). Note goodwill separately if stated.
-
-3. **Compute (match common financial reporting / FinQA convention)**:
-   - When the text states the allocation as "included $X million of [customer relationship / etc.] intangible assets and $Y million of goodwill", the question "cost not goodwill and intangible assets" is typically answered as: **purchase price − intangible assets only**, i.e. **subtract(purchase_price, intangible_assets)**. Goodwill is not subtracted in this formulation (the answer is the portion that is neither goodwill nor intangibles; the single "intangible assets" line is the standard subtraction).
-   - Use **subtract(purchase_price, intangible_assets)** when one clear intangible-assets amount is given. Use **subtract(purchase_price, add(goodwill, intangible_assets))** only when the source explicitly defines "goodwill and intangible assets" as a combined figure to subtract.
-
-4. **Output**: Return the **numeric answer only**. No text or units. Process **one acquisition only** unless the question asks for aggregation.
-"""
-
-
-def _needs_dividend_primer(query: str) -> bool:
-    """True if the query asks for total dividend amount (shares × dividend per share) or dividend received (FinQA CDW-style)."""
-    if not query or not isinstance(query, str):
-        return False
-    q = query.strip().lower()
-    if "dividend" not in q:
-        return False
-    return (
-        "how much" in q and ("receive" in q or "get " in q or "would you" in q)
-        or "total dividend" in q
-        or "dividend amount" in q
-        or ("held " in q and "shares" in q and ("dividend" in q or "receive" in q))
-    )
-
-
-# Gold-blinded primer: total dividend = shares × dividend per share; record date logic (FinQA CDW/2014).
-DIVIDEND_PRIMER = """
-When the question asks **how much you would receive in dividends** (or total dividend amount) for holding a given number of shares:
-
-1. **Identify dividend entries** in the context for the relevant year (e.g. dividend table or narrative with declaration date, record date, payment date, and amount per share).
-
-2. **Select the correct dividend**: Use the dividend whose **record date** is on or before the date the shareholder held the shares (e.g. "held on May 30, 2014" -> use the dividend with record date May 27, 2014; the shareholder is on record for that payment).
-
-3. **Dividend per share**: Note the amount per share (e.g. $0.0425) for that selected dividend.
-
-4. **Number of shares**: Use the share count **stated in the question** (e.g. "if you held 1000 shares" -> use 1000). If the question does not give a number, use only values from the document.
-
-5. **Compute**: Total dividend = number of shares × dividend per share. Use **multiply(dividend_per_share, number_of_shares)**. Example: multiply(0.0425, 1000).
-
-6. **Output**: The numeric result only (e.g. 42.5). Use the same units as the document (dollars per share × shares = dollars).
-"""
-
-
-def _needs_net_margin_primer(query: str) -> bool:
-    """True if the query asks for net margin for a quarter or year (FinQA: use operating income ÷ revenue, not net earnings)."""
-    if not query or not isinstance(query, str):
-        return False
-    q = query.strip().lower()
-    if "net margin" not in q:
-        return False
-    # Optional: ensure quarter/year context so we don't over-trigger on generic "margin" questions
-    return bool(re.search(r"\b(19|20)\d{2}\b", q)) or any(
-        x in q for x in ("qtr", "quarter", "1st", "2nd", "3rd", "4th", "for the year")
-    )
-
-
-# Gold-blinded primer: quarterly net margin = operating income ÷ revenue (FinQA; avoid net earnings for margin).
-NET_MARGIN_PRIMER = """
-You are asked to compute the **net margin** for a specific quarter (or period) in a financial statement.
-
-Instructions:
-
-1. **Identify the revenue** for the requested quarter: sales, service revenue, or total revenue as reported (e.g. "sales and service revenues" for that quarter).
-
-2. **Identify the income measure used for net margin**: If multiple income measures exist (e.g. net earnings, operating income, earnings before taxes), use **operating income** for the requested quarter. In FinQA-style filings, net margin is computed as operating income ÷ revenue; do **not** use net earnings unless the question explicitly defines net margin that way.
-
-3. **Compute net margin** as: net_margin = (operating income for the requested quarter) ÷ (revenue for the requested quarter). Output a single program: divide(operating_income, revenue).
-
-4. **Output** only the **numeric ratio** in decimal form (e.g. 0.06892). Do not include commentary or units.
-
-5. **Quarter/year**: Use revenue and operating income for the **requested** quarter and year only (e.g. 2nd qtr 2013 -> use the 2nd qtr column/row values for both numerator and denominator). Do not mix quarters or years.
-
-6. If revenue or income are reported in thousands or millions, use the same scale for both so the ratio is correct.
-"""
+    return re.search(
+        r"what\s+(?:does|do)\s+(?:the|this|that)\s+table[s]?\s+show",
+        q,
+        re.IGNORECASE,
+    ) is not None
 
 
 def _needs_accounting_adjustment_primer(query: str) -> bool:
@@ -890,39 +730,6 @@ When answering accounting adjustment questions:
 4. The final answer should match the unit and scale implied by the table
    and the question wording.
 """
-
-
-def _needs_tatqa_numeric_primer(query: str) -> bool:
-    """True if the query asks for balances/amounts in millions, multiple line items, or without adoption (TAT-QA: scale + year/event + aggregation)."""
-    if not query or not isinstance(query, str):
-        return False
-    q = query.strip().lower()
-    if "in millions" in q and ("balances" in q or "respectively" in q or "inventories" in q or "accrued" in q or "liabilities" in q):
-        return True
-    if "balances" in q and ("without adoption" in q or "topic 606" in q or "topic 842" in q):
-        return True
-    if "without adoption of topic" in q and ("balances" in q or "inventories" in q):
-        return True
-    return False
-
-
-# TAT-QA multi-account balances primer (Topic 606 aware): defensible for interviews; no sample-specific arithmetic.
-TATQA_NUMERIC_PRIMER = """
-# TAT-QA Multi-Account Balances (Topic 606 aware)
-
-When a query asks for **balances of multiple accounts** (e.g. inventories, accrued liabilities) **"without adoption of Topic 606"**:
-
-1. **Always use the "As Adjusted - Without Adoption of Topic 606" value** from the documents for each account.
-2. **Include all reported subcomponents** in the schedule; do not ignore any line item that is part of the account.
-3. **Maintain units as reported in the document.** Only convert to millions if the query explicitly says "in millions" — then convert each balance (e.g. divide by 1,000 when values are in thousands) and sum; or sum in document units then convert the total once, as consistent with the table.
-4. **For multi-account sums**, add all relevant balances **after** applying steps 1–3, keeping units consistent.
-5. **Do not assume conversion or simplifications** unless the question explicitly instructs.
-6. **Sum all reported balances for the requested accounts** (e.g. Inventories + Other accrued liabilities), not just the first line retrieved. The dataset expects a single total for this style of question.
-7. Round to one decimal place for the final answer. Output only the numeric value; no units or commentary.
-
-**Other numeric questions (e.g. quarterly net margin):** Use the row for the requested year/quarter only. Net margin = net earnings / revenues. Return decimal form unless the query asks for percentage.
-"""
-
 
 
 def _document_units_suffix(context: str, value: float) -> str:
@@ -1054,31 +861,6 @@ When the question asks for an **average** over multiple years (e.g. "average ...
 """
 
 
-def _needs_average_additions_primer(query: str) -> bool:
-    """True if the query asks for average additions over a year range (FinQA: additions = year-end balance diffs, average = sum/num_intervals)."""
-    if not query or not isinstance(query, str):
-        return False
-    q = query.strip().lower()
-    if "average" not in q or "addition" not in q:
-        return False
-    # Year range (e.g. "2006-2009", "years 2006 to 2009", "considering the years 2006-2009")
-    return bool(re.search(r"(19|20)\d{2}\s*[-–to]\s*(19|20)\d{2}|\b(19|20)\d{2}\b.*\b(19|20)\d{2}\b", q))
-
-
-# Gold-blinded primer: average additions — prefer explicit "additions during period" lines; fallback to balance differences.
-AVERAGE_ADDITIONS_PRIMER = """
-You are asked to compute the **average additions** over a range of years (e.g. 2006-2009).
-
-**Step 0 — Prefer explicit additions (FinQA schedules):** Many financial schedules report **"additions during period"** (or "additions") as separate line items for each year. If the context contains such lines for the years in the requested range (e.g. one value per year 2006, 2007, 2008, 2009), use those **reported addition values** directly. Average = sum(reported_additions) / N where N = number of years in the range (e.g. 4 for 2006-2009) or the number of addition values you have. Ensure consistent units: if values are in thousands, either keep in thousands or multiply by 1000 for the final answer as the dataset expects. Example: add(add_2006, add_2007), add(#0, add_2008), add(#1, add_2009), divide(#2, 4).
-
-**Step 1 — Fallback: year-end balances only:** If the document does **not** report explicit "additions during period" for each year, use year-end balances. Locate the ending balance at the end of **each** year in the requested range. Addition for year i = (balance at end of year i) - (balance at end of year i-1). Average = (sum of those yearly additions) / (number of intervals). Number of intervals = number of years minus one (e.g. 2006-2009 -> 3 intervals). Program: subtract(balance_2008, balance_2007), subtract(balance_2009, balance_2008), add(#0, #1), divide(#2, 3).
-
-**Step 2 — Units:** Keep units consistent. If the table says "(in thousands)", additions and average may be in thousands; if the gold expects whole units, multiply by 1000 where appropriate.
-
-**Step 3 — Output:** A single numeric value. No commentary. Do not default to balance-difference method when the schedule explicitly lists "additions during period" for each year — use those listed values and divide by the number of years (or intervals) that match the question.
-"""
-
-
 # Cash flow / share repurchase / financing: scale to millions, correct column for actual cash outflow.
 CASHFLOW_FINANCING_PRIMER = """
 You are answering a question about cash flow from financing activities. Scale all dollar values to millions.
@@ -1143,6 +925,7 @@ class AgentState(TypedDict):
     confidence: float
     messages: List[str]  # For logging
     corpus_id: Optional[str]  # Optional document id to scope retrieval (e.g. FinQA)
+    dataset_name: Optional[str]  # FinQA, TATQA — for dataset-aware primer selection (Phase 2+)
 
 
 # ========================================
@@ -1171,7 +954,7 @@ class AgenticRAG:
         retriever,
         reranker,
         api_key: Optional[str] = None,
-        model: str = "claude-sonnet-4-20250514"
+        model: str = DEFAULT_RAG_MODEL,
     ):
         """
         Initialize Agentic RAG
@@ -1586,17 +1369,13 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
         needs_totals_direct = RAG_INTENT_TOTALS_PREFER_DIRECT in intents
         needs_growth_rate = RAG_INTENT_PERCENT_CHANGE in intents
         needs_event_scoped_arithmetic = RAG_INTENT_EVENT_SCOPED in intents
-        needs_acquisition_non_goodwill = RAG_INTENT_ACQUISITION_NON_GOODWILL in intents
         needs_accounting_adjustment = RAG_INTENT_ACCOUNTING_ADJUSTMENT in intents
-        needs_tatqa_numeric = RAG_INTENT_TATQA_NUMERIC in intents
+        needs_what_table_shows = RAG_INTENT_WHAT_TABLE_SHOWS in intents
         needs_cashflow_financing = RAG_INTENT_CASHFLOW_FINANCING in intents
         needs_table_total_across_columns = RAG_INTENT_TABLE_TOTAL_ACROSS_COLUMNS in intents
         needs_interest_payment = RAG_INTENT_INTEREST_PAYMENT in intents
-        needs_dividend = RAG_INTENT_DIVIDEND in intents
-        needs_net_margin = RAG_INTENT_NET_MARGIN in intents and not is_yes_no
         needs_frequency_proportion = RAG_INTENT_FREQUENCY_PROPORTION in intents
         needs_average_subset = RAG_INTENT_AVERAGE_SUBSET in intents
-        needs_average_additions = RAG_INTENT_AVERAGE_ADDITIONS in intents and not is_yes_no
         if os.environ.get("RAG_DEBUG") == "1" and is_yes_no:
             print(f"[DEBUG] generator: yes/no question detected; will not append program execution. query_preview={query[:80]!r}...")
         if os.environ.get("RAG_DEBUG") == "1" and needs_primer:
@@ -1656,7 +1435,6 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
         needs_cumulative_return = RAG_INTENT_CUMULATIVE_RETURN in intents and not is_yes_no
         # When "percent change" uses direction-based denominator (FinQA), do NOT inject generic (new-old)/old so the model follows (old-new)/new for decreases.
         use_generic_growth_rate = needs_growth_rate and not needs_percent_change_by_direction
-        needs_numeric_reasoning = needs_growth_rate or needs_table_total_across_columns
         growth_rate_primer_block = (
             (f"\n\nGrowth rate / percentage change:{GROWTH_RATE_PRIMER}\n" if use_generic_growth_rate else "")
             + (f"\n\n{LOCOM_GROWTH_PRIMER}\n" if needs_locom_growth else "")
@@ -1666,18 +1444,12 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
             + (f"\n\nCumulative total return / indexed comparison:{CUMULATIVE_RETURN_PRIMER}\n" if needs_cumulative_return else "")
             if (needs_growth_rate or needs_percent_reduction_sign or needs_percent_change_by_direction or needs_cumulative_return) else ""
         )
-        numeric_reasoning_primer_block = (
-            f"\n\n{NUMERIC_REASONING_PRIMER}\n"
-            if (needs_numeric_reasoning and not is_yes_no) else ""
-        )
         if os.environ.get("RAG_DEBUG") == "1" and use_generic_growth_rate:
             print(f"[DEBUG] generator: injecting growth-rate primer (force program: divide(subtract(new,old), old))")
         if os.environ.get("RAG_DEBUG") == "1" and needs_percent_reduction_sign:
             print("[DEBUG] generator: injecting percent-reduction sign primer (use (new-old)/old; keep negative for reductions)")
         if os.environ.get("RAG_DEBUG") == "1" and needs_percent_change_by_direction:
             print("[DEBUG] generator: injecting percent-change-by-direction primer (decrease->(old-new)/new, increase->(new-old)/old)")
-        if os.environ.get("RAG_DEBUG") == "1" and needs_numeric_reasoning:
-            print("[DEBUG] generator: injecting numeric reasoning primer (units, aggregation, percent 0-100)")
         if os.environ.get("RAG_DEBUG") == "1" and needs_locom_growth:
             print("[DEBUG] generator: injecting LOCOM growth-rate primer (use carried amount = min(cost, fair value) per year)")
         if os.environ.get("RAG_DEBUG") == "1" and needs_percentage_as_integer:
@@ -1688,26 +1460,20 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
             f"\n\nEvent-scoped arithmetic (acquisitions, intangibles, amortization—do not sum across footnotes):{EVENT_SCOPED_ARITHMETIC_PRIMER}\n"
             if (needs_event_scoped_arithmetic and not is_yes_no) else ""
         )
-        acquisition_non_goodwill_primer_block = (
-            f"\n\nAcquisition cost not goodwill/intangible (gold-blinded):{ACQUISITION_NON_GOODWILL_PRIMER}\n"
-            if (needs_acquisition_non_goodwill and not is_yes_no) else ""
-        )
         if os.environ.get("RAG_DEBUG") == "1" and needs_event_scoped_arithmetic:
             print("[DEBUG] generator: injecting event-scoped arithmetic primer (compute per block; do not sum across footnotes)")
-        if os.environ.get("RAG_DEBUG") == "1" and needs_acquisition_non_goodwill:
-            print("[DEBUG] generator: injecting acquisition non-goodwill primer (choose earliest acquisition with all numbers)")
         accounting_adjustment_primer_block = (
             f"\n\nAccounting adjustment selection & unit handling:{ACCOUNTING_ADJUSTMENT_PRIMER}\n"
             if (needs_accounting_adjustment and not is_yes_no) else ""
         )
         if os.environ.get("RAG_DEBUG") == "1" and needs_accounting_adjustment:
             print("[DEBUG] generator: injecting accounting-adjustment primer (select single standard-specific line; preserve units)")
-        tatqa_numeric_primer_block = (
-            f"\n\nRAG numeric extraction (quarterly margins, multi-account balances, scaling):{TATQA_NUMERIC_PRIMER}\n"
-            if (needs_tatqa_numeric and not is_yes_no) else ""
+        what_table_shows_primer_block = (
+            f"\n\nTable disambiguation (what does the table show):{WHAT_TABLE_SHOWS_PRIMER}\n"
+            if needs_what_table_shows else ""
         )
-        if os.environ.get("RAG_DEBUG") == "1" and needs_tatqa_numeric:
-            print("[DEBUG] generator: injecting TAT-QA numeric primer (quarterly net margin; multi-account balances -> sum in millions when inventories+liabilities)")
+        if os.environ.get("RAG_DEBUG") == "1" and needs_what_table_shows:
+            print("[DEBUG] generator: injecting what-table-shows primer (identify table before answering; disambiguate if multiple tables)")
         # Hard program-shape constraint: singular "the adjustment" -> forbid add/sum at top level (TAT-QA row selection, not aggregation).
         needs_singular_adjustment_constraint = (
             needs_accounting_adjustment and not is_yes_no and _is_singular_adjustment(query)
@@ -1731,20 +1497,8 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
             f"\n\nBond/interest payment (periodic payment, single instrument):{INTEREST_PAYMENT_PRIMER}\n"
             if (needs_interest_payment and not is_yes_no) else ""
         )
-        dividend_primer_block = (
-            f"\n\nDividend calculation (gold-blinded):{DIVIDEND_PRIMER}\n"
-            if (needs_dividend and not is_yes_no) else ""
-        )
         if os.environ.get("RAG_DEBUG") == "1" and needs_interest_payment:
             print("[DEBUG] generator: injecting interest-payment primer (semi-annual/quarterly; one instrument)")
-        if os.environ.get("RAG_DEBUG") == "1" and needs_dividend:
-            print("[DEBUG] generator: injecting dividend primer (shares × dividend per share; record date logic)")
-        if os.environ.get("RAG_DEBUG") == "1" and needs_net_margin:
-            print("[DEBUG] generator: injecting net-margin primer (operating income ÷ revenue for requested quarter)")
-        net_margin_primer_block = (
-            f"\n\nQuarterly net margin (gold-blinded):{NET_MARGIN_PRIMER}\n"
-            if needs_net_margin else ""
-        )
         frequency_proportion_primer_block = (
             f"\n\nFrequency / proportion (how often -> divide count by total):{FREQUENCY_PROPORTION_PRIMER}\n"
             if (needs_frequency_proportion and not is_yes_no) else ""
@@ -1757,12 +1511,6 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
         )
         if os.environ.get("RAG_DEBUG") == "1" and needs_average_subset:
             print("[DEBUG] generator: injecting average-subset primer (subset of years; selective extraction)")
-        average_additions_primer_block = (
-            f"\n\nAverage additions over year range (gold-blinded):{AVERAGE_ADDITIONS_PRIMER}\n"
-            if needs_average_additions else ""
-        )
-        if os.environ.get("RAG_DEBUG") == "1" and needs_average_additions:
-            print("[DEBUG] generator: injecting average-additions primer (balance diffs -> sum / num_intervals)")
         table_total_across_columns_block = (
             f"\n\nTable total across columns (chunked tables):{TABLE_TOTAL_ACROSS_COLUMNS_PRIMER}\n"
             if (needs_table_total_across_columns and not is_yes_no) else ""
@@ -1788,7 +1536,10 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
             f"\n{FINQA_GOLDBLIND_NUMERICAL_PRIMER}\n"
             if not is_yes_no else ""
         )
-        prompt = f"""{totals_lead}{date_anchor_nudge}Based on the following information, answer the query.
+        # Phase 2: SHARED_NUMERICAL_PRIMER is base layer; intent primers extend it (regression-safe).
+        prompt = f"""{SHARED_NUMERICAL_PRIMER}
+
+{totals_lead}{date_anchor_nudge}Based on the following information, answer the query.
 
 Query: {query}
 
@@ -1802,18 +1553,13 @@ Information:
 {totals_direct_primer_block}
 {lease_percent_primer_block}
 {growth_rate_primer_block}
-{numeric_reasoning_primer_block}
-{acquisition_non_goodwill_primer_block}
 {event_scoped_primer_block}
 {accounting_adjustment_primer_block}
-{tatqa_numeric_primer_block}
+{what_table_shows_primer_block}
 {cashflow_primer_block}
 {interest_payment_primer_block}
-{dividend_primer_block}
-{net_margin_primer_block}
 {frequency_proportion_primer_block}
 {average_subset_primer_block}
-{average_additions_primer_block}
 {table_total_across_columns_block}
 {parenthetical_negative_block}
 
@@ -1844,40 +1590,8 @@ Answer:"""
             answer_text = ""
             if response.content and len(response.content) > 0:
                 answer_text = getattr(response.content[0], "text", "") or ""
-            tatqa_helper_applied = False
-            # TAT-QA numeric: try deterministic helper (scale thousands→millions, correct adjustment line) before program execution
-            if not is_yes_no and needs_tatqa_numeric and context:
-                try:
-                    from rag_system.tatqa_numeric_helper import (
-                        tatqa_numeric_helper,
-                        parse_accounts_from_query,
-                        format_tatqa_helper_answer,
-                    )
-                    chunks_list = [p.strip() for p in context.split("\n\n---\n\n") if p.strip()]
-                    accounts = parse_accounts_from_query(query)
-                    if os.environ.get("RAG_DEBUG") == "1":
-                        if not chunks_list:
-                            print("[DEBUG] generator: TAT-QA helper NOT applied — no chunks (context empty or no separator)")
-                        elif not accounts:
-                            print(f"[DEBUG] generator: TAT-QA helper NOT applied — parse_accounts_from_query returned empty (query preview: {query[:100]!r}...)")
-                    if chunks_list and accounts:
-                        balances = tatqa_numeric_helper(chunks_list, accounts)
-                        if balances and any(b != 0 for b in balances):
-                            formatted = format_tatqa_helper_answer(balances, query)
-                            if formatted:
-                                answer_text = f"{answer_text.strip()}\n\n**Numerical answer (from TAT-QA helper): {formatted}**"
-                                tatqa_helper_applied = True
-                                if os.environ.get("RAG_DEBUG") == "1":
-                                    print(f"[DEBUG] generator: TAT-QA helper applied accounts={accounts} balances={balances} -> {formatted!r}")
-                            elif os.environ.get("RAG_DEBUG") == "1":
-                                print(f"[DEBUG] generator: TAT-QA helper NOT applied — format_tatqa_helper_answer returned empty (balances={balances})")
-                        elif os.environ.get("RAG_DEBUG") == "1":
-                            print(f"[DEBUG] generator: TAT-QA helper NOT applied — balances all zero or missing (accounts={accounts} balances={balances!r})")
-                except Exception as e:
-                    if os.environ.get("RAG_DEBUG") == "1":
-                        print(f"[DEBUG] generator: TAT-QA helper failed: {e}")
             # FinQA-style: run program execution only for numerical questions; for yes/no, do not append a number
-            if not is_yes_no and not tatqa_helper_applied:
+            if not is_yes_no:
                 try:
                     from rag_system.finqa_program_executor import extract_and_execute_program
                     exe = extract_and_execute_program(answer_text)
@@ -1897,14 +1611,14 @@ Answer:"""
                                 final_num = date_fallback
                                 if os.environ.get("RAG_DEBUG") == "1":
                                     print(f"[DEBUG] generator: date-column percentage fallback replaced with {final_num} (14001/26302)")
-                        # Growth-rate: only overwrite when exe looks like raw dollar change (|exe| >> 1), not a decimal rate.
-                        # FinQA percent change is in decimal form (e.g. 3.94596 for 394.596%); values in (0.001, 50] are valid rates.
-                        # Skip when percentage in 0–100 (needs_percentage_as_integer) or cumulative return.
+                        # Growth-rate: if exe looks like raw dollar change (|exe| > 1) not a rate, recompute rate from context.
+                        # Skip when question asks for percentage in 0–100 (needs_percentage_as_integer): 96.55 is correct, not "raw change".
+                        # Skip when cumulative return / outperform: program output is return-space (e.g. 2.34); never overwrite with heuristic.
                         if (
                             needs_growth_rate
                             and not needs_percentage_as_integer
                             and not needs_cumulative_return
-                            and abs(final_num) > 100
+                            and abs(final_num) > 1
                         ):
                             growth_fallback = _extract_growth_rate_fallback(answer_text, context)
                             if growth_fallback is not None:
@@ -1914,11 +1628,6 @@ Answer:"""
                         # FinQA percentage override: for "percentage decrease/increase" (0–100 format), ensure positive and 5 decimals to match GT.
                         if needs_percentage_as_integer and exe is not None:
                             final_num = round(abs(final_num), 5)
-                        # Percent change by direction: if model output decimal (0 < |result| <= 1) instead of 0–100 form, convert (e.g. 0.03537 -> 3.537)
-                        if needs_percent_change_by_direction and 0 < abs(final_num) <= 1:
-                            final_num = final_num * 100
-                            if os.environ.get("RAG_DEBUG") == "1":
-                                print(f"[DEBUG] generator: percent-change decimal->0-100 conversion applied -> {final_num}")
                         # Round to 5 decimals for display so float noise (e.g. 6.900000000000091) shows as 6.9, not snap to 7.0
                         final_num = round(final_num, 5)
                         if os.environ.get("RAG_DEBUG") == "1" and needs_table_total_across_columns:
@@ -2049,13 +1758,19 @@ Answer:"""
 
         return "\n".join(formatted)
     
-    def query(self, query: str, corpus_id: Optional[str] = None) -> Dict:
+    def query(
+        self,
+        query: str,
+        corpus_id: Optional[str] = None,
+        dataset_name: Optional[str] = None,
+    ) -> Dict:
         """
         Query the agentic RAG system.
 
         Args:
             query: User query
             corpus_id: Optional document id to scope retrieval (e.g. FinQA ground_truth.corpus_id)
+            dataset_name: Optional dataset name (FinQA, TATQA) for dataset-aware primer selection (Phase 2+)
 
         Returns:
             {
@@ -2077,6 +1792,7 @@ Answer:"""
             "confidence": 0.0,
             "messages": [],
             "corpus_id": corpus_id,
+            "dataset_name": dataset_name,
         }
         
         # Run workflow

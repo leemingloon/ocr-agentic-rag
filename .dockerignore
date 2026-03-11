@@ -37,7 +37,7 @@ htmlcov/
 README.md
 
 # Windows startup / MCP (not used on SageMaker)
-scripts/start_cursor_mcp_with_env.ps1
-scripts/StartCursorMCP.bat
+scripts/start_mcp_with_env.ps1
+scripts/StartMCP.bat
 scripts/install_mcp_startup.ps1
 scripts/MCP_STARTUP.md

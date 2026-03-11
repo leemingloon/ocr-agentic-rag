@@ -78,7 +78,7 @@ class TesseractOCR:
         config_parts = [
             f"--psm {self.psm}",
             f"--oem {self.oem}",
-            "-c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,/$%-:() ",
+            "-c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,/$%-:()& ",
         ]
         return " ".join(config_parts)
     
@@ -112,9 +112,6 @@ class TesseractOCR:
             config=self.config,
             output_type=pytesseract.Output.DICT,
         )
-        if data["text"] and not (data["text"][0] or "").strip():
-            print("Warning: OCR returned empty text for image")
-
         text_parts = []
         word_confidences = []
         words_with_bboxes: List[Tuple[str, Tuple[int, int, int, int], float]] = []
@@ -137,6 +134,9 @@ class TesseractOCR:
                     low_confidence_words.append((word, c))
 
         full_text = " ".join(text_parts)
+        if not full_text.strip():
+            import sys
+            print("Warning: OCR returned no text for this image", file=sys.stderr, flush=True)
         if word_confidences:
             weighted_confs = []
             for word, conf in zip(text_parts, word_confidences):

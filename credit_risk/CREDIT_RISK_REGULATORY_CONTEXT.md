@@ -9,7 +9,7 @@ This document describes how the models in this repository align with common regu
 **IFRS 9** requires institutions to recognise **Expected Credit Loss (ECL)** using forward-looking information, instead of only incurred losses.
 
 - **ECL** for a loan or portfolio is typically: **ECL = PD × LGD × EAD** (and, for stage 2/3, lifetime measures).
-- **PD (Probability of Default):** Estimated probability of default over the relevant horizon (e.g. 12 months). This repo’s main output is a **PD model** (see `credit_risk/models/pd_model.py` and notebook `02_pd_xgboost_training.ipynb`).
+- **PD (Probability of Default):** Estimated probability of default over the relevant horizon (e.g. 12 months). This repo’s main output is a **PD model** (see `credit_risk/models/pd_model.py` and notebook `02a_pd_xgboost_training.ipynb`).
 - **LGD (Loss Given Default):** Fraction of exposure lost once default occurs (1 − recovery rate). A placeholder LGD component is in `credit_risk/models/lgd_model.py`; full LGD requires recovery/default data.
 - **EAD (Exposure at Default):** Credit exposure at default (e.g. outstanding balance). Often taken from systems or a simple formula; see `credit_risk/models/ead.py` for a conceptual placeholder.
 

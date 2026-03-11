@@ -8,13 +8,14 @@ Implements:
 - XGB + LGB + CatBoost stacking with meta-learner
 - Saves to models/pd/pd_model_local_v2.pkl
 
-Run after 01_lendingclub_feature_engineering.ipynb to create lendingclub_engineered.parquet.
+Run after 01_pd_lendingclub_feature_engineering.ipynb to create lendingclub_engineered.parquet.
 Then: python scripts/train_pd_model_hf_robust.py
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import joblib
 import random
 from pathlib import Path
@@ -26,13 +27,27 @@ from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold, train_test_split
 
 
-def _apply_hf_dropout(X: pd.DataFrame, p_drop: float = 0.10, seed: int = 42) -> pd.DataFrame:
-    """Randomly set p_drop fraction of values per column to NaN (HF-style missing)."""
+# Columns always missing at HF eval (no dti, issue_d, earliest_cr_line in query)
+HF_MISSING_COLS = ["dti_ratio", "dti_to_income", "credit_history_months"]
+
+
+def _apply_hf_dropout(
+    X: pd.DataFrame,
+    p_drop: float = 0.10,
+    hf_missing_p: float = 0.5,
+    seed: int = 42,
+) -> pd.DataFrame:
+    """Randomly set p_drop fraction of values per column to NaN (HF-style missing).
+    For HF_MISSING_COLS, additionally set hf_missing_p fraction of rows to NaN (simulate HF always-missing).
+    """
     X_noisy = X.copy()
     rng = random.Random(seed)
     for col in X_noisy.columns:
         n = len(X_noisy)
-        n_drop = int(n * p_drop)
+        p = p_drop
+        if col in HF_MISSING_COLS:
+            p = max(p_drop, hf_missing_p)  # Higher dropout for HF-missing cols
+        n_drop = int(n * p)
         if n_drop > 0:
             idx = rng.sample(range(n), n_drop)
             X_noisy.iloc[idx, X_noisy.columns.get_loc(col)] = np.nan
@@ -52,6 +67,7 @@ def main() -> None:
     ap.add_argument("--data", type=Path, default=Path("data/credit_risk_pd/LendingClub/processed/lendingclub_engineered.parquet"))
     ap.add_argument("--out", type=Path, default=Path("models/pd/pd_model_local_v2.pkl"))
     ap.add_argument("--p_drop", type=float, default=0.10, help="HF dropout fraction per column")
+    ap.add_argument("--hf-default-rate", type=float, default=None, help="HF default rate for scale_pos_weight (e.g. 0.19); uses train rate if not set")
     ap.add_argument("--n_trials", type=int, default=30)
     ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
@@ -62,10 +78,12 @@ def main() -> None:
     if str(repo_root) not in sys.path:
         sys.path.insert(0, str(repo_root))
 
-    from credit_risk.feature_engineering.common_features import get_feature_names_no_leakage
+    from credit_risk.feature_engineering.common_features import get_feature_names_no_leakage_v2
+    from credit_risk.feature_engineering.feature_screening import screen_features_train_only
 
     df = pd.read_parquet(args.data)
-    feature_names = get_feature_names_no_leakage()
+    # V2: additive no-leakage features (includes one-hot categoricals)
+    feature_names = get_feature_names_no_leakage_v2()
     X = df[[c for c in feature_names if c in df.columns]].copy()
     for c in feature_names:
         if c not in X.columns:
@@ -73,18 +91,47 @@ def main() -> None:
     X = X[feature_names]
     y = df["default"]
 
-    X_train, X_rest, y_train, y_rest = train_test_split(X, y, test_size=0.3, random_state=args.seed, stratify=y)
-    X_val, X_test, y_val, y_test = train_test_split(X_rest, y_rest, test_size=0.5, random_state=args.seed, stratify=y_rest)
+    X_train, X_rest, y_train, y_rest = train_test_split(
+        X, y, test_size=0.3, random_state=args.seed, stratify=y
+    )
+    X_val, X_test, y_val, y_test = train_test_split(
+        X_rest, y_rest, test_size=0.5, random_state=args.seed, stratify=y_rest
+    )
 
-    # HF simulation: create noisy copy and concatenate (or use noisy only for robustness)
-    X_train_noisy = _apply_hf_dropout(X_train, p_drop=args.p_drop, seed=args.seed)
+    # --------------------------
+    # Train-only feature screening (missingness, K-S, correlation pruning)
+    # --------------------------
+    # - drop columns with >50% missingness (train only)
+    # - K-S screen (train only)
+    # - correlation pruning (keep higher K-S)
+    screening = screen_features_train_only(
+        X_train,
+        y_train,
+        missingness_threshold=0.50,
+        min_ks=0.001,
+        corr_threshold=0.95,
+    )
+    selected_features = screening.selected_features
+    X_train = X_train[selected_features]
+    X_val = X_val[selected_features]
+    X_test = X_test[selected_features]
+
+    # HF simulation: create noisy copy and concatenate; extra dropout on dti/credit_history (HF-missing)
+    X_train_noisy = _apply_hf_dropout(
+        X_train, p_drop=args.p_drop, hf_missing_p=0.5, seed=args.seed
+    )
     medians = X_train.median().to_dict()
     X_train_noisy, _ = _fill_median(X_train_noisy, medians)
     X_train_aug = pd.concat([X_train, X_train_noisy], axis=0, ignore_index=True)
     y_train_aug = pd.concat([y_train, y_train], axis=0, ignore_index=True)
     X_val_filled, _ = _fill_median(X_val, medians)
 
-    scale = (y_train_aug == 0).sum() / max((y_train_aug == 1).sum(), 1)
+    # scale_pos_weight: use HF default rate (~0.19) if set, else train rate
+    if args.hf_default_rate is not None:
+        scale = (1 - args.hf_default_rate) / max(args.hf_default_rate, 1e-6)
+        print("scale_pos_weight from HF default rate:", round(scale, 2))
+    else:
+        scale = (y_train_aug == 0).sum() / max((y_train_aug == 1).sum(), 1)
 
     try:
         import optuna
@@ -162,12 +209,41 @@ def main() -> None:
     auc_val = roc_auc_score(y_val, p_val)
     print("Val AUC:", round(auc_val, 4))
 
+    # Optimal threshold (max F1) for eval_runner
+    from sklearn.metrics import f1_score
+    best_f1, best_threshold = 0.0, 0.5
+    for t in np.linspace(0.2, 0.8, 31):
+        f1 = f1_score(y_val, (p_val >= t).astype(int), zero_division=0)
+        if f1 > best_f1:
+            best_f1, best_threshold = f1, t
+    print("Optimal threshold (max F1):", round(best_threshold, 3), "-> F1", round(best_f1, 4))
+
     args.out.parent.mkdir(parents=True, exist_ok=True)
+    feature_medians = {k: float(v) if pd.notna(v) else 0.0 for k, v in medians.items()}
+    medians_path = args.out.parent / "feature_medians.json"
+    with open(medians_path, "w", encoding="utf-8") as f:
+        json.dump(feature_medians, f, indent=2)
+    print("Saved feature_medians.json to", medians_path)
+
     model_data = {
         "model": final_model,
-        "feature_names": feature_names,
+        "feature_names": selected_features,
         "params": best_params,
-        "metadata": {"trained_with": "train_pd_model_hf_robust", "p_drop": args.p_drop, "n_train": len(X_train_aug)},
+        "metadata": {
+            "trained_with": "train_pd_model_hf_robust",
+            "p_drop": args.p_drop,
+            "n_train": len(X_train_aug),
+            "best_threshold": best_threshold,
+            "feature_version": "v2",
+            "feature_screening": {
+                "missingness_threshold": 0.50,
+                "min_ks": 0.001,
+                "corr_threshold": 0.95,
+                "dropped_missingness": screening.dropped_missingness,
+                "dropped_low_ks": screening.dropped_low_ks,
+                "dropped_correlated": screening.dropped_correlated,
+            },
+        },
     }
     joblib.dump(model_data, args.out)
     print("Saved to", args.out)
