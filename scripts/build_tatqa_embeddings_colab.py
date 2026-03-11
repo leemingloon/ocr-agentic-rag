@@ -152,16 +152,18 @@ def main():
         print(f"Fallback corpus_id: {n_fallback_docs} docs, {n_fallback_chunks} chunks (tatqa_<split>_<doc_idx>). Keep split/file/doc order in sync with TATQAAdapter.")
     assert n_fallback_chunks >= (n_fallback_docs if n_fallback_docs else 0), "Fallback-id chunks should cover all fallback docs."
 
-    # Pre-index steps: section tagging, unit parsing, provenance (table_id), content hash, dedup
+    # Pre-index steps: section tagging, unit parsing, provenance (table_id), content hash.
+    # For TAT-QA we keep ALL chunks (no dedup) so metadata-enriched variants are preserved and
+    # we avoid false negatives from content-hash deduplication.
     from rag_system.index_preprocess import preprocess_chunks_for_index
     chunks = preprocess_chunks_for_index(
         chunks,
         context_by_corpus=context_by_corpus,
         page_by_corpus=None,
         table_id_prefix_by_corpus={cid: cid for cid in context_by_corpus},
-        dedup=not args.no_dedup,
+        dedup=False,
     )
-    print(f"After section/units/provenance/dedup: {len(chunks)} chunks.")
+    print(f"After section/units/provenance (no dedup): {len(chunks)} chunks.")
 
     from rag_system.retrieval import HybridRetriever
 

@@ -1209,6 +1209,28 @@ def _rag_prediction_is_error_or_refusal(pred_answer: str) -> bool:
     return any(phrase in lower for phrase in error_phrases)
 
 
+def _extract_final_answer_span(prediction: str | None) -> str:
+    """
+    Extract the final stated answer from a long prediction, stripping earlier reasoning.
+    Heuristics (used for TAT-QA span-style answers):
+    - If "Numerical answer (from program execution):" is present, return the text after the last marker.
+    - Else, return the last non-empty line of the prediction.
+    Falls back to the original text when extraction fails.
+    """
+    if not prediction:
+        return ""
+    text = str(prediction)
+    marker = "Numerical answer (from program execution):"
+    if marker in text:
+        tail = text.split(marker)[-1].strip()
+        if tail:
+            return tail
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    if not lines:
+        return text.strip()
+    return lines[-1]
+
+
 def _rag_parse_gold_program_operands(program: str | list | None) -> list[str]:
     """Extract numeric operands from a FinQA-style gold program string, e.g. 'divide(7991, 21367)' -> ['7991', '21367'].
     Excludes result references (#0, #1, ...) so we do not require literal '0' in context for divide(#0, const_2)."""
@@ -1387,7 +1409,8 @@ RAG_SUSPECT_GT_SAMPLE_LABELS: dict[str, str] = {
 RAG_REGRESSION_SAMPLE_IDS: dict[tuple[str, str], list[str]] = {
     ("rag", "TATQA"): [
         "d88745f6bcf2e7ab5335def3a0f0df44",  # corpus_id scoping; answer ~ "primary components of the deferred tax assets and liabilities"
-        "80d7a9cd564cbd87a5bd261b263ab09f",  # arithmetic-from-components; ratio of total current assets to total current liabilities (3.61); compute from components when totals not stated
+        "80d7a9cd564cbd87a5bd261b263ab09f",  # arithmetic-from-components; ratio of total current assets to total current liabilities (3.61); compute from components when totals not stated (GT relies on implicit totals; annotation-limited)
+        "107efaa11617ac41f5f9b3b5adf1e98c",  # annotation issue: question asks for "total assets" but GT 948,578 is "net deferred tax asset" from deferred tax schedule; model refusal is correct
     ],
 }
 
@@ -1418,6 +1441,19 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
         if dataset_name == "TATQA":
             out["relaxed_match"] = 0.0
         return out
+
+    # TAT-QA span-style answers: strip reasoning and keep only the final stated answer span before scoring,
+    # so intermediate mentions in chain-of-thought (e.g. earlier years) do not incorrectly match GT.
+    if dataset_name == "TATQA" and isinstance(gt_obj, dict) and isinstance(pred_answer, str):
+        answer_type = (gt_obj.get("answer_type") or "").strip().lower()
+        if answer_type in ("span", "multi-span"):
+            extracted = _extract_final_answer_span(pred_answer)
+            if debug and extracted != pred_answer:
+                print(
+                    f"[DEBUG] RAG TATQA span final-answer extraction: "
+                    f"sample_id={sample_id!r} extracted={extracted!r}"
+                )
+            pred_answer = extracted
 
     # TAT-QA (and similar): normalize bare numeric prediction to gold scale/format so 50 -> $0.5 million when gold is $0.5 million
     if dataset_name == "TATQA" and gt_answer is not None:

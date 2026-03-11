@@ -82,7 +82,7 @@ run_dataset_until_fail() {
   # Proof samples path: data/proof/rag/<dataset_lower>/<split>/<dataset>_<split>_samples.json
   # For TATQA we may have train or dev; the checker will try both if needed.
   local SAMPLES_DIR="data/proof/rag/$(echo "$DATASET" | tr '[:upper:]' '[:lower:]')"
-  local CMD="python eval_runner.py --category rag --dataset $DATASET --max_split 1 --max_category 1 --until_fail --debug --export_predictions_txt"
+  local CMD="python eval_runner.py --category rag --dataset $DATASET --max_split 1 --max_category 1 --debug --export_predictions_txt"
   local AVG_JSON="${SAMPLES_DIR}/$(echo "$DATASET" | tr '[:upper:]' '[:lower:]')_avg.json"
 
   while true; do

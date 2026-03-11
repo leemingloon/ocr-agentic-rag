@@ -231,6 +231,5 @@ scripts/MCP_STARTUP.md
 models/sentiment/finbert_tuned_v1/model.safetensors
 models/sentiment/finbert_tuned_v1/tonkenizer.json
 
-# TATQA index files
-data/rag/TAT-QA/tatqa_retriever_index_dev_train_no_gt/
-data/rag/TAT-QA/tatqa_retriever_index_dev_train_no_gt_aft_dedup/
+# RAG retriever index files
+*.index

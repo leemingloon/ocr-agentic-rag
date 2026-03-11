@@ -68,7 +68,55 @@ def serialize_table_to_rows(
         return []
     headers = [str(c) for c in table[0]] if first_row_is_header else []
     data_rows = table[1:] if first_row_is_header and len(table) > 1 else table
-    result = []
+
+    # TAT-QA / financial two-row header pattern:
+    # Sometimes the first row is a generic column label (e.g. ["", "June 30,", ""])
+    # and the second row contains the year labels (e.g. ["", "2019", "2018"]).
+    # In that case, fold the year row into the headers so each column header
+    # becomes "June 30, 2019", "June 30, 2018", etc., and skip the year row
+    # from data_rows. This preserves the fiscal years for questions like
+    # "What are the fiscal years included in the table?".
+    if first_row_is_header and len(data_rows) >= 1:
+        second = data_rows[0]
+        # Heuristic: second row has same width and mostly year-like tokens (4-digit numbers)
+        if isinstance(second, (list, tuple)) and len(second) == len(headers):
+            year_like_count = 0
+            non_empty_cols = 0
+            for cell in second[1:]:
+                s = str(cell).strip()
+                if s:
+                    non_empty_cols += 1
+                    if len(s) == 4 and s.isdigit():
+                        year_like_count += 1
+            if non_empty_cols and year_like_count >= max(1, non_empty_cols - 1):
+                # Carry forward the last non-empty header so empty header cells inherit
+                # the generic column label (e.g. "" -> "June 30,").
+                filled_headers: List[str] = []
+                last_nonempty = ""
+                for h in headers:
+                    h_str = str(h).strip()
+                    if h_str:
+                        last_nonempty = h_str
+                        filled_headers.append(h_str)
+                    else:
+                        filled_headers.append(last_nonempty)
+
+                new_headers: List[str] = []
+                for i, h in enumerate(filled_headers):
+                    h_str = str(h).strip()
+                    y_str = str(second[i]).strip() if i < len(second) else ""
+                    if i == 0:
+                        new_headers.append(h_str)
+                    else:
+                        if h_str and y_str:
+                            new_headers.append(f"{h_str} {y_str}")
+                        elif y_str:
+                            new_headers.append(y_str)
+                        else:
+                            new_headers.append(h_str)
+                headers = new_headers
+                data_rows = data_rows[1:]
+    result: List[str] = []
     for row in data_rows:
         if not isinstance(row, (list, tuple)):
             result.append(str(row))
