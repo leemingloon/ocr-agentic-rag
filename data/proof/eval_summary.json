@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-12T12:35:43.480254+08:00",
+  "timestamp": "2026-03-12T12:47:26.979141+08:00",
   "overview": {
     "credit_risk_memo_generator": {
       "sample_count_total": 100,
@@ -595,9 +595,9 @@
                 "relaxed_match_mean": 0.972972972972973,
                 "conclusion_match_mean_typed": null,
                 "conclusion_match_typed_count": 0,
-                "program_accuracy_mean": 0.9565217391304348,
                 "numerical_exact_match_mean": 0.9565217391304348,
                 "numerical_near_match_mean": 0.9565217391304348,
+                "program_accuracy_mean": 0.9565217391304348,
                 "sign_agnostic_match_mean": 0.9782608695652174
               }
             }
@@ -689,7 +689,7 @@
       },
       "model_class": "AgenticRAG",
       "backbone": "langgraph_hybrid_retriever_bge_reranker",
-      "timestamp": "2026-03-12T12:35:43.453252+08:00"
+      "timestamp": "2026-03-12T12:47:26.963142+08:00"
     },
     "vision": {
       "category": "vision",
