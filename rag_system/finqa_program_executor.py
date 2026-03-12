@@ -218,6 +218,17 @@ def _find_program_candidates_with_positions(text: str) -> list[tuple[str, int, i
     return sorted(result, key=lambda x: x[1])
 
 
+def _gap_connects_steps(gap: str) -> bool:
+    """True if gap between two op(...) substrings is an acceptable step separator (comma, newline, period, space)."""
+    gap_clean = gap.strip().replace("\n", " ").replace("\r", " ").strip()
+    # Allow comma; comma+space; newline; period/newline (e.g. ".\n" between steps); plain whitespace
+    if not gap_clean:
+        return True
+    if gap == "," or (gap.startswith(",") and not gap.replace(",", "").strip()):
+        return True
+    return bool(re.match(r"^[\s,.]*$", gap_clean))
+
+
 def _find_last_multistep_program(text: str) -> Optional[str]:
     """
     Find the last contiguous multi-step program (e.g. subtract(a,b), divide(#0,b))
@@ -228,30 +239,63 @@ def _find_last_multistep_program(text: str) -> Optional[str]:
     candidates = _find_program_candidates_with_positions(text)
     if not candidates:
         return None
-    # Start from the last candidate (by position in text)
-    last_prog, last_start, last_end = candidates[-1]
-    # Extend left: include any candidate that ends with ") " or ")," immediately before our start
-    parts = [last_prog]
-    pos_before = last_start
-    while True:
-        # Find the candidate that ends immediately before our current span (gap is only ", " or ",")
-        found = None
-        best_e = -1
-        for prog, s, e in candidates:
-            if e >= pos_before:
-                continue
-            gap = text[e:pos_before]
-            gap_clean = gap.strip().replace("\n", " ").strip()
-            # Allow comma or newline/whitespace as step separator (model may output steps on new lines)
-            if gap == "," or (gap.startswith(",") and gap.replace(",", "").strip() == "") or gap_clean == "":
-                if e > best_e:
-                    best_e = e
-                    found = (prog, s, e)
-        if not found:
-            break
-        prog, s, e = found
-        parts.insert(0, prog)
+
+    def build_chain_from_anchor(anchor_idx: int) -> list[str]:
+        """Build [step0, step1, ...] extending left from candidates[anchor_idx]."""
+        prog, s, e = candidates[anchor_idx]
+        parts = [prog]
         pos_before = s
+        while True:
+            found = None
+            best_e = -1
+            for i, (p, start, end) in enumerate(candidates):
+                if end >= pos_before:
+                    continue
+                gap = text[end:pos_before]
+                if _gap_connects_steps(gap) and end > best_e:
+                    best_e = end
+                    found = (p, start, end)
+            if not found:
+                break
+            p, start, end = found
+            parts.insert(0, p)
+            pos_before = start
+        return parts
+
+    def extend_chain_rightward(chain: list[str], anchor_idx: int) -> list[str]:
+        """Append any steps to the right of the anchor that reference #2, #3, ... and are connected by a gap."""
+        if anchor_idx >= len(candidates) - 1:
+            return chain
+        last_end = candidates[anchor_idx][2]
+        for j in range(anchor_idx + 1, len(candidates)):
+            p, start, end = candidates[j]
+            if start < last_end:
+                continue
+            gap = text[last_end:start]
+            if not _gap_connects_steps(gap):
+                continue
+            # Next step must reference the last result (e.g. #2 when chain has 3 steps)
+            expected_ref = len(chain) - 1
+            if expected_ref < 0 or f"#{expected_ref}" not in p:
+                continue
+            chain.append(p)
+            last_end = end
+        return chain
+
+    # Prefer chain that ends with a step referencing #0 or #1; then extend rightward to include #2, #3, ...
+    best_chain: list[str] = []
+    for i in range(len(candidates) - 1, -1, -1):
+        prog, _, _ = candidates[i]
+        if "#0" in prog or "#1" in prog:
+            chain = build_chain_from_anchor(i)
+            chain = extend_chain_rightward(chain, i)
+            if len(chain) > len(best_chain):
+                best_chain = chain
+    if best_chain:
+        return ", ".join(best_chain) if len(best_chain) > 1 else best_chain[0]
+
+    # Fallback: start from the last candidate (rightmost in text)
+    parts = build_chain_from_anchor(len(candidates) - 1)
     if len(parts) == 1:
         return parts[0]
     return ", ".join(parts)

@@ -1,18 +1,20 @@
 OCR→Agentic RAG→Credit Risk Platform
 
-**Document Intelligence + Credit Risk System**  
-**Author:** Lee Ming Loon  
-**Status:** Deployed to AWS Sagemaker. Evaluated models on Local PC.
+**Document Intelligence + Credit Risk System**
+**Author:** Lee Ming Loon
+**Status:** Deployed to Amazon Web Services (AWS) Sagemaker. Evaluated on Local / Google Colabs / Kaggle.
 
-**Credit risk:** 00-04z Jupyter notebooks (`.ipynb`) under the `notebooks/` folder.
-**RAG** *_samples.json files under `data/proof/rag/` folder.
-**Vision** *_samples.json files under `data/proof/vision/` folder.
-**OCR** *_samples.json files under `data/proof/ocr/` folder. [IN PROGRESS]
+**Credit risk (feature eng, train model):** 00-04z Jupyter notebooks (`.ipynb`) under the `notebooks/` folder.
+**RAG (model predictions)** *_samples.json files under `data/proof/rag/` folder.
+**Vision (model predictions)** *_samples.json files under `data/proof/vision/` folder.
+**OCR (model predictions)** *_samples.json files under `data/proof/ocr/` folder. [IN PROGRESS]
 
-**Demos:** Jupyter notebooks (`.ipynb`) under the `notebooks/` folder. [IN PROGRESS]
-**Demos:** Use model evaluation results (proof) in the `data/proof/` folder.
+**Demos:** demo_*.ipynb under the `notebooks/` folder. [IN PROGRESS]
 
-> **Evaluation data:** Demos and notebooks in the `notebooks/` folder load model evaluation results from the `data/proof/` folder.
+**Evaluation (Credit Risk, RAG, OCR, VLM)** eval_*.py files found in repo root directory. [FOR REPO AUDIT]
+
+Sample command for 1 TATQA Sample:
+python eval_runner.py --category rag --dataset TATQA --max_split 1 --max_category 1 --debug --export_predictions_txt
 
 ---
 

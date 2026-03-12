@@ -369,7 +369,9 @@ def _extract_yes_no_from_prediction(prediction: str | None) -> str | None:
 
 
 def _last_number_in_text(text: str | None) -> float | None:
-    """Last number in text (by occurrence). Used to prefer final-answer number over in-context numbers."""
+    """Last number in text (by occurrence). Used to prefer final-answer number over in-context numbers.
+    For RAG predictions that end with 'Numerical answer (from program execution): -1657.0', returns -1657.0
+    so sign_agnostic_match can compare abs(pred) to abs(gt) correctly."""
     if not text:
         return None
     matches = list(re.finditer(r"-?\d+(?:\.\d+)?", str(text).replace(",", "")))

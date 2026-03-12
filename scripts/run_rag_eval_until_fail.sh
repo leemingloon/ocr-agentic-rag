@@ -3,7 +3,8 @@
 #   - After each run, check the *latest evaluated sample*: if all its metrics are 1, run again; otherwise stop.
 # Default: (1) FinQA until first failure, then (2) TATQA until first failure.
 #
-# Milestones: pauses at 100, 150, 200 samples (first time only).
+# Milestones: pauses at 100, 150, 200 samples per dataset (first time only). Stored per-dataset
+# (e.g. TATQA:100, FinQA:100) so each dataset pauses independently.
 # State file: .eval_milestones_reached — delete or edit to reset milestones.
 # Re-run the script after a pause to continue from where it stopped.
 #
@@ -41,9 +42,13 @@ if [[ $RUN_FINQA -eq 0 && $RUN_TATQA -eq 0 ]]; then
   RUN_TATQA=1
 fi
 
+# Check milestone for this dataset only. Milestones are stored per-dataset (e.g. TATQA:100) so
+# FinQA and TATQA each pause at 100/150/200 independently.
 check_milestone() {
   local avg_json="$1"
+  local dataset_label="$2"
   if [[ ! -f "$avg_json" ]]; then return; fi
+  [[ -z "$dataset_label" ]] && dataset_label="RAG"
   local count
   local tmp_py
   tmp_py=$(mktemp)
@@ -60,13 +65,14 @@ PYEOF
   count=$(python "$tmp_py" "$avg_json")
   rm -f "$tmp_py"
   for milestone in "${MILESTONES[@]}"; do
-    if [[ "$count" -ge "$milestone" ]]; then
-      if ! grep -qx "$milestone" "$MILESTONE_FILE" 2>/dev/null; then
-        echo "$milestone" >> "$MILESTONE_FILE"
+    # Pause only when count exactly equals a milestone (100, 150, 200), not when already past (e.g. 101)
+    if [[ "$count" -eq "$milestone" ]]; then
+      local key="${dataset_label}:${milestone}"
+      if ! grep -Fxq "$key" "$MILESTONE_FILE" 2>/dev/null; then
+        echo "$key" >> "$MILESTONE_FILE"
         echo ""
         echo "=========================================="
-        echo "  MILESTONE REACHED: $count samples evaluated (>= $milestone)"
-        echo "  Pausing for review."
+        echo "  MILESTONE REACHED ($dataset_label): $count samples (exactly $milestone). Pausing for review."
         echo "  Re-run the script to continue."
         echo "=========================================="
         exit 0
@@ -88,7 +94,7 @@ run_dataset_until_fail() {
   while true; do
     echo "=== Running: $CMD ==="
     $CMD 2>&1 | tee "$LOG"
-    check_milestone "$AVG_JSON"
+    check_milestone "$AVG_JSON" "$DATASET"
     CONTINUE=$(python -c "
 import json
 import re
@@ -100,13 +106,13 @@ dataset_name = '''$DATASET'''
 samples_dir = '''$SAMPLES_DIR'''
 log_path = '''$LOG'''
 
-# Determine the *just-evaluated* sample from this run so we base CONTINUE/STOP on the right sample
-# (avoids wrong decision when predictions file \"last block\" is not the one we just ran, e.g. after in-place update).
+# Determine the *just-evaluated* sample from this run (use last EVAL_PROGRESS in log so we have the latest run).
 with open(log_path, encoding='utf-8', errors='replace') as f:
     log = f.read()
 just_evaluated_id = None
-m = re.search(r'\[EVAL_PROGRESS\] new_samples=(\d+) last_sample_id=(\S*)', log)
-if m:
+evals = list(re.finditer(r'\[EVAL_PROGRESS\] new_samples=(\d+) last_sample_id=(\S*)', log))
+if evals:
+    m = evals[-1]
     just_evaluated_id = (m.group(2).strip() or None) if m.group(2) else None
 if not just_evaluated_id:
     rag_m = list(re.finditer(r\"\\[DEBUG\\] RAG query corpus_id='([^']+)'\", log))
@@ -119,7 +125,9 @@ if not just_evaluated_id:
     sys.exit(0)
 
 # Look up that sample's metrics in the samples JSON (authoritative; not \"last block\" of predictions file).
+# Prefer sample_id match (unique). If fallback to corpus_id, take the *last* matching row (same doc can have multiple questions; eval appends in order).
 metrics = None
+row = None
 candidates = []
 if os.path.isdir(samples_dir):
     candidates = glob.glob(os.path.join(samples_dir, '*', '*_samples.json'))
@@ -135,7 +143,12 @@ for path in candidates:
     except Exception:
         continue
     if isinstance(data, list):
-        row = next((r for r in data if str(r.get('sample_id')) == just_evaluated_id or str(r.get('ground_truth', {}).get('corpus_id')) == just_evaluated_id), None)
+        by_sid = [r for r in data if str(r.get('sample_id')) == just_evaluated_id]
+        if by_sid:
+            row = by_sid[0]
+        else:
+            by_corpus = [r for r in data if str((r.get('ground_truth') or {}).get('corpus_id')) == just_evaluated_id]
+            row = by_corpus[-1] if by_corpus else None
         if row is not None:
             metrics = (row or {}).get('metrics') or {}
             break
@@ -148,11 +161,14 @@ if row and row.get('prediction_error'):
     print('CONTINUE')
     sys.exit(0)
 
-required = {'program_accuracy', 'numerical_exact_match', 'exact_match', 'f1'}
-optional = {'numerical_near_match'}
-all_one = all(metrics.get(k) == 1.0 or metrics.get(k) == 1 for k in required)
-if optional & set(metrics):
-    all_one = all_one and all(metrics.get(k) == 1.0 or metrics.get(k) == 1 for k in optional if k in metrics)
+# RAG pass: gate only on exact_match and f1 (like memo generator). Do not require
+# numerical_exact_match or program_accuracy — span/multi-span answers are not numerical,
+# and we avoid false stops when those metrics are 0 for non-numerical types.
+required = {'exact_match', 'f1'}
+strict_pass = all(metrics.get(k) == 1.0 or metrics.get(k) == 1 for k in required)
+# TAT-QA: relaxed_match=1 also counts as pass (answer correct, format relaxed).
+relaxed_pass = metrics.get('relaxed_match') == 1.0 or metrics.get('relaxed_match') == 1
+all_one = strict_pass or relaxed_pass
 print('CONTINUE' if all_one else 'STOP')
 ")
     if [[ "$CONTINUE" == "STOP_NO_SAMPLE" ]]; then
@@ -160,7 +176,7 @@ print('CONTINUE' if all_one else 'STOP')
       return 0
     fi
     if [[ "$CONTINUE" != "CONTINUE" ]]; then
-      echo "Latest evaluated sample does not have all metrics 1. Stopping $DATASET."
+      echo "Latest evaluated sample does not pass (exact_match+f1 or relaxed_match). Stopping $DATASET."
       return 0
     fi
     # No progress: stop only when this run actually evaluated 0 new samples (so we do not stop when last sample was accurate and we should continue).
@@ -169,7 +185,7 @@ print('CONTINUE' if all_one else 'STOP')
       echo "No new samples evaluated (new_samples=0). All samples done. Stopping $DATASET."
       return 0
     fi
-    echo "Latest sample: all metrics 1. Running again..."
+    echo "Latest sample: pass (exact_match+f1 or relaxed_match). Running again..."
   done
 }
 
