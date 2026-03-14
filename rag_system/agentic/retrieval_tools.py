@@ -27,7 +27,14 @@ def _infer_section_types_for_query(query: str) -> Optional[List[str]]:
         return None
     q = query.strip().lower()
     sections = []
-    if re.search(r"income\s+statement|statement(s)?\s+of\s+operations|operations", q):
+    # Cash flow phrasing ("cash provided by operations", "cash from operations") = statement of cash flows, not income statement — do not restrict to income_statement or we exclude cash-flow chunks (e.g. receivables securitization row).
+    is_cash_flow_query = bool(
+        re.search(r"cash\s+(provided\s+by|from)\s+operations|cash\s+from\s+operating", q)
+    )
+    if not is_cash_flow_query and re.search(
+        r"income\s+statement|statement(s)?\s+of\s+operations|results?\s+of\s+operations",
+        q,
+    ):
         sections.append(SECTION_INCOME_STATEMENT)
     if re.search(r"balance\s+sheet|financial\s+position|condition", q):
         sections.append(SECTION_BALANCE_SHEET)

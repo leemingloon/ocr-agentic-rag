@@ -234,9 +234,12 @@ models/sentiment/finbert_tuned_v1/tonkenizer.json
 # RAG retriever index files (large; do not commit)
 *.index
 **/faiss.index
+data/rag/**/finqa_retriever_index/
 data/rag/**/finqa_retriever_index_aft_dedup/
+data/rag/**/tatqa_retriever_index/
 data/rag/**/tatqa_retriever_index_aft_dedup/
 data/rag/**/tatqa_retriever_index_b4_dedup/
 
 # Large RAG data (keep repo small)
 **/train_qa.json
+**/test.json

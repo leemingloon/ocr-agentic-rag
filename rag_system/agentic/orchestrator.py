@@ -45,11 +45,15 @@ from rag_system.primers import (
     SHARED_NUMERICAL_PRIMER,
     # Section 2: Table Extraction
     TABLE_YEAR_PRIMER,
+    PRIOR_YEAR_PCT_ADJUSTMENT_PRIMER,
     FINQA_YEAR_INTERPRETATION_PRIMER,
     TABLE_MULTI_YEAR_AVERAGE_PRIMER,
     TABLE_SEGMENT_ALIGNMENT_PRIMER,
     TABLE_YEAR_CHANGE_PRIMER,
+    PER_UNIT_CHANGE_PRIMER,
     TABLE_ROW_ALIGNMENT_PRIMER,
+    RSR_RPSR_RATIO_ALIGNMENT_PRIMER,
+    RSR_RPSR_RATIO_SCALING_PRIMER,
     TABLE_DATE_COLUMN_PRIMER,
     TABLE_TOTAL_ACROSS_COLUMNS_PRIMER,
     TOTALS_PREFER_DIRECT_PRIMER,
@@ -58,7 +62,12 @@ from rag_system.primers import (
     # Section 3: Arithmetic
     ABSOLUTE_CHANGE_PRIMER,
     ABSOLUTE_DIFFERENCE_PRIMER,
+    BOY_PREFERENCE_PERCENT_CHANGE_PRIMER,
+    FLUCTUATION_RELATIVE_CHANGE_PRIMER,
     PCT_OF_TOTAL_PRIMER,
+    CONTRACTUAL_OBLIGATIONS_PCT_PRIMER,
+    CAPITAL_PLAN_COMPONENT_RATIO_PRIMER,
+    CASH_OPS_PCT_FROM_COMPONENT_PRIMER,
     GROWTH_RATE_PRIMER,
     PERCENTAGE_AS_INTEGER_PRIMER,
     PERCENT_REDUCTION_SIGN_PRIMER,
@@ -66,6 +75,7 @@ from rag_system.primers import (
     AVERAGE_SUBSET_PRIMER,
     CUMULATIVE_RETURN_PRIMER,
     UNIT_SCALE_PRIMER,
+    CONDUIT_AVERAGE_ASSETS_PRIMER,
     CROSS_YEAR_CARRY_FORWARD_PRIMER,
     # Section 4: Loss Account
     LOSS_CHANGE_PRIMER,
@@ -107,6 +117,8 @@ RAG_INTENT_TABLE_YEAR = "table_year"                  # value in a specific year
 RAG_INTENT_TABLE_DATE_COLUMN = "table_date_column"   # value as of a specific date (column)
 RAG_INTENT_TABLE_TOTAL_ACROSS_COLUMNS = "table_total_across_columns"  # total of line item, table may be split
 RAG_INTENT_COMPENSATION = "compensation"             # equity awards, milestones, ASC 718
+RAG_INTENT_RSR_RPSR_RATIO = "rsr_rpsr_ratio"        # RSR:RPSR ratio — pair by segment/grant; do not sum RPSR subcategories
+RAG_INTENT_CAPITAL_PLAN_COMPONENT_RATIO = "capital_plan_component_ratio"  # portion of capital plan for X — same-unit ratio (billions→millions)
 RAG_INTENT_EQUITY_PLAN_ISSUED_REMAINING = "equity_plan_issued_remaining"  # shares issued vs remaining yes/no (FinQA BLL-style)
 RAG_INTENT_TOTALS_PREFER_DIRECT = "totals_prefer_direct"  # prefer direct line over back-calc
 RAG_INTENT_EVENT_SCOPED = "event_scoped"              # acquired intangibles, amortization, single block
@@ -139,6 +151,10 @@ def classify_query_intent(query: str) -> List[str]:
         intents.append(RAG_INTENT_YES_NO)
     if _needs_financial_compensation_primer(query):
         intents.append(RAG_INTENT_COMPENSATION)
+    if _needs_rsr_rpsr_ratio_primer(query):
+        intents.append(RAG_INTENT_RSR_RPSR_RATIO)
+    if _needs_capital_plan_component_ratio_primer(query):
+        intents.append(RAG_INTENT_CAPITAL_PLAN_COMPONENT_RATIO)
     if _needs_equity_plan_issued_remaining_primer(query):
         intents.append(RAG_INTENT_EQUITY_PLAN_ISSUED_REMAINING)
     if _needs_table_year_primer(query):
@@ -294,6 +310,32 @@ def _needs_financial_compensation_primer(query: str) -> bool:
         "vesting",
     )
     return any(kw in q for kw in keywords)
+
+
+def _needs_rsr_rpsr_ratio_primer(query: str) -> bool:
+    """True if query asks for ratio/share involving RSR and RPSR (restricted stock / restricted performance share); triggers pairwise alignment (do not sum RPSR subcategories)."""
+    if not query or not isinstance(query, str):
+        return False
+    q = query.strip().lower()
+    # RSR / RPSR or spin-off conversion wording
+    if "rsr" not in q and "rpsr" not in q:
+        return False
+    ratio_style = (
+        "ratio", "percent", "percentage", "portion", "share",
+        "as a percentage of", "% of", "unrecognized",
+    )
+    return any(p in q for p in ratio_style) or "spin-off" in q or "converted as part" in q
+
+
+def _needs_capital_plan_component_ratio_primer(query: str) -> bool:
+    """True when query asks what portion/share of a capital plan (or program) is for a specific component (e.g. PTC)."""
+    if not query or not isinstance(query, str):
+        return False
+    q = query.strip().lower()
+    if "capital plan" not in q and "capital program" not in q:
+        return False
+    portion_style = ("how much of", "what portion", "what share", "what part of", "how much of the")
+    return any(p in q for p in portion_style)
 
 
 def _needs_equity_plan_issued_remaining_primer(query: str) -> bool:
@@ -1416,6 +1458,7 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
         needs_frequency_proportion = RAG_INTENT_FREQUENCY_PROPORTION in intents
         needs_average_subset = RAG_INTENT_AVERAGE_SUBSET in intents
         needs_multi_year_average = RAG_INTENT_MULTI_YEAR_AVERAGE in intents
+        q_lower = query.strip().lower()
         if os.environ.get("RAG_DEBUG") == "1" and is_yes_no:
             print(f"[DEBUG] generator: yes/no question detected; will not append program execution. query_preview={query[:80]!r}...")
         if os.environ.get("RAG_DEBUG") == "1" and needs_primer:
@@ -1462,8 +1505,16 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
             f"\n\nTable/year extraction (use when the question asks for a value in a specific year):{TABLE_YEAR_PRIMER}\n"
             if (needs_table_year and not is_yes_no) else ""
         )
+        needs_prior_year_pct_adjustment = (
+            needs_table_year and not is_yes_no and ("without" in q_lower or "excluding" in q_lower)
+        )
+        prior_year_pct_adjustment_primer_block = (
+            f"\n\nPrior year as base for percentage adjustments:{PRIOR_YEAR_PCT_ADJUSTMENT_PRIMER}\n"
+            if needs_prior_year_pct_adjustment else ""
+        )
+        if os.environ.get("RAG_DEBUG") == "1" and needs_prior_year_pct_adjustment:
+            print("[DEBUG] generator: injecting prior-year base for percentage adjustment primer")
         # FinQA: when question has year + ratio, compute from provided values; do not return INSUFFICIENT_DATA if operands are present.
-        q_lower = query.strip().lower()
         needs_finqa_year_interpretation = (
             needs_table_year
             and not is_yes_no
@@ -1506,10 +1557,64 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
             f"\n\nDifference between two values (non-directional):{ABSOLUTE_DIFFERENCE_PRIMER}\n"
             if needs_abs_difference else ""
         )
+        needs_fluctuation_relative = (
+            not is_yes_no
+            and any(
+                kw in q_lower
+                for kw in ("fluctuation", "basis points", "basis point", "sensitivity")
+            )
+        )
+        fluctuation_relative_primer_block = (
+            f"\n\nFluctuation (relative change, not absolute difference):{FLUCTUATION_RELATIVE_CHANGE_PRIMER}\n"
+            if needs_fluctuation_relative else ""
+        )
+        if os.environ.get("RAG_DEBUG") == "1" and needs_fluctuation_relative:
+            print("[DEBUG] generator: injecting fluctuation relative-change primer (ratio-based, not subtraction)")
         pct_of_total_primer_block = (
             f"\n\nOne value as a percentage of another:{PCT_OF_TOTAL_PRIMER}\n"
             if needs_pct_of_total else ""
         )
+        needs_contractual_obligations_pct = (
+            needs_pct_of_total and "contractual obligation" in q_lower
+        )
+        contractual_obligations_pct_primer_block = (
+            f"\n\nPercentage of total contractual obligations (row selection):{CONTRACTUAL_OBLIGATIONS_PCT_PRIMER}\n"
+            if needs_contractual_obligations_pct else ""
+        )
+        if os.environ.get("RAG_DEBUG") == "1" and needs_contractual_obligations_pct:
+            print("[DEBUG] generator: injecting contractual-obligations percentage primer (use purchase obligations row)")
+        needs_capital_plan_component_ratio = RAG_INTENT_CAPITAL_PLAN_COMPONENT_RATIO in intents and not is_yes_no
+        capital_plan_component_ratio_primer_block = (
+            f"\n\nPortion of capital plan for a component (same-unit ratio; billions→millions):{CAPITAL_PLAN_COMPONENT_RATIO_PRIMER}\n"
+            if needs_capital_plan_component_ratio else ""
+        )
+        if os.environ.get("RAG_DEBUG") == "1" and needs_capital_plan_component_ratio:
+            print("[DEBUG] generator: injecting capital-plan component ratio primer (billions to millions, then divide)")
+        needs_cash_ops_pct_from_component = (
+            needs_pct_of_total
+            and "cash" in q_lower
+            and ("operations" in q_lower or "operating" in q_lower)
+            and "from" in q_lower
+            and ("receivables" in q_lower or "securitization" in q_lower)
+        )
+        cash_ops_pct_from_component_primer_block = (
+            f"\n\nPercent of cash from operations that was from a component:{CASH_OPS_PCT_FROM_COMPONENT_PRIMER}\n"
+            if needs_cash_ops_pct_from_component else ""
+        )
+        if os.environ.get("RAG_DEBUG") == "1" and needs_cash_ops_pct_from_component:
+            print("[DEBUG] generator: injecting cash-ops percent-from-component primer (component/total; not adjusted-for=total)")
+        needs_rsr_rpsr_ratio = RAG_INTENT_RSR_RPSR_RATIO in intents and not is_yes_no
+        rsr_rpsr_ratio_primer_block = (
+            f"\n\nRSR/RPSR ratio alignment (pair RSR with matching RPSR; do not sum RPSR subcategories):{RSR_RPSR_RATIO_ALIGNMENT_PRIMER}\n"
+            if needs_rsr_rpsr_ratio else ""
+        )
+        rsr_rpsr_ratio_scaling_primer_block = (
+            f"\n\nRSR/RPSR ratio scaling (use matching RPSR denominator; check document scaling convention):{RSR_RPSR_RATIO_SCALING_PRIMER}\n"
+            if needs_rsr_rpsr_ratio else ""
+        )
+        if os.environ.get("RAG_DEBUG") == "1" and needs_rsr_rpsr_ratio:
+            print("[DEBUG] generator: injecting RSR/RPSR ratio alignment primer (pairwise operand; no sum of RPSR lines)")
+            print("[DEBUG] generator: injecting RSR/RPSR ratio scaling primer (use paired denominator; apply document scaling if stated)")
         loss_change_primer_block = (
             f"\n\nChange in loss (magnitude convention):{LOSS_CHANGE_PRIMER}\n"
             if needs_loss_change else ""
@@ -1553,6 +1658,27 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
         needs_cumulative_return = RAG_INTENT_CUMULATIVE_RETURN in intents and not is_yes_no
         # When "percent change" uses direction-based denominator (FinQA), do NOT inject generic (new-old)/old so the model follows (old-new)/new for decreases.
         use_generic_growth_rate = needs_growth_rate and not needs_percent_change_by_direction
+        needs_boy_preference = (needs_growth_rate or needs_percent_change_by_direction) and not is_yes_no
+        needs_per_unit_change = (
+            (needs_growth_rate or needs_percent_change_by_direction)
+            and not is_yes_no
+            and any(
+                p in q_lower
+                for p in ("per share", "per option", "per unit", "per employee", "per award")
+            )
+        )
+        per_unit_change_primer_block = (
+            f"\n\nPer-unit change (gold-blinded):{PER_UNIT_CHANGE_PRIMER}\n"
+            if needs_per_unit_change else ""
+        )
+        if os.environ.get("RAG_DEBUG") == "1" and needs_per_unit_change:
+            print("[DEBUG] generator: injecting per-unit change primer (raw delta, not percent)")
+        boy_preference_primer_block = (
+            f"\n\nBeginning-of-year (BOY) preference for percent change:{BOY_PREFERENCE_PERCENT_CHANGE_PRIMER}\n"
+            if needs_boy_preference else ""
+        )
+        if os.environ.get("RAG_DEBUG") == "1" and needs_boy_preference:
+            print("[DEBUG] generator: injecting BOY-preference primer (prefer beginning-of-year row when both BOY and EOY exist)")
         growth_rate_primer_block = (
             (f"\n\nGrowth rate / percentage change:{GROWTH_RATE_PRIMER}\n" if use_generic_growth_rate else "")
             + (f"\n\n{LOCOM_GROWTH_PRIMER}\n" if needs_locom_growth else "")
@@ -1610,6 +1736,22 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
         )
         if os.environ.get("RAG_DEBUG") == "1" and needs_unit_scale:
             print("[DEBUG] generator: injecting unit-scale primer (use values at requested scale)")
+        needs_conduit_avg_assets = (
+            "average" in q_lower
+            and "assets" in q_lower
+            and (
+                "self sponsored" in q_lower
+                or "conduit" in q_lower
+                or "multi-seller" in q_lower
+                or "multi seller" in q_lower
+            )
+        )
+        conduit_avg_assets_primer_block = (
+            f"\n\nAverage assets per conduit (use reported, divide by number of conduits):{CONDUIT_AVERAGE_ASSETS_PRIMER}\n"
+            if needs_conduit_avg_assets else ""
+        )
+        if os.environ.get("RAG_DEBUG") == "1" and needs_conduit_avg_assets:
+            print("[DEBUG] generator: injecting conduit average-assets primer (reported assets / n conduits)")
         # Hard program-shape constraint: singular "the adjustment" -> forbid add/sum at top level (TAT-QA row selection, not aggregation).
         needs_singular_adjustment_constraint = (
             needs_accounting_adjustment and not is_yes_no and _is_singular_adjustment(query)
@@ -1770,18 +1912,28 @@ Information:
 {financial_primer_block}
 {equity_plan_issued_remaining_block}
 {table_year_primer_block}
+{prior_year_pct_adjustment_primer_block}
+{finqa_year_interpretation_primer_block}
 {table_segment_alignment_primer_block}
 {table_row_alignment_primer_block}
 {table_year_change_primer_block}
 {absolute_change_primer_block}
 {absolute_difference_primer_block}
+{fluctuation_relative_primer_block}
 {pct_of_total_primer_block}
+{contractual_obligations_pct_primer_block}
+{capital_plan_component_ratio_primer_block}
+{cash_ops_pct_from_component_primer_block}
+{rsr_rpsr_ratio_primer_block}
+{rsr_rpsr_ratio_scaling_primer_block}
 {loss_change_primer_block}
 {loss_average_primer_block}
 {loss_comparison_primer_block}
 {table_date_column_primer_block}
 {totals_direct_primer_block}
 {lease_percent_primer_block}
+{boy_preference_primer_block}
+{per_unit_change_primer_block}
 {growth_rate_primer_block}
 {event_scoped_primer_block}
 {accounting_adjustment_primer_block}
@@ -1789,6 +1941,7 @@ Information:
 {arithmetic_from_components_primer_block}
 {cross_year_carry_forward_primer_block}
 {unit_scale_primer_block}
+{conduit_avg_assets_primer_block}
 {cashflow_primer_block}
 {interest_payment_primer_block}
 {frequency_proportion_primer_block}

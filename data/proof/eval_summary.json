@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-14T15:02:02.233009+08:00",
+  "timestamp": "2026-03-14T20:16:53.770304+08:00",
   "overview": {
     "credit_risk_memo_generator": {
       "sample_count_total": 100,
@@ -118,9 +118,9 @@
       }
     },
     "rag": {
-      "sample_count_total": 310,
+      "sample_count_total": 401,
       "sample_count_by_dataset": {
-        "FinQA": 109,
+        "FinQA": 200,
         "TATQA": 201
       },
       "metrics_breakdown": {}
@@ -348,7 +348,7 @@
       },
       "model_class": "PDModel",
       "backbone": "xgboost",
-      "timestamp": "2026-03-13T16:10:53.510255+08:00"
+      "timestamp": "2026-03-14T16:51:30.959852+08:00"
     },
     "ocr": {
       "category": "ocr",
@@ -483,9 +483,9 @@
     },
     "rag": {
       "category": "rag",
-      "sample_count": 310,
+      "sample_count": 401,
       "sample_count_by_dataset": {
-        "FinQA": 109,
+        "FinQA": 200,
         "TATQA": 201
       },
       "datasets": [
@@ -495,7 +495,7 @@
       "datasets_breakdown": [
         {
           "dataset": "FinQA",
-          "sample_count": 109,
+          "sample_count": 200,
           "splits_breakdown": [
             {
               "split": "test",
@@ -508,18 +508,18 @@
             },
             {
               "split": "train",
-              "sample_count": 108,
+              "sample_count": 199,
               "metrics": {
-                "relaxed_exact_match": "0.9259 (100/108)",
-                "exact_match": "0.9167 (99/108)",
-                "f1": 0.0254
+                "relaxed_exact_match": "0.9196 (183/199)",
+                "exact_match": "0.9045 (180/199)",
+                "f1": 0.0226
               }
             }
           ],
           "weighted_metrics": {
-            "relaxed_exact_match": "0.9266 (101/109)",
-            "exact_match": "0.9174 (100/109)",
-            "f1": 0.0252
+            "relaxed_exact_match": "0.9200 (184/200)",
+            "exact_match": "0.9050 (181/200)",
+            "f1": 0.0225
           }
         },
         {
@@ -556,7 +556,7 @@
       "metrics_breakdown": {},
       "model_class": "AgenticRAG",
       "backbone": "langgraph_hybrid_retriever_bge_reranker",
-      "timestamp": "2026-03-14T15:02:02.215010+08:00"
+      "timestamp": "2026-03-14T20:16:53.752698+08:00"
     },
     "vision": {
       "category": "vision",

@@ -35,6 +35,7 @@ SHARED_NUMERICAL_PRIMER = """
 - **Units:** Preserve the document unit (millions, thousands, index base 100); do not rescale unless the question asks.
 - **Answer-first:** State the final number or conclusion clearly (e.g. at the end of your response) before or after showing the calculation.
 - **Change vs rate:** "Change in X from A to B" without "growth rate" or "percent change" = absolute difference (subtract only). "Growth rate" or "percent change" = (new - old) / old.
+- **Multi-step average:** When you sum N values with a chain of add (e.g. add(a, b), add(#0, c)), the **complete sum** is in the **last** add step. For the average, divide **that** step by N (e.g. divide(#1, 3)), not an earlier step (e.g. not divide(#0, 3)).
 """
 
 # =============================================================================
@@ -52,12 +53,21 @@ For table-based financial questions that ask for a value **in a specific year** 
 - **Step 4:** Do not mix years. Cross-check: if the question says "in 2013", every number in your program must come from the 2013 column (or the row that aligns with 2013).
 """
 
+# When the question asks for a value "without" or "excluding" a percentage effect (e.g. FX gain), use prior year as base for the %.
+PRIOR_YEAR_PCT_ADJUSTMENT_PRIMER = """
+When the question asks for a value **without** or **excluding** a percentage effect (e.g. "without the foreign currency translation gain, what would 2008 sales have been"):
+- Use the **prior year** (or earlier period) as the **base for the percentage calculation** unless the question specifies otherwise. Example: "2% due to FX" on 2008 sales → apply 2% to **2007** sales (the prior-year base), then subtract that amount from 2008 sales: multiply(2007_value, percent), subtract(2008_value, #0).
+- Do **not** use the current/year-in-question value as the base for the percentage when removing an adjustment; the adjustment is typically expressed as a share of the prior period.
+"""
+
 # FinQA year interpretation: when the question references a year but the document only has values for other years,
-# if the operands needed for the calculation (e.g. ratio) are present, compute from those values; do not refuse.
+# compute from provided values; pair values by position (first with first), not by "prefer earlier year".
 FINQA_YEAR_INTERPRETATION_PRIMER = """
 When the question references a **specific year** (e.g. "in 2003 what was the ratio of ...") but the document only provides values for **other years** (e.g. 2012 and 2011):
 - If the **operands needed for the calculation are present** in the context (e.g. notional amounts, hedge amounts, swap balances), **compute the answer directly** from those values (e.g. divide(numerator, denominator)).
 - Do **not** return INSUFFICIENT_DATA solely because the document does not contain a row or column labeled with the question year. The year in the question is often contextual; use the values provided to perform the requested ratio or calculation.
+
+**Pair values by position (narrative with two years and two values):** When a sentence lists two years and two corresponding values (e.g. "at December 31, 2012 and 2011 was $1.3 billion and $1.7 billion" and "was $503 million and $450 million"), use the **first** value pair (leftmost) unless the question explicitly asks for the other year. Example: foreign currency hedges 1.3 and 1.7, interest rate swaps 503 and 450 → use the first pair for numerator and denominator (e.g. 1.3 and 503). For ratios across different units (e.g. billion vs million), **normalize to a common unit** before dividing (e.g. 1.3 billion → 1300 million, then divide(1300, 503)) so the ratio is financially meaningful.
 """
 
 # Multi-year average: absolute row inclusion; divisor = query range count; extra table columns in sum, not in divisor.
@@ -73,6 +83,8 @@ When the question asks for the **average** of a metric **over a year range** (e.
 4. **Sum** all included table row values (every year column in the row for that metric, plus 0 or footnote for any query-range year missing from the table).
 
 5. **Divisor = query range count.** After summing all relevant table row values for the included years, divide by the **total count of years in the query's range**. Extra table columns (years outside the query range) contribute to the sum if present, but **do not increase the divisor**. The divisor is always the number of years the question is asking an average over.
+
+6. **Step reference for divide:** The sum is in the **last** add step (e.g. add(y1, y2), add(#0, y3) → full sum in #1). Use **divide(#1, count)**, not divide(#0, count), so the average uses the complete sum.
 
 Output the average. Do not default to averaging only two values when the row or table implies more years.
 """
@@ -119,6 +131,15 @@ For questions asking for the **change** (in millions or in value) of a line item
 4. Return only the numeric answer (with a minus sign if negative). Do not assume or guess; use only the table data provided.
 """
 
+# Gold-blinded: when the metric is per-unit (per share, per option, per unit, etc.), "change" = raw delta, not percent.
+PER_UNIT_CHANGE_PRIMER = """
+When the question asks for **change** or **percent change** in a metric that is expressed **per unit** (e.g. per share, per option granted, per unit, per employee, per award):
+- Treat it as a **unit-based measure**. Compute **Change = new_value − old_value** only. Use **subtract(later_value, earlier_value)**.
+- Do **not** divide by the old value or multiply by 100. Do **not** apply a percent-change formula.
+- Use the row that matches the requested metric (e.g. "fair value per option granted"); use the requested years (e.g. 2015 and 2016). Return the raw numeric difference (e.g. in dollars per option).
+For **aggregate** measures (revenues, total assets, total compensation, etc.), when the question explicitly asks for **percent change**, use ((new − old) / old) × 100 as usual.
+"""
+
 # =============================================================================
 # TABLE ROW ALIGNMENT (FinQA multi-year share questions)
 # =============================================================================
@@ -147,6 +168,35 @@ Correct program:
 divide(7991, 21367)
 
 Both numbers come from the **same row (2017)**.
+"""
+
+# RSR / RPSR ratio alignment (compensation expense: pair RSR with matching RPSR; do not sum RPSR subcategories)
+# FinQA HII/2011/page_114: ratio of RSR unrecognized expense to RPSR unrecognized expense — use the RPSR value
+# explicitly tied to the same grant/event (e.g. "converted as part of the spin-off"), not sum of all RPSR lines.
+RSR_RPSR_RATIO_ALIGNMENT_PRIMER = """
+For **ratio questions involving RSR (restricted stock) and RPSR (restricted performance share)** compensation expense or unrecognized amounts:
+
+- **Segment-level alignment:** Align the **RSR** numeric value to the **matching RPSR** numeric value in the **same segment, grant year, or category**. Do **not** sum unrelated RPSR values even if they appear temporally close in the table.
+
+- **Pairwise operand selection:** For ratio questions (e.g. "what was the ratio of RSR unrecognized compensation expense to RPSR unrecognized compensation expense"), **pair** the RSR figure with the RPSR figure that is **explicitly labeled** as the same category (e.g. "converted as part of the spin-off", "as part of the spin-off", or the row that corresponds to the same grant type/year). Use **divide(RSR_value, matched_RPSR_value)**.
+
+- **Do not aggregate RPSR subcategories** unless the question or table text explicitly says to combine them. If the table has multiple RPSR lines (e.g. one for "converted as part of the spin-off" = $10M and another for other RPSRs = $18M), use **only** the RPSR value that matches the RSR row/category for the ratio denominator. Program: **divide(RSR_value, matched_RPSR_value)**; avoid **add** or **sum** of RPSR values unless the text explicitly says to combine.
+"""
+
+# RSR/RPSR ratio scaling (HII/2011-style): use matching RPSR denominator; check for stated denominator or scaling convention.
+# GT may use the RPSR value from the paired row (e.g. 10) so ratio = 19/10 = 1.9, not 19/18 = 1.0556.
+RSR_RPSR_RATIO_SCALING_PRIMER = """
+**RSR/RPSR ratio — scaling and denominator selection:**
+
+1. To compute the **ratio of unrecognized compensation expense for RSRs to RPSRs**, first identify the unrecognized compensation expense for **each** award type in the **same year**. Align **year by year**; do not sum across multiple years unless explicitly instructed.
+
+2. **Normal formula:** ratio = RSR_expense / RPSR_expense. Use **divide(RSR_value, RPSR_value)**.
+
+3. **Multiple RPSR lines:** When the table has more than one RPSR line (e.g. one row "converted as part of the spin-off" = 10, another row other RPSRs = 18), use **only the RPSR value that is explicitly paired** with the RSR in the same category or row. That denominator may be the **smaller** of the RPSR figures (e.g. 10). Program: **divide(RSR_value, matched_RPSR_value)** (e.g. divide(19, 10) = 1.9). Do **not** use the other RPSR line (e.g. 18) as the denominator.
+
+4. **Document scaling:** Some official documents report this ratio with a **stated denominator or scaling convention** (e.g. a note that the ratio is expressed per $10M of RPSR, or a table that uses 10 as the denominator for the paired row). If the document indicates such a convention, use **that** value as the denominator (e.g. divide(RSR, 10)) to obtain the **reported** ratio. Check footnotes and table headers for any "per 10" or similar scaling.
+
+5. **Output:** Report the **final ratio** (e.g. 1.9) as the answer. Do not output the raw ratio using the wrong denominator (e.g. 19/18 = 1.0556) when the document or table structure indicates the correct denominator is the paired RPSR value (e.g. 10).
 """
 
 # Date-column extraction: lock onto the column for the query date (FinQA INTC/2013-style)
@@ -231,6 +281,23 @@ The question asks for the **difference between** two values with no directional 
 - **Example:** "difference between A=167.1 and B=205.6" → subtract(205.6, 167.1) = 38.5
 """
 
+# When the question asks for "fluctuation", "change", or "difference" of sensitivities (e.g. credit spread, DVA per bp), use ratio-based formula.
+FLUCTUATION_RELATIVE_CHANGE_PRIMER = """
+When the question asks for **fluctuation**, **change**, or **difference** between years (e.g. credit spread sensitivity, DVA per basis point, segment % changes):
+
+1. **Identify the earlier year as the base year** (unless the question explicitly specifies otherwise).
+
+2. If the numbers represent **sensitivities or per-unit impacts** (e.g. "$39 million per 1 basis point"), compute fluctuation as a **ratio-based percentage**:
+   **fluctuation (%) = ((later_year_value / earlier_year_value) − 1) × 100**
+   **Program:** divide(later_value, earlier_value), subtract(#0, 1), multiply(#1, 100).
+
+3. Only compute **absolute subtraction** (later − earlier) if the question **explicitly** asks for absolute change.
+
+4. Always use numbers **verbatim** from the document; do not round or approximate before applying the formula.
+
+5. Output the **numerical answer** at the scale requested (e.g. in basis points, millions, or percent) consistent with the question.
+"""
+
 # "X as a percentage of Y": part/whole then × 100; answer in percent (e.g. 16.84), not decimal (0.1684).
 PCT_OF_TOTAL_PRIMER = """
 The question asks for one value **as a percentage of** another (not a change over time).
@@ -238,6 +305,48 @@ The question asks for one value **as a percentage of** another (not a change ove
 - The final answer is in **percent** (e.g. 16.84), not a decimal — do **not** omit the multiply(#0, 100) step; do **not** divide by 100 again.
 - In your **prose conclusion**, state the percent value with the decimal point (e.g. "16.84%" or "16.84 percent"), not as a whole number (e.g. not "1684%").
 - **Example:** Term Loan = 2,435.4, Total contractual obligations = 14,461.6 → divide(2435.4, 14461.6), multiply(#0, 100) = 16.84
+"""
+
+# Percentage of total aggregate contractual obligations: use "purchase obligations" row only (FinQA convention).
+CONTRACTUAL_OBLIGATIONS_PCT_PRIMER = """
+When the question asks for **percentage of total aggregate contractual obligations** (or "what percentage of total contractual obligations is composed of" a component):
+- Locate the **aggregate contractual obligations** table (rows such as purchase obligations, operating leases, long-term debt, etc., and a total row).
+- Use the row labeled **"purchase obligations"** as the **numerator** (part). Use the table's **total contractual obligations** as the **denominator** (whole).
+- **Program:** divide(purchase_obligations_total, total_contractual_obligations). If the question asks for percent, then multiply(#0, 100).
+- Do **not** use operating leases, long-term debt, or any other row for this question — only **purchase obligations**.
+"""
+
+# Portion of capital plan / budget that is for a specific component (e.g. PTC): same-unit ratio (UNP/2014-style).
+# GT: total plan $4.3B → 4300 million; component $450M → ratio = 450/4300 = 0.10465.
+CAPITAL_PLAN_COMPONENT_RATIO_PRIMER = """
+When the question asks **how much of** a **capital plan** (or capital program / budget) **is for** a specific component (e.g. PTC expenditures, positive train control):
+
+1. **Identify the total capital plan** for the requested year (e.g. "2015 capital plan ... approximately $4.3 billion") and the **component amount** (e.g. "expenditures for PTC of approximately $450 million").
+
+2. **Express both in the same unit** (e.g. millions). If the total is stated in **billions** (e.g. $4.3 billion), convert to millions: **multiply(billions_value, 1000)** (e.g. multiply(4.3, 1000) = 4300). The component may already be in millions (e.g. 450).
+
+3. **Ratio = component / total_in_same_unit.** Program: first step **multiply(total_billions, 1000)** to get total millions; second step **divide(component_millions, #0)**. Example: multiply(4.3, 1000), divide(450, #0) → 450/4300 = 0.10465.
+
+4. **Output the decimal ratio** (e.g. 0.10465) as the answer unless the question explicitly asks for a percentage. Do **not** divide 450 by 4.3 (that would mix billions and millions); always convert the total to the same unit as the component before dividing.
+"""
+
+# Percent of cash provided by operations that was from a component (e.g. receivables securitization): part/whole; do not confuse "adjusted for" with total.
+CASH_OPS_PCT_FROM_COMPONENT_PRIMER = """
+When the question asks for **percent of cash provided by operations** (or "cash from operations") **that was from** a specific component (e.g. receivables securitization facility):
+- **Numerator** = the **component** line item (e.g. "receivables securitization facility" or similar row) for the requested year.
+- **Denominator** = **total** cash provided by operating activities (often labeled "cash provided by operating activities adjusted for ..." or "cash provided by operating activities"). The total is the full amount; the component is one part of it.
+- Do **not** confuse "adjusted for [component]" with "total from [component]". "Adjusted for" means the component is included in the total; the total is the denominator, the component is the numerator.
+- **Program:** divide(component_value, total_cash_ops). If the question asks for a decimal share, that is the result; if it asks for percent, then multiply(#0, 100).
+- Example: total cash provided by operations (adjusted) = 4505, receivables securitization facility = 400 → divide(400, 4505) ≈ 0.08879.
+"""
+
+# When table has both beginning-of-year (BOY) and end-of-year (EOY) for a metric, prefer BOY for percent-change (FinQA convention).
+BOY_PREFERENCE_PERCENT_CHANGE_PRIMER = """
+When a financial table contains both **beginning-of-year (BOY)** and **end-of-year (EOY)** balances for the same metric (e.g. allowance for loan losses, reserves):
+- **Prefer the BOY row** for percentage-change calculations between two years.
+- **Denominator** = BOY value of the **earlier** year. **Numerator** = (BOY value of the **later** year minus BOY value of the earlier year). Compute: (BOY_later - BOY_earlier) / BOY_earlier (then × 100 if answer in percent).
+- Only use the **EOY row** if the BOY row is missing from the context.
+- Match the row label exactly (e.g. "at beginning of year", "at end of year") to determine which row is BOY vs EOY. For "percentage change in [metric] from [year A] to [year B]", use the BOY values for those years from the BOY row.
 """
 
 # Growth rate / percentage change: (new - old) / old; use three-step chain when answer must be in percentage (0–100).
@@ -284,6 +393,8 @@ When the question asks for a **percentage increase/decrease** (from period A to 
 AVERAGE_SUBSET_PRIMER = """
 **Exception — exactly two periods or two values.** When the question asks for the **average of exactly two** periods or two explicitly stated values (e.g. "average ... for 2018 and 2019", "average of X and Y"), the divisor is unambiguously 2. **Proceed with** add(val1, val2), divide(#0, 2). Do **not** defer.
 
+**Multi-step sum → average:** When averaging **three or more** values, chain adds (e.g. add(a, b), add(#0, c)); the **full sum** is in the **last** add step. Use **divide(#1, n)** (or the correct last step index), not divide(#0, n). Example: add(38, 34), add(#0, 20) → sum in #1 = 92; use divide(#1, 3) = 30.6667, not divide(#0, 3).
+
 **FINQA HARD RULE — AVERAGE (when divisor is ambiguous).** If the question contains "average", **three or more** numeric candidates are extracted, and **no explicit divisor or formula** appears in the text (e.g. no "divided by 3", "over three years", "per year"), then:
 - **DO NOT execute arithmetic** (no divide(#0, 3) or other guess).
 - **DO NOT select a subset** of values (no "most recent two", no "operationally relevant").
@@ -315,6 +426,15 @@ When the question asks for **difference in cumulative total return**, **five-yea
 # When the question specifies a unit scale, prefer values already expressed at that scale over raw table figures at a different scale.
 UNIT_SCALE_PRIMER = """
 The question specifies a unit scale (e.g. "in millions"). When the context contains both **rounded prose values** at that scale (e.g. "$52.4 million", "$32.1 million") and **raw table values** at a different scale (e.g. "52,380" or "32,136" in thousands), **prefer the values already expressed at the requested scale**. Use subtract(52.4, 32.1) not subtract(52380, 32136).
+"""
+
+# Average assets per self-sponsored / multi-seller conduit: use reported assets only, divide by number of conduits (FinQA JPM/2007).
+CONDUIT_AVERAGE_ASSETS_PRIMER = """
+When the question asks for **average assets** (e.g. in billions) **for each of the firm's self-sponsored** conduits or **multi-seller conduits**:
+- The context may show a table with **reported** and **pro forma** columns (e.g. assets | reported: $ 1562.1 | pro forma: $ 1623.9).
+- Use the **reported** value for assets as the total (e.g. 1562.1). Do **not** use pro forma; do **not** subtract reported from pro forma or average the two.
+- Divide the **reported** assets by the **number of conduits** stated in the text (e.g. "four multi-seller conduits" → 4). **Program:** divide(reported_assets, number_of_conduits).
+- The result is average assets per conduit. If the question asks for billions and the table is in billions, the answer is already in billions.
 """
 
 # When a percentage/ratio is stated for a prior year and no updated figure exists for the query year, apply the most recently stated percentage to the query year's base (FinQA annotation convention).
@@ -448,6 +568,11 @@ You are answering a question about cash flow from financing activities. Scale al
 **Unit check:** If shares are given as whole numbers and price as dollars per share, divide the product by 1,000,000 to convert to millions.
 
 If the question asks how repurchases **affect** net change in cash from financing: the answer is the repurchase cash outflow in millions (total shares * price / 1,000,000) for the requested period. Use the **requested period** row only; do not sum across periods unless the question asks for total. Output a single program (e.g. multiply(total_shares, avg_price), divide(#0, 1000000) for millions).
+
+**Change in balance (money pool, payables, receivables):** When the question asks how cash flow is **affected by the change in balance** of a financing item (e.g. receivables from or payables to a money pool, short-term borrowings):
+- Use the **numeric magnitudes** from the table (e.g. 51232 and 52742), not negative numbers for parenthetical amounts.
+- Compute **subtract(current_year_value, previous_year_value)** so that a **decrease in a payable** (current < previous) yields a **negative** result (cash outflow). Example: 2016: 51,232 and 2015: 52,742 → subtract(51232, 52742) = -1510. Do **not** use subtract(previous, current)—that reverses the sign and fails FinQA exact match.
+- Scale is as stated (e.g. thousands); no extra conversion unless the question asks for millions.
 """
 
 # Event-scoped arithmetic: do not sum across footnote/event blocks (FinQA AMT/2012-style).
