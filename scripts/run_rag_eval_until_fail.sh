@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Run RAG eval one sample at a time per dataset. For each dataset:
-#   - After each run, check the *latest evaluated sample*: if all its metrics are 1, run again; otherwise stop.
-# Default: (1) FinQA until first failure, then (2) TATQA until first failure.
+#   - After each run, check the *latest evaluated sample*: if relaxed_exact_match == 1, run again; otherwise stop.
+# Applies to both FinQA and TATQA. Default: (1) FinQA until first failure, then (2) TATQA until first failure.
 #
 # Milestones: pauses at 100, 150, 200 samples per dataset (first time only). Stored per-dataset
 # (e.g. TATQA:100, FinQA:100) so each dataset pauses independently.
@@ -81,8 +81,9 @@ PYEOF
   done
 }
 
-# Run one dataset until the latest evaluated sample has any metric != 1. Returns 0 when should stop, 1 when should continue.
-# Stops when: (1) latest sample has any metric != 1, or (2) no progress (run evaluated 0 new samples) to avoid infinite loop.
+# Run one dataset until the latest evaluated sample has relaxed_exact_match = 0. Returns 0 when should stop.
+# Stops when: (1) latest sample has relaxed_exact_match != 1, or (2) no progress (0 new samples) to avoid infinite loop.
+# Applies to both FinQA and TATQA (pruned metrics: gate only on relaxed_exact_match).
 run_dataset_until_fail() {
   local DATASET="$1"
   # Proof samples path: data/proof/rag/<dataset_lower>/<split>/<dataset>_<split>_samples.json
@@ -161,15 +162,10 @@ if row and row.get('prediction_error'):
     print('CONTINUE')
     sys.exit(0)
 
-# RAG pass: gate only on exact_match and f1 (like memo generator). Do not require
-# numerical_exact_match or program_accuracy — span/multi-span answers are not numerical,
-# and we avoid false stops when those metrics are 0 for non-numerical types.
-required = {'exact_match', 'f1'}
-strict_pass = all(metrics.get(k) == 1.0 or metrics.get(k) == 1 for k in required)
-# TAT-QA: relaxed_match=1 also counts as pass (answer correct, format relaxed).
-relaxed_pass = metrics.get('relaxed_match') == 1.0 or metrics.get('relaxed_match') == 1
-all_one = strict_pass or relaxed_pass
-print('CONTINUE' if all_one else 'STOP')
+# RAG pass: gate only on relaxed_exact_match (primary metric for FinQA and TATQA after metric prune).
+rem = metrics.get('relaxed_exact_match')
+pass_rem = (rem == 1.0 or rem == 1)
+print('CONTINUE' if pass_rem else 'STOP')
 ")
     if [[ "$CONTINUE" == "STOP_NO_SAMPLE" ]]; then
       echo "No new samples evaluated or could not determine last sample. Stopping $DATASET."
@@ -185,7 +181,7 @@ print('CONTINUE' if all_one else 'STOP')
       echo "No new samples evaluated (new_samples=0). All samples done. Stopping $DATASET."
       return 0
     fi
-    echo "Latest sample: pass (exact_match+f1 or relaxed_match). Running again..."
+    echo "Latest sample: relaxed_exact_match = 1. Running again..."
   done
 }
 

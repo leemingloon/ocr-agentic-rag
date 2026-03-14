@@ -49,6 +49,13 @@ def serialize_table_row(
     return " | ".join(parts)
 
 
+def _first_row_has_numeric_cells(first_row: list, start_col: int = 1) -> bool:
+    """True if any cell in first_row[start_col:] contains a digit (FinQA merged-header detection)."""
+    if not first_row or start_col >= len(first_row):
+        return False
+    return any(re.search(r"\d", str(c)) for c in first_row[start_col:])
+
+
 def serialize_table_to_rows(
     table: List[List[str]],
     first_row_is_header: bool = True,
@@ -61,6 +68,8 @@ def serialize_table_to_rows(
 
     If first_row_is_header, table[0] is the column headers and table[1:] are data rows;
     each data row is serialized with serialize_table_row(headers, row, row_label=row[0]).
+    When the first row contains numeric values (FinQA merged-header pattern, e.g. PPG/2008/page_19),
+    it is also emitted as a data row so retrieval can find the first segment's values.
     Returns a list of strings, one per data row, suitable for one chunk per row or
     joining with newlines for downstream chunking.
     """
@@ -117,6 +126,11 @@ def serialize_table_to_rows(
                 headers = new_headers
                 data_rows = data_rows[1:]
     result: List[str] = []
+    # FinQA merged-header: first row may be header + first data row (e.g. PPG/2008/page_19).
+    # Emit it as a data row too so retrieval can find the first segment's values (4716, 3811).
+    if first_row_is_header and len(table) > 0 and _first_row_has_numeric_cells(table[0]):
+        row0 = [str(c) for c in table[0]]
+        result.append(serialize_table_row(headers, row0, row_label=(row0[0].strip() if row0 else "")))
     for row in data_rows:
         if not isinstance(row, (list, tuple)):
             result.append(str(row))

@@ -2817,9 +2817,26 @@ class FinQAAdapter(BaseDatasetAdapter):
             "dataset_path": "data/rag/FinQA/train/train_qa.json",
             "ground_truth_path": None,
             "notes": "Single JSON file train_qa.json (list of QA entries)"
-        }
+        },
+        "test": {
+            "format": "json",
+            "dataset_path": "data/rag/FinQA/test/test.json",
+            "ground_truth_path": None,
+            "notes": "FinQA test set; manual download from https://github.com/czyssrs/FinQA (dataset/test.json)"
+        },
     }
-    SPLITS_WITH_GT = {"train"}
+    SPLITS_WITH_GT = {"train", "test"}
+
+    # Test samples to exclude so eval is out-of-sample. Reference = train_qa.json + tatqa_dataset_test_gold.json; any test QA in that reference is excluded (overlap corpus not evaluated).
+    FINQA_TEST_EXCLUDE_SAMPLE_IDS = frozenset({
+        "RSG/2013/page_123.pdf-1",
+        "GS/2015/page_188.pdf-2",
+        "FIS/2016/page_31.pdf-2",
+        "HOLX/2006/page_100.pdf-1",
+        "HOLX/2006/page_100.pdf-2",
+        "ETR/2008/page_298.pdf-4",
+        "ETR/2017/page_372.pdf-3",
+    })
 
     def __init__(
         self,
@@ -2897,7 +2914,7 @@ class FinQAAdapter(BaseDatasetAdapter):
                 if not qa_list:
                     raise FileNotFoundError(
                         f"FinQA {split}: {json_path} not found or empty. "
-                        "Add train_qa.json from https://github.com/czyssrs/FinQA (dataset/train.json)."
+                        f"Add {'test.json (dataset/test.json)' if split == 'test' else 'train_qa.json (dataset/train.json)'} from https://github.com/czyssrs/FinQA."
                     )
 
                 for idx, entry in enumerate(qa_list):
@@ -2908,6 +2925,16 @@ class FinQAAdapter(BaseDatasetAdapter):
                     gold_program = qa.get("program")
                     if isinstance(gold_program, list):
                         gold_program = str(gold_program) if gold_program else None
+                    # Stable corpus_id and sample_id (test.json may lack "id"; use filename + idx)
+                    corpus_id = entry.get("id") or entry.get("filename")
+                    if not corpus_id:
+                        corpus_id = f"doc_{idx}"
+                    sample_id = entry.get("id")
+                    if sample_id is None:
+                        sample_id = f"{entry.get('filename', f'doc_{idx}')}-{idx}"
+                    # Exclude test samples that overlap with train (out-of-sample eval only)
+                    if split == "test" and sample_id in self.FINQA_TEST_EXCLUDE_SAMPLE_IDS:
+                        continue
                     yield {
                         "input": {
                             "query": query,
@@ -2917,13 +2944,13 @@ class FinQAAdapter(BaseDatasetAdapter):
                             "answer": gt_answer,
                             "score": None,
                             "query_id": idx,
-                            "corpus_id": entry.get("id") or entry.get("filename"),
+                            "corpus_id": corpus_id,
                             **({"program": gold_program} if gold_program is not None else {}),
                         },
                         "metadata": {
                             "dataset": self.dataset_name,
                             "split": split,
-                            "sample_id": entry.get("id", idx),
+                            "sample_id": sample_id,
                         },
                     }
                     emitted += 1
@@ -3101,26 +3128,45 @@ class TATQAAdapter(BaseDatasetAdapter):
     and serves to extract structured data based on a schema shared across all samples within the same file type.
     """
     FILE_MAPPING = {
-        # "dev": {  # no official GT file for eval; evaluation uses test (tatqa_dataset_test_gold.json) only
-        #     "format": "json",
-        #     "dataset_path": "data/rag/TAT-QA/dev.json",
-        #     "ground_truth_path": None,
-        #     "notes": None
-        # },
+        "dev": {
+            "format": "json",
+            "dataset_path": "data/rag/TAT-QA/tatqa_dataset_dev.json",
+            "ground_truth_path": None,
+            "notes": "TAT-QA dev set; same schema as test, GT in same file"
+        },
         "test": {
             "format": "json",
-            "dataset_path": "data/rag/TAT-QA/test.json",
-            "ground_truth_path": "data/rag/TAT-QA/test_gold.json",
-            "notes": "2 json files: Ground truth for test set is in 'test_gold.json', test set is in 'test.json'"
+            "dataset_path": "data/rag/TAT-QA/tatqa_dataset_test.json",
+            "ground_truth_path": "data/rag/TAT-QA/tatqa_dataset_test_gold.json",
+            "notes": "Evaluation uses tatqa_dataset_test_gold.json (questions + answers); load_split reads that file for test split"
         },
-        # "train": {  # no official GT file for eval; evaluation uses test only
-        #     "format": "json",
-        #     "dataset_path": "data/rag/TAT-QA/train.json",
-        #     "ground_truth_path": None,
-        #     "notes": None
-        # },
     }
-    SPLITS_WITH_GT = {"test"}
+    SPLITS_WITH_GT = {"dev", "test"}
+
+    # Dev samples to exclude so eval is out-of-sample. Reference = train_qa.json + tatqa_dataset_test_gold.json; any dev QA in that reference is excluded (overlap corpus not evaluated).
+    TATQA_DEV_EXCLUDE_SAMPLE_IDS = frozenset({
+        "25ee0333-a4e1-436e-9d3c-35e5fcdd342f",
+        "4039da5e-1354-48b0-9ea2-172b0544123e",
+        "45a6f6f6-d38d-44d0-a061-878f5fc0d7ab",
+        "516cf531-262c-4318-aa5c-0ef6e2d9ac25",
+        "545b8045-d882-40f7-ac94-9767957077f9",
+        "5ebb9f4f-fba2-42bf-8c00-cec687b80b57",
+        "75e56840-cc3b-42fa-8505-07dd4c434f5a",
+        "7913db38-8477-42e8-a477-c89010e42912",
+        "8a21f821-eaf6-421a-8c67-795e7e2d1f61",
+        "a8898341-9048-41fc-ac57-1c21ca35c201",
+        "b99d3748-44ec-44e8-9de7-12567ccbd479",
+        "bbb9ab37-568a-4bab-9b95-cb3c43c5baa1",
+        "bd230040-945d-4d31-8a20-086e77788921",
+        "bfa00440-e576-4286-83d5-f71599959474",
+        "c3d058ee-d553-4c2a-9ed8-0b4c1d4eee8b",
+        "d8637395-dbdb-4d49-a48b-ef14e97ebce5",
+        "e172ba38-34fa-477b-b535-bac8d65756fb",
+        "e1c437a2-014a-46cc-b5af-05ff3fc76a31",
+        "e636ec91-f544-4bed-981c-3196a1e6b8a2",
+        "f6027e8f-0af6-4ffe-b707-10fd25b8ea50",
+        "ffe3120d-36d9-4a7d-a202-73d731944726",
+    })
 
     def __init__(
         self,
@@ -3196,6 +3242,11 @@ class TATQAAdapter(BaseDatasetAdapter):
                     for q in doc.get("questions", []):
                         if max_samples_per_split is not None and sample_idx >= max_samples_per_split:
                             break
+                        sample_id = q.get("uid", f"{split}_{sample_idx}")
+                        # Exclude dev samples that overlap with test_gold (out-of-sample eval only)
+                        if split == "dev" and sample_id in self.TATQA_DEV_EXCLUDE_SAMPLE_IDS:
+                            sample_idx += 1
+                            continue
                         answers = q.get("answer", [])
                         if isinstance(answers, list):
                             answer = answers[0] if answers else ""
@@ -3219,7 +3270,7 @@ class TATQAAdapter(BaseDatasetAdapter):
                             "metadata": {
                                 "dataset": self.dataset_name,
                                 "split": split,
-                                "sample_id": q.get("uid", f"{split}_{sample_idx}"),
+                                "sample_id": sample_id,
                             },
                         }
                         sample_idx += 1

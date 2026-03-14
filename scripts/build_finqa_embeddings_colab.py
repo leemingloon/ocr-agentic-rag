@@ -6,10 +6,13 @@ Run this on Colab with Runtime > Change runtime type > T4 GPU, then download the
 output folder and place it at: data/rag/FinQA/train/finqa_retriever_index/
 
 Usage (from repo root):
+  # Train index (default):
   python scripts/build_finqa_embeddings_colab.py --output data/rag/FinQA/train/finqa_retriever_index
+  # Test index (source label auto-set to finqa_test when path contains "test"):
+  python scripts/build_finqa_embeddings_colab.py --train_qa data/rag/FinQA/test/test.json --output data/rag/FinQA/test/finqa_retriever_index
 
 Optional:
-  --train_qa PATH   Path to train_qa.json (default: data/rag/FinQA/train/train_qa.json)
+  --train_qa PATH   Path to train_qa.json or test.json (default: data/rag/FinQA/train/train_qa.json)
   --batch_size N    Embedding batch size (default: 256 on GPU, 48 on CPU)
 """
 
@@ -49,13 +52,16 @@ def _footnote_block_from_post(post_str: str, max_chars: int = 800) -> str:
     return block[:max_chars] if len(block) > max_chars else block
 
 
-def build_finqa_chunks(train_qa_path: Path, table_aware: bool = False):
-    """Build TextNode chunks from FinQA train_qa.json.
+def build_finqa_chunks(train_qa_path: Path, table_aware: bool = False, source_label: str = None):
+    """Build TextNode chunks from FinQA train_qa.json or test.json.
 
     If table_aware=True, tables are serialized with serialize_table_to_rows so each row
     is self-contained (row label + column: value). One chunk per table row (+ pre/post
     text chunks). Avoids GS/2014-style misattribution when the chunker splits at column
     boundaries. Requires re-running the full index build and replacing the pre-built bundle.
+
+    source_label: metadata "source" for chunks (e.g. "finqa_train", "finqa_test"). If None,
+    inferred from path: "test" in path -> "finqa_test", else "finqa_train".
 
     Returns (chunks, context_by_corpus, page_by_corpus) for preprocess_chunks_for_index.
     """
@@ -71,6 +77,9 @@ def build_finqa_chunks(train_qa_path: Path, table_aware: bool = False):
     if not isinstance(data, list):
         return [], {}, {}
 
+    if source_label is None:
+        source_label = "finqa_test" if "test" in str(train_qa_path) else "finqa_train"
+
     chunker = DocumentChunker(chunk_size=512, chunk_overlap=128)
     all_chunks = []
     context_by_corpus = {}
@@ -82,7 +91,7 @@ def build_finqa_chunks(train_qa_path: Path, table_aware: bool = False):
         pre_str = "\n".join(pre) if isinstance(pre, list) else str(pre)
         post_str = "\n".join(post) if isinstance(post, list) else str(post)
         corpus_id = entry.get("id") or entry.get("filename", str(idx))
-        meta = {"entry_id": idx, "source": "finqa_train", "corpus_id": corpus_id}
+        meta = {"entry_id": idx, "source": source_label, "corpus_id": corpus_id}
         # Full doc context for section/unit inference (pre+post so table rows get doc-level section and units)
         context_by_corpus[corpus_id] = f"{pre_str}\n\n{post_str}".strip()
         page_num = _page_from_finqa_id(corpus_id)
@@ -156,8 +165,9 @@ def main():
     train_qa_path = args.train_qa if args.train_qa.is_absolute() else REPO_ROOT / args.train_qa
     output_dir = args.output if args.output.is_absolute() else REPO_ROOT / args.output
 
-    print("Building FinQA chunks..." + (" (table_aware=row-level serialization)" if args.table_aware else ""))
-    chunks, context_by_corpus, page_by_corpus = build_finqa_chunks(train_qa_path, table_aware=args.table_aware)
+    source_label = "finqa_test" if "test" in str(train_qa_path) else "finqa_train"
+    print("Building FinQA chunks..." + (" (table_aware=row-level serialization)" if args.table_aware else "") + f" source={source_label}")
+    chunks, context_by_corpus, page_by_corpus = build_finqa_chunks(train_qa_path, table_aware=args.table_aware, source_label=source_label)
     if not chunks:
         print("No chunks produced. Check train_qa.json path and content.")
         sys.exit(1)

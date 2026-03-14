@@ -145,6 +145,16 @@ if not os.path.exists(finqa_qa_path):
 else:
     print(f"FinQA QA already present: {finqa_qa_path}")
 
+# FinQA test set: not auto-downloaded (GitHub repo has no direct test.json URL in same way).
+# To run eval with --split test, manually download test.json from
+# https://github.com/czyssrs/FinQA/tree/main/dataset and place it at:
+#   data/rag/FinQA/test/test.json
+finqa_test_path = os.path.join(BASE_DIR, "rag", "FinQA", "test", "test.json")
+if os.path.exists(finqa_test_path):
+    print(f"FinQA test set present: {finqa_test_path}")
+else:
+    print(f"FinQA test: optional. For --split test, add {finqa_test_path} (manual download from https://github.com/czyssrs/FinQA/tree/main/dataset)")
+
 ########################################
 # Credit Risk datasets (PD)
 ########################################
