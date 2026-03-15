@@ -33,6 +33,18 @@ from typing import Any
 PROOF_ROOT = Path("data/proof")
 from zoneinfo import ZoneInfo
 
+
+def _safe_print(*args: Any, **kwargs: Any) -> None:
+    """Print that survives UnicodeEncodeError on Windows (cp1252) when debug output contains Unicode (e.g. arrows)."""
+    try:
+        print(*args, **kwargs)
+    except UnicodeEncodeError:
+        enc = getattr(sys.stdout, "encoding", None) or "utf-8"
+        sep = kwargs.get("sep", " ")
+        end = kwargs.get("end", "\n")
+        msg = sep.join(str(a) for a in args) + end
+        sys.stdout.buffer.write(msg.encode(enc, errors="replace"))
+
 from eval_dataset_adapters import (
     SROIEAdapter,
     FUNSDAdapter,
@@ -469,20 +481,32 @@ TATQA_SCORER_OVERRIDES: dict[str, dict] = {
 
 # FinQA: force FAIL with scorer_note only (e.g. retrieval gap / missing chunks; mirror of TATQA_SCORER_FORCE_FAIL).
 # Applied before FINQA_SCORER_OVERRIDES and FINQA_SCORER_FALSE_NEGATIVES in _scorer_label_and_note.
-FINQA_SCORER_FORCE_FAIL: dict[str, dict] = {
-    "BLL/2006/page_108.pdf-1": {
-        "note": (
-            "The model compared \"to be issued\" (4,852,978) vs \"remaining\" (5,941,210), which is correct "
-            "given the retrieved chunks. No explicit \"already issued\" or outstanding shares were found in "
-            "the retrieved context. The failure may be due to missing chunks, a retrieval false negative, "
-            "or a mismatch with GT assumptions."
-        ),
-    },
-}
+FINQA_SCORER_FORCE_FAIL: dict[str, dict] = {}
 
 # FinQA: same structure as TATQA for scorer overrides / false negatives.
 # GT_ISSUE with scorer_note only (no metric override): relaxed_exact_match stays as computed (0).
 FINQA_SCORER_FALSE_NEGATIVES: dict[str, str | dict] = {
+    "BLL/2006/page_108.pdf-1": {
+        "label": "GT_ISSUE",
+        "relaxed_exact_match": 0.0,
+        "note": (
+            "The question asks whether issued (4,852,978) exceeds remaining "
+            "(5,941,210). The model correctly answers no. The GT program tests "
+            "the reverse - whether remaining exceeds issued - and returns yes. "
+            "The annotator swapped the two operands."
+        ),
+    },
+    "C/2008/page_111.pdf-4": {
+        "label": "GT_ISSUE",
+        "relaxed_exact_match": 0.0,
+        "note": (
+            "Obligations fell from 1,470 (2009) to 1,328 (2010), a decrease. "
+            "The correct formula (new - old) / old gives -9.66%. The model "
+            "computes this correctly. The GT program assigns 2009 as the new "
+            "value and 2010 as the old value - the years are backwards, "
+            "producing a positive +10.69% for a balance that actually declined."
+        ),
+    },
     "C/2010/page_272.pdf-1": {
         "note": (
             "Identified and corrected a ground-truth annotation error in FINQA (incorrect chained "
@@ -1228,7 +1252,7 @@ def run_model(sample: dict, category: str, dataset_name: str, debug: bool = Fals
         gt = sample.get("ground_truth") if isinstance(sample.get("ground_truth"), dict) else {}
         corpus_id = gt.get("corpus_id") if gt else None
         if debug:
-            print(f"[DEBUG] RAG query corpus_id={corpus_id!r} query={query[:80]!r}...")
+            _safe_print(f"[DEBUG] RAG query corpus_id={corpus_id!r} query={query[:80]!r}...")
         try:
             _prev_rag_debug = os.environ.get("RAG_DEBUG")
             if debug:
@@ -1264,7 +1288,7 @@ def run_model(sample: dict, category: str, dataset_name: str, debug: bool = Fals
                     if isinstance(r0, dict) and r0.get("chunks"):
                         t = (r0["chunks"][0].get("text") or "")[:200]
                         first_preview = t.replace("\n", " ") + ("..." if len(t) >= 200 else "")
-                print(f"[DEBUG] RAG result: {num_chunks} chunks retrieved; first_chunk_preview={first_preview!r}")
+                _safe_print(f"[DEBUG] RAG result: {num_chunks} chunks retrieved; first_chunk_preview={first_preview!r}")
             return {
                 "answer": out.get("answer") or "",
                 "sources": out.get("tool_results", []),
@@ -1273,7 +1297,7 @@ def run_model(sample: dict, category: str, dataset_name: str, debug: bool = Fals
         except Exception as e:
             err_msg = str(e).encode("ascii", "replace").decode("ascii")
             if debug:
-                print(f"[DEBUG] RAG inference failed: {err_msg}")
+                _safe_print(f"[DEBUG] RAG inference failed: {err_msg}")
             return {
                 "answer": "",
                 "sources": [],
@@ -1671,7 +1695,7 @@ def _rag_debug_tatqa_gold_chunk_check(
     try:
         retriever = _get_rag_retriever_for_dataset(dataset_name, debug=False)
     except Exception as e:
-        print(f"[DEBUG] RAG TAT-QA gold-chunk check: could not load retriever: {e}")
+        _safe_print(f"[DEBUG] RAG TAT-QA gold-chunk check: could not load retriever: {e}")
         return
     chunks = getattr(retriever, "chunks", None) or []
     gt_lower = gt_str.lower()
@@ -1683,18 +1707,18 @@ def _rag_debug_tatqa_gold_chunk_check(
         if search_phrase in text or (len(gt_lower) > 80 and gt_lower in text):
             meta = getattr(c, "metadata", None) or {}
             containing.append((i, text[:300], meta.get("corpus_id"), getattr(c, "text", "") or ""))
-    print(f"[DEBUG] RAG TAT-QA gold-chunk existence: GT phrase in index: {'yes' if containing else 'no'} ({len(containing)} chunks)")
+    _safe_print(f"[DEBUG] RAG TAT-QA gold-chunk existence: GT phrase in index: {'yes' if containing else 'no'} ({len(containing)} chunks)")
     in_retrieved_any = any(
         bool(full_text and (full_text[:200] in full_context or full_text[:500] in full_context))
         for _idx, _preview, _cid, full_text in containing
     )
     for idx, preview, cid, full_text in containing[:5]:
         in_retrieved = bool(full_text and (full_text[:200] in full_context or full_text[:500] in full_context))
-        print(f"[DEBUG]   chunk idx={idx} corpus_id={cid!r} in_retrieved_context={in_retrieved} preview={preview[:120]!r}...")
+        _safe_print(f"[DEBUG]   chunk idx={idx} corpus_id={cid!r} in_retrieved_context={in_retrieved} preview={preview[:120]!r}...")
     if containing and not in_retrieved_any:
-        print(f"[DEBUG] RAG TAT-QA gold-chunk: none of the {len(containing)} gold-containing chunks were in retrieved context -> ranking/retrieval failure")
+        _safe_print(f"[DEBUG] RAG TAT-QA gold-chunk: none of the {len(containing)} gold-containing chunks were in retrieved context -> ranking/retrieval failure")
     elif containing and in_retrieved_any:
-        print(f"[DEBUG] RAG TAT-QA gold-chunk: at least one gold-containing chunk WAS in context")
+        _safe_print(f"[DEBUG] RAG TAT-QA gold-chunk: at least one gold-containing chunk WAS in context")
 
 
 # TAT-QA error breakdown for portfolio write-up: split numerical_exact_match=0 into three buckets before reporting.
@@ -1729,7 +1753,7 @@ def _rag_debug_index_diagnostic(
     try:
         retriever = _get_rag_retriever_for_dataset(dataset_name, dataset_split=dataset_split, debug=False)
     except Exception as e:
-        print(f"[DEBUG] RAG index diagnostic: could not load retriever: {e}")
+        _safe_print(f"[DEBUG] RAG index diagnostic: could not load retriever: {e}")
         return
     chunks = getattr(retriever, "chunks", None) or []
     # Doc chunks: same logic as retrieval.py (exact match, then prefix match)
@@ -1745,7 +1769,7 @@ def _rag_debug_index_diagnostic(
             or (getattr(c, "metadata", None) or {}).get("corpus_id") == prefix
         ]
     if not doc_indices:
-        print(f"[DEBUG] RAG index diagnostic: no chunks in index for corpus_id={corpus_id!r}")
+        _safe_print(f"[DEBUG] RAG index diagnostic: no chunks in index for corpus_id={corpus_id!r}")
         return
     # Search variants for GT
     search_vals = [gt_str, str(gt_answer).strip()]
@@ -1794,23 +1818,23 @@ def _rag_debug_index_diagnostic(
             preview = (text[:120] + "…").replace("\n", " ")
             chunks_with_implied.append((i, preview))
     # Log
-    print(f"[DEBUG] RAG index diagnostic: corpus_id={corpus_id!r} sample_id={sample_id!r} doc_chunks={len(doc_indices)}")
-    print(f"[DEBUG] RAG index diagnostic: GT={gt_answer!r} search_vals={search_vals[:5]}")
+    _safe_print(f"[DEBUG] RAG index diagnostic: corpus_id={corpus_id!r} sample_id={sample_id!r} doc_chunks={len(doc_indices)}")
+    _safe_print(f"[DEBUG] RAG index diagnostic: GT={gt_answer!r} search_vals={search_vals[:5]}")
     if chunks_with_gt:
         for idx, preview in chunks_with_gt:
             c = chunks[idx] if idx < len(chunks) else None
             in_retrieved = (getattr(c, "text", "")[:200] in full_context) if c else False
-            print(f"[DEBUG] RAG index diagnostic: chunk {idx} CONTAINS GT -> in_retrieved_context={in_retrieved} preview={preview!r}")
+            _safe_print(f"[DEBUG] RAG index diagnostic: chunk {idx} CONTAINS GT -> in_retrieved_context={in_retrieved} preview={preview!r}")
     else:
-        print(f"[DEBUG] RAG index diagnostic: no chunk in doc contains GT (chunking may have dropped it)")
+        _safe_print(f"[DEBUG] RAG index diagnostic: no chunk in doc contains GT (chunking may have dropped it)")
     if implied_vals and chunks_with_implied:
-        print(f"[DEBUG] RAG index diagnostic: implied values (from context+/-GT)={implied_vals[:6]}")
+        _safe_print(f"[DEBUG] RAG index diagnostic: implied values (from context+/-GT)={implied_vals[:6]}")
         for idx, preview in chunks_with_implied:
             text = getattr(chunks[idx], "text", None) or ""
             in_retrieved = (text[:200] in full_context) if text else False
-            print(f"[DEBUG] RAG index diagnostic: chunk {idx} CONTAINS implied value -> in_retrieved_context={in_retrieved} preview={preview!r}")
+            _safe_print(f"[DEBUG] RAG index diagnostic: chunk {idx} CONTAINS implied value -> in_retrieved_context={in_retrieved} preview={preview!r}")
     elif implied_vals:
-        print(f"[DEBUG] RAG index diagnostic: implied values={implied_vals[:6]} -> no chunk contains them (missing row in index)")
+        _safe_print(f"[DEBUG] RAG index diagnostic: implied values={implied_vals[:6]} -> no chunk contains them (missing row in index)")
 
 
 # RAG samples evaluated against dataset GT only; some are labeled as suspect GT for reporting.
@@ -1872,7 +1896,7 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
 
             extracted = _extract_final_answer_span(pred_answer, allow_numeric_bold=allow_numeric_bold)
             if debug and extracted != pred_answer:
-                print(
+                _safe_print(
                     f"[DEBUG] RAG TATQA span final-answer extraction: "
                     f"sample_id={sample_id!r} extracted={extracted!r}"
                 )
@@ -1889,7 +1913,7 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
                         if "." in extracted:
                             extracted = extracted.rstrip("0").rstrip(".")
                         if debug:
-                            print(
+                            _safe_print(
                                 f"[DEBUG] RAG TATQA arithmetic final-answer extraction: "
                                 f"sample_id={sample_id!r} extracted={extracted!r}"
                             )
@@ -1902,7 +1926,7 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
                     if "." in extracted:
                         extracted = extracted.rstrip("0").rstrip(".")
                     if debug:
-                        print(
+                        _safe_print(
                             f"[DEBUG] RAG TATQA numerical final-answer extraction: "
                             f"sample_id={sample_id!r} extracted={extracted!r}"
                         )
@@ -1914,7 +1938,7 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
         if normalized is not None:
             pred_answer = normalized
             if debug:
-                print(f"[DEBUG] RAG TATQA scale normalization applied -> pred_answer={pred_answer!r}")
+                _safe_print(f"[DEBUG] RAG TATQA scale normalization applied -> pred_answer={pred_answer!r}")
 
     # TAT-QA span answers: if the model returned a full sentence containing the gold span,
     # treat the gold span as the effective prediction for span-type questions so scoring
@@ -1931,7 +1955,7 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
             pred_norm = _norm_span_text(pred_answer)
             if gt_norm and gt_norm in pred_norm:
                 if debug:
-                    print(
+                    _safe_print(
                         "[DEBUG] RAG TATQA span extraction: gold span found inside prediction; "
                         f"using gold span for scoring. sample_id={sample_id!r} "
                         f"gt_answer={gt_answer!r} pred_answer_preview={pred_answer[:120]!r}"
@@ -1948,14 +1972,14 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
         if isinstance(query_preview, dict):
             query_preview = query_preview.get("query", "") or ""
         query_preview = str(query_preview)[:100] + ("..." if len(str(query_preview)) > 100 else "")
-        print(
+        _safe_print(
             f"[DEBUG] RAG yes/no mismatch: sample_id={sample_id!r} gold={gt_yn!r} extracted={extracted_yn!r} "
             f"(exact_match=0 expected while model gives {extracted_yn or 'no yes/no found'})"
         )
-        print(f"[DEBUG] RAG yes/no question preview: {query_preview!r}")
+        _safe_print(f"[DEBUG] RAG yes/no question preview: {query_preview!r}")
         # Last 400 chars often contain "the answer is X"
         tail = (pred_answer or "")[-400:].replace("\n", " ")
-        print(f"[DEBUG] RAG yes/no prediction tail (last 400 chars): {tail!r}")
+        _safe_print(f"[DEBUG] RAG yes/no prediction tail (last 400 chars): {tail!r}")
     # Debug: possible missed extraction when GT is a number and model text contains it but declined to state it
     if debug and exact == 0 and gt_answer is not None and str(gt_answer).strip():
         gt_str = str(gt_answer).strip()
@@ -1969,7 +1993,7 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
             if gt_str in pred_answer or (gt_normalized and gt_normalized in pred_normalized):
                 refusal_phrases = ["cannot find", "not provided", "not stated", "cannot be determined", "is not provided"]
                 if any(p in pred_answer.lower() for p in refusal_phrases):
-                    print(
+                    _safe_print(
                         f"[DEBUG] RAG possible missed extraction: gold={gt_str!r} appears in model response but model declined to state it "
                         f"(sample_id={sample.get('metadata', {}).get('sample_id')})"
                     )
@@ -1999,16 +2023,16 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
                 gt_obj_debug = sample.get("ground_truth", {})
                 corpus_id_debug = gt_obj_debug.get("corpus_id") if isinstance(gt_obj_debug, dict) else None
 
-                print(f"[DEBUG] RAG numerical_exact_match=0 sample_id={sample_id_debug!r} gt={gt_answer!r}")
+                _safe_print(f"[DEBUG] RAG numerical_exact_match=0 sample_id={sample_id_debug!r} gt={gt_answer!r}")
                 noisy = RAG_ANNOTATION_NOISY_CORPUS_IDS.get(dataset_name, [])
                 if corpus_id_debug and corpus_id_debug in noisy:
-                    print(
+                    _safe_print(
                         f"[DEBUG] RAG annotation-noisy corpus: corpus_id={corpus_id_debug!r} is in RAG_ANNOTATION_NOISY_CORPUS_IDS; "
                         "treat failure as dataset/annotation issue, not model failure."
                     )
                 if isinstance(gt_obj_debug, dict) and gt_obj_debug.get("program") is not None:
                     gold_prog = gt_obj_debug.get("program")
-                    print(f"[DEBUG] RAG gold program: {gold_prog}")
+                    _safe_print(f"[DEBUG] RAG gold program: {gold_prog}")
                     # Gold program operands: are they in the context the model saw?
                     operands = _rag_parse_gold_program_operands(gold_prog)
                     segments = [p.strip() for p in full_context.split("\n\n---\n\n") if p.strip()]
@@ -2022,12 +2046,12 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
                         pat = r"\b" + re.escape(op_plain) + r"\b"
                         in_which = [i for i, seg in enumerate(segments) if re.search(pat, seg)]
                         if in_which:
-                            print(f"[DEBUG] RAG gold operand {op_plain!r} IN context (segment indices {in_which})")
+                            _safe_print(f"[DEBUG] RAG gold operand {op_plain!r} IN context (segment indices {in_which})")
                         else:
-                            print(f"[DEBUG] RAG gold operand {op_plain!r} NOT in context -> model cannot compute gold program")
+                            _safe_print(f"[DEBUG] RAG gold operand {op_plain!r} NOT in context -> model cannot compute gold program")
 
                 # Per-chunk lengths, scores, and preview (so we see truncation / missing columns and post-rerank scores)
-                print(f"[DEBUG] RAG context assembly: {len(context_parts)} chunks, total {len(full_context)} chars")
+                _safe_print(f"[DEBUG] RAG context assembly: {len(context_parts)} chunks, total {len(full_context)} chars")
                 chunk_idx = 0
                 for s in sources:
                     res = s.get("result") if isinstance(s.get("result"), dict) else {}
@@ -2035,16 +2059,16 @@ def evaluate_rag_sample(dataset_name: str, prediction: dict, sample: dict, debug
                         part = ch.get("text") if isinstance(ch, dict) else str(ch)
                         score = ch.get("score") if isinstance(ch, dict) else None
                         prev = (part[:100] + "…").replace("\n", " ") if len(part) > 100 else (part or "").replace("\n", " ")
-                        print(f"[DEBUG] RAG chunk {chunk_idx}: len={len(part)} score={score} preview={prev!r}")
+                        _safe_print(f"[DEBUG] RAG chunk {chunk_idx}: len={len(part)} score={score} preview={prev!r}")
                         chunk_idx += 1
                 # TAT-QA: gold chunk existence and whether it was retrieved (drill down on wrong-table retrieval failure)
                 _rag_debug_tatqa_gold_chunk_check(
                     dataset_name, gt_answer, full_context, sample_id=sample_id_debug
                 )
 
-                print(f"[DEBUG] RAG full context (first 6000 chars):\n{full_context[:6000]}")
+                _safe_print(f"[DEBUG] RAG full context (first 6000 chars):\n{full_context[:6000]}")
                 if len(full_context) > 6000:
-                    print(f"[DEBUG] ... (context total {len(full_context)} chars)")
+                    _safe_print(f"[DEBUG] ... (context total {len(full_context)} chars)")
 
                 # Index diagnostic: is GT or implied value in the doc's chunks? In retrieved context?
                 _rag_debug_index_diagnostic(
@@ -2548,11 +2572,14 @@ def migrate_prediction_errors_from_per_sample(proof_dir: Path | str = "data/proo
                 split_metric_rows = [r.get("metrics") or {} for r in ok_rows if r.get("metrics")]
                 split_avg = aggregate_metrics(split_metric_rows)
                 split_avg["sample_count"] = len(ok_rows)
-                if cat_dir.name != "rag":
+                if cat_dir.name == "vision":
                     split_avg["gt_override_count"] = int(sum((m.get("gt_override", 0) or 0) for m in split_metric_rows))
+                else:
+                    split_avg.pop("gt_override_count", None)
                 avg_path = split_dir / f"{ds_dir.name.lower()}_{split_dir.name}_avg.json"
+                to_dump = {k: v for k, v in split_avg.items() if k != "gt_override_count"} if cat_dir.name != "vision" else split_avg
                 with open(avg_path, "w", encoding="utf-8") as f:
-                    json.dump(split_avg, f, ensure_ascii=False, indent=2)
+                    json.dump(to_dump, f, ensure_ascii=False, indent=2)
                 print(f"[migrate_prediction_errors] {per_sample_path}: moved {len(err_rows)} error(s) to {prediction_error_path.name}, updated {avg_path.name}")
 
 
@@ -2653,10 +2680,12 @@ def evaluate_dataset(
     if dataset_proof_dir_override is not None:
         dataset_proof_dir = Path(dataset_proof_dir_override)
         category_proof_dir = dataset_proof_dir.parent
+        dataset_file_slug = dataset_proof_dir.name  # e.g. lendingclub_untuned_xgb for chatbot identification
     else:
         proof_root = Path(proof_dir)
         category_proof_dir = proof_root / category.lower()
         dataset_proof_dir = category_proof_dir / dataset_name.lower()
+        dataset_file_slug = dataset_name.lower()
     dataset_proof_dir.mkdir(parents=True, exist_ok=True)
 
     # Global (this run only)
@@ -2719,7 +2748,7 @@ def evaluate_dataset(
         # When force_reeval=True, do not load existing IDs so every sample runs (new predictions).
         if split_name not in existing_ids_by_split:
             split_dir = dataset_proof_dir / split_name
-            per_sample_path = split_dir / _samples_filename(dataset_name, split_name)
+            per_sample_path = split_dir / _samples_filename(dataset_file_slug, split_name)
             ids = set()
             if not force_reeval and per_sample_path.exists():
                 try:
@@ -2750,7 +2779,7 @@ def evaluate_dataset(
             image, _ = _extract_image_for_vision(sample, debug=debug)
             if image is not None:
                 split_dir.mkdir(parents=True, exist_ok=True)
-                png_name = f"{dataset_name.lower()}_{split_name}_{png_suffix}.png"
+                png_name = f"{dataset_file_slug}_{split_name}_{png_suffix}.png"
                 png_path = split_dir / png_name
                 try:
                     from PIL import Image as PILImage
@@ -2764,7 +2793,7 @@ def evaluate_dataset(
         # Optional: write per-sample metadata JSON (e.g. options_list for multiple-choice)
         if generate_metadata:
             split_dir.mkdir(parents=True, exist_ok=True)
-            meta_path = split_dir / f"{dataset_name.lower()}_{split_name}_{png_suffix}_metadata.json"
+            meta_path = split_dir / f"{dataset_file_slug}_{split_name}_{png_suffix}_metadata.json"
             inp = sample.get("input") or {}
             meta_export = {
                 "sample_id": sample_id,
@@ -2951,7 +2980,7 @@ def evaluate_dataset(
         split_dir = dataset_proof_dir / split_name
         split_dir.mkdir(parents=True, exist_ok=True)
 
-        per_sample_path = split_dir / _samples_filename(dataset_name, split_name)
+        per_sample_path = split_dir / _samples_filename(dataset_file_slug, split_name)
         prediction_error_path = split_dir / "prediction_error.json"
 
         ok_rows = [r for r in new_rows if not r.get("prediction_error")]
@@ -3008,9 +3037,20 @@ def evaluate_dataset(
             with open(prediction_error_path, "w", encoding="utf-8") as f:
                 json.dump(list(err_by_id.values()), f, ensure_ascii=False, indent=2)
 
-        # Order 2: Compute split avg from per_sample only. RAG: aggregate from samples JSON only (rows with metrics).
-        with open(per_sample_path, "r", encoding="utf-8") as f:
-            rows_from_file = json.load(f)
+    # Order 2: Refresh split avg from per_sample for every split that has a per_sample file
+    # (so we always rewrite with current logic, e.g. no gt_override_count for credit_risk_pd)
+    for split_dir in dataset_proof_dir.iterdir():
+        if not split_dir.is_dir():
+            continue
+        split_name = split_dir.name
+        per_sample_path = split_dir / _samples_filename(dataset_file_slug, split_name)
+        if not per_sample_path.exists():
+            continue
+        try:
+            with open(per_sample_path, "r", encoding="utf-8") as f:
+                rows_from_file = json.load(f)
+        except Exception:
+            continue
         rows_for_agg = [r for r in rows_from_file if r.get("metrics")]
         split_metric_rows = [r.get("metrics") or {} for r in rows_for_agg]
         if category in ("credit_risk_PD", "credit_risk_PD_quantum") and split_metric_rows:
@@ -3026,7 +3066,6 @@ def evaluate_dataset(
                     "precision_mean": f1_prec_rec["precision"],
                     "recall_mean": f1_prec_rec["recall"],
                     "sample_count": len(rows_from_file),
-                    "gt_override_count": 0,
                 }
             else:
                 split_avg = aggregate_metrics(split_metric_rows)
@@ -3039,20 +3078,22 @@ def evaluate_dataset(
                 "f1_macro_mean": sent_utils.f1_macro(refs, preds),
                 "exact_match_mean": sum(r.get("exact_match", 0) for r in split_metric_rows) / len(split_metric_rows),
                 "sample_count": len(rows_from_file),
-                "gt_override_count": 0,
             }
         elif category == "rag" and dataset_name.upper() in ("TATQA", "FINQA"):
             split_avg = aggregate_rag_split_metrics(rows_for_agg)
         else:
             split_avg = aggregate_metrics(split_metric_rows)
             split_avg["sample_count"] = len(rows_for_agg)
-        if category != "rag":
+        if category == "vision":
             split_avg["gt_override_count"] = int(sum((m.get("gt_override", 0) or 0) for m in split_metric_rows))
+        else:
+            split_avg.pop("gt_override_count", None)  # never write for credit_risk_pd etc.
         split_avgs[split_name] = split_avg
-
-        avg_path = split_dir / f"{dataset_name.lower()}_{split_name}_avg.json"
+        avg_path = split_dir / f"{dataset_file_slug}_{split_name}_avg.json"
+        # Never write gt_override_count for non-vision: filter at dump time so it cannot appear on disk
+        to_dump = {k: v for k, v in split_avg.items() if k != "gt_override_count"} if category != "vision" else split_avg
         with open(avg_path, "w", encoding="utf-8") as f:
-            json.dump(split_avg, f, ensure_ascii=False, indent=2)
+            json.dump(to_dump, f, ensure_ascii=False, indent=2)
 
     # -------------------------------
     # Order 3: Dataset-level weighted average from split avg files (read from disk)
@@ -3063,7 +3104,7 @@ def evaluate_dataset(
         if not split_dir.is_dir():
             continue
         split_name = split_dir.name
-        avg_path = split_dir / f"{dataset_name.lower()}_{split_name}_avg.json"
+        avg_path = split_dir / f"{dataset_file_slug}_{split_name}_avg.json"
         if not avg_path.exists():
             continue
         try:
@@ -3083,7 +3124,7 @@ def evaluate_dataset(
                 split_avgs_from_files,
                 singapore_now_iso(),
             )
-            dataset_weighted_path = dataset_proof_dir / f"{dataset_name.lower()}_avg.json"
+            dataset_weighted_path = dataset_proof_dir / f"{dataset_file_slug}_avg.json"
             with open(dataset_weighted_path, "w", encoding="utf-8") as f:
                 json.dump(dataset_payload, f, ensure_ascii=False, indent=2)
             return {
@@ -3114,7 +3155,7 @@ def evaluate_dataset(
             denom += count
         dataset_weighted_metrics[key] = num / denom if denom else 0.0
 
-    # Per-split breakdown for interpretability (split -> count + metrics [+ gt_override_count for non-RAG])
+    # Per-split breakdown for interpretability (split -> count + metrics [+ gt_override_count for vision only])
     def _mean_key(k: str) -> bool:
         return k.endswith("_mean")
     splits_breakdown = []
@@ -3122,8 +3163,10 @@ def evaluate_dataset(
         avg = split_avgs_from_files[split_name]
         metrics = {k: v for k, v in avg.items() if _mean_key(k)}
         entry = {"split": split_name, "sample_count": avg.get("sample_count", 0), "metrics": metrics}
-        if category != "rag":
+        if category == "vision":
             entry["gt_override_count"] = avg.get("gt_override_count", 0)
+        else:
+            entry.pop("gt_override_count", None)  # never write for credit_risk_pd etc.
         splits_breakdown.append(entry)
 
     dataset_payload = {
@@ -3132,14 +3175,31 @@ def evaluate_dataset(
         "splits": sorted(split_avgs_from_files.keys()),
         "splits_breakdown": splits_breakdown,
     }
-    if category != "rag":
+    if category == "vision":
         dataset_payload["gt_override_count"] = sum(avg.get("gt_override_count", 0) for avg in split_avgs_from_files.values())
+    else:
+        dataset_payload.pop("gt_override_count", None)  # never write for credit_risk_pd etc.
     dataset_payload["timestamp"] = singapore_now_iso()
     dataset_payload["weighted_metrics"] = dataset_weighted_metrics
+    if category == "credit_risk_PD":
+        dataset_payload["threshold_note"] = (
+            "F1/precision/recall computed at threshold=0.5 (eval_runner default). "
+            "Optimal threshold from OOT validation is 0.54. "
+            "AUC-ROC is the primary metric and is threshold-independent."
+        )
 
-    dataset_weighted_path = dataset_proof_dir / f"{dataset_name.lower()}_avg.json"
+    dataset_weighted_path = dataset_proof_dir / f"{dataset_file_slug}_avg.json"
+    # Never write gt_override_count for non-vision: filter at dump time (top-level and inside splits_breakdown)
+    if category != "vision":
+        payload_to_dump = {k: v for k, v in dataset_payload.items() if k != "gt_override_count"}
+        if "splits_breakdown" in payload_to_dump:
+            payload_to_dump["splits_breakdown"] = [
+                {k2: v2 for k2, v2 in ent.items() if k2 != "gt_override_count"} for ent in payload_to_dump["splits_breakdown"]
+            ]
+    else:
+        payload_to_dump = dataset_payload
     with open(dataset_weighted_path, "w", encoding="utf-8") as f:
-        json.dump(dataset_payload, f, ensure_ascii=False, indent=2)
+        json.dump(payload_to_dump, f, ensure_ascii=False, indent=2)
 
     return {
         "dataset": dataset_name,
@@ -3729,14 +3789,17 @@ def run_reevaluate_only(
         if category.lower() == "rag" and dataset_name.upper() in ("TATQA", "FINQA"):
             split_avg = aggregate_rag_split_metrics(rows_for_agg)
         else:
-            split_avg = aggregate_metrics(split_metric_rows)
-            split_avg["sample_count"] = len(rows_for_agg)
-            if category.lower() != "rag":
-                split_avg["gt_override_count"] = int(sum((m.get("gt_override", 0) or 0) for m in split_metric_rows))
+                split_avg = aggregate_metrics(split_metric_rows)
+                split_avg["sample_count"] = len(rows_for_agg)
+                if category.lower() == "vision":
+                    split_avg["gt_override_count"] = int(sum((m.get("gt_override", 0) or 0) for m in split_metric_rows))
+                else:
+                    split_avg.pop("gt_override_count", None)
         split_avgs_from_files[split_name] = split_avg
         avg_path = split_dir / f"{dataset_name.lower()}_{split_name}_avg.json"
+        to_dump = {k: v for k, v in split_avg.items() if k != "gt_override_count"} if category.lower() != "vision" else split_avg
         with open(avg_path, "w", encoding="utf-8") as f:
-            json.dump(split_avg, f, ensure_ascii=False, indent=2)
+            json.dump(to_dump, f, ensure_ascii=False, indent=2)
         print(f"[reevaluate_only] Wrote {avg_path}")
 
     # Dataset-level weighted average
@@ -3770,9 +3833,12 @@ def run_reevaluate_only(
             }
             for s in sorted(split_avgs_from_files.keys())
         ]
-        if category.lower() != "rag":
+        if category.lower() == "vision":
             for entry in splits_breakdown:
                 entry["gt_override_count"] = split_avgs_from_files[entry["split"]].get("gt_override_count", 0)
+        else:
+            for entry in splits_breakdown:
+                entry.pop("gt_override_count", None)
         dataset_payload = {
             "dataset": dataset_name,
             "sample_count": dataset_total,
@@ -3781,11 +3847,21 @@ def run_reevaluate_only(
             "weighted_metrics": dataset_weighted_metrics,
             "timestamp": singapore_now_iso(),
         }
-        if category.lower() != "rag":
+        if category.lower() == "vision":
             dataset_payload["gt_override_count"] = sum(avg.get("gt_override_count", 0) for avg in split_avgs_from_files.values())
+        else:
+            dataset_payload.pop("gt_override_count", None)
         dataset_avg_path = dataset_proof_dir / f"{dataset_name.lower()}_avg.json"
+        if category.lower() != "vision":
+            payload_to_dump = {k: v for k, v in dataset_payload.items() if k != "gt_override_count"}
+            if "splits_breakdown" in payload_to_dump:
+                payload_to_dump["splits_breakdown"] = [
+                    {k2: v2 for k2, v2 in ent.items() if k2 != "gt_override_count"} for ent in payload_to_dump["splits_breakdown"]
+                ]
+        else:
+            payload_to_dump = dataset_payload
         with open(dataset_avg_path, "w", encoding="utf-8") as f:
-            json.dump(dataset_payload, f, ensure_ascii=False, indent=2)
+            json.dump(payload_to_dump, f, ensure_ascii=False, indent=2)
         print(f"[reevaluate_only] Wrote {dataset_avg_path}")
 
     # Couple rescore and export: always regenerate *_predictions.txt from updated *_samples.json
@@ -3932,10 +4008,12 @@ def export_predictions_txt(
     per_sample_paths: list[Path] = []
     if category and dataset:
         base = dataset_proof_dir_override if dataset_proof_dir_override is not None else (proof_dir / category.lower() / dataset.lower())
+        # When override is set, files are named with override dir name (e.g. lendingclub_untuned_xgb_<split>_samples.json).
+        file_slug = dataset_proof_dir_override.name if dataset_proof_dir_override is not None else dataset.lower()
         if base.exists():
             for split_dir in base.iterdir():
                 if split_dir.is_dir():
-                    p = split_dir / _samples_filename(dataset, split_dir.name)
+                    p = split_dir / _samples_filename(file_slug, split_dir.name)
                     if p.exists():
                         per_sample_paths.append(p)
         per_sample_paths.sort()
@@ -4804,7 +4882,7 @@ if __name__ == "__main__":
         "--model_output_path",
         type=str,
         default=None,
-        help="Directory for this run's outputs (test/, train/, *_samples.json, *_avg.json). If not set but --model is set for credit_risk_PD/LendingClub, defaults to data/proof/credit_risk_pd/lendingclub_untuned_xgb. Use with --category and --dataset to compare runs side by side.",
+        help="Directory for this run's outputs (test/, train/, *_samples.json, *_avg.json). When set, files are written under this path. For credit_risk_PD/LendingClub with --model (untuned), defaults to data/proof/credit_risk_pd/lendingclub_untuned_xgb if not set. Tuned run (no --model) uses data/proof/credit_risk_pd/lendingclub.",
     )
     args = parser.parse_args()
 
@@ -4819,13 +4897,12 @@ if __name__ == "__main__":
         args.sample_id = RAG_REGRESSION_SAMPLE_IDS[key][0]
         print(f"[regression] Running pinned sample_id={args.sample_id!r} for {args.category}/{args.dataset}")
 
-    # Default model output path when --model is set for credit_risk_PD/LendingClub (so untuned run goes to lendingclub_untuned_xgb without requiring --model_output_path).
+    # Override only when user sets --model_output_path or --model (untuned LendingClub → lendingclub_untuned_xgb). Tuned run uses default data/proof/credit_risk_pd/lendingclub with lendingclub_<split>_* filenames.
     def _effective_model_output_path() -> Path | None:
         if args.model_output_path:
             return Path(args.model_output_path)
-        if args.model and args.category and args.dataset:
-            if args.category.strip().lower() == "credit_risk_pd" and args.dataset.strip().lower() == "lendingclub":
-                return PROOF_ROOT / "credit_risk_pd" / "lendingclub_untuned_xgb"
+        if args.category and args.dataset and args.category.strip().lower() == "credit_risk_pd" and args.dataset.strip().lower() == "lendingclub" and args.model:
+            return PROOF_ROOT / "credit_risk_pd" / "lendingclub_untuned_xgb"
         return None
 
     if args.sample_id:
@@ -4893,5 +4970,6 @@ if __name__ == "__main__":
         proof_dir_dataset_override=proof_dir_dataset_override,
     )
 
-    if args.export_predictions_txt:
+    # Always export predictions.txt when model_output_path was used (so override dir gets *_predictions.txt). Also when --export_predictions_txt.
+    if args.export_predictions_txt or proof_dir_dataset_override is not None:
         export_predictions_txt(proof_root, category=args.category, dataset=args.dataset, dataset_proof_dir_override=proof_dir_dataset_override)

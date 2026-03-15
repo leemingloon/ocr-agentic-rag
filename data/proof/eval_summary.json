@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-14T20:16:53.770304+08:00",
+  "timestamp": "2026-03-15T12:17:53.731413+08:00",
   "overview": {
     "credit_risk_memo_generator": {
       "sample_count_total": 100,
@@ -31,36 +31,40 @@
       }
     },
     "credit_risk_pd": {
-      "sample_count_total": 13453,
+      "sample_count_total": 26906,
       "sample_count_by_dataset": {
         "LendingClub": 13453
       },
       "metrics_breakdown": {
         "auc_roc_mean": {
-          "value": 0.60223,
-          "n_samples": 13453,
+          "value": 0.602599,
+          "n_samples": 26906,
           "datasets": [
+            "LendingClub",
             "LendingClub"
           ]
         },
         "f1_mean": {
-          "value": 0.08277,
-          "n_samples": 13453,
+          "value": 0.066794,
+          "n_samples": 26906,
           "datasets": [
+            "LendingClub",
             "LendingClub"
           ]
         },
         "precision_mean": {
-          "value": 0.361977,
-          "n_samples": 13453,
+          "value": 0.355443,
+          "n_samples": 26906,
           "datasets": [
+            "LendingClub",
             "LendingClub"
           ]
         },
         "recall_mean": {
-          "value": 0.046753,
-          "n_samples": 13453,
+          "value": 0.037094,
+          "n_samples": 26906,
           "datasets": [
+            "LendingClub",
             "LendingClub"
           ]
         }
@@ -118,10 +122,10 @@
       }
     },
     "rag": {
-      "sample_count_total": 401,
+      "sample_count_total": 800,
       "sample_count_by_dataset": {
-        "FinQA": 200,
-        "TATQA": 201
+        "FinQA": 400,
+        "TATQA": 400
       },
       "metrics_breakdown": {}
     },
@@ -256,11 +260,12 @@
     },
     "credit_risk_pd": {
       "category": "credit_risk_PD",
-      "sample_count": 13453,
+      "sample_count": 26906,
       "sample_count_by_dataset": {
         "LendingClub": 13453
       },
       "datasets": [
+        "LendingClub",
         "LendingClub"
       ],
       "datasets_breakdown": [
@@ -276,8 +281,7 @@
                 "f1_mean": 0.06620209059233449,
                 "precision_mean": 0.3275862068965517,
                 "recall_mean": 0.03682170542635659
-              },
-              "gt_override_count": 0
+              }
             },
             {
               "split": "train",
@@ -287,8 +291,7 @@
                 "f1_mean": 0.08944213923467036,
                 "precision_mean": 0.377431906614786,
                 "recall_mean": 0.05073221757322176
-              },
-              "gt_override_count": 0
+              }
             },
             {
               "split": "valid",
@@ -298,8 +301,7 @@
                 "f1_mean": 0.06920415224913495,
                 "precision_mean": 0.3225806451612903,
                 "recall_mean": 0.03875968992248062
-              },
-              "gt_override_count": 0
+              }
             }
           ],
           "weighted_metrics": {
@@ -308,47 +310,93 @@
             "precision_mean": 0.3619773816317547,
             "recall_mean": 0.0467527157611753
           }
+        },
+        {
+          "dataset": "LendingClub",
+          "sample_count": 13453,
+          "splits_breakdown": [
+            {
+              "split": "test",
+              "sample_count": 2691,
+              "metrics": {
+                "auc_roc_mean": 0.6003394814220797,
+                "f1_mean": 0.03278688524590164,
+                "precision_mean": 0.2727272727272727,
+                "recall_mean": 0.01744186046511628
+              }
+            },
+            {
+              "split": "train",
+              "sample_count": 9417,
+              "metrics": {
+                "auc_roc_mean": 0.6039760801028046,
+                "f1_mean": 0.055930568948891035,
+                "precision_mean": 0.35802469135802467,
+                "recall_mean": 0.030334728033472803
+              }
+            },
+            {
+              "split": "valid",
+              "sample_count": 1345,
+              "metrics": {
+                "auc_roc_mean": 0.6011602946734844,
+                "f1_mean": 0.051094890510948905,
+                "precision_mean": 0.4375,
+                "recall_mean": 0.027131782945736434
+              }
+            }
+          ],
+          "weighted_metrics": {
+            "auc_roc_mean": 0.602967136487829,
+            "f1_mean": 0.050817684064941235,
+            "precision_mean": 0.3489084300473953,
+            "recall_mean": 0.027435548090749783
+          }
         }
       ],
       "weighted_metrics": {
-        "auc_roc_mean": 0.6022299376552934,
-        "f1_mean": 0.08277009111216453,
-        "precision_mean": 0.3619773816317547,
-        "recall_mean": 0.0467527157611753
+        "auc_roc_mean": 0.6025985370715612,
+        "f1_mean": 0.06679388758855288,
+        "precision_mean": 0.35544290583957505,
+        "recall_mean": 0.03709413192596254
       },
       "metrics_breakdown": {
         "auc_roc_mean": {
-          "value": 0.60223,
-          "n_samples": 13453,
+          "value": 0.602599,
+          "n_samples": 26906,
           "datasets": [
+            "LendingClub",
             "LendingClub"
           ]
         },
         "f1_mean": {
-          "value": 0.08277,
-          "n_samples": 13453,
+          "value": 0.066794,
+          "n_samples": 26906,
           "datasets": [
+            "LendingClub",
             "LendingClub"
           ]
         },
         "precision_mean": {
-          "value": 0.361977,
-          "n_samples": 13453,
+          "value": 0.355443,
+          "n_samples": 26906,
           "datasets": [
+            "LendingClub",
             "LendingClub"
           ]
         },
         "recall_mean": {
-          "value": 0.046753,
-          "n_samples": 13453,
+          "value": 0.037094,
+          "n_samples": 26906,
           "datasets": [
+            "LendingClub",
             "LendingClub"
           ]
         }
       },
       "model_class": "PDModel",
       "backbone": "xgboost",
-      "timestamp": "2026-03-14T16:51:30.959852+08:00"
+      "timestamp": "2026-03-15T12:17:53.709411+08:00"
     },
     "ocr": {
       "category": "ocr",
@@ -483,10 +531,10 @@
     },
     "rag": {
       "category": "rag",
-      "sample_count": 401,
+      "sample_count": 800,
       "sample_count_by_dataset": {
-        "FinQA": 200,
-        "TATQA": 201
+        "FinQA": 400,
+        "TATQA": 400
       },
       "datasets": [
         "FinQA",
@@ -495,44 +543,44 @@
       "datasets_breakdown": [
         {
           "dataset": "FinQA",
-          "sample_count": 200,
+          "sample_count": 400,
           "splits_breakdown": [
             {
               "split": "test",
-              "sample_count": 1,
+              "sample_count": 200,
               "metrics": {
-                "relaxed_exact_match": "1.0000 (1/1)",
-                "exact_match": "1.0000 (1/1)",
-                "f1": 0.0
+                "relaxed_exact_match": "0.7750 (155/200)",
+                "exact_match": "0.7150 (143/200)",
+                "f1": 0.0157
               }
             },
             {
               "split": "train",
-              "sample_count": 199,
+              "sample_count": 200,
               "metrics": {
-                "relaxed_exact_match": "0.9196 (183/199)",
-                "exact_match": "0.9045 (180/199)",
-                "f1": 0.0226
+                "relaxed_exact_match": "0.9200 (184/200)",
+                "exact_match": "0.9050 (181/200)",
+                "f1": 0.0225
               }
             }
           ],
           "weighted_metrics": {
-            "relaxed_exact_match": "0.9200 (184/200)",
-            "exact_match": "0.9050 (181/200)",
-            "f1": 0.0225
+            "relaxed_exact_match": "0.8475 (339/400)",
+            "exact_match": "0.8100 (324/400)",
+            "f1": 0.0191
           }
         },
         {
           "dataset": "TATQA",
-          "sample_count": 201,
+          "sample_count": 400,
           "splits_breakdown": [
             {
               "split": "dev",
-              "sample_count": 1,
+              "sample_count": 200,
               "metrics": {
-                "relaxed_exact_match": "1.0000 (1/1)",
-                "exact_match": "1.0000 (1/1)",
-                "f1": 1.0
+                "relaxed_exact_match": "0.8950 (179/200)",
+                "exact_match": "0.7700 (154/200)",
+                "f1": 0.6244
               }
             },
             {
@@ -546,9 +594,9 @@
             }
           ],
           "weighted_metrics": {
-            "relaxed_exact_match": "0.9851 (198/201)",
-            "exact_match": "0.8109 (163/201)",
-            "f1": 0.6753
+            "relaxed_exact_match": "0.9400 (376/400)",
+            "exact_match": "0.7900 (316/400)",
+            "f1": 0.6491
           }
         }
       ],
@@ -556,7 +604,7 @@
       "metrics_breakdown": {},
       "model_class": "AgenticRAG",
       "backbone": "langgraph_hybrid_retriever_bge_reranker",
-      "timestamp": "2026-03-14T20:16:53.752698+08:00"
+      "timestamp": "2026-03-15T08:37:21.266741+08:00"
     },
     "vision": {
       "category": "vision",

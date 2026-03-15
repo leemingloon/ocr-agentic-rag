@@ -97,6 +97,8 @@ Output the average. Do not default to averaging only two values when the row or 
 # across segments; for "portion of total" questions use the second aligned pair.
 
 TABLE_SEGMENT_ALIGNMENT_PRIMER = """
+**Scope — OCR-flattened tables only.** Use this primer when the table is flattened by OCR so that segment and total labels repeat within blocks.
+
 **OCR-flattened segment tables:** The same label (e.g. "total backlog") may appear **multiple times** within each segment block. **Do NOT take the first match.**
 
 **Steps:**
@@ -124,6 +126,10 @@ divide(7991, 21367)
 
 # Gold-blinded primer for year-over-year table change: compute difference without revealing the answer
 TABLE_YEAR_CHANGE_PRIMER = """
+**Loss account carve-out — check this FIRST.**
+
+If the line item in the question is NET LOSS or OPERATING LOSS (the values are shown as $(X) in the table), do NOT use this primer. Apply LOSS_CHANGE_PRIMER instead. This carve-out applies ONLY to "net loss" and "operating loss" — NOT to "allowance for loan losses", "accumulated other comprehensive loss", or other balance items that incidentally contain the word "loss".
+
 For questions asking for the **change** (in millions or in value) of a line item **from one year to another** (e.g. "what was the change in the carrying amount from 2007 to 2008?"):
 1. Locate the value for the **earlier** year (e.g. 2007) in the table row/column that matches the requested line item.
 2. Locate the value for the **later** year (e.g. 2008) in the same row/column.
@@ -148,6 +154,8 @@ For **aggregate** measures (revenues, total assets, total compensation, etc.), w
 # or selecting the wrong year when computing ratios.
 
 TABLE_ROW_ALIGNMENT_PRIMER = """
+**Scope — standard tables with visible year labels.** Use this primer when the table has clear year columns or rows (e.g. 2018, 2017).
+
 For financial tables that show **multiple years but the question does NOT specify a year** (e.g. "what portion of total backlog is related to Ingalls segment?"):
 
 - Step 1: Identify whether the table shows **multiple year rows or columns** (e.g. 2018, 2017).
@@ -229,6 +237,26 @@ For queries like **total operating expenses**, **total revenue**, etc. in millio
 - Output the **direct** figure if present; do not prefer a percentage-based calculation when a direct total is available.
 """
 
+# When the question asks "which years does the table provide information for", list years from the table that matches the question.
+TABLE_YEARS_PRIMER = """
+When the question asks **which years** (or **what years**) **the table provides information for** (or "covers", "includes"):
+- **List every year** that appears in the **relevant** table (column headers, row labels, narrative). If the question refers to specific metrics (e.g. projected benefit obligation), use only a table that contains those metrics — see pension funding status primer when the question mentions PBO, ABO, or fair value of plan assets.
+- If the question asks for a single year (e.g. latest reporting year), give that year only; otherwise list all years the table refers to.
+"""
+
+# Pension: only extract years from the funding status table (PBO, ABO, fair value of plan assets). Ignore asset allocation tables.
+PENSION_FUNDING_STATUS_TABLE_PRIMER = """
+**Pension plan questions mentioning projected benefit obligation (PBO), accumulated benefit obligation (ABO), or fair value of plan assets** refer specifically to the **pension funding status** table.
+
+- **Only extract years from a table that explicitly contains rows labeled:** Projected benefit obligation, Accumulated benefit obligation, Fair value of plan assets (or equivalent). That table reports the funded status and its column headers are the reporting years (e.g. 2020, 2019).
+
+- **Ignore pension asset allocation tables** that contain only: Target allocations, Percentage of plan assets (by category). Those tables describe **asset allocation**, not PBO/ABO/fair value of plan assets, and **do not answer** the question.
+
+- If the retrieved context contains only an asset allocation table (target allocations, percentage of plan assets), **do not** extract years from it. State that the retrieved table does not contain the required rows (projected benefit obligation, accumulated benefit obligation, fair value of plan assets) and that the question cannot be answered from the provided table.
+
+- If multiple pension tables exist, **select the table** that contains the three liability/asset rows above and extract the reporting year(s) from **that table only**.
+"""
+
 # WHAT_TABLE_SHOWS_PRIMER — disambiguate table when query is ambiguous
 WHAT_TABLE_SHOWS_PRIMER = """
 Before answering any "What does the table show?" (or similar) query:
@@ -250,6 +278,14 @@ When the question asks for a **ratio** (e.g. ratio of total X to total Y) or a *
 
 # Absolute year-over-year change (signed difference only; not growth rate).
 ABSOLUTE_CHANGE_PRIMER = """
+**Loss account carve-out — check this FIRST.**
+
+If the SPECIFIC SUBJECT of the change in this question is NET LOSS or OPERATING LOSS — that is, the question explicitly contains the phrase "net loss" or "operating loss", and the table values appear in parenthetical format $(X) indicating a loss account — then do NOT use this primer. Apply LOSS_CHANGE_PRIMER instead, which uses the magnitude convention (strip the negative sign before subtracting).
+
+This primer applies to INCOME, REVENUE, ASSET, and BALANCE-SHEET metrics where table values are positive or signed non-parenthetically. Examples: "change in total assets", "change in revenue", "change in OFA Level 2", "change in carrying amount", "change in allowance for loan losses", "change in accumulated other comprehensive loss".
+
+The carve-out is NARROW: it applies ONLY to "net loss" and "operating loss" as the direct subject, not to any metric that contains the word "loss" (e.g. "allowance for loan losses", "accumulated other comprehensive loss" are NOT loss accounts for this purpose — they are balance-sheet items with positive reported values).
+
 For questions asking **how much** a metric **changed** (absolute difference, not percentage) **from [YEAR_A] to [YEAR_B]** (e.g. "How much did Level 2 OFA change by from 2018 year end to 2019 year end?"):
 
 1. **Identify the two years from the query string.**
@@ -274,6 +310,17 @@ Example (intentional: 2018 > 2019 so decrease → negative): Query "How much did
 
 # "Difference between A and B" (no directional framing): always subtract(larger, smaller) for non-negative result.
 ABSOLUTE_DIFFERENCE_PRIMER = """
+**Scope — applies ONLY when the question has no temporal directionality.**
+
+Temporal directionality means the question specifies a BASE PERIOD and a COMPARISON PERIOD with a clear direction of change (e.g. "from 2009 to 2010", "percent reduction from X to Y", "percent increase", "percentage decrease", "percentage increase"). If ANY of those patterns appear AND the two values being compared are from DIFFERENT TIME PERIODS, do NOT use this primer — use PERCENT_REDUCTION_SIGN_PRIMER or PERCENT_CHANGE_BY_DIRECTION_PRIMER instead.
+
+This primer applies to:
+  - "difference between [category A] and [category B]" (same time period)
+  - "difference between [value X] and [value Y]" (no time ordering)
+  - "difference between [actual] and [target]" (plan vs actual, same period)
+
+It does NOT apply to: "difference between [year A value] and [year B value]" when the two values come from different fiscal years and a direction of change is implied. In those cases use TABLE_YEAR_CHANGE_PRIMER.
+
 The question asks for the **difference between** two values with no directional framing (e.g. "difference between operating lease obligations and other purchase obligations").
 - **Convention:** Always compute **subtract(larger_value, smaller_value)** so the result is non-negative.
 - Do **not** use positional order from the query — identify which value is larger and subtract the smaller from it.

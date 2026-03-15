@@ -57,6 +57,8 @@ from rag_system.primers import (
     TABLE_DATE_COLUMN_PRIMER,
     TABLE_TOTAL_ACROSS_COLUMNS_PRIMER,
     TOTALS_PREFER_DIRECT_PRIMER,
+    TABLE_YEARS_PRIMER,
+    PENSION_FUNDING_STATUS_TABLE_PRIMER,
     WHAT_TABLE_SHOWS_PRIMER,
     ARITHMETIC_FROM_COMPONENTS_PRIMER,
     # Section 3: Arithmetic
@@ -132,6 +134,8 @@ RAG_INTENT_CUMULATIVE_RETURN = "cumulative_return"        # cumulative total ret
 RAG_INTENT_LEASE_PERCENT = "lease_percent"                # percent of total operating leases (direct rent-expense line, not schedule sum)
 RAG_INTENT_ACCOUNTING_ADJUSTMENT = "accounting_adjustment"  # TAT-QA: cumulative-effect / adoption adjustment — select single line, preserve units
 RAG_INTENT_WHAT_TABLE_SHOWS = "what_table_shows"     # "What does the table show?" — disambiguate table before answering
+RAG_INTENT_TABLE_YEARS = "table_years"               # "Which years does the table provide information for" — include all years including target
+RAG_INTENT_PENSION_FUNDING_STATUS_YEARS = "pension_funding_status_years"  # which years for PBO/ABO/fair value → funding status table only; ignore asset allocation table
 RAG_INTENT_ARITHMETIC_FROM_COMPONENTS = "arithmetic_from_components"  # ratio/total from components when not stated (TAT-QA 80d7a9cd)
 RAG_INTENT_CROSS_YEAR_CARRY_FORWARD = "cross_year_carry_forward"  # % stated for prior year, apply to query year base (FinQA MSI/2008)
 RAG_INTENT_UNIT_SCALE = "unit_scale"                 # "in millions" etc. — prefer values at requested scale over raw table (FinQA SWKS/2012)
@@ -195,6 +199,10 @@ def classify_query_intent(query: str) -> List[str]:
         intents.append(RAG_INTENT_ACCOUNTING_ADJUSTMENT)
     if _needs_what_table_shows_primer(query):
         intents.append(RAG_INTENT_WHAT_TABLE_SHOWS)
+    if _needs_table_years_primer(query):
+        intents.append(RAG_INTENT_TABLE_YEARS)
+    if _needs_pension_funding_status_table_primer(query):
+        intents.append(RAG_INTENT_PENSION_FUNDING_STATUS_YEARS)
     if _needs_arithmetic_from_components_primer(query):
         intents.append(RAG_INTENT_ARITHMETIC_FROM_COMPONENTS)
     if _needs_cross_year_carry_forward_primer(query):
@@ -766,6 +774,32 @@ def _needs_what_table_shows_primer(query: str) -> bool:
         q,
         re.IGNORECASE,
     ) is not None
+
+
+def _needs_table_years_primer(query: str) -> bool:
+    """True when query asks which/what years the table provides information for (include target year e.g. 2020)."""
+    if not query or not isinstance(query, str):
+        return False
+    q = query.strip().lower()
+    if "table" not in q:
+        return False
+    return bool(
+        re.search(r"which\s+years?\s+(?:does|do)\s+(?:the\s+)?table\s+provide", q)
+        or re.search(r"what\s+years?\s+(?:does|do)\s+(?:the\s+)?table\s+provide", q)
+        or re.search(r"which\s+years?\s+.*\s+table\s+(?:provide|covers|includes)", q)
+    )
+
+
+def _needs_pension_funding_status_table_primer(query: str) -> bool:
+    """True when query asks about years/metrics for projected benefit obligation, ABO, or fair value of plan assets (use funding status table only; ignore asset allocation table)."""
+    if not query or not isinstance(query, str):
+        return False
+    q = query.strip().lower()
+    if "projected" not in q and "pbo" not in q and "abo" not in q and "fair value of plan assets" not in q and "fair value" not in q:
+        return False
+    return any(
+        kw in q for kw in ("benefit", "obligation", "pension", "plan assets", "plan")
+    )
 
 
 def _needs_arithmetic_from_components_primer(query: str) -> bool:
@@ -1449,6 +1483,7 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
         needs_event_scoped_arithmetic = RAG_INTENT_EVENT_SCOPED in intents
         needs_accounting_adjustment = RAG_INTENT_ACCOUNTING_ADJUSTMENT in intents
         needs_what_table_shows = RAG_INTENT_WHAT_TABLE_SHOWS in intents
+        needs_table_years = RAG_INTENT_TABLE_YEARS in intents and not is_yes_no
         needs_arithmetic_from_components = RAG_INTENT_ARITHMETIC_FROM_COMPONENTS in intents
         needs_cross_year_carry_forward = RAG_INTENT_CROSS_YEAR_CARRY_FORWARD in intents and not is_yes_no
         needs_unit_scale = RAG_INTENT_UNIT_SCALE in intents and not is_yes_no
@@ -1718,6 +1753,19 @@ Can we answer the query with this information? Reply with just "YES" or "NO"."""
         )
         if os.environ.get("RAG_DEBUG") == "1" and needs_what_table_shows:
             print("[DEBUG] generator: injecting what-table-shows primer (identify table before answering; disambiguate if multiple tables)")
+        table_years_primer_block = (
+            f"\n\nWhich years the table provides information for:{TABLE_YEARS_PRIMER}\n"
+            if needs_table_years else ""
+        )
+        if os.environ.get("RAG_DEBUG") == "1" and needs_table_years:
+            print("[DEBUG] generator: injecting table-years primer (list years from relevant table)")
+        needs_pension_funding_status_table = RAG_INTENT_PENSION_FUNDING_STATUS_YEARS in intents and not is_yes_no
+        pension_funding_status_table_primer_block = (
+            f"\n\nPension funding status table (use only table with PBO, ABO, fair value of plan assets):{PENSION_FUNDING_STATUS_TABLE_PRIMER}\n"
+            if needs_pension_funding_status_table else ""
+        )
+        if os.environ.get("RAG_DEBUG") == "1" and needs_pension_funding_status_table:
+            print("[DEBUG] generator: injecting pension funding status table primer (ignore asset allocation table)")
         arithmetic_from_components_primer_block = (
             f"\n\nArithmetic from components (ratio/total):{ARITHMETIC_FROM_COMPONENTS_PRIMER}\n"
             if needs_arithmetic_from_components else ""
@@ -1938,6 +1986,8 @@ Information:
 {event_scoped_primer_block}
 {accounting_adjustment_primer_block}
 {what_table_shows_primer_block}
+{table_years_primer_block}
+{pension_funding_status_table_primer_block}
 {arithmetic_from_components_primer_block}
 {cross_year_carry_forward_primer_block}
 {unit_scale_primer_block}
