@@ -1,5 +1,6 @@
 {
-  "anls_mean": 1.0,
-  "exact_match_mean": 1.0,
-  "sample_count": 7
+  "anls_mean": 0.8888888888888888,
+  "exact_match_mean": 0.8888888888888888,
+  "sample_count": 9,
+  "gt_override_count": 0
 }

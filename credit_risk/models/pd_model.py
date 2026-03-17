@@ -95,6 +95,31 @@ class _StackedPDWrapper:
         return (self.predict_proba(X)[:, 1] >= 0.5).astype(int)
 
 
+class _LRWithScaler:
+    """Thin wrapper: StandardScaler + LogisticRegression with predict_proba
+    interface compatible with eval_runner PDModel loader.
+    Bundles the scaler inside predict_proba so no separate scaling step is
+    needed at inference — same interface as _StackedPDWrapper.
+    """
+    def __init__(self, scaler, lr_model, feature_names):
+        self.scaler = scaler
+        self.lr_model = lr_model
+        self.feature_names = feature_names
+
+    def predict_proba(self, X):
+        import pandas as pd
+        import numpy as np
+        if hasattr(X, "columns"):
+            missing = [c for c in self.feature_names if c not in X.columns]
+            for c in missing:
+                X = X.copy()
+                X[c] = 0.0
+            X = X[self.feature_names]
+        X_arr = np.array(X)
+        X_scaled = self.scaler.transform(X_arr)
+        return self.lr_model.predict_proba(X_scaled)
+
+
 class PDModel:
     """
     Probability of Default (PD) prediction model
@@ -364,11 +389,14 @@ class PDModel:
         Args:
             filepath: Local file path
         """
-        # Allow pkls saved from notebook (__main__._StackedPDWrapper) to load when we run from eval_runner
+        # Allow pkls saved from notebook (__main__._StackedPDWrapper / _LRWithScaler) to load when we run from eval_runner
         import sys
         main_module = sys.modules.get("__main__")
-        if main_module is not None and not hasattr(main_module, "_StackedPDWrapper"):
-            setattr(main_module, "_StackedPDWrapper", _StackedPDWrapper)
+        if main_module is not None:
+            if not hasattr(main_module, "_StackedPDWrapper"):
+                setattr(main_module, "_StackedPDWrapper", _StackedPDWrapper)
+            if not hasattr(main_module, "_LRWithScaler"):
+                setattr(main_module, "_LRWithScaler", _LRWithScaler)
         model_data = joblib.load(filepath)
         
         self.model = model_data["model"]

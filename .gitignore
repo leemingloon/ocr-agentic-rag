@@ -243,3 +243,7 @@ data/rag/**/tatqa_retriever_index_b4_dedup/
 # Large RAG data (keep repo small)
 **/train_qa.json
 **/test.json
+
+# Backup LSTM notebooks
+notebooks/00_pd_homecredit_lstm_kaggle_slim.ipynb
+notebooks/00_pd_homecredit_lstm_kaggle_stable.ipynb

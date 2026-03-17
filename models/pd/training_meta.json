@@ -1,4 +1,6 @@
 {
-  "xgb_stack_tuning_sec": 290.8660428000003,
-  "ann_training_sec": 15.286261400000512
+  "xgb_stack_tuning_sec": 228.4140109,
+  "ann_training_sec": 8.056219400001282,
+  "stack_oot_auc": 0.6360742426798609,
+  "stack_oot_ks": 0.2046011249058507
 }

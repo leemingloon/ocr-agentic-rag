@@ -2638,6 +2638,7 @@ def evaluate_dataset(
     run_sample_id: str | None = None,
     proof_dir: str | Path = "data/proof",
     dataset_proof_dir_override: Path | None = None,
+    output_suffix: str = "",
 ):
     """Streamed evaluation over adapter.load_split(...), row-by-row.
 
@@ -2680,12 +2681,12 @@ def evaluate_dataset(
     if dataset_proof_dir_override is not None:
         dataset_proof_dir = Path(dataset_proof_dir_override)
         category_proof_dir = dataset_proof_dir.parent
-        dataset_file_slug = dataset_proof_dir.name  # e.g. lendingclub_untuned_xgb for chatbot identification
+        dataset_file_slug = dataset_proof_dir.name + (output_suffix or "")
     else:
         proof_root = Path(proof_dir)
         category_proof_dir = proof_root / category.lower()
         dataset_proof_dir = category_proof_dir / dataset_name.lower()
-        dataset_file_slug = dataset_name.lower()
+        dataset_file_slug = dataset_name.lower() + (output_suffix or "")
     dataset_proof_dir.mkdir(parents=True, exist_ok=True)
 
     # Global (this run only)
@@ -3184,7 +3185,7 @@ def evaluate_dataset(
     if category == "credit_risk_PD":
         dataset_payload["threshold_note"] = (
             "F1/precision/recall computed at threshold=0.5 (eval_runner default). "
-            "Optimal threshold from OOT validation is 0.54. "
+            "Optimal threshold from OOT validation is 0.30 (max-F1 = 0.576). "
             "AUC-ROC is the primary metric and is threshold-independent."
         )
 
@@ -3389,6 +3390,7 @@ def main(
     pd_model_path: str | None = None,
     proof_dir: str | Path = "data/proof",
     proof_dir_dataset_override: Path | None = None,
+    output_suffix: str = "",
 ):
     global _PD_MODEL_PATH_OVERRIDE
     _PD_MODEL_PATH_OVERRIDE = pd_model_path
@@ -3459,6 +3461,7 @@ def main(
                 run_sample_id=run_sample_id,
                 proof_dir=proof_root,
                 dataset_proof_dir_override=dataset_proof_override,
+                output_suffix=output_suffix,
             )
             if summary and summary["sample_count"] > 0:
                 dataset_summaries.append(summary)
@@ -4058,6 +4061,7 @@ def export_predictions_txt(
             proof_category = rel.parts[0] if len(rel.parts) >= 1 else ""
             dataset_from_path = rel.parts[1] if len(rel.parts) >= 2 else ""
         except ValueError:
+            rel = type("_Rel", (), {"parts": ()})()  # path not under proof_dir (e.g. model_output_path override)
             is_rag = False
             proof_category = ""
             dataset_from_path = ""
@@ -4075,7 +4079,7 @@ def export_predictions_txt(
 
         # RAG: use same population as dataset avg (samples JSON only, rows with metrics)
         # so AGGREGATE SUMMARY in predictions.txt matches finqa_avg.json / tatqa_avg.json.
-        if rel.parts[0] == "rag" and header_dataset.upper() in ("TATQA", "FINQA"):
+        if len(rel.parts) >= 1 and rel.parts[0] == "rag" and header_dataset.upper() in ("TATQA", "FINQA"):
             rows_for_header = [r for r in rows if r.get("metrics")]
             total_samples = len(rows_for_header)
         else:
@@ -4327,7 +4331,7 @@ def export_predictions_txt(
             ]
 
         # Minimal, category-aware legend.
-        if rel.parts[0] == "rag" and header_dataset.upper() == "TATQA":
+        if len(rel.parts) >= 1 and rel.parts[0] == "rag" and header_dataset.upper() == "TATQA":
             all_met = [r.get("metrics") or {} for r in rows_for_header]
             rem_vals = [m.get("relaxed_exact_match") for m in all_met if isinstance(m.get("relaxed_exact_match"), (int, float))]
             ex_vals = [m.get("exact_match") for m in all_met if isinstance(m.get("exact_match"), (int, float))]
@@ -4652,7 +4656,7 @@ def export_predictions_txt(
                 f.write("\n".join(lines))
             print(f"[export_predictions_txt] Wrote {out_path}")
             continue
-        elif rel.parts[0] == "rag" and header_dataset.upper() == "FINQA":
+        elif len(rel.parts) >= 1 and rel.parts[0] == "rag" and header_dataset.upper() == "FINQA":
             all_met = [r.get("metrics") or {} for r in rows_for_header]
             rem_vals = [m.get("relaxed_exact_match") for m in all_met if isinstance(m.get("relaxed_exact_match"), (int, float))]
             ex_vals = [m.get("exact_match") for m in all_met if isinstance(m.get("exact_match"), (int, float))]
@@ -4730,20 +4734,20 @@ def export_predictions_txt(
                 f1_zero_sub1=f1_zero_sub1,
                 dataset_label_for_gt_issue="FinQA",
             )
-        elif rel.parts[0] == "vision":
+        elif len(rel.parts) >= 1 and rel.parts[0] == "vision":
             header_lines += [
                 "anls                : Average Normalized Levenshtein Similarity (DocVQA/InfographicsVQA).",
                 "exact_match         : Exact/relaxed text match (or MC letter for MMMU).",
                 "strict_accuracy     : Exact chart answer (ChartQA).",
                 "relaxed_accuracy    : Numeric-tolerance chart answer (ChartQA).",
             ]
-        elif rel.parts[0] == "credit_risk_memo_generator":
+        elif len(rel.parts) >= 1 and rel.parts[0] == "credit_risk_memo_generator":
             header_lines += [
                 "exact_match         : 1.0 if memo matches reference.",
                 "f1                  : Token-level F1; 1.0 when exact_match is 1.0.",
                 "relaxed_match       : 1.0 if key conclusions/ratios match despite wording.",
             ]
-        if not (rel.parts[0] == "rag" and header_dataset.upper() in ("TATQA", "FINQA")):
+        if not (len(rel.parts) >= 1 and rel.parts[0] == "rag" and header_dataset.upper() in ("TATQA", "FINQA")):
             header_lines += [
                 "",
                 "SCORER LABELS",
@@ -4770,7 +4774,7 @@ def export_predictions_txt(
 
         lines = header_lines
         # For TATQA, append shared evaluation methodology after metric design sections.
-        if rel.parts[0] == "rag" and header_dataset.upper() == "TATQA":
+        if len(rel.parts) >= 1 and rel.parts[0] == "rag" and header_dataset.upper() == "TATQA":
             lines.append("")
             lines.append(EVAL_REPORT_METHODOLOGY)
         for i, row in enumerate(rows):
@@ -4884,6 +4888,12 @@ if __name__ == "__main__":
         default=None,
         help="Directory for this run's outputs (test/, train/, *_samples.json, *_avg.json). When set, files are written under this path. For credit_risk_PD/LendingClub with --model (untuned), defaults to data/proof/credit_risk_pd/lendingclub_untuned_xgb if not set. Tuned run (no --model) uses data/proof/credit_risk_pd/lendingclub.",
     )
+    parser.add_argument(
+        "--output_suffix",
+        default="",
+        help="Suffix appended to output JSON filenames (e.g. '_lr_tuned') "
+             "to avoid overwriting results from a different model run.",
+    )
     args = parser.parse_args()
 
     if args.regression:
@@ -4953,6 +4963,10 @@ if __name__ == "__main__":
 
     proof_root = PROOF_ROOT
     proof_dir_dataset_override = _effective_model_output_path()
+    # When --output_suffix is set, write to default dir (e.g. lendingclub/) with suffixed filenames so stack results are not overwritten
+    output_suffix_val = getattr(args, "output_suffix", "") or ""
+    if output_suffix_val:
+        proof_dir_dataset_override = None
 
     main(
         max_samples_per_split=args.max_split,
@@ -4968,6 +4982,7 @@ if __name__ == "__main__":
         pd_model_path=args.model,
         proof_dir=proof_root,
         proof_dir_dataset_override=proof_dir_dataset_override,
+        output_suffix=output_suffix_val,
     )
 
     # Always export predictions.txt when model_output_path was used (so override dir gets *_predictions.txt). Also when --export_predictions_txt.
