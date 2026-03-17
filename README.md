@@ -68,7 +68,7 @@ End-to-end pipeline: **OCR → Agentic RAG → Multimodal Vision → Credit Risk
 │   PD Model: Logistic Regression — OOT AUC 0.66                    │
 │   Risk Memos: LLM-generated — FinanceBench exact match 94% n=100  │
 │   Governance: Prompt versioning, safety filters                   │
-│   Monitoring: Drift detection — Logistic Regression - 0.234       │
+│   Monitoring: Drift detection — Logistic Regression 0.234       │
 └───────────────────────────────────────────────────────────────────┘
 ```
 
