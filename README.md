@@ -288,7 +288,7 @@ python eval_runner.py --category credit_risk_PD
 - **Vision model:** Claude Sonnet (vision)
 - **Use cases:** Chart QA, document QA, complex layouts, OCR validation
 
-### Credit Risk (NEW)
+### Credit Risk
 - **Feature engineering:** Pandas, NumPy (ratios, trends, NLP signals)
 - **Sentiment/NLP:** FinBERT (ProsusAI/finbert) + rule-based postprocessing
 - **PD / risk models:** XGBoost, LightGBM, scikit-learn, PyTorch (ANN/LSTM)
