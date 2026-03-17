@@ -1,15 +1,15 @@
 OCR→Agentic RAG→Credit Risk Platform
 
-**Document Intelligence + Credit Risk System**
-**Author:** Lee Ming Loon
+**Document Intelligence + Credit Risk System**<br>
+**Author:** Lee Ming Loon<br>
 **Status:** Deployed to Amazon Web Services (AWS) Sagemaker. Evaluated on Local / Google Colabs / Kaggle.
 
-**Credit risk (feature eng, train model):** 00-04z Jupyter notebooks (`.ipynb`) under the `notebooks/` folder.<br>
-**RAG (model predictions):** *_samples.json files under `data/proof/rag/` folder.<br>
-**Vision (model predictions):** *_samples.json files under `data/proof/vision/` folder.<br>
-**OCR (model predictions):** *_samples.json files under `data/proof/ocr/` folder. [IN PROGRESS]
+**Credit risk (feature eng, train model):** 00-04z Jupyter notebooks (`.ipynb`) under the `notebooks/` folder.<br> [COMPLETED]
+**RAG (model predictions):** <dataset>_<split>_samples.json files under `data/proof/rag/` folder.<br> [COMPLETED]
+**Vision (model predictions):** <dataset>_<split>_samples.json files under `data/proof/vision/` folder.<br>
+**OCR (model predictions):** <dataset>_<split>_samples.json files under `data/proof/ocr/` folder.
 
-**Demos:** demo_*.ipynb under the `notebooks/` folder. [IN PROGRESS]
+**Demos:** demo_*.ipynb under the `notebooks/` folder.
 
 **Evaluation (Credit Risk, RAG, OCR, VLM):** eval_*.py files found in repo root directory. 
 
@@ -27,41 +27,49 @@ End-to-end pipeline: **OCR → Agentic RAG → Multimodal Vision → Credit Risk
 ## 📊 System Architecture
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    LAYER 1: OCR PIPELINE                     │
+│                    LAYER 1: OCR PIPELINE                    │
 │   3-Tier Detection: Cache → Classical → DL                  │
 │   Recognition: Tesseract → PaddleOCR → Vision OCR           │
-│   Performance: TBD (see data/proof)                          │
+│   Performance: N/A                                          │
 └────────────────────────┬────────────────────────────────────┘
                          │
                          ▼ Structured Text + Layout
                          │
 ┌─────────────────────────────────────────────────────────────┐
-│                  LAYER 2: AGENTIC RAG                        │
+│                  LAYER 2: AGENTIC RAG                       │
 │   Retrieval: BM25 + BGE-M3 (hybrid dense+sparse)            │
 │   Reranking: BGE-reranker-v2-m3 (cross-encoder)             │
-│   Orchestration: LangGraph (autonomous tool selection)       │
-│   Performance: TBD (see data/proof)                         │
+│   Orchestration: LangGraph (autonomous tool selection)      │
+│   Performance:                                              │
+│        FinQA, out-of-sample:                                │
+│               relaxed exact match 77.5%                     │
+│               exact match 71.5%                             │
+│        TATQA: out-of-sample:                                │
+│               relaxed exact match 89.5%                     │
+│               exact match: 77%                              │
 └────────────────────────┬────────────────────────────────────┘
                          │
                          ▼ Enriched Context
                          │
 ┌─────────────────────────────────────────────────────────────┐
-│              LAYER 3: MULTIMODAL VISION                      │
+│              LAYER 3: MULTIMODAL VISION                     │
 │   Vision Model: Claude 3.5 Sonnet Vision                    │
-│   Use Cases: Charts, handwriting, complex layouts            │
-│   Performance: TBD (see data/proof)                          │
+│   Use Cases: Charts, handwriting, complex layouts           │
+│   Performance:                                              │
+│         DocVQA, ChartQA, InfographicsVQA, MMMU              |
+|                In-sample: 90% accuracy, n=50                │
 └────────────────────────┬────────────────────────────────────┘
                          │
                          ▼ Structured Features
                          │
-┌─────────────────────────────────────────────────────────────┐
-│            LAYER 4: CREDIT RISK PIPELINE                     │
-│   Feature Engineering: Ratios, Trends, NLP sentiment        │
-│   PD Model: XGBoost — metrics TBD                           │
-│   Risk Memos: LLM-generated — metrics TBD                   │
-│   Governance: Prompt versioning, safety filters              │
-│   Monitoring: Drift detection — TBD                          │
-└─────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────┐
+│            LAYER 4: CREDIT RISK PIPELINE                          │
+│   Feature Engineering: Ratios, Trends, NLP sentiment              │
+│   PD Model: Logistic Regression — OOT AUC 0.66                    │
+│   Risk Memos: LLM-generated — FinanceBench exact match 94% n=100  │
+│   Governance: Prompt versioning, safety filters                   │
+│   Monitoring: Drift detection — Logistic Regression - 0.234       │
+└───────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -111,21 +119,6 @@ python run_e2e.py --eval
 # Full E2E demo
 python examples/06_full_e2e_demo.py
 ```
-
----
-
-## 📊 Evaluation Results
-
-Evaluation is run via `eval_runner.py`; results are written under **`data/proof/`**.  
-Demos in **`notebooks/`** read from `data/proof/` for any reported metrics.
-
-**Categories with proof under `data/proof/`:**
-- **Vision:** ChartQA, DocVQA, InfographicsVQA, MMMU (Accounting, Economics, Finance, Math) — *scores TBD*
-- **RAG:** FinQA (and adversarial) — *scores TBD*
-
-**Other categories** (OCR, full multimodal, other RAG datasets, Credit Risk, system tests) are not yet backed by artifacts in `data/proof/`. Scores will be added as evaluation progresses.
-
-See [EVALUATION_RESULTS.md](EVALUATION_RESULTS.md) for methodology; current numbers are placeholders until filled from proof runs.
 
 ---
 
@@ -222,9 +215,9 @@ ocr-agentic-rag/
 
 ### Local PC
 
-**Specs:** 16GB RAM, i5-11500, no GPU  
+**Specs:** 16GB RAM, CPU-only, no GPU  
 **Mode:** `local` 
-**Samples:** 80 total  
+**Samples:** 80 total
 **Runtime:** ~3 minutes  
 **Cost:** $0
 ```bash
@@ -326,13 +319,6 @@ python run_e2e.py --mode production --eval
 - [EVALUATION_RESULTS.md](EVALUATION_RESULTS.md) - All 20 benchmark results
 - [data/credit_risk/README.md](data/credit_risk/README.md) - Dataset download guide
 
-### Quick References
-- **OCR Demo:** `examples/01_ocr_demo.py`
-- **RAG Demo:** `examples/02_rag_demo.py`
-- **Credit Risk Demo:** `examples/05_credit_risk_demo.py`
-- **Full E2E Demo:** `examples/06_full_e2e_demo.py`
-- **Evaluation Suite:** `python run_e2e.py --eval`
-
 ---
 
 ## 🔒 MAS FEAT Compliance
@@ -351,7 +337,7 @@ python run_e2e.py --mode production --eval
 ### Transparency
 - SHAP explainability for PD model
 - LLM explanations with citation tracking
-- Drift monitoring — *TBD*
+- Drift monitoring
 
 ---
 
