@@ -9,13 +9,6 @@ OCR→Agentic RAG→Credit Risk Platform
 **Vision (model predictions):** <dataset>_<split>_samples.json files under `data/proof/vision/` folder.<br>
 **OCR (model predictions):** <dataset>_<split>_samples.json files under `data/proof/ocr/` folder.
 
-**Demos:** demo_*.ipynb under the `notebooks/` folder.
-
-**Evaluation (Credit Risk, RAG, OCR, VLM):** eval_*.py files found in repo root directory. 
-
-Command to evaluate 1 TATQA Sample: [FOR REPO AUDIT]<br>
-python eval_runner.py --category rag --dataset TATQA --max_split 1 --max_category 1 --debug --export_predictions_txt
-
 ---
 
 ## 🎯 Project Overview
@@ -81,12 +74,12 @@ End-to-end pipeline: **OCR → Agentic RAG → Multimodal Vision → Credit Risk
 - Python 3.10+
 - 16GB RAM minimum
 - Tesseract OCR installed
-- Anthropic API key (with vision support)
+- Anthropic API key (claude API calls for Vision and RAG)
 
 ### Installation
 ```bash
 # 1. Clone repository
-git clone https://github.com/yourusername/ocr-agentic-rag.git
+git clone https://github.com/leemingloon/ocr-agentic-rag.git
 cd ocr-agentic-rag
 
 # 2. Create virtual environment
@@ -100,24 +93,12 @@ pip install -r requirements.txt
 cp .env.example .env
 # Edit .env and add your ANTHROPIC_API_KEY
 
-# 5. Create credit risk directories
-mkdir -p credit_risk/feature_engineering \
-         credit_risk/models \
-         credit_risk/governance \
-         credit_risk/monitoring \
-         data/credit_risk/{lending_club,fiqa_sentiment,financebench,ectsum,credit_card_default,freddie_mac,home_credit,counterfactual_synthetic}
 ```
 
 ### Run Demo
-```bash
-# Quick demo (1 sample, ~3 seconds)
-python run_e2e.py
-
-# Local evaluation (80 samples, ~3 minutes)
-python run_e2e.py --eval
-
-# Full E2E demo
-python examples/06_full_e2e_demo.py
+```
+# Evaluation (1 TATQA sample)
+python eval_runner.py --category rag --dataset TATQA --max_split 1 --max_category 1 --debug --export_predictions_txt
 ```
 
 ---
@@ -196,18 +177,16 @@ ocr-agentic-rag/
 
 ### Multimodal Layer
 - Chart extraction, handwriting recognition
-- Visual document QA (DocVQA, ChartQA, InfographicsVQA, MMMU — *see data/proof*)
+- Visual document QA (DocVQA, ChartQA, InfographicsVQA, MMMU — *see files under data/proof*)
 
 ### RAG Layer
-- Financial QA (FinQA — *see data/proof*)
+- Financial QA (FinQA)
 - Table reasoning (TAT-QA)
 
 ### Credit Risk Layer
 - Default probability prediction (PD model)
 - Credit deterioration
-- Automated risk memo generation
-- Covenant stress testing, what-if analysis
-- Real-time drift monitoring
+- Risk memo generation
 
 ---
 
@@ -324,7 +303,7 @@ python run_e2e.py --mode production --eval
 ## 🔒 MAS FEAT Compliance
 
 ### Fairness
-- Bias gap target: &lt;10% threshold — *TBD*
+- Bias gap target: &lt;10% threshold
 
 ### Ethics
 - Human-in-the-loop for high-risk decisions
@@ -338,13 +317,6 @@ python run_e2e.py --mode production --eval
 - SHAP explainability for PD model
 - LLM explanations with citation tracking
 - Drift monitoring
-
----
-
-## ⚡ Performance Benchmarks
-
-Latency, throughput, and cost figures are TBD and will be updated from runs that write to `data/proof/`.  
-See `eval_runner.py` and `data/proof/` for current evaluation outputs.
 
 ---
 
