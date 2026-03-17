@@ -13,7 +13,15 @@ OCR→Agentic RAG→Credit Risk Platform
 
 ## 🎯 Project Overview
 
-End-to-end pipeline: **OCR → Agentic RAG → Multimodal Vision → Credit Risk**
+End-to-end platform for **financial document intelligence and credit risk**, combining:
+
+- **OCR:** Extract text and layout from PDFs, scans, and forms.
+- **Agentic RAG:** Answer finance questions over reports, tables, and notes using LangGraph + hybrid retrieval.
+- **Multimodal vision:** Use Claude Sonnet (vision) for charts, complex layouts, and visual QA.
+- **Credit risk:** Build PD models, sentiment signals, and LLM-based risk memos from structured features.
+
+All evaluation metrics and benchmarks are produced via `eval_runner.py` and stored under `data/proof/`.  
+See `ARCHITECTURE.md` and `EVALUATION_RESULTS.md` for more detail.
 
 ---
 
@@ -67,16 +75,113 @@ End-to-end pipeline: **OCR → Agentic RAG → Multimodal Vision → Credit Risk
 
 ---
 
-## 🚀 Quick Start
+## 📁 Repository Structure
+```
+ocr-agentic-rag/
+├── ocr_pipeline/                 # Layer 1: OCR (3-tier detection + recognition)
+│   ├── quality_assessment.py
+│   ├── template_detector.py
+│   ├── detection/
+│   └── recognition/
+├── rag_system/                   # Layer 2: RAG + multimodal fusion
+│   ├── chunking.py
+│   ├── retrieval.py
+│   ├── reranking.py
+│   ├── multimodal_rag.py
+│   └── agentic/
+│       ├── orchestrator.py
+│       ├── tools.py
+│       └── memory.py
+├── credit_risk/                  # Layer 4: Credit Risk
+│   ├── pipeline.py               # End-to-end PD + memo pipeline
+│   ├── feature_engineering/
+│   │   ├── ratio_builder.py
+│   │   ├── trend_engine.py
+│   │   └── nlp_signals.py
+│   ├── models/
+│   │   ├── pd_model.py
+│   │   ├── pd_ann.py
+│   │   ├── quantum_pd_model.py
+│   │   ├── lgd_model.py
+│   │   ├── ead.py
+│   │   ├── ecl.py
+│   │   └── counterfactual.py
+│   ├── sentiment/                # FinBERT + rule-based sentiment
+│   │   ├── pipeline.py
+│   │   ├── config.py
+│   │   ├── negation.py
+│   │   ├── hedging.py
+│   │   └── evaluation.py
+│   ├── governance/
+│   │   ├── risk_memo_generator.py
+│   │   ├── prompt_registry.py
+│   │   ├── prompt_version.py
+│   │   └── safety_filter.py
+│   └── monitoring/
+│       ├── data_drift.py
+│       └── prediction_drift.py
+├── data/
+│   ├── proof/                        # All evaluation outputs (see EVALUATION_RESULTS.md)
+│   │   ├── rag/
+│   │   ├── vision/
+│   │   ├── ocr/
+│   │   ├── credit_risk_pd/
+│   │   └── credit_risk_memo_generator/
+│   ├── credit_risk_pd/               # LendingClub benchmark (PD eval)
+│   ├── credit_risk_sentiment/        # FinancialPhraseBank, FiQA
+│   ├── credit_risk_memo_generator/   # FinanceBench
+│   ├── home_credit/                  # Home Credit CSVs (notebooks)
+│   └── rag/ / vision/ / ocr/         # Raw benchmark datasets (after download_datasets.py)
+├── scripts/
+│   ├── download_datasets.py          # Download all HF/other datasets into data/
+│   └── build_*_embeddings_*.py       # Index-building helpers for RAG
+├── notebooks/                        # 00–04z credit risk, RAG index build, demos
+├── eval_runner.py                    # Unified evaluation entry point
+├── eval_dataset_adapters.py
+├── eval_postprocess_utils.py
+├── ARCHITECTURE.md
+├── EVALUATION_RESULTS.md
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## 🎯 Use Cases
+
+### OCR Layer
+- Invoice and receipt extraction (SROIE)
+- Form and contract key-value extraction (FUNSD)
+- General document text extraction feeding RAG and credit risk
+
+### Multimodal Layer
+- Chart understanding and numeric QA (ChartQA)
+- Document visual QA (DocVQA, InfographicsVQA)
+- Multichoice reasoning over financial diagrams and tables (MMMU Accounting/Economics/Finance/Math)
+
+### RAG Layer
+- Financial QA over reports and tables (FinQA)
+- Table- and passage-heavy question answering (TAT-QA)
+- Retrieval-augmented support for memo generation and analysis
+
+### Credit Risk Layer
+- Probability of default (PD) modelling (LendingClub; Home Credit in notebooks)
+- Early warning and deterioration signals (ratios, trends, NLP sentiment)
+- LLM-generated credit risk memos (FinanceBench-style Q&A)
+
+---
+
+## 💻 Running on Different Platforms
 
 ### Prerequisites
 
 - Python 3.10+
 - 16GB RAM minimum
 - Tesseract OCR installed
-- Anthropic API key (claude API calls for Vision and RAG)
+- Anthropic API key (for Vision and RAG)
 
 ### Installation
+
 ```bash
 # 1. Clone repository
 git clone https://github.com/leemingloon/ocr-agentic-rag.git
@@ -92,166 +197,74 @@ pip install -r requirements.txt
 # 4. Setup environment
 cp .env.example .env
 # Edit .env and add your ANTHROPIC_API_KEY
-
 ```
-
-### Run Demo
-```
-# Evaluation (1 TATQA sample)
-python eval_runner.py --category rag --dataset TATQA --max_split 1 --max_category 1 --debug --export_predictions_txt
-```
-
----
-
-## 📁 Repository Structure
-```
-ocr-agentic-rag/
-├── ocr_pipeline/              # Layer 1: OCR
-│   ├── quality_assessment.py
-│   ├── template_detector.py
-│   ├── detection/            # 3-tier detection
-│   └── recognition/          # Hybrid recognition + vision
-├── rag_system/               # Layer 2: RAG
-│   ├── chunking.py
-│   ├── retrieval.py
-│   ├── reranking.py
-│   ├── multimodal_rag.py     # Layer 3: Multimodal
-│   └── agentic/
-│       ├── orchestrator.py
-│       ├── tools.py
-│       └── memory.py
-├── credit_risk/              # Layer 4: Credit Risk (NEW)
-│   ├── pipeline.py
-│   ├── feature_engineering/
-│   │   ├── ratio_builder.py
-│   │   ├── trend_engine.py
-│   │   └── nlp_signals.py
-│   ├── models/
-│   │   ├── pd_model.py
-│   │   └── counterfactual.py
-│   ├── governance/
-│   │   ├── risk_memo_generator.py
-│   │   ├── prompt_registry.py
-│   │   ├── prompt_version.py
-│   │   └── safety_filter.py
-│   └── monitoring/
-│       ├── data_drift.py
-│       └── prediction_drift.py
-├── evaluation/
-│   ├── ocr_eval.py           # 6 OCR benchmarks
-│   ├── multimodal_eval.py    # 8 multimodal benchmarks
-│   ├── rag_eval.py           # 4 RAG benchmarks
-│   ├── credit_risk_eval.py   # 6 credit risk benchmarks (NEW)
-│   ├── e2e_functional_eval.py
-│   ├── e2e_robustness_test.py
-│   ├── e2e_bias_test.py
-│   ├── e2e_adversarial_test.py
-│   ├── e2e_load_test.py
-│   └── e2e_full_suite.py
-├── examples/
-│   ├── 01_ocr_demo.py
-│   ├── 02_rag_demo.py
-│   ├── 03_e2e_demo.py
-│   ├── 04_evaluation_demo.py
-│   ├── 05_credit_risk_demo.py     # NEW
-│   └── 06_full_e2e_demo.py        # NEW
-├── scripts/
-│   └── download_credit_datasets.sh # NEW
-├── data/
-│   ├── evaluation/
-│   └── credit_risk/          # NEW: 8 datasets
-├── run_e2e.py               # Main entry point (NEW)
-├── requirements.txt
-├── README.md
-├── ARCHITECTURE.md
-└── EVALUATION_RESULTS.md
-```
-
----
-
-## 🎯 Use Cases
-
-### OCR Layer
-- Invoice processing (SROIE)
-- Form extraction (FUNSD)
-
-### Multimodal Layer
-- Chart extraction, handwriting recognition
-- Visual document QA (DocVQA, ChartQA, InfographicsVQA, MMMU — *see files under data/proof*)
-
-### RAG Layer
-- Financial QA (FinQA)
-- Table reasoning (TAT-QA)
-
-### Credit Risk Layer
-- Default probability prediction (PD model)
-- Credit deterioration
-- Risk memo generation
-
----
-
-## 💻 Running on Different Platforms
 
 ### Local PC
 
-**Specs:** 16GB RAM, CPU-only, no GPU  
-**Mode:** `local` 
-**Samples:** 80 total
-**Runtime:** ~3 minutes  
+**Specs (suggested):** 16GB RAM, CPU-only is fine  
+**Mode:** `local`  
+**Typical usage:** quick demos and small eval slices  
+**Runtime:** minutes on small batches  
 **Cost:** $0
+
+**Quick demos (run after installation):**
 ```bash
-python run_e2e.py --eval
+# 1) Small RAG demo (1 TATQA sample)
+python eval_runner.py --category rag --dataset TATQA --max_split 1 --max_category 1 --debug --export_predictions_txt
+
+# 2) Small credit risk memo demo (FinanceBench)
+python eval_runner.py --category credit_risk_memo_generator --dataset FinanceBench --max_split 20 --max_category 20
+
+# 3) Vision demo (DocVQA)
+python eval_runner.py --category vision --dataset DocVQA --max_split 10 --max_category 10
 ```
 
 ---
 
 ### AWS SageMaker (Free Tier)
 
-**Instance:** ml.t3.medium (2 vCPU, 4GB RAM)  
+**Instance (example):** `ml.t3.medium` (2 vCPU, 4GB RAM)  
 **Mode:** `sagemaker`  
-**Samples:** 600 total  
-**Runtime:** ~15-20 minutes  
-**Cost:** $0 (within 250 hours/month free tier)
+**Typical usage:** batch evaluation on more samples with managed storage/compute  
+**Cost:** $0 within free-tier hours (check your AWS account)
 
 **Setup:**
 ```bash
 # 1. Create S3 bucket
 aws s3 mb s3://my-sagemaker-credit-risk
 
-# 2. Generate sample datasets
-python scripts/create_sample_datasets.py --mode sagemaker
+# 2. Download evaluation datasets into data/
+python scripts/download_datasets.py
 
-# 3. Upload to S3
-aws s3 sync data/credit_risk/ s3://my-sagemaker-credit-risk/data/
+# 3. Upload data/ if you prefer remote storage
+aws s3 sync data/ s3://my-sagemaker-credit-risk/data/
 
-# 4. Launch SageMaker notebook
-# Use ml.t3.medium instance type
-
-# 5. Run in notebook
-python run_e2e.py --mode sagemaker --s3-bucket my-sagemaker-credit-risk --eval
+# 4. In SageMaker notebook, run evals as usual
+python eval_runner.py --category rag --dataset FinQA --max_split 200 --max_category 200
 ```
 
 **SageMaker Tips:**
-- Use **ml.t3.medium** (free tier eligible)
-- Process in batches of 10 to avoid memory issues
-- Results auto-saved to S3
-- Monitor with CloudWatch (free)
+- Use **`ml.t3.medium`** or similar free-tier instance
+- Keep `max_split` / `max_category` modest for experiments
+- Store `data/proof/` outputs on S3 if you need persistence
 
 ---
 
 ### Production (Full Datasets)
 
-**Specs:** 16GB+ RAM, GPU recommended  
-**Mode:** `production`  
-**Samples:** 3.7M total  
-**Runtime:** ~2-4 hours  
-**Cost:** $0 (local) or ~$5-10 (AWS)
+**Specs (example):** 16GB+ RAM; GPU recommended for heavy vision or OCR DL  
+**Mode:** `production` (or multiple targeted `eval_runner.py` calls)  
+**Typical usage:** full benchmark sweeps and renewal of `data/proof/eval_summary.json`  
+**Cost:** depends on hardware/runtime (local vs cloud)
 ```bash
-# Download full datasets
-bash scripts/download_all_datasets.sh
+# 1. Download all required datasets
+python scripts/download_datasets.py
 
-# Run full evaluation
-python run_e2e.py --mode production --eval
+# 2. Run category-level sweeps (examples)
+python eval_runner.py --category ocr
+python eval_runner.py --category vision
+python eval_runner.py --category rag
+python eval_runner.py --category credit_risk_PD
 ```
 
 ---
@@ -259,35 +272,35 @@ python run_e2e.py --mode production --eval
 ## 🔧 Technology Stack
 
 ### OCR
-- **Detection:** OpenCV (classical), PaddleOCR (DL), Template Cache
-- **Recognition:** Tesseract, PaddleOCR, Claude Vision
-- **Optimization:** ONNX Runtime (12x speedup)
+- **Detection:** OpenCV (classical), template cache, PaddleOCR (DL)
+- **Recognition:** Tesseract, PaddleOCR; Claude Sonnet (vision) as fallback
+- **Optimization:** Optional ONNX Runtime export for PaddleOCR
 
 ### RAG
-- **Chunking:** Structure-preserving
-- **Embeddings:** BGE-M3 (HuggingFace)
-- **Retrieval:** FAISS + BM25 (hybrid)
-- **Reranking:** BGE-reranker-v2-m3
-- **Orchestration:** LangGraph
-- **LLM:** Claude Sonnet 4
+- **Chunking:** Structure-preserving, metadata-enriched
+- **Embeddings:** BGE-M3 (Hugging Face)
+- **Retrieval:** FAISS + BM25 (hybrid sparse + dense)
+- **Reranking:** BGE-reranker-v2-m3 (cross-encoder)
+- **Orchestration:** LangGraph state graph
+- **LLM:** Claude Sonnet (text, tool use, CoT)
 
 ### Multimodal
-- **Vision Model:** Claude 4.6 Sonnet
-- **Chart Understanding:** Vision-first (95% accuracy)
+- **Vision model:** Claude Sonnet (vision)
+- **Use cases:** Chart QA, document QA, complex layouts, OCR validation
 
 ### Credit Risk (NEW)
-- **Feature Engineering:** Pandas, NumPy
-- **NLP:** FinBERT (ProsusAI/finbert)
-- **ML Models:** XGBoost, scikit-learn
+- **Feature engineering:** Pandas, NumPy (ratios, trends, NLP signals)
+- **Sentiment/NLP:** FinBERT (ProsusAI/finbert) + rule-based postprocessing
+- **PD / risk models:** XGBoost, LightGBM, scikit-learn, PyTorch (ANN/LSTM)
 - **Explainability:** SHAP
-- **LLM:** Claude Sonnet 4 (risk memos)
-- **Monitoring:** Scipy (KS test), Evidently AI
-- **Governance:** SQLite (prompt registry)
+- **LLM:** Claude Sonnet (risk memos and explanations)
+- **Monitoring:** SciPy (KS), custom drift utilities
+- **Governance:** Prompt registry + safety filter (SQLite-backed)
 
 ### Infrastructure
-- **Monitoring:** OpenTelemetry, Prometheus
-- **Cloud:** AWS SageMaker, S3
-- **Storage:** PostgreSQL, SQLite
+- **Monitoring/observability:** (optional) OpenTelemetry, Prometheus, CloudWatch
+- **Cloud:** AWS SageMaker, S3 (batch and notebook workflows)
+- **Storage:** Local files, S3; optional PostgreSQL / SQLite for metadata
 
 ---
 
@@ -303,41 +316,43 @@ python run_e2e.py --mode production --eval
 ## 🔒 MAS FEAT Compliance
 
 ### Fairness
-- Bias gap target: &lt;10% threshold
+- Target: bias gap &lt;10% across document types and benchmarks.
+- Bias tests and layout cache/completeness heuristics are summarised in `data/proof/SUMMARY.md` (current gap and coverage).
 
 ### Ethics
-- Human-in-the-loop for high-risk decisions
-- Autonomous approval for low-risk cases only
+- High-risk credit decisions must go to **human-in-the-loop**; low-risk segments may be auto-approved under configured thresholds.
+- LLM usage (risk memos) is constrained by safety filters and prompt registry policies.
 
 ### Accountability
-- Audit trail and lineage tracking (data → features → model → decision)
-- Prompt versioning (LLM calls logged)
+- Full audit trail from data → features → model → decision, including prompt/version for LLM calls.
+- Prompt registry in `credit_risk/governance/` tracks versions, approvers, and status for all production prompts.
 
 ### Transparency
-- SHAP explainability for PD model
-- LLM explanations with citation tracking
-- Drift monitoring
+- PD models use SHAP for feature-attribution explanations where applicable.
+- RAG answers and risk memos can surface retrieved evidence and key drivers; drift monitoring is logged via `credit_risk/monitoring/`.
 
 ---
 
 ## 📝 License
 
-MIT License
+This project is licensed under the **MIT License**.  
+See the `LICENSE` file for full terms.
 
 ---
 
 ## 🙏 Acknowledgments
 
-**Datasets:**
-- Lending Club (Kaggle)
-- FiQA, FinanceBench, (HuggingFace)
-- SROIE, FUNSD, DocVQA (Academia)
+**Datasets and benchmarks:**
+- Home Credit Default Risk (Kaggle)
+- LendingClub (Kaggle, TheFinAI/lendingclub-benchmark)
+- Financial PhraseBank, FiQA, FinanceBench (Hugging Face)
+- SROIE, FUNSD, DocVQA, ChartQA, InfographicsVQA, MMMU
 
-**Frameworks:**
-- PaddleOCR, LlamaIndex, LangGraph
-- HuggingFace Transformers
-- Anthropic Claude
-- XGBoost, scikit-learn, SHAP
+**Libraries and frameworks:**
+- PaddleOCR, OpenCV, Tesseract
+- LangGraph, FAISS, Hugging Face Transformers
+- Anthropic Claude (Sonnet language-vision + text)
+- XGBoost, LightGBM, scikit-learn, SHAP
 
 ---
 
