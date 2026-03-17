@@ -4,8 +4,8 @@ OCR→Agentic RAG→Credit Risk Platform
 **Author:** Lee Ming Loon<br>
 **Status:** Deployed to Amazon Web Services (AWS) Sagemaker. Evaluated using Local / Google Colabs / Kaggle.
 
-**Credit risk (feature eng, train model):** 00-04z Jupyter notebooks (`.ipynb`) under `notebooks/` folder. [COMPLETED]<br>
-**RAG (model predictions):** <dataset>_<split>_samples.json files under `data/proof/rag/` folder. [COMPLETED]<br>
+**Credit risk (feature eng, train model):** 00-04z Jupyter notebooks (`.ipynb`) under `notebooks/` folder. [Completed]<br>
+**RAG (model predictions):** <dataset>_<split>_samples.json files under `data/proof/rag/` folder. [Completed]<br>
 **Vision (model predictions):** <dataset>_<split>_samples.json files under `data/proof/vision/` folder.<br>
 **OCR (model predictions):** <dataset>_<split>_samples.json files under `data/proof/ocr/` folder.
 
