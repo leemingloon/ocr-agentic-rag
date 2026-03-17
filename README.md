@@ -31,7 +31,6 @@ See `ARCHITECTURE.md` and `EVALUATION_RESULTS.md` for more detail.
 │                    LAYER 1: OCR PIPELINE                    │
 │   3-Tier Detection: Cache → Classical → DL                  │
 │   Recognition: Tesseract → PaddleOCR → Vision OCR           │
-│   Performance: N/A                                          │
 └────────────────────────┬────────────────────────────────────┘
                          │
                          ▼ Structured Text + Layout
