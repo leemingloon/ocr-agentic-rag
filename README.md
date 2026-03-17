@@ -1,4 +1,4 @@
-OCR→Agentic RAG→Credit Risk Platform
+OCR → RAG → Credit Risk Platform
 
 **Document Intelligence + Credit Risk System**<br>
 **Author:** Lee Ming Loon<br>
@@ -16,7 +16,7 @@ OCR→Agentic RAG→Credit Risk Platform
 End-to-end platform for **financial document intelligence and credit risk**, combining:
 
 - **OCR:** Extract text and layout from PDFs, scans, and forms.
-- **Agentic RAG:** Answer finance questions over reports, tables, and notes using LangGraph + hybrid retrieval.
+- **RAG:** Answer finance questions over reports, tables, and notes using LangGraph + hybrid retrieval.
 - **Multimodal vision:** Use Claude Sonnet (vision) for charts, complex layouts, and visual QA.
 - **Credit risk:** Build PD models, sentiment signals, and LLM-based risk memos from structured features.
 
@@ -36,7 +36,7 @@ See `ARCHITECTURE.md` and `EVALUATION_RESULTS.md` for more detail.
                          ▼ Structured Text + Layout
                          │
 ┌─────────────────────────────────────────────────────────────┐
-│                  LAYER 2: AGENTIC RAG                       │
+│                  LAYER 2: RAG                               │
 │   Retrieval: BM25 + BGE-M3 (hybrid dense+sparse)            │
 │   Reranking: BGE-reranker-v2-m3 (cross-encoder)             │
 │   Orchestration: LangGraph (autonomous tool selection)      │
