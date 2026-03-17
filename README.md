@@ -1,13 +1,13 @@
-OCR→Agentic RAG→Credit Risk Platform
+OCR → RAG → Credit Risk Platform
 
 **Document Intelligence + Credit Risk System**<br>
 **Author:** Lee Ming Loon<br>
 **Status:** Deployed to Amazon Web Services (AWS) Sagemaker. Evaluated using Local / Google Colabs / Kaggle.
 
-**Credit risk (feature eng, train model):** 00-04z Jupyter notebooks (`.ipynb`) under `notebooks/` folder. [COMPLETED]<br>
-**RAG (model predictions):** <dataset>_<split>_samples.json files under `data/proof/rag/` folder. [COMPLETED]<br>
-**Vision (model predictions):** <dataset>_<split>_samples.json files under `data/proof/vision/` folder.<br>
-**OCR (model predictions):** <dataset>_<split>_samples.json files under `data/proof/ocr/` folder.
+**Credit risk (feature eng, train model):** 00-04z Jupyter notebooks (`.ipynb`) under `notebooks/` folder. [Completed]<br>
+**RAG (model predictions):** dataset_split_samples.json files under `data/proof/rag/` folder. [Completed]<br>
+**Vision (model predictions):** dataset_split_samples.json files under `data/proof/vision/` folder.<br>
+**OCR (model predictions):** dataset_split_samples.json files under `data/proof/ocr/` folder.
 
 ---
 
@@ -16,7 +16,7 @@ OCR→Agentic RAG→Credit Risk Platform
 End-to-end platform for **financial document intelligence and credit risk**, combining:
 
 - **OCR:** Extract text and layout from PDFs, scans, and forms.
-- **Agentic RAG:** Answer finance questions over reports, tables, and notes using LangGraph + hybrid retrieval.
+- **RAG:** Answer finance questions over reports, tables, and notes using LangGraph + hybrid retrieval.
 - **Multimodal vision:** Use Claude Sonnet (vision) for charts, complex layouts, and visual QA.
 - **Credit risk:** Build PD models, sentiment signals, and LLM-based risk memos from structured features.
 
@@ -31,13 +31,12 @@ See `ARCHITECTURE.md` and `EVALUATION_RESULTS.md` for more detail.
 │                    LAYER 1: OCR PIPELINE                    │
 │   3-Tier Detection: Cache → Classical → DL                  │
 │   Recognition: Tesseract → PaddleOCR → Vision OCR           │
-│   Performance: N/A                                          │
 └────────────────────────┬────────────────────────────────────┘
                          │
                          ▼ Structured Text + Layout
                          │
 ┌─────────────────────────────────────────────────────────────┐
-│                  LAYER 2: AGENTIC RAG                       │
+│                  LAYER 2: RAG                               │
 │   Retrieval: BM25 + BGE-M3 (hybrid dense+sparse)            │
 │   Reranking: BGE-reranker-v2-m3 (cross-encoder)             │
 │   Orchestration: LangGraph (autonomous tool selection)      │
@@ -288,7 +287,7 @@ python eval_runner.py --category credit_risk_PD
 - **Vision model:** Claude Sonnet (vision)
 - **Use cases:** Chart QA, document QA, complex layouts, OCR validation
 
-### Credit Risk (NEW)
+### Credit Risk
 - **Feature engineering:** Pandas, NumPy (ratios, trends, NLP signals)
 - **Sentiment/NLP:** FinBERT (ProsusAI/finbert) + rule-based postprocessing
 - **PD / risk models:** XGBoost, LightGBM, scikit-learn, PyTorch (ANN/LSTM)
