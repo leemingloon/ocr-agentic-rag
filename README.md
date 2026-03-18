@@ -26,8 +26,8 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 
 <small>
 
-| Layer | Dataset | Metric | Value | Total pop | OOT test sample size | Notes |
-|-------|---------|--------|-------|-----------|----------------------|------|
+| Layer | Dataset | Metric | Value | Total population | OOT test sample size | Notes |
+|-------|---------|--------|-------|-----------------|----------------------|------|
 | **Credit risk PD (LSTM)** | Home Credit (full population) | OOT AUC-ROC | 0.756 | 307,511 | 61,502 | |
 | **Credit risk PD (LSTM)** | Home Credit (has_repayment_bureau 88K) | OOT AUC-ROC | 0.749 | 88,816 | 17,763 | |
 | **Credit risk PD (LSTM)** | Home Credit (has_bureau) | OOT AUC-ROC | 0.753 | 295,058 | 58,829 | |
@@ -116,13 +116,13 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) and [EVALUATION_RESULTS.md](EVALUATION_RE
 |----------|-----------|
 | **Hybrid retrieval (BM25 + BGE-M3)** | Handles both numeric tables and text-heavy financial documents; sparse + dense covers different query patterns. |
 | **Agentic orchestration (LangGraph)** | Dynamically selects tools instead of static pipelines; adapts to multi-step QA and reasoning. |
-| **3-tier OCR fallback** | Balances cost, speed, and accuracy: cache → classical → DL; Vision fallback for hard cases. |
+| **3-tier OCR fallback** | Balances cost, speed, and accuracy: cache → classical → DL -> Vision-Language. Classical for text recognition, DL for table recognition, Vision fallback for charts or diagrams. |
 | **LLM + structured features fusion for credit risk** | Not pure black-box models; interpretable PD models (LR, XGBoost, LSTM) plus LLM for memos and explanations. |
 | **Governance layer (prompt registry + safety filters)** | Production readiness: versioning, audit trail, and safety filters for LLM outputs. |
 
 ---
 
-## 🔒 Governance, Risk & Compliance
+## 🔒 Governance, Risk & Compliance (Work in progress)
 
 ### Fairness
 - Target: bias gap &lt;10% across document types and benchmarks.
