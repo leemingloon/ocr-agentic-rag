@@ -4,10 +4,10 @@ OCR → RAG → Credit Risk Platform
 **Author:** Lee Ming Loon<br>
 **Status:** Deployed to Amazon Web Services (AWS) Sagemaker. Evaluated using Local / Google Colabs / Kaggle.
 
-**Credit risk:** demo_credit_risk_pd.ipynb, 00-04z Jupyter notebooks (`.ipynb`) in `notebooks/` folder. [Completed]<br>
-**RAG (model predictions):** *_predictions.txt files under `data/proof/rag/` folder. [Completed]<br>
-**Vision (model predictions):** *_predictions.txt files under `data/proof/vision/` folder.<br>
-**OCR (model predictions):** *_predictions.txt files under `data/proof/ocr/` folder.
+**Credit risk:** `demo_credit_risk_pd.ipynb`, `00`-`04z` Jupyter notebooks (`.ipynb`) in `notebooks/` folder. [Completed]<br>
+**RAG (model predictions):** `*_predictions.txt` files under `data/proof/rag/` folder. [Completed]<br>
+**Vision (model predictions):** `*_predictions.txt` files under `data/proof/vision/` folder.<br>
+**OCR (model predictions):** `*_predictions.txt` files under `data/proof/ocr/` folder.
 
 ---
 
