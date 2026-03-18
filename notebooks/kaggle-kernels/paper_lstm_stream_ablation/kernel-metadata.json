@@ -1,0 +1,13 @@
+{
+  "id": "leemingloon/paper-lstm-stream-ablation",
+  "title": "paper-lstm-stream-ablation",
+  "code_file": "paper_lstm_stream_ablation.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": false,
+  "dataset_sources": [],
+  "competition_sources": ["home-credit-default-risk"],
+  "kernel_sources": []
+}
