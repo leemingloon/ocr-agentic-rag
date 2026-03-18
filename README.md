@@ -1,6 +1,4 @@
-OCR → RAG → Credit Risk Platform
-
-**Document Intelligence + Credit Risk System**<br>
+OCR → RAG → Credit Risk platform for financial documents
 **Author:** Lee Ming Loon<br>
 **Status:** Deployed to Amazon Web Services (AWS) Sagemaker. Evaluated using Local / Google Colabs / Kaggle.
 
@@ -9,6 +7,7 @@ OCR → RAG → Credit Risk Platform
 **Vision (model predictions):** `*_predictions.txt` files under `data/proof/vision/` folder.<br>
 **OCR (model predictions):** `*_predictions.txt` files under `data/proof/ocr/` folder.
 
+Above section for developers that would like a quick scan of the work.
 ---
 
 ## 🎯 Project Overview
