@@ -4,7 +4,8 @@ OCR → RAG → Credit Risk platform for financial documents<br>
 
 **Status:** Deployed to Amazon Web Services (AWS) Sagemaker. Evaluated using Local / Google Colabs / Kaggle.
 
-- **Credit risk:** [demo_credit_risk_pd.ipynb](notebooks/demo_credit_risk_pd.ipynb), notebooks 00–04z in [notebooks/](notebooks/) [Completed]
+- **Credit risk:** , notebooks in [notebooks/](notebooks/) [Completed]
+  - [demo_credit_risk_pd.ipynb](notebooks/demo_credit_risk_pd.ipynb)
   - [00_pd_homecredit_lstm_kaggle.ipynb](notebooks/00_pd_homecredit_lstm_kaggle.ipynb)
   - [01_pd_lendingclub_feature_engineering.ipynb](notebooks/01_pd_lendingclub_feature_engineering.ipynb)
   - [02a_pd_xgboost_training.ipynb](notebooks/02a_pd_xgboost_training.ipynb)
