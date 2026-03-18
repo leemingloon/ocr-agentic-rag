@@ -2,7 +2,6 @@
 
 OCR → RAG → Credit Risk platform for financial documents<br>
 
-**Author:** Lee Ming Loon<br>
 **Status:** Deployed to Amazon Web Services (AWS) Sagemaker. Evaluated using Local / Google Colabs / Kaggle.
 
 **Credit risk:** `demo_credit_risk_pd.ipynb`, `00`-`04z` notebooks (`.ipynb`) in `notebooks/` folder. [Completed]<br>
