@@ -4,9 +4,19 @@ OCR → RAG → Credit Risk platform for financial documents<br>
 
 **Status:** Deployed to Amazon Web Services (AWS) Sagemaker. Evaluated using Local / Google Colabs / Kaggle.
 
-- **Credit risk:** [demo_credit_risk_pd.ipynb](notebooks/demo_credit_risk_pd.ipynb), [00](notebooks/00_pd_homecredit_lstm_kaggle.ipynb)-[04z](notebooks/04z_sentiment_model_comparison.ipynb) notebooks in [notebooks/](notebooks/) [Completed]
+- **Credit risk:** [demo_credit_risk_pd.ipynb](notebooks/demo_credit_risk_pd.ipynb), notebooks 00–04z in [notebooks/](notebooks/) [Completed]
+  - [00_pd_homecredit_lstm_kaggle.ipynb](notebooks/00_pd_homecredit_lstm_kaggle.ipynb)
+  - [01_pd_lendingclub_feature_engineering.ipynb](notebooks/01_pd_lendingclub_feature_engineering.ipynb)
+  - [02a_pd_xgboost_training.ipynb](notebooks/02a_pd_xgboost_training.ipynb)
+  - [02b_pd_ann_training.ipynb](notebooks/02b_pd_ann_training.ipynb)
+  - [02c_pd_quantum_qvc_training.ipynb](notebooks/02c_pd_quantum_qvc_training.ipynb)
+  - [02z_pd_model_comparison.ipynb](notebooks/02z_pd_model_comparison.ipynb)
+  - [03_sentiment_FP_FiQA_feature_engineering.ipynb](notebooks/03_sentiment_FP_FiQA_feature_engineering.ipynb)
+  - [04a_sentiment_finbert_training.ipynb](notebooks/04a_sentiment_finbert_training.ipynb)
+  - [04b_sentiment_qnlp_training.ipynb](notebooks/04b_sentiment_qnlp_training.ipynb)
+  - [04z_sentiment_model_comparison.ipynb](notebooks/04z_sentiment_model_comparison.ipynb)
   - PD predictions in [data/proof/credit_risk_pd/](data/proof/credit_risk_pd/) (e.g. [LendingClub](data/proof/credit_risk_pd/lendingclub/test/lendingclub_test_predictions.txt))
-  - memos in [data/proof/credit_risk_memo_generator/](data/proof/credit_risk_memo_generator/) (e.g. [FinanceBench](data/proof/credit_risk_memo_generator/financebench/train/financebench_train_predictions.txt)).
+  - Credit risk memo generator on [FinanceBench](data/proof/credit_risk_memo_generator/financebench/train/financebench_train_predictions.txt).
 - **RAG (model predictions):** [`*_predictions.txt`](data/proof/rag/finqa/test/finqa_test_predictions.txt) files under [data/proof/rag/](data/proof/rag/). [Completed]
 - **Vision (model predictions):** [`*_predictions.txt`](data/proof/vision/docvqa/validation/docvqa_validation_predictions.txt) files under [data/proof/vision/](data/proof/vision/).
 - **OCR (model predictions):** [`*_avg.json`](data/proof/ocr/funsd/funsd_avg.json) files under [data/proof/ocr/](data/proof/ocr/).
