@@ -42,7 +42,7 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 | Layer | Dataset | Metric | Value | Total population | OOT test sample size | Notes |
 |-------|---------|--------|-------|-----------------|----------------------|------|
 | **Credit risk PD (LSTM)** | Home Credit (full population) | OOT AUC-ROC | 0.756 | 307,511 | 61,502 | |
-| **Credit risk PD (LSTM)** | Home Credit (has_repayment_bureau 88K) | OOT AUC-ROC | 0.749 | 88,816 | 17,763 | |
+| **Credit risk PD (LSTM)** | Home Credit (has_repayment_bureau) | OOT AUC-ROC | 0.749 | 88,816 | 17,763 | |
 | **Credit risk PD (LSTM)** | Home Credit (has_bureau) | OOT AUC-ROC | 0.753 | 295,058 | 58,829 | |
 | **Credit risk PD (LSTM)** | Home Credit (no_bureau) | OOT AUC-ROC | 0.744 | 12,453 | 109 | |
 | **Credit risk PD (Logistic Regression)** | LendingClub | OOT AUC-ROC, Brier | 0.660, 0.236 | — | 21,721 | Preferred for rank-ordering |
