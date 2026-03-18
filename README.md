@@ -1,6 +1,7 @@
 # Quick Scan for developers
 
 OCR → RAG → Credit Risk platform for financial documents<br>
+
 **Author:** Lee Ming Loon<br>
 **Status:** Deployed to Amazon Web Services (AWS) Sagemaker. Evaluated using Local / Google Colabs / Kaggle.
 
