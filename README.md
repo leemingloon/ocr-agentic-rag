@@ -7,8 +7,7 @@ OCR → RAG → Credit Risk platform for financial documents
 **Vision (model predictions):** `*_predictions.txt` files under `data/proof/vision/` folder.<br>
 **OCR (model predictions):** `*_predictions.txt` files under `data/proof/ocr/` folder.
 
-Above section for developers that would like a quick scan of the work.
----
+Above section is for developers that would like a quick scan of the results.
 
 ## 🎯 Project Overview
 
