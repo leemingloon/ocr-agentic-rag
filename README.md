@@ -1,13 +1,15 @@
-## Quick look at my work and results (for developers)
+### Quick look at my work and results (for developers)
 
 OCR → RAG → Credit Risk platform for financial documents<br>
 
 **Status:** Deployed to Amazon Web Services (AWS) Sagemaker. Evaluated using Local / Google Colabs / Kaggle.
 
-**Credit risk:** `demo_credit_risk_pd.ipynb`, `00`-`04z` notebooks (`.ipynb`) in `notebooks/` folder. [Completed]<br>
-**RAG (model predictions):** `*_predictions.txt` files under `data/proof/rag/` folder. [Completed]<br>
-**Vision (model predictions):** `*_predictions.txt` files under `data/proof/vision/` folder.<br>
-**OCR (model predictions):** `*_predictions.txt` files under `data/proof/ocr/` folder.
+- **Credit risk:** [demo_credit_risk_pd.ipynb](notebooks/demo_credit_risk_pd.ipynb), [00](notebooks/00_pd_homecredit_lstm_kaggle.ipynb)-[04z](notebooks/04z_sentiment_model_comparison.ipynb) notebooks in [notebooks/](notebooks/)
+  - PD predictions in [data/proof/credit_risk_pd/](data/proof/credit_risk_pd/) (e.g. [LendingClub](data/proof/credit_risk_pd/lendingclub/test/lendingclub_test_predictions.txt))
+  - memos in [data/proof/credit_risk_memo_generator/](data/proof/credit_risk_memo_generator/) (e.g. [FinanceBench](data/proof/credit_risk_memo_generator/financebench/train/financebench_train_predictions.txt)). [Completed]
+- **RAG (model predictions):** [`*_predictions.txt`](data/proof/rag/finqa/test/finqa_test_predictions.txt) files under [data/proof/rag/](data/proof/rag/). [Completed]
+- **Vision (model predictions):** [`*_predictions.txt`](data/proof/vision/docvqa/validation/docvqa_validation_predictions.txt) files under [data/proof/vision/](data/proof/vision/).
+- **OCR (model predictions):** [`*_avg.json`](data/proof/ocr/funsd/funsd_avg.json) files under [data/proof/ocr/](data/proof/ocr/).
 
 ---
 
@@ -20,8 +22,28 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 - **Multimodal vision:** Use Claude Sonnet (vision) for charts, complex layouts, and visual QA.
 - **Credit risk:** Build PD models, sentiment signals, and LLM-based risk memos from structured features.
 
-All evaluation metrics and benchmarks are produced via `eval_runner.py` and stored under `data/proof/`.  
-See `ARCHITECTURE.md` and `EVALUATION_RESULTS.md` for more detail.
+### Key Results (benchmarks)
+
+| Layer | Dataset | Metric | Value | Total pop | OOT test sample size | Notes |
+|-------|---------|--------|-------|-----------|----------------------|------|
+| **Credit risk PD (LSTM)** | Home Credit (full population) | OOT AUC-ROC | 0.756 | 307,511 | 61,502 | |
+| **Credit risk PD (LSTM)** | Home Credit (has_repayment_bureau 88K) | OOT AUC-ROC | 0.749 | 88,816 | 17,763 | |
+| **Credit risk PD (LSTM)** | Home Credit (has_bureau) | OOT AUC-ROC | 0.753 | 295,058 | 58,829 | |
+| **Credit risk PD (LSTM)** | Home Credit (no_bureau) | OOT AUC-ROC | 0.744 | 12,453 | 109 | |
+| **Credit risk PD (Logistic Regression)** | LendingClub | OOT AUC-ROC, Brier | 0.660, 0.236 | — | 21,721 | Preferred for rank-ordering |
+| **Credit risk PD (Optuna-tuned XGBoost/LightGBM stack)** | LendingClub | OOT AUC-ROC, Brier | 0.636, 0.145 | — | 21,721 | Preferred for PD calibration/estimation |
+| **Credit risk PD (ANN)** | LendingClub | OOT AUC-ROC | 0.616 | — | 21,721 | |
+| **RAG** | FinQA (out-of-sample) | Relaxed / Exact | 77.5% / 71.5% | — | 200 | |
+| **RAG** | FinQA (in-sample) | Relaxed / Exact | 92% / 90.5% | — | 200 | |
+| **RAG** | TAT-QA (out-of-sample) | Relaxed / Exact | 89.5% / 77% | — | 200 | |
+| **RAG** | TAT-QA (in-sample) | Relaxed / Exact | 98.5% / 81% | — | 200 | |
+| **Vision-Language model (VLM)** | DocVQA, ChartQA, InfographicsVQA, MMMU | In-sample accuracy | ~90% | — | 56 | |
+| **Credit risk memo generator** | FinanceBench | Exact match | ~94% | — | 100 | |
+| **Credit risk PD (Quantum VQC)** | LendingClub | OOT AUC-ROC | 0.540 | — | 21,721 | |
+| **Credit Risk Sentiment (QNLP)** | Financial PhraseBank & FiQA | Test F1 macro | ~0.40 | — | 112 | |
+
+All evaluation metrics are produced via `eval_runner.py` and stored under `data/proof/`.  
+See [ARCHITECTURE.md](ARCHITECTURE.md) and [EVALUATION_RESULTS.md](EVALUATION_RESULTS.md) for full detail.
 
 ---
 
@@ -62,14 +84,12 @@ See `ARCHITECTURE.md` and `EVALUATION_RESULTS.md` for more detail.
 │ LAYER 2: RAG                                                                │
 │ Chunking: structure-preserving | Embeddings: BGE-M3 | Retrieval: FAISS+BM25 │
 │ Reranking: BGE-reranker-v2-m3 | Orchestration: LangGraph | LLM: Claude      │
-│ Benchmarks: FinQA 77.5% relaxed / 71.5% exact | TATQA 89.5% / 77%           │
 └────────────────────────────────────┬────────────────────────────────────────┘
                                      │ Enriched context
                                      ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ LAYER 3: MULTIMODAL VISION                                                  │
 │ Model: Claude 3.5 Sonnet Vision | DocVQA, ChartQA, InfographicsVQA, MMMU    │
-│ In-sample: 90% accuracy (n=50)                                              │
 └────────────────────────────────────┬────────────────────────────────────────┘
                                      │ Structured features
                                      ▼
