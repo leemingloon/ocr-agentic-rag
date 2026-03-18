@@ -4,9 +4,9 @@ OCR → RAG → Credit Risk platform for financial documents<br>
 
 **Status:** Deployed to Amazon Web Services (AWS) Sagemaker. Evaluated using Local / Google Colabs / Kaggle.
 
-- **Credit risk:** [demo_credit_risk_pd.ipynb](notebooks/demo_credit_risk_pd.ipynb), [00](notebooks/00_pd_homecredit_lstm_kaggle.ipynb)-[04z](notebooks/04z_sentiment_model_comparison.ipynb) notebooks in [notebooks/](notebooks/)
+- **Credit risk:** [demo_credit_risk_pd.ipynb](notebooks/demo_credit_risk_pd.ipynb), [00](notebooks/00_pd_homecredit_lstm_kaggle.ipynb)-[04z](notebooks/04z_sentiment_model_comparison.ipynb) notebooks in [notebooks/](notebooks/) [Completed]
   - PD predictions in [data/proof/credit_risk_pd/](data/proof/credit_risk_pd/) (e.g. [LendingClub](data/proof/credit_risk_pd/lendingclub/test/lendingclub_test_predictions.txt))
-  - memos in [data/proof/credit_risk_memo_generator/](data/proof/credit_risk_memo_generator/) (e.g. [FinanceBench](data/proof/credit_risk_memo_generator/financebench/train/financebench_train_predictions.txt)). [Completed]
+  - memos in [data/proof/credit_risk_memo_generator/](data/proof/credit_risk_memo_generator/) (e.g. [FinanceBench](data/proof/credit_risk_memo_generator/financebench/train/financebench_train_predictions.txt)).
 - **RAG (model predictions):** [`*_predictions.txt`](data/proof/rag/finqa/test/finqa_test_predictions.txt) files under [data/proof/rag/](data/proof/rag/). [Completed]
 - **Vision (model predictions):** [`*_predictions.txt`](data/proof/vision/docvqa/validation/docvqa_validation_predictions.txt) files under [data/proof/vision/](data/proof/vision/).
 - **OCR (model predictions):** [`*_avg.json`](data/proof/ocr/funsd/funsd_avg.json) files under [data/proof/ocr/](data/proof/ocr/).
@@ -23,6 +23,8 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 - **Credit risk:** Build PD models, sentiment signals, and LLM-based risk memos from structured features.
 
 ### Key Results (benchmarks)
+
+<small>
 
 | Layer | Dataset | Metric | Value | Total pop | OOT test sample size | Notes |
 |-------|---------|--------|-------|-----------|----------------------|------|
@@ -41,6 +43,8 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 | **Credit risk memo generator** | FinanceBench | Exact match | ~94% | — | 100 | |
 | **Credit risk PD (Quantum VQC)** | LendingClub | OOT AUC-ROC | 0.540 | — | 21,721 | |
 | **Credit Risk Sentiment (QNLP)** | Financial PhraseBank & FiQA | Test F1 macro | ~0.40 | — | 112 | |
+
+</small>
 
 All evaluation metrics are produced via `eval_runner.py` and stored under `data/proof/`.  
 See [ARCHITECTURE.md](ARCHITECTURE.md) and [EVALUATION_RESULTS.md](EVALUATION_RESULTS.md) for full detail.
