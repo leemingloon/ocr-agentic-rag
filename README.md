@@ -18,7 +18,9 @@ OCR → RAG → Credit Risk platform for financial documents<br>
   - [04z_sentiment_model_comparison.ipynb](notebooks/04z_sentiment_model_comparison.ipynb)
   - PD predictions in [data/proof/credit_risk_pd/](data/proof/credit_risk_pd/) (e.g. [LendingClub](data/proof/credit_risk_pd/lendingclub/test/lendingclub_test_predictions.txt))
   - Credit risk memo generator on [FinanceBench](data/proof/credit_risk_memo_generator/financebench/train/financebench_train_predictions.txt).
-- **RAG (model predictions):** [`*_predictions.txt`](data/proof/rag/finqa/test/finqa_test_predictions.txt) files under [data/proof/rag/](data/proof/rag/). [Completed]
+- **RAG (model predictions):** Under [data/proof/rag/](data/proof/rag/). [Completed]
+  - **FinQA:** [in-sample (train)](data/proof/rag/finqa/train/finqa_train_predictions.txt), [out-of-sample (test)](data/proof/rag/finqa/test/finqa_test_predictions.txt)
+  - **TAT-QA:** [in-sample (test)](data/proof/rag/tatqa/test/tatqa_test_predictions.txt), [out-of-sample (dev)](data/proof/rag/tatqa/dev/tatqa_dev_predictions.txt)
 - **Vision (model predictions):** [`*_predictions.txt`](data/proof/vision/docvqa/validation/docvqa_validation_predictions.txt) files under [data/proof/vision/](data/proof/vision/).
 - **OCR (model predictions):** [`*_avg.json`](data/proof/ocr/funsd/funsd_avg.json) files under [data/proof/ocr/](data/proof/ocr/).
 

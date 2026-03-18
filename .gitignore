@@ -249,3 +249,4 @@ data/rag/**/tatqa_retriever_index_b4_dedup/
 notebooks/00-pd-homecredit-lstm-kaggle.ipynb
 notebooks/00_pd_homecredit_lstm_kaggle_slim.ipynb
 notebooks/00_pd_homecredit_lstm_kaggle_stable.ipynb
+notebooks/00_pd_homecredit_lstm_kaggle_stable2.ipynb
