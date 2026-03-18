@@ -1,3 +1,5 @@
+# Quick Scan for developers
+
 OCR → RAG → Credit Risk platform for financial documents<br>
 **Author:** Lee Ming Loon<br>
 **Status:** Deployed to Amazon Web Services (AWS) Sagemaker. Evaluated using Local / Google Colabs / Kaggle.
@@ -7,9 +9,9 @@ OCR → RAG → Credit Risk platform for financial documents<br>
 **Vision (model predictions):** `*_predictions.txt` files under `data/proof/vision/` folder.<br>
 **OCR (model predictions):** `*_predictions.txt` files under `data/proof/ocr/` folder.
 
-Above section is for developers that would like a quick scan of the work and results.
+---
 
-## 🎯 Project Overview
+## ⚡ Overview & Key Results
 
 End-to-end platform for **financial document intelligence and credit risk**, combining:
 
@@ -23,52 +25,105 @@ See `ARCHITECTURE.md` and `EVALUATION_RESULTS.md` for more detail.
 
 ---
 
-## 📊 System Architecture
+## 🎯 Use Cases & Benchmarks
+
+### OCR Layer
+- Invoice and receipt extraction (SROIE)
+- Form and contract key-value extraction (FUNSD)
+- General document text extraction feeding RAG and credit risk
+
+### Multimodal Layer
+- Chart understanding and numeric QA (ChartQA)
+- Document visual QA (DocVQA, InfographicsVQA)
+- Multichoice reasoning over financial diagrams and tables (MMMU Accounting/Economics/Finance/Math)
+
+### RAG Layer
+- Financial QA over reports and tables (FinQA)
+- Table- and passage-heavy question answering (TAT-QA)
+- Retrieval-augmented support for memo generation and analysis
+
+### Credit Risk Layer
+- Probability of default (PD) modelling (LendingClub; Home Credit in notebooks)
+- Early warning and deterioration signals (ratios, trends, NLP sentiment)
+- LLM-generated credit risk memos (FinanceBench-style Q&A)
+
+---
+
+## 📊 System Architecture & Technology Stack
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    LAYER 1: OCR PIPELINE                    │
-│   3-Tier Detection: Cache → Classical → DL                  │
-│   Recognition: Tesseract → PaddleOCR → Vision OCR           │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼ Structured Text + Layout
-                         │
-┌─────────────────────────────────────────────────────────────┐
-│                  LAYER 2: RAG                               │
-│   Retrieval: BM25 + BGE-M3 (hybrid dense+sparse)            │
-│   Reranking: BGE-reranker-v2-m3 (cross-encoder)             │
-│   Orchestration: LangGraph (autonomous tool selection)      │
-│   Performance:                                              │
-│        FinQA, out-of-sample:                                │
-│               relaxed exact match 77.5%                     │
-│               exact match 71.5%                             │
-│        TATQA: out-of-sample:                                │
-│               relaxed exact match 89.5%                     │
-│               exact match: 77%                              │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼ Enriched Context
-                         │
-┌─────────────────────────────────────────────────────────────┐
-│              LAYER 3: MULTIMODAL VISION                     │
-│   Vision Model: Claude 3.5 Sonnet Vision                    │
-│   Use Cases: Charts, handwriting, complex layouts           │
-│   Performance:                                              │
-│         DocVQA, ChartQA, InfographicsVQA, MMMU              |
-|                In-sample: 90% accuracy, n=50                │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼ Structured Features
-                         │
-┌───────────────────────────────────────────────────────────────────┐
-│            LAYER 4: CREDIT RISK PIPELINE                          │
-│   Feature Engineering: Ratios, Trends, NLP sentiment              │
-│   PD Model: Logistic Regression — OOT AUC 0.66                    │
-│   Risk Memos: LLM-generated — FinanceBench exact match 94% n=100  │
-│   Governance: Prompt versioning, safety filters                   │
-│   Monitoring: Drift detection — Logistic Regression 0.234         │
-└───────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ LAYER 1: OCR                                                                │
+│ Detection: Cache → OpenCV (classical) → PaddleOCR (DL) | ONNX optional      │
+│ Recognition: Tesseract → PaddleOCR → Claude Sonnet (vision fallback)        │
+└────────────────────────────────────┬────────────────────────────────────────┘
+                                     │ Structured text + layout
+                                     ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ LAYER 2: RAG                                                                │
+│ Chunking: structure-preserving | Embeddings: BGE-M3 | Retrieval: FAISS+BM25 │
+│ Reranking: BGE-reranker-v2-m3 | Orchestration: LangGraph | LLM: Claude      │
+│ Benchmarks: FinQA 77.5% relaxed / 71.5% exact | TATQA 89.5% / 77%           │
+└────────────────────────────────────┬────────────────────────────────────────┘
+                                     │ Enriched context
+                                     ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ LAYER 3: MULTIMODAL VISION                                                  │
+│ Model: Claude 3.5 Sonnet Vision | DocVQA, ChartQA, InfographicsVQA, MMMU    │
+│ In-sample: 90% accuracy (n=50)                                              │
+└────────────────────────────────────┬────────────────────────────────────────┘
+                                     │ Structured features
+                                     ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ LAYER 4: CREDIT RISK                                                        │
+│ Features: Pandas/NumPy (ratios, trends) | NLP: FinBERT + rules              │
+│ PD: XGBoost, LightGBM, LR, PyTorch (ANN/LSTM) | Explainability: SHAP        │
+│ Memos: Claude Sonnet | Governance: prompt registry + safety filter          │
+│ Monitoring: SciPy (KS), drift | Cloud: AWS SageMaker, S3                    │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 🧠 Key Design Decisions
+
+**Why this matters:** These choices shape the system’s reliability, cost, and regulatory fit.
+
+| Decision | Rationale |
+|----------|-----------|
+| **Hybrid retrieval (BM25 + BGE-M3)** | Handles both numeric tables and text-heavy financial documents; sparse + dense covers different query patterns. |
+| **Agentic orchestration (LangGraph)** | Dynamically selects tools instead of static pipelines; adapts to multi-step QA and reasoning. |
+| **3-tier OCR fallback** | Balances cost, speed, and accuracy: cache → classical → DL; Vision fallback for hard cases. |
+| **LLM + structured features fusion for credit risk** | Not pure black-box models; interpretable PD models (LR, XGBoost, LSTM) plus LLM for memos and explanations. |
+| **Governance layer (prompt registry + safety filters)** | Production readiness: versioning, audit trail, and safety filters for LLM outputs. |
+
+---
+
+## 🔒 Governance, Risk & Compliance
+
+### Fairness
+- Target: bias gap &lt;10% across document types and benchmarks.
+- Bias tests and layout cache/completeness heuristics are summarised in `data/proof/SUMMARY.md` (current gap and coverage).
+
+### Ethics
+- High-risk credit decisions must go to **human-in-the-loop**; low-risk segments may be auto-approved under configured thresholds.
+- LLM usage (risk memos) is constrained by safety filters and prompt registry policies.
+
+### Accountability
+- Full audit trail from data → features → model → decision, including prompt/version for LLM calls.
+- Prompt registry in `credit_risk/governance/` tracks versions, approvers, and status for all production prompts.
+
+### Transparency
+- PD models use SHAP for feature-attribution explanations where applicable.
+- RAG answers and risk memos can surface retrieved evidence and key drivers; drift monitoring is logged via `credit_risk/monitoring/`.
+
+---
+
+## 📖 Documentation
+
+### Core Documentation
+- [ARCHITECTURE.md](ARCHITECTURE.md) - Complete system design
+- [EVALUATION_RESULTS.md](EVALUATION_RESULTS.md) - All 20 benchmark results
+- [data/credit_risk/README.md](data/credit_risk/README.md) - Dataset download guide
 
 ---
 
@@ -144,31 +199,7 @@ ocr-agentic-rag/
 
 ---
 
-## 🎯 Use Cases
-
-### OCR Layer
-- Invoice and receipt extraction (SROIE)
-- Form and contract key-value extraction (FUNSD)
-- General document text extraction feeding RAG and credit risk
-
-### Multimodal Layer
-- Chart understanding and numeric QA (ChartQA)
-- Document visual QA (DocVQA, InfographicsVQA)
-- Multichoice reasoning over financial diagrams and tables (MMMU Accounting/Economics/Finance/Math)
-
-### RAG Layer
-- Financial QA over reports and tables (FinQA)
-- Table- and passage-heavy question answering (TAT-QA)
-- Retrieval-augmented support for memo generation and analysis
-
-### Credit Risk Layer
-- Probability of default (PD) modelling (LendingClub; Home Credit in notebooks)
-- Early warning and deterioration signals (ratios, trends, NLP sentiment)
-- LLM-generated credit risk memos (FinanceBench-style Q&A)
-
----
-
-## 💻 Running on Different Platforms
+## 💻 Quick Start
 
 ### Prerequisites
 
@@ -266,70 +297,6 @@ python eval_runner.py --category credit_risk_PD
 
 ---
 
-## 🔧 Technology Stack
-
-### OCR
-- **Detection:** OpenCV (classical), template cache, PaddleOCR (DL)
-- **Recognition:** Tesseract, PaddleOCR; Claude Sonnet (vision) as fallback
-- **Optimization:** Optional ONNX Runtime export for PaddleOCR
-
-### RAG
-- **Chunking:** Structure-preserving, metadata-enriched
-- **Embeddings:** BGE-M3 (Hugging Face)
-- **Retrieval:** FAISS + BM25 (hybrid sparse + dense)
-- **Reranking:** BGE-reranker-v2-m3 (cross-encoder)
-- **Orchestration:** LangGraph state graph
-- **LLM:** Claude Sonnet (text, tool use, CoT)
-
-### Multimodal
-- **Vision model:** Claude Sonnet (vision)
-- **Use cases:** Chart QA, document QA, complex layouts, OCR validation
-
-### Credit Risk
-- **Feature engineering:** Pandas, NumPy (ratios, trends, NLP signals)
-- **Sentiment/NLP:** FinBERT (ProsusAI/finbert) + rule-based postprocessing
-- **PD / risk models:** XGBoost, LightGBM, scikit-learn, PyTorch (ANN/LSTM)
-- **Explainability:** SHAP
-- **LLM:** Claude Sonnet (risk memos and explanations)
-- **Monitoring:** SciPy (KS), custom drift utilities
-- **Governance:** Prompt registry + safety filter (SQLite-backed)
-
-### Infrastructure
-- **Monitoring/observability:** (optional) OpenTelemetry, Prometheus, CloudWatch
-- **Cloud:** AWS SageMaker, S3 (batch and notebook workflows)
-- **Storage:** Local files, S3; optional PostgreSQL / SQLite for metadata
-
----
-
-## 📖 Documentation
-
-### Core Documentation
-- [ARCHITECTURE.md](ARCHITECTURE.md) - Complete system design
-- [EVALUATION_RESULTS.md](EVALUATION_RESULTS.md) - All 20 benchmark results
-- [data/credit_risk/README.md](data/credit_risk/README.md) - Dataset download guide
-
----
-
-## 🔒 MAS FEAT Compliance
-
-### Fairness
-- Target: bias gap &lt;10% across document types and benchmarks.
-- Bias tests and layout cache/completeness heuristics are summarised in `data/proof/SUMMARY.md` (current gap and coverage).
-
-### Ethics
-- High-risk credit decisions must go to **human-in-the-loop**; low-risk segments may be auto-approved under configured thresholds.
-- LLM usage (risk memos) is constrained by safety filters and prompt registry policies.
-
-### Accountability
-- Full audit trail from data → features → model → decision, including prompt/version for LLM calls.
-- Prompt registry in `credit_risk/governance/` tracks versions, approvers, and status for all production prompts.
-
-### Transparency
-- PD models use SHAP for feature-attribution explanations where applicable.
-- RAG answers and risk memos can surface retrieved evidence and key drivers; drift monitoring is logged via `credit_risk/monitoring/`.
-
----
-
 ## 📝 License
 
 This project is licensed under the **MIT License**.  
@@ -353,4 +320,4 @@ See the `LICENSE` file for full terms.
 
 ---
 
-**Contact:** Lee Ming Loon | Singapore  
+**Contact:** Lee Ming Loon | Singapore
