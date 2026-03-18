@@ -1,0 +1,37 @@
+[
+  {
+    "sample_id": "dev_Math_1",
+    "split": "dev",
+    "ground_truth": "4",
+    "input_text": {
+      "question": "Each of seven students has chosen three courses from ten options, and must sit an exam for each of his or her three choices. Two students sitting the same exam must do so at the same time, but no student can sit more than one exam in the same day. The table of choices is given in <image 1>. Find the smallest number of days required to schedule the exams. Return only the number of days."
+    },
+    "prediction": "## Structured Analysis\n\n### 1. Chart Type\nTable\n\n### 2. Title\nNone present\n\n### 3. Axes Labels\n- Columns: Student, Exams (3 exams per student)\n- Students: A through G\n\n### 4. Data Points\n| Student | Exam 1 | Exam 2 | Exam 3 |\n|---------|--------|--------|--------|\n| A | 1 | 2 | 3 |\n| B | 1 | 4 | 5 |\n| C | 2 | 4 | 6 |\n| D | 3 | 5 | 7 |\n| E | 6 | 8 | 10 |\n| F | 7 | 8 | 9 |\n| G | 1 | 9 | 10 |\n\n### 5. Trends & Graph Coloring Analysis\n\n**Conflict Graph:** Two exams conflict (must be on different days) if any student takes both.\n\nBuilding the conflict edges:\n- A: (1,2),(1,3),(2,3)\n- B: (1,4),(1,5),(4,5)\n- C: (2,4),(2,6),(4,6)\n- D: (3,5),(3,7),(5,7)\n- E: (6,8),(6,10),(8,10)\n- F: (7,8),(7,9),(8,9)\n- G: (1,9),(1,10),(9,10)\n\n**Chromatic number** = minimum days needed = minimum coloring of this conflict graph.\n\n**Finding cliques** (lower bound): Look for cliques of size k.\n- Exams 8,9,10: 8-9 (F), 8-10 (E), 9-10 (G) → triangle → need ≥ 3 days\n- Check for 4-clique among {1,2,3,4,5,6,7,8,9,10}\n\nTry: 1,4,5 conflict (from B). Does 1 conflict with something else in a 4-clique? 1-2(A), 1-3(A), 1-4(B), 1-5(B), 1-9(G), 1-10(G).\n\n**Attempting a valid coloring with 4 days:**\n\nAssign days (colors):\n- Day 1: 1, 6, 9 → check conflicts: 1-6? No student has both. 1-9? G has both! ❌\n- Day 1: 1, 6, 7 → 1-6? No. 1-7? No. 6-7? No. ✓\n- Day 2: 2, 5, 8 → 2-5? No. 2-8? No. 5-8? No. ✓\n- Day 3: 3, 4, 9 → 3-4? No. 3-9? No. 4-9? No. ✓\n- Day 4: 10 → remaining\n\nCheck remaining: 10. What's left? Exams assigned: 1,6,7,2,5,8,3,4,9 → **exam 10** on Day 4.\n\n**Verify all students:**\n- A(1,2,3): Days 1,2,3 ✓\n- B(1,4,5): Days 1,3,2 ✓\n- C(2,4,6): Days 2,3,1 ✓\n- D(3,5,7): Days 3,2,1 ✓\n- E(6,8,10): Days 1,2,4 ✓\n- F(7,8,9): Days 1,2,3 ✓\n- G(1,9,10): Days 1,3,4 ✓\n\nAll students have their 3 exams on **different days** ✓\n\n### 6. Key Insights\n4 days suffices and the conflict structure (triangles) requires at least 3, with careful analysis showing 3 is insufficient due to the interconnected conflicts.\n\n## **Answer: 4**",
+    "prediction_error": null,
+    "metrics": {
+      "accuracy": 1.0
+    }
+  },
+  {
+    "sample_id": "dev_Math_2",
+    "split": "dev",
+    "ground_truth": "D",
+    "input_text": {
+      "question": "For the function f(x) = 8x^3 - 2x^2 - 7x + 3, perform two iterations of the dichotomous search scheme for locating the minimum in [0, 1]. In the interval [0, 1], apply the three-point equal-interval search scheme and compare the results with the above solution. Applying the quadratic interpolation technique, find λ^ from (1) and compare the result with that of dichotomous search: λ^ = (1/2) [{g(a)(c^2 - b^2) + g(b)(a^2 - c^2) + g(c)(b^2 - a^2)} / {g(a)(c - b) + g(b)(a - c) + g(c)(b - a)}] (1) Choose ε = 0.1.\n<image 1>"
+    },
+    "prediction": "I'll analyze this systematically.\n\n## Chart Analysis\n\n1. **Chart Type:** Line graph\n2. **Title:** f(x) = 8x³ - 2x² - 7x + 3\n3. **Axes:** x-axis (horizontal), f(x) (vertical)\n4. **Data Points:** Local maximum near x = -0.5 (f ≈ 5+), minimum near x = 0.75 (f ≈ 0.63), marked points at x = 0.5, 0.63, 0.75\n5. **Trends:** Cubic function with local max in [-1, 0] and local min near x = 0.75 in [0, 1]\n6. **Key Insights:** Minimum in [0,1] occurs near x* ≈ 0.75, f(x*) ≈ 0.63\n\n---\n\n## Structured Analysis\n\n### Dichotomous Search (ε = 0.1), two iterations in [0, 1]:\n\n**Iteration 1:** a=0, b=1, midpoint=0.5\n- x₁ = 0.5 - 0.05 = 0.45, x₂ = 0.5 + 0.05 = 0.55\n- f(0.45) ≈ 0.811, f(0.55) ≈ 0.669 → minimum in [0.45+, 1] → new interval [0.45, 1] or [0.5, 1]\n- Reduce to **[0.5, 1]**\n\n**Iteration 2:** a=0.5, b=1, midpoint=0.75\n- x₁ = 0.70, x₂ = 0.80\n- f(0.70) ≈ 0.656, f(0.80) ≈ 0.702 → minimum in [0.5, 0.80]\n- Resulting interval: **[0.5, 0.80]**, length = 0.30\n\n---\n\n### Three-Point Equal-Interval Search in [0, 1]:\n\nDivide [0,1] into 4 equal parts: points at x = 0, 0.25, 0.5, 0.75, 1.0\n- f(0) = 3, f(0.25) ≈ 1.5, f(0.5) ≈ 0.5, f(0.75) ≈ 0.63, f(1.0) = 2\n- Minimum region: **[0.5, 1.0]**, length = 0.50\n\nThe dichotomous search gives interval **[0.5, 0.80]** (length 0.30) vs equal-interval **[0.5, 1.0]** (length 0.50). **Dichotomous yields smaller interval.**\n\n---\n\n### Quadratic Interpolation using points a=0, b=0.5, c=1:\n\n- g(a)=f(0)=3, g(b)=f(0.5)≈0.5, g(c)=f(1)=2\n\nλ' = ½ × [3(1-0.25) + 0.5(0-1) + 2(0.25-0)] / [3(1-0.5) + 0.5(0-1) + 2(0.5-0)]\n\nNumerator: 3(0.75) + 0.5(-1) + 2(0.25) = 2.25 - 0.5 + 0.5 = **2.25**\nDenominator: 3(0.5) + 0.5(-1) + 2(0.5) = 1.5 - 0.5 + 1.0 = **2.0**\n\nλ' = ½ × (2.25/2.0) = **0.5625 ≈ 0.52** (approximate)\n\nTrue minimum near x* ≈ 0.75; λ' ≈ 0.52 is **not accurate**.\n\n---\n\n## Evaluation of Options\n\n- **A:** Dichotomous search yields smaller interval [0.5, 0.8] vs equal-interval [0.5, 1.0] → **TRUE**\n- **B:** λ' ≈ 0.52–0.56, but true x* ≈ 0.75 → not accurate → **FALSE**\n- **C:** Equal-interval used 5 evaluations, quadratic used 3 → equal-interval used MORE → could be true, but A is more directly supported\n- **D:** Maximum is ~5, not minimum → **FALSE**\n\n**A is clearly correct.**\n\nA",
+    "prediction_error": null,
+    "metrics": {
+      "accuracy": 0.0
+    },
+    "metadata": {
+      "sample_id": "dev_Math_2",
+      "options_list": [
+        "The dichotomous search yields a smaller interval containing $ x^* $ than the equal-interval search.",
+        "The value obtained from quadratic interpolation $ \\lambda' = 0.52 $ is an accurate estimate for $ \\lambda^* $.",
+        "The equal-interval search required more function evaluations than the quadratic interpolation.",
+        "$ f(x) $ has a minimum of 5 in the interval $ [-1, 1] $."
+      ]
+    }
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "sample_id": "validation_Economics_2",
+  "question": "<image 1> Suppose the government decided that, since gasoline is a necessity, its price should be legally capped at $1.30 per gallon. What do you anticipate would be the outcome in the gasoline market?",
+  "ground_truth": "B",
+  "options_list": [
+    "A price below that of 1.30 dollars would cause a situation of excess demand and hence a surplus.",
+    "A price below that of 1.30 dollars would cause a situation of excess demand and hence a shortage.",
+    "Not certain."
+  ],
+  "options_present": true,
+  "split": "validation",
+  "dataset": "MMMU_Economics"
+}

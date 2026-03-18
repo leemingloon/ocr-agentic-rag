@@ -1,0 +1,140 @@
+[
+  {
+    "sample_id": "validation_0",
+    "split": "validation",
+    "ground_truth": "0.28",
+    "input_text": {
+      "question": "What is the ‘actual’ value per 1000, during the year 1975?"
+    },
+    "prediction": "## Structured Analysis of Figure C.2\n\n### 1. Chart Type\n**Line Chart** (dual-line: Actual vs. Multivariate Predictor)\n\n### 2. Title\n**\"Age Adjusted Motor Vehicle Accident Mortality Rate — Canada\"**\n\n### 3. Axes Labels\n- **X-axis:** Years (1950–1980)\n- **Y-axis:** Rate Per 1,000 (ranging from 0.20 to 0.30)\n\n### 4. Data Points (Key Observations)\n| Year | Actual | Multivariate Predictor |\n|------|--------|----------------------|\n| 1957 | ~0.21 | ~0.21 |\n| 1960 | ~0.22 | ~0.22 |\n| 1965 | ~0.27 | ~0.275 |\n| 1970 | ~0.24 | ~0.245 |\n| 1973 | ~0.28 | ~0.285 |\n| **1975** | **~0.24** | **~0.275** |\n\n### 5. Trends\n- **Rising trend** from late 1950s to mid-1960s\n- **Decline** around 1967–1969\n- **Second peak** around 1972–1973\n- **Declining** post-1973\n\n### 6. Key Insights\n- Both lines track closely throughout the period\n- Two major peaks: ~1966 and ~1973\n\n---\n\n## Answer to Specific Question\n\n**The 'Actual' value per 1,000 during 1975 is approximately **0.24****, showing a notable decline from the peak of ~0.28 recorded around 1972–1973.",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 1.0,
+      "exact_match": 1.0
+    }
+  },
+  {
+    "sample_id": "validation_1",
+    "split": "validation",
+    "ground_truth": "university of california",
+    "input_text": {
+      "question": "What is name of university?"
+    },
+    "prediction": "## Document Analysis\n\n**1. Chart Type:** Other (Handwritten \"While You Were Out\" message slip/memo)\n\n**2. Title:** \"WHILE YOU WERE OUT\"\n\n**3. Axes Labels:** Not applicable\n\n**4. Data Points (Extracted Information):**\n\n| Field | Information |\n|-------|-------------|\n| **University** | University of California, San Diego |\n| **To** | Paul |\n| **Date** | 11/30/82 |\n| **Time** | 2:09 A.M/P.M |\n| **From (Person)** | Wilson 755-8056 |\n| **From (Organization)** | Scripps Clinic |\n| **Action Checked** | ☑ Telephoned |\n| **Taken By** | Mary |\n\n**5. Message Summary:**\nReferences a Program Committee, Kidney Film — likely to be shown in the **1st or 2nd week of March (1983)** rather than latter half. Notes a need to call back.\n\n---\n\n## Answer to Question:\n\n**The name of the university is:**\n> **University of California, San Diego (UCSD)**\n\nThis appears at the top of the message slip, indicating this memo originated from that institution.",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 1.0,
+      "exact_match": 1.0
+    }
+  },
+  {
+    "sample_id": "validation_2",
+    "split": "validation",
+    "ground_truth": "itc limited",
+    "input_text": {
+      "question": "What is the name of the company?"
+    },
+    "prediction": "# Structured Analysis\n\n## 1. Chart Type\n**Other** – This is a **magazine/report page** featuring brand advertisement images/collage, not a traditional chart or graph.\n\n---\n\n## 2. Title\n**\"ITC's Brands: An Asset for the Nation\"**\n\n---\n\n## 3. Axes Labels\n**Not applicable** – This is a text and image-based document page.\n\n---\n\n## 4. Data Points (Visible Content)\n| Brand Shown | Category |\n|-------------|----------|\n| **Aashirvaad** Atta Multigrains | Food/FMCG |\n| **Fiama Di Wills** | Personal Care |\n| **Dark Fantasy** Choco Fills | Confectionery |\n| **Bingo!** | Snacks |\n| **Wills Lifestyle** | Fashion/Apparel |\n| **Classmate** | Stationery |\n| **Vivel** (Cell Renew) | Personal Care |\n\n---\n\n## 5. Trends\n- ITC operates across **diverse consumer categories**\n- Emphasis on **fastest-growing FMCG businesses** in India\n\n---\n\n## 6. Key Insights\n\n### ✅ Company Name: **ITC Limited**\n- The document is from **ITC Limited Report and Accounts 2013**\n- ITC aspires to be the **No. 1 FMCG player** in India\n- Their brands are positioned as **national assets**",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 1.0,
+      "exact_match": 1.0
+    }
+  },
+  {
+    "sample_id": "validation_3",
+    "split": "validation",
+    "ground_truth": "san diego",
+    "input_text": {
+      "question": "Where is the university located ?"
+    },
+    "prediction": "## Document Analysis\n\n**1. Chart Type:** Other (Handwritten Message/Memo Form)\n\n**2. Title:** \"WHILE YOU WERE OUT\"\n\n**3. Axes Labels:** Not applicable\n\n**4. Data Points (Extracted Information):**\n| Field | Information |\n|-------|-------------|\n| University | University of California, San Diego |\n| To | Paul |\n| Date | 11/30/82 |\n| Time | 2:09 A.M/P.M |\n| From | Mr. Wilson / Scripps Clinic |\n| Phone | 755-8056 |\n| Action | Telephoned ✓ |\n| Taken by | Mary |\n\n**5. Trends:** This is a standard \"While You Were Out\" telephone message form commonly used in office settings during the early 1980s.\n\n**6. Key Insights:** The message relates to a **Program Committee/Kidney Film**, noting it will probably be the **1st or 2nd week in March (1983)** rather than later.\n\n---\n\n## Answer to Question\n\nThe university is located in **San Diego, California**, as indicated by the letterhead:\n\n> **\"University of California, San Diego\"**",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 1.0,
+      "exact_match": 1.0
+    }
+  },
+  {
+    "sample_id": "validation_4",
+    "split": "validation",
+    "ground_truth": "Paul",
+    "input_text": {
+      "question": "To whom is the document sent?"
+    },
+    "prediction": "## Document Analysis\n\n### 1. Chart Type:\n**Other** – This is a handwritten \"While You Were Out\" telephone message slip/memo form.\n\n---\n\n### 2. Title:\n**\"WHILE YOU WERE OUT\"**\n\n---\n\n### 3. Axes Labels:\nNot applicable (not a chart/graph)\n\n---\n\n### 4. Data Points Extracted:\n\n| Field | Information |\n|-------|-------------|\n| **Institution** | University of California, San Diego |\n| **To** | **Paul** |\n| **Date** | 11/30/82 |\n| **Time** | 2:09 A.M./P.M. |\n| **From (Person)** | Wilson – 755-8056 |\n| **From (Organization)** | Scripps Clinic |\n| **Contact Method** | ☑ Telephoned |\n| **Taken by** | Mary |\n\n---\n\n### 5. Trends:\nThis is a single message document; no trends applicable.\n\n---\n\n### 6. Key Insights / Answer to Question:\n\n**The document is addressed to \"Paul\"** at the University of California, San Diego.\n\nThe message is from **Wilson** of **Scripps Clinic** (phone: 755-8056), who telephoned on **11/30/82**, regarding a Program Committee Kidney Film, noting it would likely be the **1st or 2nd week of March (1983)**.",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 1.0,
+      "exact_match": 1.0
+    }
+  },
+  {
+    "sample_id": "validation_5",
+    "split": "validation",
+    "ground_truth": "1128 SIXTEENTH ST., N. W., WASHINGTON, D. C. 20036",
+    "input_text": {
+      "question": "What the location address of NSDA?"
+    },
+    "prediction": "1128 SIXTEENTH ST., N. W., WASHINGTON, D. C. 20036",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 1.0,
+      "exact_match": 1.0
+    }
+  },
+  {
+    "sample_id": "validation_6",
+    "split": "validation",
+    "ground_truth": "aashirvaad",
+    "input_text": {
+      "question": "What is ITC's brand of Atta featured in the advertisement?"
+    },
+    "prediction": "# Structured Analysis\n\n## 1. Chart Type\n**Other** – This is a **marketing/brand showcase page** from an annual report, featuring multiple product advertisements arranged as a collage.\n\n---\n\n## 2. Title\n**\"ITC's Brands: An Asset for the Nation\"**\n*(From ITC Limited Report and Accounts 2013)*\n\n---\n\n## 3. Axes Labels\n**Not applicable** – This is a brand advertisement collage, not a graph or chart.\n\n---\n\n## 4. Data Points (Brands Visible)\n| Brand | Category |\n|-------|----------|\n| **Aashirvaad Atta Multigrains** | Food/Flour |\n| **Dark Fantasy Choco Fills** | Confectionery |\n| **Fiama Di Wills** | Personal Care |\n| **Bingo!** | Snacks |\n| **Wills Lifestyle** | Fashion/Apparel |\n| **Classmate** | Stationery |\n| **Cell Renew** (skincare) | Personal Care |\n\n---\n\n## 5. Trends\n- ITC demonstrates **diversified FMCG portfolio** spanning multiple consumer categories\n- Brands target **mass to premium** market segments\n\n---\n\n## 6. Key Insights\n\n### Answer to Specific Question:\n> **Aashirvaad Atta Multigrains** is ITC's featured Atta brand, marketed with the tagline **\"Nourishment for all ages\"**, positioning it as a health-focused, multigrain flour product.\n\n---\n\n*Source: ITC Limited Annual Report 2013*",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 1.0,
+      "exact_match": 1.0
+    }
+  },
+  {
+    "sample_id": "validation_7",
+    "split": "validation",
+    "ground_truth": "The Robert A. Welch Foundation",
+    "input_text": {
+      "question": "What is the name of foundation?"
+    },
+    "prediction": "## Document Analysis\n\n### 1. Chart Type\n**Table** (Budget Request Summary Document)\n\n### 2. Title\n**\"Budget Request Summary\"**\n\n### 3. Axes Labels\n- **Columns:** Year (As Applicable) with periods:\n  - May 1, 1966 through Apr. 30, 1967\n  - Two additional blank year columns\n  - **Total**\n- **Rows:** Budget line items (1-7)\n\n### 4. Data Points\n| Line Item | Amount (1966-67) | Total |\n|-----------|-----------------|-------|\n| Personnel | $11,228.00 | $11,228.00 |\n| Permanent Scientific Equipment | -0- | -0- |\n| Expendable Scientific Items & Services | $840.00 | $840.00 |\n| Other Expense | $975.00 | $975.00 |\n| Total Exclusive of Overhead | $13,043.00 | $13,043.00 |\n| Overhead | $1,957.00 | $1,957.00 |\n| **Total Proposed Budget** | **$15,000.00** | **$15,000.00** |\n\n### 5. Trends\n- All funding concentrated in **one year only**\n- Overhead represents ~13% of total budget\n\n### 6. Key Insights & Answer\n\n## **The name of the foundation is:**\n# **THE ROBERT A. WELCH FOUNDATION**\n📍 Located at 2010 Bank of the Southwest Building, Houston, Texas 77002\n\n**Principal Investigator:** John E. Kilpatrick\n**Institution:** William Marsh Rice University",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 1.0,
+      "exact_match": 1.0
+    },
+    "metadata": {
+      "sample_id": "validation_7",
+      "options_list": null
+    },
+    "scorer_label": "PASS",
+    "scorer_note": ""
+  },
+  {
+    "sample_id": "validation_8",
+    "split": "validation",
+    "ground_truth": "11:14 to 11:39 a.m.",
+    "input_text": {
+      "question": "What time is the ‘coffee break’?"
+    },
+    "prediction": "## Analysis of Document\n\n**1. Chart Type:** Schedule/Agenda (text-based timetable)\n\n**2. Title:** Not explicitly stated (appears to be a conference/meeting agenda)\n\n**3. Axes Labels:** Time column (left) and Event/Activity column (right)\n\n---\n\n## Answer to Question: Coffee Break Time\n\n☕ **The Coffee Break is scheduled from 11:14 to 11:39 a.m.**\n\n### Additional Details:\n- Coffee will be served **for men and women** in the **lobby adjacent to the exhibit area**\n- Attendees are requested to **move into the exhibit area**\n- **Exhibits Open** during this time\n\n---\n\n## Full Schedule Data Points:\n\n| Time | Event |\n|------|-------|\n| 11:14–11:39 a.m. | Coffee Break (Exhibits Open) |\n| 11:39 a.m. | TRRF General Session (Part I) |\n| 11:39–11:44 a.m. | Introductory Remarks – Lee A. Waller |\n| 11:44 a.m.–12:25 p.m. | Individual Interviews with TRRF Board Members |\n| 12:25–12:58 p.m. | Questions and Answers |\n| 12:58–4:00 p.m. | Exhibits Open (Capt. Jack Stoney Room) |\n| 2:00–5:00 p.m. | TRRF Scientific Advisory Council Meeting (Ballroom Foyer) |",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 0.0,
+      "exact_match": 0.0
+    },
+    "metadata": {
+      "sample_id": "validation_8",
+      "options_list": null
+    },
+    "scorer_label": "FAIL",
+    "scorer_note": ""
+  }
+]

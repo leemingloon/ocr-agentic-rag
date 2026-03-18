@@ -1,0 +1,702 @@
+[
+  {
+    "sample_id": "0",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "1",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "10",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "11",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "12",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "13",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "14",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "15",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "16",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "17",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "18",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "19",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "2",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "20",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "21",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "22",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "23",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "24",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "25",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "26",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "27",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "28",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "29",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "3",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "30",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "31",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "32",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "33",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "34",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "35",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "36",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "37",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "38",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "39",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "4",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "40",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "41",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "42",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "43",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "44",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "45",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "46",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "47",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "48",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "49",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "5",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "50",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "51",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "52",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "53",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "54",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "55",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "56",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "57",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "58",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "59",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "6",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "60",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "61",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "62",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "63",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "64",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "65",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "66",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "67",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "68",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "69",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "7",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "70",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "71",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "72",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "73",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "74",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "75",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "76",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "77",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "78",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "79",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "8",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "80",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "81",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "82",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "83",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "84",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "85",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "86",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "87",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "88",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "89",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "9",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "90",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "91",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "92",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "93",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "94",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "95",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "96",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "97",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "98",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "99",
+    "split": "train",
+    "dataset": "FUNSD",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "dataset": "ChartQA",
+  "sample_count": 11,
+  "splits": [
+    "test",
+    "train"
+  ],
+  "splits_breakdown": [
+    {
+      "split": "test",
+      "sample_count": 6,
+      "metrics": {
+        "relaxed_accuracy_mean": 1.0,
+        "strict_accuracy_mean": 1.0
+      },
+      "gt_override_count": 0
+    },
+    {
+      "split": "train",
+      "sample_count": 5,
+      "metrics": {
+        "relaxed_accuracy_mean": 1.0,
+        "strict_accuracy_mean": 1.0
+      },
+      "gt_override_count": 0
+    }
+  ],
+  "gt_override_count": 0,
+  "timestamp": "2026-03-15T22:56:25.551869+08:00",
+  "weighted_metrics": {
+    "relaxed_accuracy_mean": 1.0,
+    "strict_accuracy_mean": 1.0
+  }
+}

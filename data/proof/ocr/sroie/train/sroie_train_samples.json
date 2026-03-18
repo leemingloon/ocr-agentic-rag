@@ -1,0 +1,2102 @@
+[
+  {
+    "sample_id": "X00016469612",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "BOOK TA .K (TAMAN DAYA) SDN BHD",
+        "date": "25/12/2018",
+        "address": "NO.53 55,57 & 59, JALAN SAGU 18, TAMAN DAYA, 81100 JOHOR BAHRU, JOHOR.",
+        "total": "9.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "JOHOR liale belt: OLY Ri RE Yun Total. wy) Uh) 9.00 Cash JUV CHANGE hoo EXCHANGEABLE THANKYOU",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X00016469619",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "INDAH GIFT & HOME DECO",
+        "date": "19/10/2018",
+        "address": "27, JALAN DEDAP 13, TAMAN JOHOR JAYA, 81100 JOHOR BAHRU, JOHOR.",
+        "total": "60.30"
+      }
+    },
+    "input_text": {},
+    "prediction": "RECEIPT 050100029279 88888 190.00 62483 90.90 -5.59 BM 60.21 saa 69,39 RM 79.39 RH 10.00",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X00016469620",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "MR D.I.Y. (JOHOR) SDN BHD",
+        "date": "12-01-19",
+        "address": "LOT 1851-A & 1851-B, JALAN KPB 6, KAWASAN PERINDUSTRIAN BALAKONG, 43300 SERI KEMBANGAN, SELANGOR (MR DIY TESCO TERBAU)",
+        "total": "33.90"
+      }
+    },
+    "input_text": {},
+    "prediction": "BALAKONG, SELANGOR -INVOICE- 8970669 3066468 9557031100236 CLEAR 6935818350846 TOTAL CASH --.% WITHIN",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X00016469622",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "YONGFATT ENTERPRISE",
+        "date": "25/12/2018",
+        "address": "NO 122.124. JALAN DEDAP 13 81100 JOHOR BAHRU",
+        "total": "80.90"
+      }
+    },
+    "input_text": {},
+    "prediction": "ListR Ref. on Qty BoD 1 8094 SOI Duscourit Rounding OO 80.90 100.00 19.10 : Of () Total: 80.91 0 0G LJ A",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X00016469623",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "MR D.I.Y. (M) SDN BHD",
+        "date": "18-11-18",
+        "address": "LOT 1851-A & 1851-B, JALAN KPB 6, KAWASAN PERINDUSTRIAN BALAKONG, 43300 SERI KEMBANGAN, SELANGOR (TESCO PUTRA NILAI)",
+        "total": "30.90"
+      }
+    },
+    "input_text": {},
+    "prediction": "-INVOICE- AUTO FCO SHINE i 3.0) 4000 7 079567600084 9555651400385 9090822 4.50 74 Oty(s ) lotal RH 30. 7 CASH SHAN if Rn 20. 10 18- rE 1313258 SHOI 1153 12 8000002902",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X00016469669",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "ABC HO TRADING",
+        "date": "09/01/2019",
+        "address": "NO.2&4, JALAN HARMONI 3/2, TAMAN DESA HARMONI. 81100 JOHOR BAHRU JOHOR",
+        "total": "31.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "Date Description RM RM 70.00 Q ).ad",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X00016469672",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "SOON HUAT MACHINERY ENTERPRISE",
+        "date": "11/01/2019",
+        "address": "NO.53 JALAN PUTRA 1, TAMAN SRI PUTRA, 81200 JOHOR BAHRU JOHOR",
+        "total": "327.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "JOHOR CS00004040 Cashier Ref.. 1072 1 80.00 70949 1 160.00 1u7) 1 1700 70791 1 10.00 70637 1 6.00 600 600 1643 1 800 8.00 B.00 70197 1 10.00 70561 2 36.00 327.00 009 0.00 0,00 327.00 327.00 0.00",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X00016469676",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "S.H.H. MOTOR (SUNGAI RENGIT) SDN. BHD.",
+        "date": "23-01-2019",
+        "address": "NO. 343, JALAN KURAU, SUNGAI RENGIT, 81620 PENGERANG, JOHOR.",
+        "total": "20.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "1 INVOICE PRICE 4132 20. 00 0. 00 eee 0.00 0.00 yi )",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005200938",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "PERNIAGAAN ZHENG HUI",
+        "date": "12/02/2018",
+        "address": "NO.59 JALAN PERMAS 9/5 BANDAR BARU PERMAS JAYA 81760 JOHOR BAHRU",
+        "total": "112.45"
+      }
+    },
+    "input_text": {},
+    "prediction": "JM0325955-V Salesporson: i Tay tem 8239 16.00 15.0C 8565075109147 AAS 7.00 21.06 O744 18.00 18.0C 12525 50.00 50.0C 2016 SA3 0.70 106.10 0.00 6.37 -0.02 6.00 SR 6 106-16 6.37 ne",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005230617",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "GERBANG ALAF RESTAURANTS SDN BHD",
+        "date": "18/01/2018",
+        "address": "LEVEL 6, BANGUNAN TH, DAMANSARA UPTOWN3 NO.3, JALAN SS21/39,47400 PETALING JAYA SELANGOR",
+        "total": "26.60"
+      }
+    },
+    "input_text": {},
+    "prediction": "wa a 1950 es (65351-M) Selangor TOTAL 11.00 5.60 10.00 26.60 20.60 100 Change Feet. OR Ww",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005255805",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "SAM SAM TRADING CO",
+        "date": "29-12-2017",
+        "address": "67,JLN MEWAH 25/63 TMN SRI MUDA, 40400 SHAH ALAM.",
+        "total": "14.10"
+      }
+    },
+    "input_text": {},
+    "prediction": "eo 7997368063013 227908 2 TOTAL RM 14.10 CASH CHANGE RM 3.99 SSO",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005268200",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "AIK HUAT HARDWARE ENTERPRISE (SETIA ALAM) SDN BHD",
+        "date": "15/06/2017",
+        "address": "NO. 17-G, JALAN SETIA INDAH (X) U13/X, SETIA ALAM, SEKSYEN U13, 40170 SHAH ALAM,",
+        "total": "15.00"
+      }
+    },
+    "input_text": {},
+    "prediction": ": ROWARE ENTERPRISE (SETIA 922737-X NO. E118 INDAH SEKSVEN mee ITEH ary ra AHOUNT nu 2000160000024 1 15.0 1854 5 1 2.00 0.00 TOTAL is.U90 CASH iG.vua CHANGE v.00 oe nm me ION",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005268262",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "HOME MASTER HARDWARE & ELECTRICAL",
+        "date": "22/12/2017",
+        "address": "NO.113G & 115G, JALAN SETIA GEMBILANG U13/BG BANDAR SETIA ALAM, 40170 BANDAR SETIA ALAM, SELANGOR.",
+        "total": "15.90"
+      }
+    },
+    "input_text": {},
+    "prediction": "ELECTRICAL SELANGOR. Date: 1.00 75.90 SR 75.90 15.00 45.90 50.00 34.10 19.00 0.90 THANK YOU",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005268400",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "RESTORAN HASSANBISTRO",
+        "date": "12/28/2017",
+        "address": "NO.2-1-1 JALAN SEITA PRIMA Q U 13/Q SEITA ALAM 40170 SHAN ALAM SELANGOR",
+        "total": "15.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "SELatiuR DATE TOKEN Orem Discount RM oe et 18.09 2:00 Rounding RH oa On CHANGE Hh 18-09 .00",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005268472",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "ASIA MART",
+        "date": "22/12/2017",
+        "address": "NO.23 BATU 10, TAMAN SENTOSA, JALAN KAPAR, 42200 KLANG, SELANGOR.",
+        "total": "32.70"
+      }
+    },
+    "input_text": {},
+    "prediction": "MART ($a0264196-1) A, SEN pe cor. ore 59/12/2017 were Cashier ae ee Oe, GST) st) amount Tax tem 0.85 0.90 3.5 5R 9556127101331 141 1.50 1.50 nu 142 1.51 3850199320725 1.42 1.51 2.30 2.44 230 2.44 an i 1.60 2.74 2.80 31.03 0.00 1.65 0.02 (Inclusive 32.79 40.00 7.30 4 Tax (Ru) Sk 6 27.48 : ZL 0 3.55 78 tes RETURNABLE THANK Y Ou.",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005301659",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "HOME MASTER HARDWARE & ELECTRICAL",
+        "date": "22/12/2017",
+        "address": "NO.113G & 115G, JALAN SETIA GEMBILANG U13/BG BANDAR SETIA ALAM, 40170 BANDAR SETIA ALAM, SELANGOR.",
+        "total": "15.90"
+      }
+    },
+    "input_text": {},
+    "prediction": "ELECTRICAL SELANGOR. Date: 1.00 75.90 SR 75.90 15.00 45.90 50.00 34.10 19.00 0.90 THANK YOU",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005301661",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "LIGHTROOM GALLERY SDN BHD",
+        "date": "20/12/2017",
+        "address": "NO: 28, JALAN ASTANA 1C, BANDAR BUKIT RAJA, 41050 KLANG SELANGOR D.E, MALAYSIA",
+        "total": "73.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "LIGHTROOM GALLERY No: ASTANA IC, BANDAR BUKIT (1072825-A) . 000584089600 Tel:03-3369 4395 Station: CASHTER Cas 20/12/2017 Code Name Address CH50514 OR 2.83 YT51874 SR 66.04 : RM 0.00 GST/TAX 6%, : RM 4.13 RM 73.00 CA... : RM 73.00 CHANGE: RM 0.00 4.13 ZR/OS/EZ 0.00 . eee",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005301667",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "LIGHTROOM GALLERY SDN BHD",
+        "date": "20/11/2017",
+        "address": "NO: 28, JALAN ASTANA 1C, BANDAR BUKIT RAJA, 41050 KLANG SELANGOR D.E, MALAYSIA",
+        "total": "39.80"
+      }
+    },
+    "input_text": {},
+    "prediction": "HD B 000584089600, 4395 Fax:03-33 2 211 LCNOO Cover 37.55 Code Nane Address 0 MINIT YT51775 SR : : RM 0.00 : RM 2.25 RM 39.80 RM 39.80 CHANGE: RM ZR/0S/EZ 0.00",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005303661",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "LIGHTROOM GALLERY SDN BHD",
+        "date": "20/12/2017",
+        "address": "NO: 28,JALAN ASTANA 1C, BANDAR BUKIT RAJA, 41050 KLANG SELANGOR D.E, MALAYSIA",
+        "total": "73.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "LIGHTROOM GALLERY No: ASTANA IC, BANDAR BUKIT (1072825-A) . 000584089600 Tel:03-3369 4395 Station: CASHTER Cas 20/12/2017 Code Name Address CH50514 OR 2.83 YT51874 SR 66.04 : RM 0.00 GST/TAX 6%, : RM 4.13 RM 73.00 CA... : RM 73.00 CHANGE: RM 0.00 4.13 ZR/OS/EZ 0.00 . eee",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005306399",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "SHELL ISNI PETRO TRADING",
+        "date": "18/03/18",
+        "address": "LOT 2685 JLN GENTING KLANG 53300 KL SITE 1066",
+        "total": "86.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "3180048 Total Visa 4.87 Card 6018840126306675 - o oer - o - - - - - Date OPT given",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005337872",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "SYL ROASTED DELIGHTS SDN. BHD.",
+        "date": "06/03/2018",
+        "address": "75. JALAN SS 22/19, DAMANSARA JAYA, 47400 PJ",
+        "total": "54.50"
+      }
+    },
+    "input_text": {},
+    "prediction": "RSA. 422703: Cashier USER Salesperson Descriptions 20 7.00 1400 (Fo, 1.0 1200 SMALL 1.0 12.00 MUSTARD (BO3) 2.0 2.30 460 TEA(HOT) 1.0 11.90 11.90 51.42 5142 0.00 308 O00",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005361883",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "TEO HENG STATIONERY & BOOKS",
+        "date": "18/01/2018",
+        "address": "NO. 53, JALAN BESAR, 45600 BATANG BERJUNTAI SELANGOR DARUL EHSAN",
+        "total": "4.90"
+      }
+    },
+    "input_text": {},
+    "prediction": "IPS nN e CASH ae RAD 3.30 1 1.30. 2 4.60 . 4.60 0.28 ROUNDING 0.02 TOTAL : 4.90 CASH 4.90 CHANGE : 0.00 AMOUNT TAX SR 6.00 4.60 0.28 4.60 0.28",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005361895",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "FUYI MINI MARKET",
+        "date": "25/01/2018",
+        "address": "NO 43-45-47G, TAMAN SEJATI, IJOK, 45600 BESTARI JAYA, KUALA SELANGOR.",
+        "total": "9.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "TEN KUALA SELANGO 10720 013 SUMMER CUP 48X230ML 9.00 SI 9.00 Cash 90.00 Change 47.00 Amount Tax MARKET",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005361897",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "TEO HENG STATIONERY & BOOKS",
+        "date": "17/01/2018",
+        "address": "NO.53, JALAN BESAR, 45600 BATANG BERJUNTAI SELANGOR DARUL EHSAN",
+        "total": "27.55"
+      }
+    },
+    "input_text": {},
+    "prediction": "(001451637-M) CASH py ITEM (RM) 9555017370017 1 28. 1 26.00 : 26.00 : 1.56 ROUNDING : -0.01 TOTAL 7.55 CASH ras xp AL na. oar on AMOUNT TAX 2 (RM) (RMD SR 6.00 26.00 1.56 TOTAL: 26.00 1,56",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005361898",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "TEO HENG STATIONERY & BOOKS",
+        "date": "15/01/2018",
+        "address": "NO.53, JALAN BESAR, 45600 BATANG BEJUNTAL SELANGOR DARUL EHSAN",
+        "total": "55.10"
+      }
+    },
+    "input_text": {},
+    "prediction": "(001451637-M) CASH ITEM AMOUNT ne (RAD 2 52.00 : 52.00 3.12 ROUNDING -0.02 TOTAL 1) 55.10 CASH ae Te ).0.00 My 2 RYV, SR 6.00 52.00 3.12 TOTAL: 52.00 3.12",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005361900",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "TEO HENG STATIONERY & BOOKS",
+        "date": "23/01/2018",
+        "address": "NO.53,JALAN BESAR,45600 BATANG BERJUNTAI SELANGOR DARUL EHSAN",
+        "total": "18.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "(001451637-M) CASH TP-24 5 9557546631393 JP) 16.98 SET yp 16.98 ROUNDING. CASH CHANGE NA. 0.00 % AURA dix SR 6.00 16.98 1.02 TOTAL: 16.98 1.02",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005361907",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "TED HENG STATIONERY & BOOKS",
+        "date": "12/02/2018",
+        "address": "NO. 53, JALAN BESAR, 45600 BATANG BERJUNTAI SELANGOR DARUL EHSAN",
+        "total": "153.35"
+      }
+    },
+    "input_text": {},
+    "prediction": ", CASH 12/02/2018 (R. 17.45% 0.855 1.70% 8.40 7.924 BOOK 18 144.68 gente, pars 144.68 j ee ar rad Py 8.68 TOTA CASH, 7 oy as . CHANGE ne 0.00 AMOUNT TAX aE SR 6.00 144.68 8.68 8.68 Tax). RETURNABLE,",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005361946",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "MR. D.I.Y. (M) SDN BHD",
+        "date": "14-03-18",
+        "address": "LOT 1851-A & 1851-B, JALAN KPB 6, KAWASAN PERINDUSTRIAN BALAKONG, 43300 SERI KEMBANGAN, SELANGOR",
+        "total": "37.10"
+      }
+    },
+    "input_text": {},
+    "prediction": "ALAKOND -000- DAMANSARA). 0 9560114461966 KUMAR EXCHANGE Al I: STRICTLY",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005361950",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "99 SPEED MART S/B",
+        "date": "24-01-18",
+        "address": "LOT P.T. 2811, JALAN ANGSA, TAMAN BERKELEY 41150 KLANG, SELANGOR 1076-IJOK",
+        "total": "2.50"
+      }
+    },
+    "input_text": {},
+    "prediction": "iO at vs lg 2811, i) ey) 000181747713 O7/182/Ti049 348582 1973 GARBAGE BAG (BLUE) RMI. 1974 t4 cash Too rm 2.36 14",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005365179",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "C W KHOO HARDWARE SDN BHD",
+        "date": "01-03-18",
+        "address": "NO.50,JALAN PBS 14/11, KAWASAN PERINDUSTRIAN BUKIT SERDANG,",
+        "total": "21.20"
+      }
+    },
+    "input_text": {},
+    "prediction": "3-1707067 (481500-M) BHD 03-89410243 000549584896 1803/0064 Date Amount 5 4.00 1,20 NetTotal(MYR): 21.20 0.00 21.20 Cash 21.20 Change ee 0.00 Reem",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005433492",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "UNIHAKKA INTERNATIONAL SDN BHD",
+        "date": "05 MAR 2018",
+        "address": "12, JALAN TAMPOI 7/4,KAWASAN PERINDUSTRIAN TAMPOI,81200 JOHOR BAHRU,JOHOR",
+        "total": "$8.20"
+      }
+    },
+    "input_text": {},
+    "prediction": "A0S0/8 (867388-U) $5.50 1 . $5.50 $2.70 1 $2.70 Armount CASH $8.20 Change $0.00 Amnounht$) 774 026",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005433494",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "AEON CO. (M) BHD",
+        "date": "06/03/2018",
+        "address": "3RD FLR, AEON TAMAN MALURI SD JLN JEJAKA, TAMAN MALURI CHERAS, 55100 KUALA LUMPUR",
+        "total": "75.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "ut SHOPPING HOURS FRI-SAT: 1K HRS ix 15. 005k Sub-total 75,08 75,06 75,00 CASH 100.00 26,00 Tax 70.75 4,25 70.75 4,25 en",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005433514",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "UNIHAKKA INTERNATIONAL SDN BHD",
+        "date": "03 MAR 2018",
+        "address": "12, JALAN TAMPOI 7/4,KAWASAN PERINDUSTRIAN TAMPOI 81200 JOHOR BAHRU,JOHOR",
+        "total": "$8.20"
+      }
+    },
+    "input_text": {},
+    "prediction": "(867388-U) em Qly Total $7.10 1 $7.10 $1.10 1 $1.10 . Amount CASH , $8.20 Change $0.00 Anwunt($) Tax($) he cae Facebook.comBarWangRice",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005433522",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "UNIHAKKA INTERNATIONAL SDN BHD",
+        "date": "10 MAR 2018",
+        "address": "12, JALAN TAMPOI 7/4,KAWASAN PERINDUSTRIAN TAMPOI,81200 JOHOR BAHRU,JOHOR",
+        "total": ""
+      }
+    },
+    "input_text": {},
+    "prediction": "f3030 UNIHAKKA BHD : Perindusinian Bahru,Johor item Qty : Total $7.10 i $7.10 $1.10 1 $1.10 Amount CASH $8.20 Change $0.00 GSF Amounk$) 274 0.48 JAYA GST) Facebook.com/BarWangRice",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005433533",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "PERNIAGAAN ZHENG HUI",
+        "date": "09/03/2018",
+        "address": "NO.59 JALAN PERMAS 9/5 BANDAR BARU PERMAS JAYA 81750 JOHOR BAHRU",
+        "total": "332.30"
+      }
+    },
+    "input_text": {},
+    "prediction": "Oe rte Pa PERNIAGAAN JM0325955-y 000800580824 SIMPLIFIED TAX INVOICE a ee i i Item Qt RSp Amount 10273 (1BC) 2547 GA-(8014 SR: KOBELGO WELDING 12133 7.50 BRUSH 10457 5.50 11.Gc 121314 BRUSH 9555752615705 SA18ol4 2226 6.00 6.00 S104 3879 5.0c WELDING GLASS 0.30 GLASS GHlfols 8.00 6894 x (Excludeg Total 313.59 000 : 18.84 Rounding -0.07 Totaj 332.36 932,39 Change 0.90 GST SUMMARY eA ee ee Total: SG 18.34 GOODS NOTRE TURNABLE. THANK YOu,",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005433538",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "UNIHAKKA INTERNATIONAL SDN BHD",
+        "date": "12 MAR 2018",
+        "address": "12, JALAN TAMPOI 7/4,KAWASAN PERINDUSTRIAN TAMPOI,81200 JOHOR BAHRU,JOHOR",
+        "total": "$8.20"
+      }
+    },
+    "input_text": {},
+    "prediction": "(867388-U) Item aly Total $7.10 1 $7.10 $1.10 1 $1.10 Amount CASH $8.20 Change $0.00 Amourt($) 174 046 Facebook.com/BarWangRics",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005433541",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "UNIHAKKA INTERNATIONAL SDN BHD",
+        "date": "14 MAR 2018",
+        "address": "12, JALAN TAMPOI 7/4,KAWASAN PERINDUSTRIAN TAMPOI,81200 JOHOR BAHRU,JOHOR",
+        "total": "$8.20"
+      }
+    },
+    "input_text": {},
+    "prediction": "a . ra oO i Ss XN, Nt (867388-U) ftern Qty Total $5.50 1 $6.50 $2.70 1 $2.70 Amount mn CASH $8.20 Change $0.00 . 3 O56 Facebook.com-BarWangRice ct",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005433552",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "WARAKUYA PERMAS CITY SDN BHD",
+        "date": "10/03/2018",
+        "address": "JALAN PERMAS UTARA 1 PERMAS JAYA 81750 MASAI JOHOR",
+        "total": "57.80"
+      }
+    },
+    "input_text": {},
+    "prediction": "58244 53.70 241.90 - 4.00 DISCOUNT 99,00 4.906 3.27 -0.03 Total Amount: TOTAL: SKU 3.27",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005433553",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "YHM AEON TEBRAU CITY",
+        "date": "11/03/2018",
+        "address": "S117, SECOND FLOOR, AEON TEBRAU CITY, 1, JALAN DESA TEBRAU, TAMAN DESA TEBRAU, 81100 JOHOR BAHRU, JOHOR.",
+        "total": "13.10"
+      }
+    },
+    "input_text": {},
+    "prediction": "002105827328 i Pax: Cashier Iten 4.80 FG-HOOTOC 1 2.80 SubTeta: : 13,16 Total 13.10 TOTAL:MYR 13.10 : 12.3 : 0.74 (thee. Cash . 20.10 7.06",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005441398",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "OWNER BY CASTLE BLUE S/B",
+        "date": "30/03/2018",
+        "address": "AVTIVO PLAZA,LOT B-F-11, BLOCK B NO1.JALAN PJU 9/1,D'SARA AVEVUE BANDAR SRI D'SARA, 52000 KL",
+        "total": "189.75"
+      }
+    },
+    "input_text": {},
+    "prediction": "Date Cashier Waiter ate 179,80 10,74 O84 189.75 Amount Tax 1798S",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005441401",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "THREE STOOGES",
+        "date": "12/03/2018",
+        "address": "109, SS21/1A, DAMANSARA UTAMA",
+        "total": "343.95"
+      }
+    },
+    "input_text": {},
+    "prediction": "Pi RM ay ITEM AMUUNI 150.00 145.00 295.00 29.50 19.47 ROUNDING ADJ -0.02 tel iUTAL 343.9 Amount 4 295.00 dt 374.50 Thank. Oh",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005441402",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "THREE STOOGES",
+        "date": "03/03/2018",
+        "address": "109, SS21/1A, DAMANSARA UTAMA",
+        "total": "174.90"
+      }
+    },
+    "input_text": {},
+    "prediction": "TABLE Rit AMUUNT 189.00 1) 174.9 CASH U0 CHANGE 2510 Amount Tax 150.00 15.00 165.00 9,90",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005441407",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "TASTE OF THE WORLD SDN BHD",
+        "date": "5/3/2018",
+        "address": "LOT 38, 39 101 BOULEVARD, JALAN KENARI 5, BANDAR PUCHONG JAYA, 47170 PUCHONG, SELANGOR",
+        "total": "64.15"
+      }
+    },
+    "input_text": {},
+    "prediction": "Geoventure 965857-A (TEM GTGO2 1 TOTAL CASH CHANGE 1 S 64 60.50 3.63 VA Os",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005441408",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "32 PUB & BISTRO OWN BY CNU TRADING",
+        "date": "10-03-2018",
+        "address": "78G, JALAN SS21/62, DAMANSARA UTAMA, 47400 PETALING JAYA.",
+        "total": "190.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "Cashier CHEN Description ot us price Total Tax meme HEINEKEN (5 BTL) 2x Sb. 190. 00 OR lotal (Excluding BST): TOTAL: eae Closed: 32 11-03-2018 00: 32:02 ser Vier: CHEN CHANGE: OR fe ft) Ansa 1 mn",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005442327",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "UNIHAKKA INTERNATIONAL SDN BHD",
+        "date": "18 MAR 2018",
+        "address": "12, JALAN TAMPOI 7/4,KAWASAN PARINDUSTRIAN TAMPOI,81200 JOHOR BAHRU,JOHOR",
+        "total": "$8.60"
+      }
+    },
+    "input_text": {},
+    "prediction": "(867388-U) Itern Qty Total $4.40 1 $4.40 $0.50 1 $0.50 $3.70 1 $3.70 Amount CASH $8.60 Change $0.00 Tax($) eV Facebook.comBarwWangRice fe",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005442333",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "UNIHAKKA INTERNATIONAL SDN BHD",
+        "date": "27 MAR 2018",
+        "address": "12, JALAN TAMPOI 7/4,KAWASAN PARINDUSTRIAN TAMPOI,81200 JOHOR BAHRU,JOHOR",
+        "total": "$6.90"
+      }
+    },
+    "input_text": {},
+    "prediction": "(7 (867388-U) Petindustian Bahtu,Johor 70334 Item Qty Total $2.00 1 $2.00 $2.70 1 $2.70 $1.10 2 . $2.20 Amount CASH $6.90 Change $0.00 651 036 Facebook.com/BarWangrice",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005442338",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "PASAR MINI JIN SENG",
+        "date": "18/03/18",
+        "address": "379, JALAN PERMAS SATU, BANDAR BARU PERMAS JAYA 81750 PLENTONG, JOHOR.",
+        "total": "28.60"
+      }
+    },
+    "input_text": {},
+    "prediction": "18/03/16 1VEGETABLES i-VEGETASLES 1 1 SEAFOOD 7 SUBTOTAL: 28.60: TL:RM AU CASH 100.00 71.40 CASHTER2 SR (463) 1.20 0,07 (80%) 27.40 0.05",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005442341",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "RESTAURANT SIN DU",
+        "date": "09/03/2018",
+        "address": "K3-113, JL IBRAHIM SULTAN 80300 JOHOR BAHRU JOHOR",
+        "total": "170.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "0 016-7867868 CASH",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005442344",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "YONG TAT HARDWARE TRADING",
+        "date": "13/03/2018",
+        "address": "NO 4,JALAN PERJIRANAN 10, TAMAN AIR BIRU, 81700 PASIR GUDANG, JOHOR.",
+        "total": "100.90"
+      }
+    },
+    "input_text": {},
+    "prediction": "RADING jJM0202487-D) JOHOR. 07-2814733 erence Cashier Salesperson. Ref. (GST) (GST) 2597 50.88 5736 eee : 95.17 Discount: 0.60 6.71 Rounding: 0.02 400.90 aid GETSUMMARY 7 % Amt(RM) Tax(RM) SR 6 95.17 671",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005442346",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "PERNIAGAAN ZHENG HUI",
+        "date": "15/03/2018",
+        "address": "NO.59 JALAN PERMAS 9/5 BANDAR BARU PERMAS JAYA 81750 JOHOR BAHRU",
+        "total": "8.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "INVOICE CASH ne Salesperson: ltem Q RSP Amount 3934 1 7.66 COUPON nr 7.56 : 0.00 Total 0.45 Rounding (RM: 0.06 8.00 8.00 6.06 % Amount. BST SRO 0.48 Total: BE RETURNABLE,",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005442361",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "TIMELESS KITCHENETTE SDN BHD",
+        "date": "2018-03-23",
+        "address": "LOT 50, FLOOR T2,SKY AVENUE GENTING HIGHLANDS PAHANG, 69000 PAHANG MALAYSIA",
+        "total": "593.10"
+      }
+    },
+    "input_text": {},
+    "prediction": "Geri Morganfields 1174703-K Halaysia Full Slab Sub-total: 593,16 33.57 593.10 ok 33.57 ox 0.90 0",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005442376",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "UNIHAKKA INTERNATIONAL SDN BHD",
+        "date": "22 MAR 2018",
+        "address": "12, JALAN TAMPOI 7/4,KAWASAN PERINDUSTRIAN TAMPOI,81200 JOHOR BAHRU,JOHOR",
+        "total": "$7.60"
+      }
+    },
+    "input_text": {},
+    "prediction": "Ay 31/2, (887388-U) item Qly Total $7.10 1 $7.10 $0.50 1 $0.50 Amount CASH $7.60 Changs $0.00 Amount($) 217 048",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005442378",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "PAGOH REST AND SERVICE AREA",
+        "date": "23/03/2018",
+        "address": "LOT R1, KWS REHAT & RAWAT PAGOH ARAH UTARA, SIMPANG AMPAT PAGOH, LEBUHRAYA UTARA SELATAN, 84600,PAGOH,JOHOR",
+        "total": "10.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "R4600,PAGOH,JOHOR 000709361664 ne neon any AMT 02 1 10.00 10.00 20.00 10.00 L",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005442379",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "UNIHAKKA INTERNATIONAL SDN BHD",
+        "date": "24 MAR 2018",
+        "address": "12, JALAN TAMPOI 7/4,KAWASAN PERINDUSTRIAN TAMPOI,81200 JOHOR BAHRU,JOHOR",
+        "total": "$9.20"
+      }
+    },
+    "input_text": {},
+    "prediction": "AN02116 (867388-U) TAXINVOICE tem Qty Total $8.70 1 $8.70 $0.50 1 $0.50 Amount CASH $9.20 Change $0.00 888 082 Facebook.comvBarWangRice",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005442383",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "CARREFOUR RESTAURANT",
+        "date": "20/03/2018",
+        "address": "18,JALAN PERMAS 10/7 BANDAR BARU PERMAS JAYA, MASAI,JOHOR",
+        "total": "13.80"
+      }
+    },
+    "input_text": {},
+    "prediction": "Ae3)29 JMO725766-U MASAI,JOHOR ASH SALESPERSON Feet 238 110.00 10.00 Bye 1033 1 3.00 3.00 2 13.00 DISC: 0.00 0.00 0.78 0.02 TOTAL 13.80 CASH 13.80 CHANGE 0.00",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005442384",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "UNIHAKKA INTERNATIONAL SDN BHD",
+        "date": "19 MAR 2018",
+        "address": "12, JALAN TAMPOI 7/4,KAWASAN PERINDUSTRIAN TAMPOI,81200 JOHOR BAHRU,JOHOR",
+        "total": "$8.20"
+      }
+    },
+    "input_text": {},
+    "prediction": "(867388-U) Qty Total $2.70 $2.70 $6.50 1 $5.50 Amount $8.20 Change $0.00 GSTSummary 2.74 0.46 Facebook.com/BarWangRice",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005442386",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "UNIHAKKA INTERNATIONAL SDN BHD",
+        "date": "21 MAR 2018",
+        "address": "12, JALAN TAMPOI 7/4,KAWASAN PERINDUSTRIAN TAMPOI,81200 JOHOR BAHRU,JOHOR",
+        "total": "$8.70"
+      }
+    },
+    "input_text": {},
+    "prediction": "Ao2 3 (867388-U) TAXINVOICE Qty Total $1.60 1 $1.80 $7.10 1 $7.10 Amount CASH $8.70 Change $0.00 Aspounk$) Tax($) an ody Facebook.comBarWangRice",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005442392",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "UNIHAKKA INTERNATIONAL SDN BHD",
+        "date": "29 MAR 2018",
+        "address": "12 JALAN TAMPOI 7/4,KAWASAN PERINDUSTRIAN TAMPOI,81200 JOHOR BAHRU,JOHOR",
+        "total": "$7.10"
+      }
+    },
+    "input_text": {},
+    "prediction": "(867388-U) hem Qty Total $7.10 1 $7.10 Amount CASH $7.40 Change $0.00 6.70 ow Facebook.comBarWangRice",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005442394",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "UNIHAKKA INTERNATIONAL SDN BHD",
+        "date": "30 MAR 2018",
+        "address": "12, JALAN TAMPOI 7/4,KAWASAN PERINDUSTRIAN TAMPOI,81200 JOHOR BAHRU,JOHOR",
+        "total": "$8.20"
+      }
+    },
+    "input_text": {},
+    "prediction": "Gs Byz, (867388-U) : TAXINVOICE tiem Qty Total 1 $7.10 $1.10 1 $1.10 Amount ASH $8.20 Change $0.00 ast Summary Amount($) tH 0.88 Facebook.comBarWangRice f A es",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005442397",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "TRIPLE SIX POINT ENTERPRISE 666",
+        "date": "25-03-2018",
+        "address": "NO 14 & 16 JALAN PERMAS 4/3 BANDAR BARU PERMAS JAY",
+        "total": "7.60"
+      }
+    },
+    "input_text": {},
+    "prediction": "os Lo WN rei oo Se Receipt (RM) (RM) Tendered 10.00",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005444033",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "BENS INDEPENDENT GROCER SDN. BHD",
+        "date": "12/03/18",
+        "address": "LOT 6, JALAN BATAI, PLAZA BATAI, DAMANSARA HEIGHTS 50490, KUALA LUMPUR",
+        "total": "77.20"
+      }
+    },
+    "input_text": {},
+    "prediction": "(913144-A) (GST REG NE 000243941376) . eee meee oe ec 12/03/18 20:29:59 880209950078 3068320113784 2 77.20 Rounding 0.00 Fotal Saving 0.00 Total 77.20 Tender Cash 100.00 Cnange 22.80 50.47 303 23.70 0.00 BiIG.COM.MY FACEBOOK.COM/THEBIGGROUP",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005444037",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "NANDO'S CHICKENLAND MALAYSIA SDN BHD",
+        "date": "28 MAR 18",
+        "address": "UNIT G-13, GROUND FLOOR, NO.1 JLN KIARA, MONT KIARA 50480 KUALA LUMPUR",
+        "total": "129.30"
+      }
+    },
+    "input_text": {},
+    "prediction": "Guest0 4 1/4-H S S GrillVeg-H GrillVeg-H GrillVeg-H 3 1/4-M S S 129.30 7.30 7.30 0.00",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005444045",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "99 SPEED MART S/B",
+        "date": "19-03-18",
+        "address": "LOT P.T. 2811, JALAN ANGSA, TAMAN BERKELEY 41150 KLANG, SELANGOR 1245-DESA SRI HARTAMAS",
+        "total": "11.40"
+      }
+    },
+    "input_text": {},
+    "prediction": "969547 19-Q5-18 aa CARN. Tax(RM) 16.75 265",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005447832",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "PETRODELI ENTERPRISE",
+        "date": "26/02/18",
+        "address": "LOT 485, TMN LEMBAH KERAMAT JLN ULU KELANG,  54200 KUALA LUMPUR",
+        "total": "85.54"
+      }
+    },
+    "input_text": {},
+    "prediction": "Total Visa 8018840059149/65 - - - - - - - - - - - - - - -- - - - - - - - - Date OPT",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005447833",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "SUN WONG KUT SDN BHD",
+        "date": "21/02/18",
+        "address": "176 JLN SUNGEI BESI 57100 KUALA LUMPUR.",
+        "total": "88.17"
+      }
+    },
+    "input_text": {},
+    "prediction": "GST No RI Total Visa Rit 881 LRM 00 RE - - o- - - - - - . - - - Cy o - - 601884005914//64 oo - - - - - - - - - . - - - - - - - - - - - Date vel",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005447839",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "RESTAURANT JIAWEI JIAWEI HOUSE",
+        "date": "9/3/2018",
+        "address": "13, JLN TASIK UTAMA 8 MEDAN NIAGA DAMAI SG BESI 57000 KL",
+        "total": "65.20"
+      }
+    },
+    "input_text": {},
+    "prediction": "002693074-K INVOICE Invoice 9820 Cashier:admin Table 7 16 meee ey Aint ARM B. Bean Head 3) 1 35.00 1 16.00 omens 1 2 0.00 1.20 COLD 2 1.50 3 TOTAL",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005447840",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "PASARAYA BORONG PINTAR SDN BHD",
+        "date": "14/03/2018",
+        "address": "NO 19-G& 19-1& 19-2 JALAN TASIK UTAMA 4, MEDAN NIAGA TASIK DAMAI",
+        "total": "8.20"
+      }
+    },
+    "input_text": {},
+    "prediction": "016-5498845, Price Tax 1.60 1.60 160 1.60 4.50 4.50 0.50 050 820 8.20 Cash 20.20 Change 12.00 820 0.00",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005447848",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "LIAN CHI PU TIAN VEGETARIAN RESTAURANT SDN BHD",
+        "date": "06/01/18",
+        "address": "54,JALAN SS23/11 TAMAN SEA,47400 PETALING JAYA,SELANGOR",
+        "total": "53.55"
+      }
+    },
+    "input_text": {},
+    "prediction": "(1095514-X: Cashier Cate tein Qty Price Amount (S) 515 1 Too (S) O17 1 1473 410 1 1272 (POT) 822 1 318 (B) 92. 4.80 23, 53.55 Wu $0 ave",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005447850",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "PASARAYA BORONG PINTAR SDN BHD",
+        "date": "20180304",
+        "address": "NO 19-G& 19-1& 19-2 JALAN TASIK UTAMA 4, MEDAN NIAGA TASIK DAMAI",
+        "total": "3.20"
+      }
+    },
+    "input_text": {},
+    "prediction": "016-5498845. Price Tax 3.20 3.20 320 3.20 Cash 5.20 Change 2.00 3.20 0.00 7%",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005447852",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "99 SPEED MART S/B",
+        "date": "20-02-18",
+        "address": "LOT P.T. 2811, JALAN ANGSA, TAMAN BERKELEY 41150 KLANG, SELANGOR 1249-TMN PANDAN CAHAYA",
+        "total": "9.90"
+      }
+    },
+    "input_text": {},
+    "prediction": "9,90 mit 9.90 mir",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005447853",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "99 SPEED MART S/B",
+        "date": "05-02-18",
+        "address": "LOT P.T. 2811, JALAN ANGSA, TAMAN BERKELEY 41150 KLANG, SELANGOR 1317 TRILLIUM S6 BESI",
+        "total": "141.50"
+      }
+    },
+    "input_text": {},
+    "prediction": "il 568017 Uy 2-46 CHANGE Ni Gor Aas (wy It Ade oil",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005447860",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "AEON CO. (M) BHD",
+        "date": "19/02/2018",
+        "address": "3RD FLR, AEON TAMAN MALURI SC JLN JEJAKA, TAMAN MALURI CHERAS, 55100 KUALA LUMPUR",
+        "total": "17.70"
+      }
+    },
+    "input_text": {},
+    "prediction": "MON-SUN: 1009 HRS HRS Ik Hon 4089728 x G00 Sub-total 17.70 770 770 AGH 5U (G Amount 16.71 94 Total 16.71 0,99 PATRONAUt",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005447861",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "POPULAR BOOK CO. (M) SDN BHD",
+        "date": "01/03/18",
+        "address": "NO 8, JALAN 7/118B, DESA TUN RAZAK 56000 KUALA LUMPUR, MALAYSIA",
+        "total": "49.40"
+      }
+    },
+    "input_text": {},
+    "prediction": "Deseription Amount -1.20 -2.09 49.39 0.01 49.40 Cash CHANGE 0.60 26.41 2.18 Ou",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005453729",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "LIAN HING STATIONERY SDN BHD",
+        "date": "27/03/2018",
+        "address": "NO.32 & 33, JALAN SR 1/9, SEKSYEN 9, TAMAN SERDANG RAYA, 43300 SERI KEMBANGAN, SELANGOR DARUL EHSAN",
+        "total": "79.50"
+      }
+    },
+    "input_text": {},
+    "prediction": "180303 BHD (162761-M) sewer SELANGOR GSTID- 002139201536 RM Chip 20 - 79.507 100.00 Change: 20.50 101 (RM) 18.00.00... 4505. Total 75.00 4.50",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005453801",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "GL HANDICRAFT & TAIL ORING",
+        "date": "20/03/2018",
+        "address": "19, JALAN KANCIL, OFF JALAN PUDU, 55100 KUALA LUMPUR MALAYSIA",
+        "total": "102.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "3180303 ORING MALAYSIA Date 07 3 Subtotal 102.00 9823 10200 Payment 10200 000 9623 577 THANK YOU se",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005453802",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "LIAN HING STATIONERY SDN BHD",
+        "date": "30/03/2018",
+        "address": "NO.32 & 33, JALAN SR 1/9, SEKSYEN 9, TAMAN SERDANG RAYA, 43300 SERI KEMBANGAN, SELANGOR DARUL EHSAN",
+        "total": "159.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "BHD (162761-M) RAYA. SELANGOR GSTID- 9139201836 ee / 5500 / otal 159.00 Rounding Total , 159.00 Lf 200.00 41.00 202 gst Summary (RM) Toth 19000... 9.00%. anauir",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005453804",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "LIAN HING STATIONERY SDN BHD",
+        "date": "27/03/2018",
+        "address": "NO.32 & 33, JALAN SR 1/9, SEKSYEN 9, TAMAN SERDANG RAYA, 43300 SERI KEMBANGAN, SELANGOR DARUL EHSAN",
+        "total": "12.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "3180303 1 (162761-M) RAYA, KEMBANGAN. SELANGOR ss wees ee Pe Now: 6600",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005568827",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "BANH MI CAFE SDN BHD",
+        "date": "29-10-2017",
+        "address": "NO,1 JALAN PUTERI 7/10 BANDAR PUTERI, 47100 PUCHONG SELANGOR, MALAYSIA",
+        "total": "23.25"
+      }
+    },
+    "input_text": {},
+    "prediction": "mee ee o Qty TAY 1 SUONG NON RAM CHUA 9. ra 3p a 1 Total (Excluding 8H): 21.30 v.65 1.31 23.26 Rounding A -0.0) Closed: 29- 10 2",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005568829",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "THAI DELICIOUS RESTAURANT",
+        "date": "02/02/2017",
+        "address": "NO.22 JALAN PUTERI 2/4 BANDAR PUTERI 47100 PUCHONG, SELANGOR",
+        "total": "92.80"
+      }
+    },
+    "input_text": {},
+    "prediction": "Table Date A3 Pax 4 Description Qty Price Amount 1 28.00 28.00 SALFEDEGG SOU 1 13.00 13.00 1 15.00 15.00 4 180 BONO 1 6.50 650 TRA: 1 Ong YVIATER i 784 250 TEA 9280. 100.00 Change 7.20 23.20",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005568880",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "MR.D.I.Y(M)SDN BHD",
+        "date": "19-09-17",
+        "address": "LOT 1851-A & 1851-B, JALAN KPB 6, KAWASAN PERINDUSTRIAN BALAKONG, 43300 SERI KEMBANGAN, SELANGOR",
+        "total": "15.90"
+      }
+    },
+    "input_text": {},
+    "prediction": "Co-REG:860671-D 9067860 9071872 6909906163102 6909906163103 8720019 CASH CHANGE 15.00 0.90 1J03",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005568881",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "HON HWA HARDWARE TRADING",
+        "date": "21/09/2017",
+        "address": "NO 37, JALAN MANIS 7, TAMAN SEGAR, 56100 CHERAS, KUALA LUMPUR.",
+        "total": "10.40"
+      }
+    },
+    "input_text": {},
+    "prediction": "VOC (50PCS) oe Tofal 10.40 iscount: 0.00 0.00 10.40 CASH 10.40 Net Amt G4 059 10.40 Total G91 0.59 10.40",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005568884",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "MR. D.I.Y. SDN BHD",
+        "date": "24-11-17",
+        "address": "LOT 1851-A & 1851-B, JALAN KPB 6, KAWASAN PERINDUSTRIAN BALAKONG, 43300 SERI KEMBANGAN, SELANGOR",
+        "total": "RM 3.90"
+      }
+    },
+    "input_text": {},
+    "prediction": "LEISURE 4 PCS XO12 CASH CHANGE 3.68 0.22 24- 11-",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005568891",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "HON HWA HARDWARE TRADING",
+        "date": "08/02/2017",
+        "address": "NO 37, JALAN MANIS 7, TAMAN SEGAR, 56100 CHERAS, KUALA LUMPUR.",
+        "total": "277.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "BRACKET(END) BRACKET BRACKET(END) 0.00 277.90 discount: 0.90 0.00 2/7.40 CASH mma 261.32 14.68 277.00 Total 261.32 15.63 277.00 exchange 1)",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005568898",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "VIVOPAC MARKETING SDN BHD",
+        "date": "30/05/2017",
+        "address": "14 JALAN MANIS 4 TAMAN SEGAR 56100 KL",
+        "total": "18.80"
+      }
+    },
+    "input_text": {},
+    "prediction": ".vivopac.com INVOICE CH: CS21539777 ME SCRIPTION QTY RM 6.7500 8.0006 6.0000 1.5000 17.75 1.07 -0.02 18.80 Cash 20.00 1.20 Summary Amount(RM) Tax(RM) 17.75 1.07",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005568899",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "MR. D.I.Y. SDN BHD",
+        "date": "18-10-17",
+        "address": "LOT 1851-A & 1851-B, JALAN KPB 6, KAWASAN PERINDUSTRIAN BALAKONG, 43300 SERI KEMBANGAN, SELANGOR",
+        "total": "5.90"
+      }
+    },
+    "input_text": {},
+    "prediction": "9555112901406 CASH 5.57 0.33 f-------------------------------------- 18-10- 17",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005568900",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "MR. D.I.Y. SDN BHD",
+        "date": "28-12-17",
+        "address": "LOT 1851-A & 1851-B, JALAN KPB 6, KAWASAN PERINDUSTRIAN BALAKONG, 43300 SERI KEMBANGAN, SELANGOR",
+        "total": "9.90"
+      }
+    },
+    "input_text": {},
+    "prediction": "SELANGOR 001092886528) TAX INVOILE- PADLOCK P6150 50MM 6942131561507 Item(s) Total Inel. CASH CHANGE Amt(RM) Tax(RM) 9.34 0.56 re 28-12- 17 18: 52 SHOT ZT09 1 RUOUO20832",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005568911",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "MR. D.I.Y. (KUCHAI) SDN BHD",
+        "date": "08-03-17",
+        "address": "LOT 1851-A & 1851-B, JALAN KPB 6, KAWASAN PERINDUSTRIAN BALAKONG, 43300 SERI KEMBANGAN, SELANGOR",
+        "total": "37.80"
+      }
+    },
+    "input_text": {},
+    "prediction": "-TAX INVOICE- weil 9001620 9063977 9071246 6909906163107 Item(s) 4 TOTAL CASH CHANGE 35.66 2.14",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005568913",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "IKANO HANDEL SDN BHD",
+        "date": "27/07/17",
+        "address": "NO 2A JALAN COCHRANE TAMAN MALURI 55100 KUALA LUMPUR",
+        "total": "538.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "(1074617K) Staff: 95837 0.00 Total Rounded 538.00 Visa 6% 507.55",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005568914",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "IKANO HANDEL SDN BHD",
+        "date": "09/08/17",
+        "address": "NO 2A JALAN COCHRANE TAMAN MALURI 55100 KUALA LUMPUR",
+        "total": "99.80"
+      }
+    },
+    "input_text": {},
+    "prediction": "(1074617K) yochrane 55100 KUALA 000115154944 bate: BMT Staff: 96728 99.80 0.00 Mastercard 6% 5.64 iat. Pel. GST 94.16 3",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005577192",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "FY EAGLE ENTERPRISE",
+        "date": "04/12/2017",
+        "address": "NO. 42, JALAN PBS 14/11, TAMAN PERINDUSTRIAN BUKIT SERDANG, 43300 SERI KEMBANGAN, SELANGOR",
+        "total": "7.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "mee cee sone om 1 tae ye a rs i it i my i 2 gC 2 a fe a ara . . 7. 20 2388 pe soe: ok Pre) var et a Sy i . . sty ack . oom: ai) patos . . . o e . oy aed A) i im : : het Aad Ly - ches 4 : es . Sek : area eae . ae . e . ee ee . me TIME CLEA SUB-TOTAL nS ROUNDING Saal BS) 3) a - er ren Ry . ad en e017 15214300 (RA) th Sad - rect ied u aC wat ivy ERS ya",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005587254",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "TRI SHAAS SDN BHD",
+        "date": "13/03/2017",
+        "address": "4-20, JALAN RIA 25/62 TAMAN SRI MUDA SEKSYEN 25, 40400 SHAH ALAM SELANGOR",
+        "total": "5.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "(728515-M) Tel: : EA 2 8999002310564 2.50 5.09 Total 0.09 Cash 10.09 CHANGE 5.0) Tax(Rid4) 4.72 0.28 0.00 0.00 2 Join En 6605505001-880000255018 03:00:44PM request prescribed request.",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005587267",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "TRI SHAAS SDN BHD",
+        "date": "4/02/2017",
+        "address": "4-20, JALAN RIA 25/62 TAMAN SRI MUDA SEKSYEN 25, 40400 SHAH ALAM SELANGOR",
+        "total": "85.10"
+      }
+    },
+    "input_text": {},
+    "prediction": "Tel. 03- -51217970 000429166492 RECEIPT are eee a) 2901060011145 7 2.06 CSS FA es) 206 oO 999020304655 4.40 ms) 92491156 itm Count sy 18 iota Bre ze 65.10 eundlag Adjustment 28 RG 0.00 2Z CHANGE 15.00 us Rate. Ant evel 5 80.27 4,93 0.00 0.00 6605505001950000261172 discretion",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005605284",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "ADVANCO COMPANY",
+        "date": "23/03/2018",
+        "address": "NO 1&3, JALAN WANGSA DELIMA 12, WANGSA LINK, WANGSA MAJU, 53300 KUALA LUMPUR",
+        "total": "83.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "01658445804 TAX INVOICE 3:13:19 M2-0 Cashier Qty Description Price Total FUJI XEROX E SR 11.00 55.00 Item Discount $0.20 -1.00 CANON PG-47BkK E400 BLACK SR 29.00 29.00 se Rounding Adj 0.00 GST. 83.00 CASH 85.00 Change 2.00 GST Summar Code % GST Total SR 6% 78.30 4.70 83.00 47033567",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005605285",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "AEON CO. (M) BHD.",
+        "date": "22/03/2018",
+        "address": "3 FLOOR, AEON TAMAN MALURI SC JLN JEJAKA, TAMAN MALURI CHERAS, 55100 KUALA LUMPUR",
+        "total": "5.90"
+      }
+    },
+    "input_text": {},
+    "prediction": "NG eee. 5.90SR 590 5,90 5.90 CASH 50.00 44.10 Amount Tax 557 0.33 Total 5.5f 0.33 EL",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005605286",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "AEON CO. (M) BHD",
+        "date": "09/02/2018",
+        "address": "3RD FLR, AEON TAMAN MALURI SC JLN JEJAKA, TAMAN MALURI CHERAS, 55100 KUALA LUMPUR",
+        "total": "5.90"
+      }
+    },
+    "input_text": {},
+    "prediction": "5.90SR Sub-total 5.90 5.90 5.90 CASH 10.00 4,10 Amount Tax 557 0.33 Total 557 0,33 OMA",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005605333",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "POPULAR BOOK CO. (M) SDN BHD",
+        "date": "07/01/18",
+        "address": "NO 8, JALAN 7/118B, DESA TUN RAZAK 56000 KUALA LUMPUR, MALAYSIA KL FESTIVAL CITY MALL",
+        "total": "31.45"
+      }
+    },
+    "input_text": {},
+    "prediction": "- BOOk 54000 nOorhasmids Cash CHANGE 13.05 Item 5 est 1,48",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005605334",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "POPULAR BOOK CO. (M) SDN BHD",
+        "date": "29/03/18",
+        "address": "NO 8, JALAN 7/118B, DESA TUN RAZAK 56000 KUALA LUMPUR, MALAYSIA",
+        "total": "9.65"
+      }
+    },
+    "input_text": {},
+    "prediction": "29/03/18 0010111111 eed 9.65 Cash CHANGE 40.35 3 9.10 0.55 0.00 Cees",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005605335",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "POPULAR BOOK CO. (M) SDN BHD",
+        "date": "12/01/18",
+        "address": "NO 8, JALAN 7/118B, DESA TUN RAZAK 56000 KUALA LUMPUR, MALAYSIA",
+        "total": "21.00"
+      }
+    },
+    "input_text": {},
+    "prediction": "U ( No.8, 6281/6920 ro 12/01/18 Trans: 744 ption Aw Sstat- Total Total Cash CHANGE Saving RM Tax 19.79 Savings HD ) Razak ia 0070154 99 Ount 20.98 0.02 21.00 20.00 29.00 2 CRM) 1.19 IN.",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005663272",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "WAHIN HARDWARE SDN BHD",
+        "date": "04/12/17",
+        "address": "425, JALAN PAHANG, SETAPAK, 53000 KUALA LUMPUR.",
+        "total": "42.40"
+      }
+    },
+    "input_text": {},
+    "prediction": "148481-U LUMPUR. 40218976, 603-40217507. late ItenPescription 2 2.6900 HANTILE 2 3.1800 i 30.7400 40.00 2.40 : 42.40 Q 2.40) Saag Q.00 a 3 40.00 2.407",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  },
+  {
+    "sample_id": "X51005663273",
+    "split": "train",
+    "ground_truth": {
+      "token_labels": null,
+      "document_entities": {
+        "company": "SYARIKAT PERNIAGAAN GIN KEE",
+        "date": "04/12/2017",
+        "address": "NO 290, JALAN AIR PANAS. SETAPAK, 53200, KUALA LUMPUR",
+        "total": "47.70"
+      }
+    },
+    "input_text": {},
+    "prediction": "Jaen (81109-A) SETAPAK, CASH Cashier Salesperson. if Oy Tax 46.90 ay 70 SR 88 ogee 3 45.00 0.00 2.70 0.00 47.70 47.70 0.00 % SR 6 45.00 2.70 Total: 45.00 2.70",
+    "prediction_error": null,
+    "metrics": {
+      "entity_match": 0.0,
+      "entity_matched": 0,
+      "entity_total": 0
+    }
+  }
+]

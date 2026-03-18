@@ -1,0 +1,41 @@
+{
+  "dataset": "SROIE",
+  "sample_count": 200,
+  "splits": [
+    "test",
+    "train"
+  ],
+  "splits_breakdown": [
+    {
+      "split": "test",
+      "sample_count": 100,
+      "metrics": {
+        "entity_match_mean": 0.0,
+        "entity_matched_mean": 0.0,
+        "entity_total_mean": 0.0
+      },
+      "gt_override_count": 0
+    },
+    {
+      "split": "train",
+      "sample_count": 100,
+      "metrics": {
+        "entity_match_mean": 0.0,
+        "entity_matched_mean": 0.0,
+        "entity_total_mean": 0.0
+      },
+      "gt_override_count": 0
+    }
+  ],
+  "gt_override_count": 0,
+  "skipped_no_ground_truth": 0,
+  "prediction_error_counts": {},
+  "model_class": "HybridOCR",
+  "backbone": "paddleocr_tesseract",
+  "timestamp": "2026-03-07T18:16:19.420767+08:00",
+  "weighted_metrics": {
+    "entity_match_mean": 0.0,
+    "entity_matched_mean": 0.0,
+    "entity_total_mean": 0.0
+  }
+}

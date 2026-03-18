@@ -1,0 +1,14 @@
+{
+  "sample_id": "test_Accounting_4",
+  "question": "<image 1> Ballentine Manufacturing produces and sells lawnmowers through a national dealership network. They purchase raw materials from a variety of suppliers, and all manufacturing and assembly work is performed at their plant outside of Kansas City, Missouri. They recorded these costs for the year ending December 31, 2017. What is the net income?",
+  "ground_truth": "A",
+  "options_list": [
+    "$300,000",
+    "$400,000",
+    "$500,000",
+    "$600,000"
+  ],
+  "options_present": true,
+  "split": "test",
+  "dataset": "MMMU_Accounting"
+}

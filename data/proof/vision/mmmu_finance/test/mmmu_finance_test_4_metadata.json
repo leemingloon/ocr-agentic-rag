@@ -1,0 +1,14 @@
+{
+  "sample_id": "test_Finance_4",
+  "question": "Here are returns and standard deviations for four investments. <image 1>. Calculate the standard deviations of the following portfolio: 50% in Treasury bills, 50% in stock P",
+  "ground_truth": "B",
+  "options_list": [
+    "1%",
+    "7%",
+    "19.1%",
+    "27%"
+  ],
+  "options_present": true,
+  "split": "test",
+  "dataset": "MMMU_Finance"
+}

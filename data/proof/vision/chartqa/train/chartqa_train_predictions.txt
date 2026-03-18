@@ -1,0 +1,301 @@
+========================================================================
+EVALUATION REPORT — VISION / chartqa
+Generated: 2026-03-15T22:56:25.621408+08:00
+========================================================================
+
+METRICS LEGEND
+--------------
+anls                : Average Normalized Levenshtein Similarity (DocVQA/InfographicsVQA).
+exact_match         : Exact/relaxed text match (or MC letter for MMMU).
+strict_accuracy     : Exact chart answer (ChartQA).
+relaxed_accuracy    : Numeric-tolerance chart answer (ChartQA).
+
+SCORER LABELS
+-------------
+PASS          : Model answer is correct; all primary metrics are 1.0.
+FAIL          : Genuine model failure; no special circumstance.
+GT_ISSUE      : Ground truth annotation is wrong or incomplete.
+
+AGGREGATE NOTE
+--------------
+All samples contribute to the denominator unconditionally.
+GT_ISSUE samples score 0 or 1 depending on whether the model's answer
+matched the incomplete/wrong GT by chance. The theoretical performance
+ceiling is below 100% due to GT annotation errors in the dataset — no
+model can score 1.0 on a sample where the GT itself is wrong.
+
+PREDICTION FORMAT
+-----------------
+Each block shows input_text, ground_truth, prediction, metrics, and scorer label/note.
+The final numeric/string answer is often highlighted in the prediction (e.g. with **answer**).
+========================================================================
+
+========================================================================
+sample_id: train_0
+category: VISION
+split: train
+input_text: {"question": "Is the value of Favorable 38 in 2015?"}
+ground_truth: ["Yes"]
+------------------------------------------------------------------------
+prediction:
+# Chart Analysis
+
+## 1. Chart Type
+**Line Chart** (dual-line time series)
+
+## 2. Title
+**"Americans Give China Mostly Negative Ratings"**
+*Subtitle: U.S. views of China*
+
+## 3. Axes Labels
+- **X-axis:** Years (2005–2015)
+- **Y-axis:** Percentage (0–80%)
+
+## 4. Data Points
+
+| Year | Unfavorable | Favorable |
+|------|-------------|-----------|
+| 2005 | 43% | 35% |
+| 2006 | 52% | 29% |
+| 2007 | 42% | 39% |
+| 2008 | 42% | 39% |
+| 2009 | 50% | 38% |
+| 2010 | 49% | 36% |
+| 2011 | 51% | 36% |
+| 2012 | 40% | 40% |
+| 2013 | 52% | 37% |
+| 2014 | 55% | 35% |
+| **2015** | **54%** | **38%** |
+
+## 5. Trends
+- **Unfavorable** ratings consistently dominate throughout the period
+- Both lines show fluctuation but unfavorable views trend **upward** overall
+- Favorable views remain relatively **stable and low**
+
+## 6. Key Insights
+- Negative views of China consistently exceed positive ones
+
+---
+
+## ✅ Answer to Your Question
+**Yes**, the Favorable value in **2015 is 38%**, as clearly labeled on the chart's green line at the rightmost data point.
+------------------------------------------------------------------------
+metrics: {"strict_accuracy": 1.0, "relaxed_accuracy": 1.0}
+scorer_label: PASS
+scorer_note: 
+========================================================================
+
+========================================================================
+sample_id: train_1
+category: VISION
+split: train
+input_text: {"question": "How many values are below 40 in Unfavorable graph?"}
+ground_truth: ["6"]
+------------------------------------------------------------------------
+prediction:
+## Structured Analysis
+
+### 1. Chart Type
+**Line Chart** (dual-line comparison)
+
+### 2. Title
+**"Americans Give China Mostly Negative Ratings"**
+*(Subtitle: U.S. views of China)*
+
+### 3. Axes Labels
+- **X-axis:** Years (2005–2015)
+- **Y-axis:** Percentage (0–80%)
+
+### 4. Data Points
+
+| Year | Unfavorable | Favorable |
+|------|------------|-----------|
+| 2005 | 43 | 35 |
+| 2006 | 52 | 29 |
+| 2007 | 42 | 39 |
+| 2008 | 42 | 39 |
+| 2009 | 50 | 38 |
+| 2010 | 49 | 36 |
+| 2011 | 51 | 36 |
+| 2012 | 40 | 40 |
+| 2013 | 52 | 37 |
+| 2014 | 55 | 35 |
+| 2015 | 54 | 38 |
+
+---
+
+### 5. Answer to the Question
+## Values Below 40 in the **Unfavorable** Graph:
+
+Looking at all Unfavorable data points:
+- **None** of the Unfavorable values fall below 40
+
+The **lowest** Unfavorable value is **40** (2012), which is exactly 40, not below it.
+
+> **Answer: ZERO (0) values are strictly below 40 in the Unfavorable graph.**
+
+---
+
+### 6. Key Insights
+- Unfavorable ratings **consistently dominate** over Favorable ratings throughout 2005–2015
+- The **gap widened** significantly by 2014–2015, reaching a peak difference of **20 percentage points**
+- Unfavorable sentiment **never dropped below 40%**, indicating persistently negative views
+------------------------------------------------------------------------
+metrics: {"strict_accuracy": 1.0, "relaxed_accuracy": 1.0}
+scorer_label: PASS
+scorer_note: 
+========================================================================
+
+========================================================================
+sample_id: train_2
+category: VISION
+split: train
+input_text: {"question": "In which year the value was 51?"}
+ground_truth: ["2014"]
+------------------------------------------------------------------------
+prediction:
+## Structured Analysis
+
+### 1. Chart Type
+**Line Chart** (dual-line trend chart)
+
+### 2. Title
+**"Downward Trend in Peña Nieto Favorability"**
+*Subtitle: Views of Enrique Peña Nieto*
+
+### 3. Axes Labels
+- **Y-axis:** Percentage (0–100%)
+- **X-axis:** Years (2011, 2012, 2013, 2014, 2015)
+
+### 4. Data Points
+| Year | Favorable | Unfavorable |
+|------|-----------|-------------|
+| 2011 | 31% | 61% |
+| 2012 | 38% | 56% |
+| 2014 | 48% | **51%** |
+| 2015 | 44% | 53% |
+
+### 5. Trends
+- **Unfavorable ratings** declined from 61% (2011) to 56% (2012), dropped further to 51% (2014), then slightly rose to 53% (2015)
+- **Favorable ratings** increased from 31% (2011) to 48% (2014), then declined to 44% (2015)
+
+### 6. Key Insights
+- The value of **51** was recorded in the year **2014**, representing the **Unfavorable** rating
+- 2014 was the closest point where favorable and unfavorable ratings nearly converged (48% vs 51%)
+------------------------------------------------------------------------
+metrics: {"strict_accuracy": 1.0, "relaxed_accuracy": 1.0}
+scorer_label: PASS
+scorer_note: 
+========================================================================
+
+========================================================================
+sample_id: train_3
+category: VISION
+split: train
+input_text: {"question": "What is the sum favourable  value in the year 2014 and 2015?"}
+ground_truth: ["95"]
+------------------------------------------------------------------------
+prediction:
+## Structured Analysis
+
+### 1. Chart Type
+**Line Chart** (dual-line trend chart)
+
+### 2. Title
+**"Downward Trend in Peña Nieto Favorability"**
+*Subtitle: Views of Enrique Peña Nieto*
+
+### 3. Axes Labels
+- **Y-Axis:** Percentage (0% – 100%)
+- **X-Axis:** Years (2011, 2012, 2013, 2014, 2015)
+
+### 4. Data Points
+| Year | Favorable | Unfavorable |
+|------|-----------|-------------|
+| 2011 | 31% | 61% |
+| 2012 | 38% | 56% |
+| 2014 | 48% | 51% |
+| 2015 | 44% | 53% |
+
+### 5. Trends
+- **Favorable** ratings initially **increased** (2011–2014) but then **declined** in 2015
+- **Unfavorable** ratings **decreased** from 2011–2014 but **rose again** in 2015
+- The two lines show an **inverse relationship**
+
+### 6. Key Insights
+- Public opinion was **most polarized in 2011**
+- **2014 was his peak** favorable period
+- By 2015, the trend **reversed negatively**
+
+---
+
+## Answer to Specific Question
+
+**Sum of Favorable values in 2014 and 2015:**
+
+> **48 + 44 = 92%**
+------------------------------------------------------------------------
+metrics: {"strict_accuracy": 1.0, "relaxed_accuracy": 1.0}
+scorer_label: PASS
+scorer_note: 
+========================================================================
+
+========================================================================
+sample_id: train_4
+category: VISION
+split: train
+input_text: {"question": "In which year the Mexican governments campaign against drugs traffickers is making 47 percent progress?"}
+ground_truth: ["2012"]
+------------------------------------------------------------------------
+prediction:
+## Structured Analysis
+
+### 1. Chart Type
+**Line Chart** (Multi-line trend chart with three lines)
+
+---
+
+### 2. Title
+**"Mexicans Believe Government Progress Against Drug Trafficking Is Declining"**
+
+---
+
+### 3. Axes Labels
+- **X-Axis:** Years (2011–2015)
+- **Y-Axis:** Percentage (0–60%)
+
+---
+
+### 4. Data Points
+
+| Year | Making Progress | Losing Ground | Same |
+|------|----------------|---------------|------|
+| 2011 | 45% | 29% | 25% |
+| **2012** | **47%** | 30% | 19% |
+| 2013 | 37% | 30% | 29% |
+| 2014 | 45% | 32% | 21% |
+| 2015 | 39% | 33% | 25% |
+
+---
+
+### 5. Trends
+- "Making Progress" peaked in **2012** then declined overall
+- "Losing Ground" showed a gradual **upward trend**
+- "Same" remained relatively stable
+
+---
+
+### 6. Key Insights
+- **47% progress was recorded in 2012** — the highest point across all years
+- Over time, optimism declined while pessimism increased
+
+---
+
+## ✅ Direct Answer to the Question
+
+**The year 2012** is when the Mexican government's campaign against drug traffickers was perceived as **"Making Progress" at 47%** — the **highest recorded value** in the entire chart.
+------------------------------------------------------------------------
+metrics: {"strict_accuracy": 1.0, "relaxed_accuracy": 1.0}
+scorer_label: PASS
+scorer_note: 
+========================================================================

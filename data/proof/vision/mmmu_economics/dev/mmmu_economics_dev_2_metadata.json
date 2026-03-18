@@ -1,0 +1,14 @@
+{
+  "sample_id": "dev_Economics_2",
+  "question": "The table below describes production possibilities for Mexico and Nigeria. Each number in the table shows the number of workers needed to produce one unit of the product. <image 1> Suppose that both countries have 90 workers. What is the opportunity cost of producing Glasses in Mexico?",
+  "ground_truth": "A",
+  "options_list": [
+    "1.20 Shoes",
+    "1.00 Shoes",
+    "0.83 Shoes",
+    "0.75 Shoes"
+  ],
+  "options_present": true,
+  "split": "dev",
+  "dataset": "MMMU_Economics"
+}

@@ -1,0 +1,32 @@
+{
+  "dataset": "FinanceBench",
+  "sample_count": 100,
+  "splits": [
+    "train"
+  ],
+  "splits_breakdown": [
+    {
+      "split": "train",
+      "sample_count": 100,
+      "metrics": {
+        "exact_match_mean": 0.94,
+        "f1_mean": 0.9485476686874289,
+        "relaxed_match_mean": 0.94,
+        "conclusion_match_mean_typed": 0.7241379310344828,
+        "conclusion_match_typed_count": 29
+      },
+      "gt_override_count": 0
+    }
+  ],
+  "gt_override_count": 0,
+  "skipped_no_ground_truth": 0,
+  "prediction_error_counts": {},
+  "model_class": "RiskMemoGenerator",
+  "backbone": "claude_sonnet",
+  "timestamp": "2026-03-10T13:18:44.515476+08:00",
+  "weighted_metrics": {
+    "exact_match_mean": 0.94,
+    "f1_mean": 0.9485476686874289,
+    "relaxed_match_mean": 0.94
+  }
+}

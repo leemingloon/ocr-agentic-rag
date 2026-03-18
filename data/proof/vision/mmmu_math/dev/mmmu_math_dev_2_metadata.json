@@ -1,0 +1,14 @@
+{
+  "sample_id": "dev_Math_2",
+  "question": "For the function f(x) = 8x^3 - 2x^2 - 7x + 3, perform two iterations of the dichotomous search scheme for locating the minimum in [0, 1]. In the interval [0, 1], apply the three-point equal-interval search scheme and compare the results with the above solution. Applying the quadratic interpolation technique, find λ^ from (1) and compare the result with that of dichotomous search: λ^ = (1/2) [{g(a)(c^2 - b^2) + g(b)(a^2 - c^2) + g(c)(b^2 - a^2)} / {g(a)(c - b) + g(b)(a - c) + g(c)(b - a)}] (1) Choose ε = 0.1.\n<image 1>",
+  "ground_truth": "D",
+  "options_list": [
+    "The dichotomous search yields a smaller interval containing $ x^* $ than the equal-interval search.",
+    "The value obtained from quadratic interpolation $ \\lambda' = 0.52 $ is an accurate estimate for $ \\lambda^* $.",
+    "The equal-interval search required more function evaluations than the quadratic interpolation.",
+    "$ f(x) $ has a minimum of 5 in the interval $ [-1, 1] $."
+  ],
+  "options_present": true,
+  "split": "dev",
+  "dataset": "MMMU_Math"
+}

@@ -1,0 +1,14 @@
+{
+  "sample_id": "test_Economics_2",
+  "question": "It is a hot day, and Bert is thirsty. Here is the value he places on a bottle of water:<image 1> If the price of a bottle of water is $2, how many bottles does Bert buy?",
+  "ground_truth": "B",
+  "options_list": [
+    "2",
+    "3",
+    "4",
+    "5"
+  ],
+  "options_present": true,
+  "split": "test",
+  "dataset": "MMMU_Economics"
+}

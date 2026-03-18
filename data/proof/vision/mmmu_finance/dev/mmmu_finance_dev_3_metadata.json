@@ -1,0 +1,14 @@
+{
+  "sample_id": "dev_Finance_3",
+  "question": "Clare Jaccard has $5,000 to invest. Because she is only 25 years old, she is not concerned about the length of the investment's life. What she is sensitive to is the rate of return she will earn on the investment. With the help of her financial advisor, Clare has isolated four equally risky investments, each providing a single amount at the end of its life, as shown in the following table. All the investments require an initial $5,000 payment. <image 1> Calculate, to the nearest 1%, the rate of return on investment D available to Clare.",
+  "ground_truth": "C",
+  "options_list": [
+    "11%",
+    "8%",
+    "10%",
+    "9%"
+  ],
+  "options_present": true,
+  "split": "dev",
+  "dataset": "MMMU_Finance"
+}

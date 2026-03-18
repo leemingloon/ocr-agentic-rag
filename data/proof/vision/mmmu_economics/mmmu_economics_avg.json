@@ -1,0 +1,44 @@
+{
+  "dataset": "MMMU_Economics",
+  "sample_count": 10,
+  "gt_override_count": 0,
+  "splits": [
+    "dev",
+    "test",
+    "validation"
+  ],
+  "splits_breakdown": [
+    {
+      "split": "dev",
+      "sample_count": 4,
+      "gt_override_count": 0,
+      "metrics": {
+        "accuracy_mean": 1.0
+      }
+    },
+    {
+      "split": "test",
+      "sample_count": 2,
+      "gt_override_count": 0,
+      "metrics": {
+        "accuracy_mean": 0.6666666666666666
+      }
+    },
+    {
+      "split": "validation",
+      "sample_count": 4,
+      "gt_override_count": 0,
+      "metrics": {
+        "accuracy_mean": 1.0
+      }
+    }
+  ],
+  "skipped_no_ground_truth": 0,
+  "prediction_error_counts": {},
+  "model_class": "VisionOCR",
+  "backbone": "claude-sonnet-4-6",
+  "timestamp": "2026-03-01T07:40:27.387398+08:00",
+  "weighted_metrics": {
+    "accuracy_mean": 0.9333333333333332
+  }
+}

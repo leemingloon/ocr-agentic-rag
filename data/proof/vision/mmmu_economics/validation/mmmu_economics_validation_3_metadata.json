@@ -1,0 +1,14 @@
+{
+  "sample_id": "validation_Economics_3",
+  "question": "<image 1> Table 10.7 provides some hypothetical data on macroeconomic accounts for three countries represented by A, B, and C and measured in billions of currency units. In Table 10.7, private household saving is SH, tax revenue is T, government spending is G, and investment spending is I. Calculate the trade balance and the net inflow of foreign saving for each country(country A,B,C).",
+  "ground_truth": "A",
+  "options_list": [
+    "-700,250,0",
+    "-700,250,-100",
+    "-600,350,-100",
+    "-700,350,0"
+  ],
+  "options_present": true,
+  "split": "validation",
+  "dataset": "MMMU_Economics"
+}

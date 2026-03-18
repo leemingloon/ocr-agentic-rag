@@ -1,0 +1,81 @@
+[
+  {
+    "sample_id": "validation_Economics_1",
+    "split": "validation",
+    "ground_truth": "A",
+    "input_text": {
+      "question": "Consider the following balance sheet for TD. <image 1> Suppose that someone deposited $700 at TD Bank. Given this data, what is the minimum amount by which the money supply will increase?"
+    },
+    "prediction": "# Balance Sheet Analysis for TD Bank\n\n## 1. Chart Type\n**Table** – A simplified T-account balance sheet\n\n## 2. Title\nBalance Sheet for TD Bank\n\n## 3. Axes Labels\n| **Assets** | | **Liabilities** | |\n|---|---|---|---|\n| Reserves | $493 | Deposits | $2,900 |\n| Loans | $2,407 | | |\n\n## 4. Data Points\n- **Reserves:** $493\n- **Loans:** $2,407\n- **Deposits:** $2,900\n- **Total Assets = Total Liabilities = $2,900**\n\n---\n\n## 5. Key Calculations\n\n### Step 1: Calculate the Reserve Ratio\n$$\\text{Reserve Ratio} = \\frac{\\text{Reserves}}{\\text{Deposits}} = \\frac{493}{2900} \\approx 0.17 = 17\\%$$\n\n### Step 2: Calculate the Money Multiplier\n$$\\text{Money Multiplier} = \\frac{1}{\\text{Reserve Ratio}} = \\frac{1}{0.17} \\approx 5.88$$\n\n### Step 3: Calculate Minimum Increase in Money Supply\n$$\\Delta \\text{Money Supply} = \\text{Deposit} \\times \\text{Money Multiplier}$$\n$$= \\$700 \\times 5.88 \\approx \\$4,118$$\n\n---\n\n## 6. Key Insights\n\n| Item | Value |\n|---|---|\n| New Deposit | $700 |\n| Reserve Ratio | ~17% |\n| Money Multiplier | ~5.88 |\n| **Minimum Money Supply Increase** | **~$4,118** |\n\n> ✅ **The minimum increase in the money supply is approximately $4,118**, driven by the fractional reserve banking system where TD holds ~17% in reserves and lends out the rest repeatedly through the banking system.",
+    "prediction_error": null,
+    "metrics": {
+      "accuracy": 1.0
+    }
+  },
+  {
+    "sample_id": "validation_Economics_2",
+    "split": "validation",
+    "ground_truth": "B",
+    "input_text": {
+      "question": "<image 1> Suppose the government decided that, since gasoline is a necessity, its price should be legally capped at $1.30 per gallon. What do you anticipate would be the outcome in the gasoline market?"
+    },
+    "prediction": "## Chart Analysis\n\n**1. Chart Type:** Line graph (Supply and Demand diagram)\n\n**2. Title:** Gasoline Market Supply and Demand\n\n**3. Axes Labels:**\n- Y-axis: P ($ per gallon)\n- X-axis: Quantity of Gasoline (millions of gallons)\n\n**4. Data Points:**\n- Equilibrium (E): $1.40/gallon at 600 million gallons\n- Above-equilibrium price: $1.80 → Supply ~700M, Demand ~500M (surplus of ~200M gallons)\n- Below-equilibrium price: $1.20 → Supply ~500M, Demand ~700M (shortage of ~200M gallons)\n- Supply curve (S): Upward sloping\n- Demand curve (D): Downward sloping\n\n**5. Trends:**\n- Above equilibrium → Excess supply/surplus\n- Below equilibrium → Excess demand/shortage\n- Market naturally moves toward equilibrium at $1.40\n\n**6. Key Insights:**\n- Equilibrium is $1.40 at 600M gallons\n- Price controls below equilibrium create shortages\n\n## Answer to Question\n\nA price cap of **$1.30** is **below the equilibrium price of $1.40**. This means:\n- Quantity **demanded** would **exceed** quantity **supplied**\n- This creates **excess demand** → a **shortage** in the gasoline market\n- Suppliers are unwilling to produce as much at the lower mandated price\n- Consumers want more at the artificially low price\n\nB",
+    "prediction_error": null,
+    "metrics": {
+      "accuracy": 1.0
+    },
+    "metadata": {
+      "sample_id": "validation_Economics_2",
+      "options_list": [
+        "A price below that of 1.30 dollars would cause a situation of excess demand and hence a surplus.",
+        "A price below that of 1.30 dollars would cause a situation of excess demand and hence a shortage.",
+        "Not certain."
+      ]
+    }
+  },
+  {
+    "sample_id": "validation_Economics_3",
+    "split": "validation",
+    "ground_truth": "A",
+    "input_text": {
+      "question": "<image 1> Table 10.7 provides some hypothetical data on macroeconomic accounts for three countries represented by A, B, and C and measured in billions of currency units. In Table 10.7, private household saving is SH, tax revenue is T, government spending is G, and investment spending is I. Calculate the trade balance and the net inflow of foreign saving for each country(country A,B,C)."
+    },
+    "prediction": "## Structured Analysis\n\n### 1. Chart Type: Table\n### 2. Title: Table 10.7 Macroeconomic Accounts\n### 3. Axes Labels: Countries (A, B, C) vs. Macroeconomic Variables (SH, T, G, I)\n### 4. Data Points:\n\n| Variable | A | B | C |\n|----------|-----|-----|-----|\n| SH (Private Household Saving) | 700 | 500 | 600 |\n| T (Tax Revenue) | 0 | 500 | 500 |\n| G (Government Spending) | 600 | 350 | 650 |\n| I (Investment) | 800 | 400 | 450 |\n\n*(Note: \"00\" for Country A's T is interpreted as 0)*\n\n---\n\n## Key Formulas\n\n**National Savings Identity:**\n$$\\text{Trade Balance (NX)} = (SH - I) + (T - G)$$\n\n**Net Inflow of Foreign Saving:**\n$$SF = I - SH - (T - G) = -\\text{Trade Balance}$$\n\n---\n\n## Calculations\n\n### Country A:\n- **Trade Balance** = (700 - 800) + (0 - 600) = (-100) + (-600) = **-700**\n- **Net Foreign Saving Inflow** = -(-700) = **+700**\n\n### Country B:\n- **Trade Balance** = (500 - 400) + (500 - 350) = (100) + (150) = **+250**\n- **Net Foreign Saving Inflow** = -(250) = **-250**\n\n### Country C:\n- **Trade Balance** = (600 - 450) + (500 - 650) = (150) + (-150) = **0**\n- **Net Foreign Saving Inflow** = 0\n\n---\n\n## Results Summary\n\n| Country | Trade Balance | Net Foreign Saving Inflow |\n|---------|--------------|--------------------------|\n| A | -700 | +700 |\n| B | +250 | -250 |\n| C | 0 | 0 |\n\n### Key Insights:\n- **Country A**: Large trade deficit (-700), running a current account deficit, requiring substantial foreign capital inflows\n- **Country B**: Trade surplus (+250), exporting capital abroad\n- **Country C**: Perfectly balanced trade (0)\n\nThe trade balance values are **-700, 250, 0** → matching **Option A**\n\nA",
+    "prediction_error": null,
+    "metrics": {
+      "accuracy": 1.0
+    },
+    "metadata": {
+      "sample_id": "validation_Economics_3",
+      "options_list": [
+        "-700,250,0",
+        "-700,250,-100",
+        "-600,350,-100",
+        "-700,350,0"
+      ]
+    }
+  },
+  {
+    "sample_id": "validation_Economics_4",
+    "split": "validation",
+    "ground_truth": "B",
+    "input_text": {
+      "question": "<image 1> The provided image depicts a/an"
+    },
+    "prediction": "## Structured Analysis\n\n**1. Chart Type:** Line graph (curve)\n\n**2. Title:** None present\n\n**3. Axes Labels:**\n- Y-axis: Inflation Rate (%)\n- X-axis: Unemployment Rate (%)\n\n**4. Data Points:**\n- No specific numerical values are marked\n- The curve starts high on the Y-axis (high inflation) and extends to the right along the X-axis (high unemployment)\n- The curve is smooth and continuously decreasing\n\n**5. Trends:**\n- Strong inverse (negative) relationship between inflation rate and unemployment rate\n- As unemployment increases, inflation decreases\n- As unemployment decreases, inflation increases\n- The curve is convex/hyperbolic in shape, showing a non-linear relationship\n\n**6. Key Insights:**\n- This graph illustrates the classic trade-off between inflation and unemployment\n- The shape suggests diminishing returns — large drops in inflation occur at low unemployment levels, with smaller changes at higher unemployment levels\n- This is the foundational macroeconomic concept introduced by economist A.W. Phillips in 1958\n- Policymakers face a trade-off: reducing unemployment may come at the cost of higher inflation, and vice versa\n\n## Conclusion\nThis graph depicts the **Phillips Curve** — the inverse relationship between inflation and unemployment rates, matching **Option B**.\n\nB",
+    "prediction_error": null,
+    "metrics": {
+      "accuracy": 1.0
+    },
+    "metadata": {
+      "sample_id": "validation_Economics_4",
+      "options_list": [
+        "demand curve",
+        "Phillips curve",
+        "production possibilities frontier",
+        "aggregate supply curve",
+        "Lorenz curve"
+      ]
+    }
+  }
+]

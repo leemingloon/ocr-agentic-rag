@@ -1,0 +1,24 @@
+{
+  "description": "Canonical FP/FiQA sentiment split and model metrics (notebooks 03, 04a, 04b). Exact per-source counts in data/credit_risk_sentiment/processed/meta.json after running 03.",
+  "data_sources": {
+    "FinancialPhraseBank": { "split_loaded": "test", "n_raw": 1000 },
+    "FiQA": { "split_loaded": "valid", "n_raw": 117 }
+  },
+  "n_total": 1117,
+  "split": "80/10/10 stratified, random_state=42",
+  "n_train": 893,
+  "n_val": 112,
+  "n_test": 112,
+  "per_source_approximate": {
+    "train": { "FinancialPhraseBank": 800, "FiQA": 93 },
+    "val": { "FinancialPhraseBank": 100, "FiQA": 12 },
+    "test": { "FinancialPhraseBank": 100, "FiQA": 12 }
+  },
+  "val_metrics": {
+    "QNLP_lambeq": { "f1_macro": 0.40, "n": 112 },
+    "TF-IDF_LogReg": { "f1_macro": 0.76, "n": 112 },
+    "FinBERT_fine_tuned": { "f1_macro": 0.86, "n": 112 },
+    "FinBERT_inference_only": { "f1_macro": 0.04, "n": 112 }
+  },
+  "note": "Per-dataset (PhraseBank vs FiQA) F1 can be computed from 04a/04b when loading processed parquets with source column; val n per source ~100 PB, ~12 FiQA."
+}

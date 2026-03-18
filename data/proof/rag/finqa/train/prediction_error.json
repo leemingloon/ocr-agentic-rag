@@ -1,0 +1,106 @@
+[
+  {
+    "sample_id": "ADI/2016/page_61.pdf-2",
+    "split": "train",
+    "ground_truth": {
+      "answer": "0.02602",
+      "score": null,
+      "query_id": 39,
+      "corpus_id": "ADI/2016/page_61.pdf-2",
+      "program": "subtract(1679116, 1636526), divide(#0, 1636526)"
+    },
+    "input_text": {
+      "query": "what is the percentage change in the balance of goodwill from 2015 to 2016?"
+    },
+    "prediction": "",
+    "prediction_error": "rag_inference_failed:'charmap' codec can't encode character '\\u26a0' in position 0: character maps to <undefined>",
+    "metrics": {}
+  },
+  {
+    "sample_id": "ZBH/2008/page_70.pdf-1",
+    "split": "train",
+    "ground_truth": {
+      "answer": "0.15385",
+      "score": null,
+      "query_id": 63,
+      "corpus_id": "ZBH/2008/page_70.pdf-1",
+      "program": "subtract(3.0, 2.6), divide(#0, 2.6)"
+    },
+    "input_text": {
+      "query": "what is the percent change in information technology integration from 2006 to 2007?"
+    },
+    "prediction": "",
+    "prediction_error": "rag_inference_failed:'charmap' codec can't encode character '\\u2192' in position 73: character maps to <undefined>",
+    "metrics": {}
+  },
+  {
+    "sample_id": "FRT/2009/page_124.pdf-1",
+    "split": "train",
+    "ground_truth": {
+      "answer": "100491.0",
+      "score": null,
+      "query_id": 78,
+      "corpus_id": "FRT/2009/page_124.pdf-1",
+      "program": "add(96454, 101321), multiply(const_1000, 103.698), add(#0, #1), divide(#2, const_3)"
+    },
+    "input_text": {
+      "query": "considering the years 2006-2009 , what is the value of the average additions?"
+    },
+    "prediction": "",
+    "prediction_error": "rag_inference_failed:'charmap' codec can't encode character '\\u2192' in position 69: character maps to <undefined>",
+    "metrics": {}
+  },
+  {
+    "sample_id": "MSI/2008/page_71.pdf-2",
+    "split": "train",
+    "ground_truth": {
+      "answer": "4236.12",
+      "score": null,
+      "query_id": 93,
+      "corpus_id": "MSI/2008/page_71.pdf-2",
+      "program": "multiply(10086, 42%)"
+    },
+    "input_text": {
+      "query": "how many segmented sales did the 5 largest customers account for in 2008?"
+    },
+    "prediction": "",
+    "prediction_error": "rag_inference_failed:name 'q' is not defined",
+    "metrics": {}
+  },
+  {
+    "sample_id": "SWKS/2012/page_116.pdf-1",
+    "split": "train",
+    "ground_truth": {
+      "answer": "20.3",
+      "score": null,
+      "query_id": 100,
+      "corpus_id": "SWKS/2012/page_116.pdf-1",
+      "program": "subtract(52.4, 32.1)"
+    },
+    "input_text": {
+      "query": "what is the net chance in unrecognized tax benefits from 2011 to 2012 , ( in millions ) ?"
+    },
+    "prediction": "",
+    "prediction_error": "rag_inference_failed:'NoneType' object has no attribute 'get'",
+    "metrics": {}
+  },
+  {
+    "sample_id": "HII/2018/page_64.pdf-4",
+    "split": "train",
+    "ground_truth": {
+      "answer": "0.37399",
+      "score": null,
+      "query_id": 25,
+      "corpus_id": "HII/2018/page_64.pdf-4",
+      "program": "divide(7991, 21367)"
+    },
+    "input_text": {
+      "query": "what portion of total backlog is related to ingalls segment?"
+    },
+    "prediction": "",
+    "prediction_error": "rag_inference_failed:name 'table_segment_alignment_primer_block' is not defined",
+    "metrics": {},
+    "scorer_label": "PASS",
+    "scorer_note": ""
+  }
+]

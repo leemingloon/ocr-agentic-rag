@@ -1,0 +1,14 @@
+{
+  "sample_id": "test_Finance_1",
+  "question": "A firm wishing to evaluate interest rate behavior has gathered data on the nominal rate of interest and on inflationary expectations for five U.S. Treasury securities, each having a different maturity and each measured at a different point in time during the year just ended. (Note: Assume that the risk that future interest rate movements will affect longer maturities more than shorter maturities is zero; that is, assume that there is no maturity risk.) These data are summarized in the following table. <image 1> Using the preceding data, find the real rate of interest at each point in time",
+  "ground_truth": "D",
+  "options_list": [
+    "A: 3.0%; B: 3.1%; C: 3.1%; D: 2.9%; E: 3.1%",
+    "A: 3.1%; B: 3.1%; C: 3.1%; D: 2.9%; E: 3.1%",
+    "A: 3.1%; B: 3.1%; C: 3.1%; D: 3.1%; E: 3.1%",
+    "A: 3.1%; B: 3%; C: 3%; D: 2.9%; E: 3.1%"
+  ],
+  "options_present": true,
+  "split": "test",
+  "dataset": "MMMU_Finance"
+}

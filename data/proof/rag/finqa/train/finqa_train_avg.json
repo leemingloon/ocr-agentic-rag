@@ -1,0 +1,6 @@
+{
+  "sample_count": 200,
+  "relaxed_exact_match": "0.9200 (184/200)",
+  "exact_match": "0.9050 (181/200)",
+  "f1": 0.0225
+}

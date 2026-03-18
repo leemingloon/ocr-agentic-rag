@@ -1,0 +1,9 @@
+{
+  "sample_id": "dev_Finance_2",
+  "question": "Upton Computers makes bulk purchases of small computers, stocks them in conveniently located warehouses, ships them to its chain of retail stores, and has a staff to advise customers and help them set up their new computers. Upton's balance sheet as of December 31, 2010, is shown here (millions of dollars): <image 1> Sales for 2010 were $350 million and net income for the year was $10.5 million, so the firm's profit margin was 3.0%. Upton paid dividends of $4.2 million to common stockholders, so its payout ratio was 40%. Its tax rate is 40%, and it operated at full capacity. Assume that all assets/sales ratios, spontaneous liabilities/sales ratios, the profit margin, and the payout ratio remain constant in 2011. Using the AFN equation, determine Upton's self-supporting growth rate. That is, what is the maximum growth rate the firm can achieve without having to employ nonspontaneous external funds?",
+  "ground_truth": "6.38",
+  "options_list": null,
+  "options_present": false,
+  "split": "dev",
+  "dataset": "MMMU_Finance"
+}

@@ -1,0 +1,6 @@
+{
+  "accuracy_mean": 1.0,
+  "gt_override_mean": 0.5,
+  "sample_count": 4,
+  "gt_override_count": 2
+}

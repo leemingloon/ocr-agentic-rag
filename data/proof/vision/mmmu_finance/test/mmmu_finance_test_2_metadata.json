@@ -1,0 +1,9 @@
+{
+  "sample_id": "test_Finance_2",
+  "question": "A newly issued bond has the following characteristics: <image 1> Calculate modified duration using the information above (in years).",
+  "ground_truth": "9.26",
+  "options_list": null,
+  "options_present": false,
+  "split": "test",
+  "dataset": "MMMU_Finance"
+}

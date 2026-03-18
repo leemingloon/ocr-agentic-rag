@@ -1,0 +1,49 @@
+{
+  "dataset": "LendingClub",
+  "sample_count": 13453,
+  "splits": [
+    "test",
+    "train",
+    "valid"
+  ],
+  "splits_breakdown": [
+    {
+      "split": "test",
+      "sample_count": 2691,
+      "metrics": {
+        "auc_roc_mean": 0.6133342243606879,
+        "f1_mean": 0.3245997088791849,
+        "precision_mean": 0.25990675990675993,
+        "recall_mean": 0.4321705426356589
+      }
+    },
+    {
+      "split": "train",
+      "sample_count": 9417,
+      "metrics": {
+        "auc_roc_mean": 0.6101701376209445,
+        "f1_mean": 0.343265306122449,
+        "precision_mean": 0.2814591700133869,
+        "recall_mean": 0.4398535564853556
+      }
+    },
+    {
+      "split": "valid",
+      "sample_count": 1345,
+      "metrics": {
+        "auc_roc_mean": 0.6006575240866334,
+        "f1_mean": 0.3126760563380282,
+        "precision_mean": 0.24557522123893805,
+        "recall_mean": 0.43023255813953487
+      }
+    }
+  ],
+  "timestamp": "2026-03-15T16:41:59.069358+08:00",
+  "weighted_metrics": {
+    "auc_roc_mean": 0.6098519998236503,
+    "f1_mean": 0.3364733888443943,
+    "precision_mean": 0.273560452500671,
+    "recall_mean": 0.4373548399875735
+  },
+  "threshold_note": "F1/precision/recall computed at threshold=0.5 (eval_runner default). Optimal threshold from OOT validation is 0.30 (max-F1 = 0.576). AUC-ROC is the primary metric and is threshold-independent."
+}

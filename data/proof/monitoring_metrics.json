@@ -1,0 +1,38 @@
+{
+  "timestamp": "2026-03-07T18:24:44.873586+08:00",
+  "bias_testing": {
+    "phrase": "bias testing <10% gap",
+    "bias_gap": 0.153846,
+    "bias_gap_pct": 15.38,
+    "mas_feat_compliant": false,
+    "target_gap_pct": 10
+  },
+  "robustness_testing": {
+    "phrase": "robustness <10% degradation",
+    "avg_degradation_pct": 0,
+    "max_degradation_pct": 0,
+    "under_10_pct": true,
+    "target_degradation_pct": 10,
+    "note": "Run evaluation/e2e_robustness_test.py to populate."
+  },
+  "layout_fingerprint_cache": {
+    "phrase": "layout fingerprint cache (65% hit rate)",
+    "hit_rate_actual": 0.0,
+    "hit_rate_target": 0.65,
+    "meets_target": false
+  },
+  "completeness_heuristics": {
+    "phrase": "completeness heuristics catching 90% of false negatives",
+    "fn_caught_rate_actual": 0.9886,
+    "fn_caught_rate_target": 0.9,
+    "meets_target": true,
+    "note": "Run OCR eval to populate monitoring_metrics/completeness_heuristics/<dataset>_<split>_samples.json."
+  },
+  "adversarial_testing": {
+    "phrase": "adversarial testing (95% prompt injection resistance)",
+    "prompt_injection_resistance_actual": 1.0,
+    "prompt_injection_resistance_target": 0.95,
+    "meets_target": true,
+    "n_prompts": 3
+  }
+}

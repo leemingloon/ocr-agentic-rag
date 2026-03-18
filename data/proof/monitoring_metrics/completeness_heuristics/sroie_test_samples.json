@@ -1,0 +1,702 @@
+[
+  {
+    "sample_id": "X00016469670",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 123
+  },
+  {
+    "sample_id": "X00016469671",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 234
+  },
+  {
+    "sample_id": "X51005200931",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 124
+  },
+  {
+    "sample_id": "X51005230605",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 53
+  },
+  {
+    "sample_id": "X51005230616",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 86
+  },
+  {
+    "sample_id": "X51005230621",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 108
+  },
+  {
+    "sample_id": "X51005230648",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 17
+  },
+  {
+    "sample_id": "X51005230657",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 113
+  },
+  {
+    "sample_id": "X51005230659",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 124
+  },
+  {
+    "sample_id": "X51005268275",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 163
+  },
+  {
+    "sample_id": "X51005268408",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 50
+  },
+  {
+    "sample_id": "X51005288570",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 181
+  },
+  {
+    "sample_id": "X51005301666",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 163
+  },
+  {
+    "sample_id": "X51005337867",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 108
+  },
+  {
+    "sample_id": "X51005337877",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 72
+  },
+  {
+    "sample_id": "X51005361906",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 273
+  },
+  {
+    "sample_id": "X51005361908",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 184
+  },
+  {
+    "sample_id": "X51005361912",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 196
+  },
+  {
+    "sample_id": "X51005361923",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 84
+  },
+  {
+    "sample_id": "X51005365187",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 218
+  },
+  {
+    "sample_id": "X51005433518",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 132
+  },
+  {
+    "sample_id": "X51005433543",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 191
+  },
+  {
+    "sample_id": "X51005433548",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 223
+  },
+  {
+    "sample_id": "X51005433556",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 143
+  },
+  {
+    "sample_id": "X51005442322",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 137
+  },
+  {
+    "sample_id": "X51005442334",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 138
+  },
+  {
+    "sample_id": "X51005442343",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 127
+  },
+  {
+    "sample_id": "X51005442366",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 36
+  },
+  {
+    "sample_id": "X51005442375",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 146
+  },
+  {
+    "sample_id": "X51005442382",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 143
+  },
+  {
+    "sample_id": "X51005442388",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 53
+  },
+  {
+    "sample_id": "X51005444040",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 233
+  },
+  {
+    "sample_id": "X51005444041",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 246
+  },
+  {
+    "sample_id": "X51005444044",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 59
+  },
+  {
+    "sample_id": "X51005444046",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 209
+  },
+  {
+    "sample_id": "X51005447841",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 84
+  },
+  {
+    "sample_id": "X51005447842",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 82
+  },
+  {
+    "sample_id": "X51005447844",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 140
+  },
+  {
+    "sample_id": "X51005447851",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 54
+  },
+  {
+    "sample_id": "X51005447859",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 77
+  },
+  {
+    "sample_id": "X51005568855",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 10
+  },
+  {
+    "sample_id": "X51005568866",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 82
+  },
+  {
+    "sample_id": "X51005568885",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 127
+  },
+  {
+    "sample_id": "X51005568887",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 52
+  },
+  {
+    "sample_id": "X51005568889",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 94
+  },
+  {
+    "sample_id": "X51005568890",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 45
+  },
+  {
+    "sample_id": "X51005568892",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 134
+  },
+  {
+    "sample_id": "X51005568894",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 146
+  },
+  {
+    "sample_id": "X51005568895",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 196
+  },
+  {
+    "sample_id": "X51005577191",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 400
+  },
+  {
+    "sample_id": "X51005582745",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 115
+  },
+  {
+    "sample_id": "X51005587261",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 317
+  },
+  {
+    "sample_id": "X51005605287",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 112
+  },
+  {
+    "sample_id": "X51005605295",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 122
+  },
+  {
+    "sample_id": "X51005605332",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 127
+  },
+  {
+    "sample_id": "X51005621482",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 86
+  },
+  {
+    "sample_id": "X51005663274",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 83
+  },
+  {
+    "sample_id": "X51005663300",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 111
+  },
+  {
+    "sample_id": "X51005663307",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 107
+  },
+  {
+    "sample_id": "X51005663309",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 0,
+    "text_length": 2
+  },
+  {
+    "sample_id": "X51005663310",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 66
+  },
+  {
+    "sample_id": "X51005663323",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 142
+  },
+  {
+    "sample_id": "X51005675099",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 93
+  },
+  {
+    "sample_id": "X51005675103",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 162
+  },
+  {
+    "sample_id": "X51005675104",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 114
+  },
+  {
+    "sample_id": "X51005675914",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 140
+  },
+  {
+    "sample_id": "X51005676534",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 162
+  },
+  {
+    "sample_id": "X51005676535",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 131
+  },
+  {
+    "sample_id": "X51005676537",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 175
+  },
+  {
+    "sample_id": "X51005676542",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 130
+  },
+  {
+    "sample_id": "X51005676548",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 138
+  },
+  {
+    "sample_id": "X51005677327",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 141
+  },
+  {
+    "sample_id": "X51005677333",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 155
+  },
+  {
+    "sample_id": "X51005677336",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 112
+  },
+  {
+    "sample_id": "X51005677337",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 131
+  },
+  {
+    "sample_id": "X510056849111",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 78
+  },
+  {
+    "sample_id": "X51005684949",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 78
+  },
+  {
+    "sample_id": "X51005705727",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 148
+  },
+  {
+    "sample_id": "X51005705729",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 343
+  },
+  {
+    "sample_id": "X51005705759",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 207
+  },
+  {
+    "sample_id": "X51005705784",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 269
+  },
+  {
+    "sample_id": "X51005710963",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 89
+  },
+  {
+    "sample_id": "X51005711402",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 109
+  },
+  {
+    "sample_id": "X51005711443",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 85
+  },
+  {
+    "sample_id": "X51005711444",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 64
+  },
+  {
+    "sample_id": "X51005711446",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 101
+  },
+  {
+    "sample_id": "X51005711449",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 143
+  },
+  {
+    "sample_id": "X51005715006",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 161
+  },
+  {
+    "sample_id": "X51005715007",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 78
+  },
+  {
+    "sample_id": "X51005715455",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 32
+  },
+  {
+    "sample_id": "X51005719823",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 248
+  },
+  {
+    "sample_id": "X51005719855",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 176
+  },
+  {
+    "sample_id": "X51005719857",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 179
+  },
+  {
+    "sample_id": "X51005719863",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 0,
+    "text_length": 0
+  },
+  {
+    "sample_id": "X51005719888",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 135
+  },
+  {
+    "sample_id": "X51005719889",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 152
+  },
+  {
+    "sample_id": "X51005719895",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 55
+  },
+  {
+    "sample_id": "X51005719898",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 80
+  },
+  {
+    "sample_id": "X51005719903",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 63
+  },
+  {
+    "sample_id": "X51005719905",
+    "split": "test",
+    "dataset": "SROIE",
+    "heuristic_caught": 1,
+    "text_length": 217
+  }
+]

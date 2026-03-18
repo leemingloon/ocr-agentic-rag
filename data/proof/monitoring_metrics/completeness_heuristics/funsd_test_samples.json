@@ -1,0 +1,352 @@
+[
+  {
+    "sample_id": "0",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 60
+  },
+  {
+    "sample_id": "1",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 30
+  },
+  {
+    "sample_id": "10",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 343
+  },
+  {
+    "sample_id": "11",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 53
+  },
+  {
+    "sample_id": "12",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 50
+  },
+  {
+    "sample_id": "13",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 65
+  },
+  {
+    "sample_id": "14",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 106
+  },
+  {
+    "sample_id": "15",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 263
+  },
+  {
+    "sample_id": "16",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 39
+  },
+  {
+    "sample_id": "17",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 42
+  },
+  {
+    "sample_id": "18",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 433
+  },
+  {
+    "sample_id": "19",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 61
+  },
+  {
+    "sample_id": "2",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 312
+  },
+  {
+    "sample_id": "20",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 147
+  },
+  {
+    "sample_id": "21",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 206
+  },
+  {
+    "sample_id": "22",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 140
+  },
+  {
+    "sample_id": "23",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 90
+  },
+  {
+    "sample_id": "24",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 99
+  },
+  {
+    "sample_id": "25",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 418
+  },
+  {
+    "sample_id": "26",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 97
+  },
+  {
+    "sample_id": "27",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 20
+  },
+  {
+    "sample_id": "28",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 82
+  },
+  {
+    "sample_id": "29",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 45
+  },
+  {
+    "sample_id": "3",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 47
+  },
+  {
+    "sample_id": "30",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 137
+  },
+  {
+    "sample_id": "31",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 166
+  },
+  {
+    "sample_id": "32",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 18
+  },
+  {
+    "sample_id": "33",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 99
+  },
+  {
+    "sample_id": "34",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 98
+  },
+  {
+    "sample_id": "35",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 504
+  },
+  {
+    "sample_id": "36",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 27
+  },
+  {
+    "sample_id": "37",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 348
+  },
+  {
+    "sample_id": "38",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 108
+  },
+  {
+    "sample_id": "39",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 18
+  },
+  {
+    "sample_id": "4",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 74
+  },
+  {
+    "sample_id": "40",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 122
+  },
+  {
+    "sample_id": "41",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 143
+  },
+  {
+    "sample_id": "42",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 43
+  },
+  {
+    "sample_id": "43",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 138
+  },
+  {
+    "sample_id": "44",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 102
+  },
+  {
+    "sample_id": "45",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 133
+  },
+  {
+    "sample_id": "46",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 114
+  },
+  {
+    "sample_id": "47",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 85
+  },
+  {
+    "sample_id": "48",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 162
+  },
+  {
+    "sample_id": "49",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 70
+  },
+  {
+    "sample_id": "5",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 121
+  },
+  {
+    "sample_id": "6",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 68
+  },
+  {
+    "sample_id": "7",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 74
+  },
+  {
+    "sample_id": "8",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 95
+  },
+  {
+    "sample_id": "9",
+    "split": "test",
+    "dataset": "FUNSD",
+    "heuristic_caught": 1,
+    "text_length": 293
+  }
+]

@@ -1,0 +1,7 @@
+{
+  "entity_match_mean": 0.0,
+  "entity_matched_mean": 0.0,
+  "entity_total_mean": 0.0,
+  "sample_count": 100,
+  "gt_override_count": 0
+}

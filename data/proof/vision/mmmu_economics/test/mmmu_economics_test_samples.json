@@ -1,0 +1,37 @@
+[
+  {
+    "sample_id": "test_Economics_1",
+    "split": "test",
+    "ground_truth": "D",
+    "input_text": {
+      "question": "<image 1> For a small economy in a fixed exchange rate system that begins in period 0 at the long-run equilibrium point A, the government cuts net taxes. The aggregate demand curve moves from its initial position AD to AD', so that the economy is in short-run equilibrium in period 1 at point B. Assume that the backward-looking component of core inflation dominates the forward-looking component. Which of the following observations will not be true of the ultimate long-run that this economy will attain after the policy change of period 1?"
+    },
+    "prediction": "# Structured Analysis\n\n## Chart Identification\n\n1. **Chart Type:** Economic diagram (AS-AD framework with inflation dynamics)\n2. **Title:** None explicitly stated\n3. **Axes Labels:**\n   - **Y-axis:** Inflation (π)\n   - **X-axis:** Output gap (Y - Ȳ)\n4. **Key Reference Points:** π* (target inflation), Points A, B, C, D, E, and curves AD, AD', AS, AS', LAS, LAD\n\n---\n\n## Data Points & Curve Positions\n\n| Element | Position | Description |\n|---------|----------|-------------|\n| Point A | (negative gap, π*) | Initial long-run equilibrium |\n| Point B | (positive gap, π*) | Short-run equilibrium after AD→AD' |\n| Point C | (near zero, above π*) | Intermediate adjustment |\n| Point D | (negative gap, π*) | On LAD |\n| Point E | (zero gap, above π*) | LAS intersection |\n| LAS | Vertical at Y=Ȳ | Long-run aggregate supply |\n| LAD | Downward sloping | Long-run aggregate demand |\n\n---\n\n## Mechanism Analysis\n\n### Fixed Exchange Rate Context\n```\nFixed Exchange Rate → No monetary policy autonomy\n→ Interest rate parity constrains central bank\n→ AD shifts driven purely by fiscal policy\n```\n\n### Sequence of Events\n\n**Period 0:** Economy at Point A\n- Output gap: **negative** (below potential)\n- Inflation: **at π***\n- Long-run equilibrium on both LAS and LAD\n\n**Period 1:** Tax cut → AD shifts to AD'\n- Economy moves to **Point B**\n- Output gap: **positive**\n- Inflation: **still at π*** (short-run)\n\n**Subsequent Periods (Backward-Looking Inflation):**\n```\nPositive output gap at B\n→ Inflation RISES (AS shifts left/upward to AS')\n→ Economy moves toward Point C, then E\n→ AS continues shifting until output gap = 0\n```\n\n---\n\n## Long-Run Equilibrium Analysis\n\n### What the Ultimate Long-Run WILL Look Like:\n\n| Feature | Status | Reasoning |\n|---------|--------|-----------|\n| Output gap = 0 | ✅ TRUE | Must return to LAS (Y = Ȳ) |\n| Economy on LAD | ✅ TRUE | Long-run requires LAD intersection |\n| Inflation > π* | ✅ TRUE | Backward-looking expectations ratchet inflation UP |\n| Point E is equilibrium | ✅ TRUE | Intersection of LAS and AD' at higher inflation |\n| AS curve shifted left | ✅ TRUE | Persistent positive gap drives AS leftward |\n\n---\n\n## Key Insight: What Will NOT Be True\n\n> **The economy will NOT return to Point A or maintain π* inflation in the long run.**\n\nSpecifically, the observation that will **NOT be true** is:\n\n### ❌ \"Inflation will return to π*\"\n\n**Why:**\n- In a **fixed exchange rate** system, the central bank **cannot conduct independent monetary policy**\n- The backward-looking component **dominates** → inflation expectations are **adaptive**, not anchored\n- The positive output gap at B continuously **pushes inflation upward**\n- The new long-run equilibrium is at **Point E** (LAS ∩ AD'), where:\n  - Output gap = 0 ✅\n  - Inflation > π* ❌ (higher than target)\n\n```\nFixed Exchange Rate + Backward-Looking Expectations\n= Permanent inflation increase\n= No self-correcting nominal anchor\n```\n\n---\n\n## Summary\n\n| True in New Long-Run | Not True in New Long-Run |\n|---------------------|--------------------------|\n| Y = Ȳ (output gap = 0) | π = π* (inflation at target) |\n| Economy on LAS | Return to Point A |\n| Higher inflation than period 0 | AD curve returning to original AD |\n| Economy at Point E | Inflation being controlled by policy |\n\nThe **critical answer** is that **inflation returning to π*** will **NOT** be true, because the fixed exchange rate eliminates monetary policy tools needed to re-anchor inflation, and backward-looking expectations permanently embed the higher inflation rate into the new long-run equilibrium at **Point E**.",
+    "prediction_error": null,
+    "metrics": {
+      "accuracy": 1.0
+    }
+  },
+  {
+    "sample_id": "test_Economics_2",
+    "split": "test",
+    "ground_truth": "B",
+    "input_text": {
+      "question": "It is a hot day, and Bert is thirsty. Here is the value he places on a bottle of water:<image 1> If the price of a bottle of water is $2, how many bottles does Bert buy?"
+    },
+    "prediction": "## Analysis\n\n**1. Chart Type:** Table\n\n**2. Title:** None explicitly stated; shows Bert's value for bottles of water\n\n**3. Axes Labels:** N/A (table format)\n\n**4. Data Points:**\n- Value of first bottle: $7\n- Value of second bottle: $5\n- Value of third bottle: $3\n- Value of fourth bottle: $1\n\n**5. Trends:**\n- Diminishing marginal utility pattern — each additional bottle provides less value than the previous one\n- Values decrease by $2 with each additional bottle ($7, $5, $3, $1)\n\n**6. Key Insights:**\n- Bert will purchase a bottle as long as the **value ≥ price**\n- At a price of **$2**, we compare each bottle's value to the price:\n  - 1st bottle: $7 ≥ $2 ✅ → Buy\n  - 2nd bottle: $5 ≥ $2 ✅ → Buy\n  - 3rd bottle: $3 ≥ $2 ✅ → Buy\n  - 4th bottle: $1 < $2 ❌ → Do NOT buy\n\nBert buys **3 bottles** because the value of the third bottle ($3) still exceeds the price ($2), but the fourth bottle ($1) does not.\n\n**B**",
+    "prediction_error": null,
+    "metrics": {
+      "accuracy": 1.0
+    },
+    "metadata": {
+      "sample_id": "test_Economics_2",
+      "options_list": [
+        "2",
+        "3",
+        "4",
+        "5"
+      ]
+    }
+  }
+]

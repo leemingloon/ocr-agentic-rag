@@ -1,0 +1,106 @@
+[
+  {
+    "sample_id": "train_0",
+    "split": "train",
+    "ground_truth": [
+      "Yes"
+    ],
+    "input_text": {
+      "question": "Is the value of Favorable 38 in 2015?"
+    },
+    "prediction": "# Chart Analysis\n\n## 1. Chart Type\n**Line Chart** (dual-line time series)\n\n## 2. Title\n**\"Americans Give China Mostly Negative Ratings\"**\n*Subtitle: U.S. views of China*\n\n## 3. Axes Labels\n- **X-axis:** Years (2005–2015)\n- **Y-axis:** Percentage (0–80%)\n\n## 4. Data Points\n\n| Year | Unfavorable | Favorable |\n|------|-------------|-----------|\n| 2005 | 43% | 35% |\n| 2006 | 52% | 29% |\n| 2007 | 42% | 39% |\n| 2008 | 42% | 39% |\n| 2009 | 50% | 38% |\n| 2010 | 49% | 36% |\n| 2011 | 51% | 36% |\n| 2012 | 40% | 40% |\n| 2013 | 52% | 37% |\n| 2014 | 55% | 35% |\n| **2015** | **54%** | **38%** |\n\n## 5. Trends\n- **Unfavorable** ratings consistently dominate throughout the period\n- Both lines show fluctuation but unfavorable views trend **upward** overall\n- Favorable views remain relatively **stable and low**\n\n## 6. Key Insights\n- Negative views of China consistently exceed positive ones\n\n---\n\n## ✅ Answer to Your Question\n**Yes**, the Favorable value in **2015 is 38%**, as clearly labeled on the chart's green line at the rightmost data point.",
+    "prediction_error": null,
+    "metrics": {
+      "strict_accuracy": 1.0,
+      "relaxed_accuracy": 1.0
+    }
+  },
+  {
+    "sample_id": "train_1",
+    "split": "train",
+    "ground_truth": [
+      "6"
+    ],
+    "input_text": {
+      "question": "How many values are below 40 in Unfavorable graph?"
+    },
+    "prediction": "## Structured Analysis\n\n### 1. Chart Type\n**Line Chart** (dual-line comparison)\n\n### 2. Title\n**\"Americans Give China Mostly Negative Ratings\"**\n*(Subtitle: U.S. views of China)*\n\n### 3. Axes Labels\n- **X-axis:** Years (2005–2015)\n- **Y-axis:** Percentage (0–80%)\n\n### 4. Data Points\n\n| Year | Unfavorable | Favorable |\n|------|------------|-----------|\n| 2005 | 43 | 35 |\n| 2006 | 52 | 29 |\n| 2007 | 42 | 39 |\n| 2008 | 42 | 39 |\n| 2009 | 50 | 38 |\n| 2010 | 49 | 36 |\n| 2011 | 51 | 36 |\n| 2012 | 40 | 40 |\n| 2013 | 52 | 37 |\n| 2014 | 55 | 35 |\n| 2015 | 54 | 38 |\n\n---\n\n### 5. Answer to the Question\n## Values Below 40 in the **Unfavorable** Graph:\n\nLooking at all Unfavorable data points:\n- **None** of the Unfavorable values fall below 40\n\nThe **lowest** Unfavorable value is **40** (2012), which is exactly 40, not below it.\n\n> **Answer: ZERO (0) values are strictly below 40 in the Unfavorable graph.**\n\n---\n\n### 6. Key Insights\n- Unfavorable ratings **consistently dominate** over Favorable ratings throughout 2005–2015\n- The **gap widened** significantly by 2014–2015, reaching a peak difference of **20 percentage points**\n- Unfavorable sentiment **never dropped below 40%**, indicating persistently negative views",
+    "prediction_error": null,
+    "metrics": {
+      "strict_accuracy": 1.0,
+      "relaxed_accuracy": 1.0
+    },
+    "metadata": {
+      "sample_id": "train_1",
+      "options_list": null
+    },
+    "scorer_label": "PASS",
+    "scorer_note": ""
+  },
+  {
+    "sample_id": "train_2",
+    "split": "train",
+    "ground_truth": [
+      "2014"
+    ],
+    "input_text": {
+      "question": "In which year the value was 51?"
+    },
+    "prediction": "## Structured Analysis\n\n### 1. Chart Type\n**Line Chart** (dual-line trend chart)\n\n### 2. Title\n**\"Downward Trend in Peña Nieto Favorability\"**\n*Subtitle: Views of Enrique Peña Nieto*\n\n### 3. Axes Labels\n- **Y-axis:** Percentage (0–100%)\n- **X-axis:** Years (2011, 2012, 2013, 2014, 2015)\n\n### 4. Data Points\n| Year | Favorable | Unfavorable |\n|------|-----------|-------------|\n| 2011 | 31% | 61% |\n| 2012 | 38% | 56% |\n| 2014 | 48% | **51%** |\n| 2015 | 44% | 53% |\n\n### 5. Trends\n- **Unfavorable ratings** declined from 61% (2011) to 56% (2012), dropped further to 51% (2014), then slightly rose to 53% (2015)\n- **Favorable ratings** increased from 31% (2011) to 48% (2014), then declined to 44% (2015)\n\n### 6. Key Insights\n- The value of **51** was recorded in the year **2014**, representing the **Unfavorable** rating\n- 2014 was the closest point where favorable and unfavorable ratings nearly converged (48% vs 51%)",
+    "prediction_error": null,
+    "metrics": {
+      "strict_accuracy": 1.0,
+      "relaxed_accuracy": 1.0
+    },
+    "metadata": {
+      "sample_id": "train_2",
+      "options_list": null
+    },
+    "scorer_label": "PASS",
+    "scorer_note": ""
+  },
+  {
+    "sample_id": "train_3",
+    "split": "train",
+    "ground_truth": [
+      "95"
+    ],
+    "input_text": {
+      "question": "What is the sum favourable  value in the year 2014 and 2015?"
+    },
+    "prediction": "## Structured Analysis\n\n### 1. Chart Type\n**Line Chart** (dual-line trend chart)\n\n### 2. Title\n**\"Downward Trend in Peña Nieto Favorability\"**\n*Subtitle: Views of Enrique Peña Nieto*\n\n### 3. Axes Labels\n- **Y-Axis:** Percentage (0% – 100%)\n- **X-Axis:** Years (2011, 2012, 2013, 2014, 2015)\n\n### 4. Data Points\n| Year | Favorable | Unfavorable |\n|------|-----------|-------------|\n| 2011 | 31% | 61% |\n| 2012 | 38% | 56% |\n| 2014 | 48% | 51% |\n| 2015 | 44% | 53% |\n\n### 5. Trends\n- **Favorable** ratings initially **increased** (2011–2014) but then **declined** in 2015\n- **Unfavorable** ratings **decreased** from 2011–2014 but **rose again** in 2015\n- The two lines show an **inverse relationship**\n\n### 6. Key Insights\n- Public opinion was **most polarized in 2011**\n- **2014 was his peak** favorable period\n- By 2015, the trend **reversed negatively**\n\n---\n\n## Answer to Specific Question\n\n**Sum of Favorable values in 2014 and 2015:**\n\n> **48 + 44 = 92%**",
+    "prediction_error": null,
+    "metrics": {
+      "strict_accuracy": 1.0,
+      "relaxed_accuracy": 1.0
+    },
+    "metadata": {
+      "sample_id": "train_3",
+      "options_list": null
+    },
+    "scorer_label": "PASS",
+    "scorer_note": ""
+  },
+  {
+    "sample_id": "train_4",
+    "split": "train",
+    "ground_truth": [
+      "2012"
+    ],
+    "input_text": {
+      "question": "In which year the Mexican governments campaign against drugs traffickers is making 47 percent progress?"
+    },
+    "prediction": "## Structured Analysis\n\n### 1. Chart Type\n**Line Chart** (Multi-line trend chart with three lines)\n\n---\n\n### 2. Title\n**\"Mexicans Believe Government Progress Against Drug Trafficking Is Declining\"**\n\n---\n\n### 3. Axes Labels\n- **X-Axis:** Years (2011–2015)\n- **Y-Axis:** Percentage (0–60%)\n\n---\n\n### 4. Data Points\n\n| Year | Making Progress | Losing Ground | Same |\n|------|----------------|---------------|------|\n| 2011 | 45% | 29% | 25% |\n| **2012** | **47%** | 30% | 19% |\n| 2013 | 37% | 30% | 29% |\n| 2014 | 45% | 32% | 21% |\n| 2015 | 39% | 33% | 25% |\n\n---\n\n### 5. Trends\n- \"Making Progress\" peaked in **2012** then declined overall\n- \"Losing Ground\" showed a gradual **upward trend**\n- \"Same\" remained relatively stable\n\n---\n\n### 6. Key Insights\n- **47% progress was recorded in 2012** — the highest point across all years\n- Over time, optimism declined while pessimism increased\n\n---\n\n## ✅ Direct Answer to the Question\n\n**The year 2012** is when the Mexican government's campaign against drug traffickers was perceived as **\"Making Progress\" at 47%** — the **highest recorded value** in the entire chart.",
+    "prediction_error": null,
+    "metrics": {
+      "strict_accuracy": 1.0,
+      "relaxed_accuracy": 1.0
+    },
+    "metadata": {
+      "sample_id": "train_4",
+      "options_list": null
+    },
+    "scorer_label": "PASS",
+    "scorer_note": ""
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "sample_id": "dev_Economics_4",
+  "question": "The graph below shows the supply and demand curves and the world price for bagels. <image 1> What is the equilibrium quantity if this country does not trade?",
+  "ground_truth": "B",
+  "options_list": [
+    "2",
+    "4",
+    "6",
+    "8"
+  ],
+  "options_present": true,
+  "split": "dev",
+  "dataset": "MMMU_Economics"
+}

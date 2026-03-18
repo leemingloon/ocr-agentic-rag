@@ -1,0 +1,24 @@
+{
+  "dataset": "DocVQA",
+  "sample_count": 9,
+  "splits": [
+    "validation"
+  ],
+  "splits_breakdown": [
+    {
+      "split": "validation",
+      "sample_count": 9,
+      "metrics": {
+        "anls_mean": 0.8888888888888888,
+        "exact_match_mean": 0.8888888888888888
+      },
+      "gt_override_count": 0
+    }
+  ],
+  "gt_override_count": 0,
+  "timestamp": "2026-03-15T22:51:10.011963+08:00",
+  "weighted_metrics": {
+    "anls_mean": 0.8888888888888888,
+    "exact_match_mean": 0.8888888888888888
+  }
+}

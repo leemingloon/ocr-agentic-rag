@@ -1,0 +1,15 @@
+{
+  "sample_id": "validation_Economics_4",
+  "question": "<image 1> The provided image depicts a/an",
+  "ground_truth": "B",
+  "options_list": [
+    "demand curve",
+    "Phillips curve",
+    "production possibilities frontier",
+    "aggregate supply curve",
+    "Lorenz curve"
+  ],
+  "options_present": true,
+  "split": "validation",
+  "dataset": "MMMU_Economics"
+}

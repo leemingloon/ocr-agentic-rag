@@ -1,0 +1,34 @@
+{
+  "dataset": "TATQA",
+  "sample_count": 400,
+  "weighted_metrics": {
+    "relaxed_exact_match": "0.9400 (376/400)",
+    "exact_match": "0.7900 (316/400)",
+    "f1": 0.6491
+  },
+  "timestamp": "2026-03-15T08:37:21.223741+08:00",
+  "splits": [
+    "dev",
+    "test"
+  ],
+  "splits_breakdown": [
+    {
+      "split": "dev",
+      "sample_count": 200,
+      "metrics": {
+        "relaxed_exact_match": "0.8950 (179/200)",
+        "exact_match": "0.7700 (154/200)",
+        "f1": 0.6244
+      }
+    },
+    {
+      "split": "test",
+      "sample_count": 200,
+      "metrics": {
+        "relaxed_exact_match": "0.9850 (197/200)",
+        "exact_match": "0.8100 (162/200)",
+        "f1": 0.6737
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "sample_id": "dev_Economics_3",
+  "question": "The table below describes production possibilities for Mexico and Nigeria. Each number in the table shows the number of workers needed to produce one unit of the product. <image 1> Suppose that both countries have 90 workers. Which country should be specializing in the production of Shoes?",
+  "ground_truth": "C",
+  "options_list": [
+    "Nigeria",
+    "Neither country",
+    "Mexico"
+  ],
+  "options_present": true,
+  "split": "dev",
+  "dataset": "MMMU_Economics"
+}

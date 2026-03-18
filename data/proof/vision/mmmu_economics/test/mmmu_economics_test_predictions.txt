@@ -1,0 +1,158 @@
+gt_override_count: 0
+
+========================================================================
+sample_id: test_Economics_1
+split: test
+ground_truth: D
+question: <image 1> For a small economy in a fixed exchange rate system that begins in period 0 at the long-run equilibrium point A, the government cuts net taxes. The aggregate demand curve moves from its initial position AD to AD', so that the economy is in short-run equilibrium in period 1 at point B. Assume that the backward-looking component of core inflation dominates the forward-looking component. Which of the following observations will not be true of the ultimate long-run that this economy will attain after the policy change of period 1?
+------------------------------------------------------------------------
+prediction:
+# Structured Analysis
+
+## Chart Identification
+
+1. **Chart Type:** Economic diagram (AS-AD framework with inflation dynamics)
+2. **Title:** None explicitly stated
+3. **Axes Labels:**
+   - **Y-axis:** Inflation (π)
+   - **X-axis:** Output gap (Y - Ȳ)
+4. **Key Reference Points:** π* (target inflation), Points A, B, C, D, E, and curves AD, AD', AS, AS', LAS, LAD
+
+---
+
+## Data Points & Curve Positions
+
+| Element | Position | Description |
+|---------|----------|-------------|
+| Point A | (negative gap, π*) | Initial long-run equilibrium |
+| Point B | (positive gap, π*) | Short-run equilibrium after AD→AD' |
+| Point C | (near zero, above π*) | Intermediate adjustment |
+| Point D | (negative gap, π*) | On LAD |
+| Point E | (zero gap, above π*) | LAS intersection |
+| LAS | Vertical at Y=Ȳ | Long-run aggregate supply |
+| LAD | Downward sloping | Long-run aggregate demand |
+
+---
+
+## Mechanism Analysis
+
+### Fixed Exchange Rate Context
+```
+Fixed Exchange Rate → No monetary policy autonomy
+→ Interest rate parity constrains central bank
+→ AD shifts driven purely by fiscal policy
+```
+
+### Sequence of Events
+
+**Period 0:** Economy at Point A
+- Output gap: **negative** (below potential)
+- Inflation: **at π***
+- Long-run equilibrium on both LAS and LAD
+
+**Period 1:** Tax cut → AD shifts to AD'
+- Economy moves to **Point B**
+- Output gap: **positive**
+- Inflation: **still at π*** (short-run)
+
+**Subsequent Periods (Backward-Looking Inflation):**
+```
+Positive output gap at B
+→ Inflation RISES (AS shifts left/upward to AS')
+→ Economy moves toward Point C, then E
+→ AS continues shifting until output gap = 0
+```
+
+---
+
+## Long-Run Equilibrium Analysis
+
+### What the Ultimate Long-Run WILL Look Like:
+
+| Feature | Status | Reasoning |
+|---------|--------|-----------|
+| Output gap = 0 | ✅ TRUE | Must return to LAS (Y = Ȳ) |
+| Economy on LAD | ✅ TRUE | Long-run requires LAD intersection |
+| Inflation > π* | ✅ TRUE | Backward-looking expectations ratchet inflation UP |
+| Point E is equilibrium | ✅ TRUE | Intersection of LAS and AD' at higher inflation |
+| AS curve shifted left | ✅ TRUE | Persistent positive gap drives AS leftward |
+
+---
+
+## Key Insight: What Will NOT Be True
+
+> **The economy will NOT return to Point A or maintain π* inflation in the long run.**
+
+Specifically, the observation that will **NOT be true** is:
+
+### ❌ "Inflation will return to π*"
+
+**Why:**
+- In a **fixed exchange rate** system, the central bank **cannot conduct independent monetary policy**
+- The backward-looking component **dominates** → inflation expectations are **adaptive**, not anchored
+- The positive output gap at B continuously **pushes inflation upward**
+- The new long-run equilibrium is at **Point E** (LAS ∩ AD'), where:
+  - Output gap = 0 ✅
+  - Inflation > π* ❌ (higher than target)
+
+```
+Fixed Exchange Rate + Backward-Looking Expectations
+= Permanent inflation increase
+= No self-correcting nominal anchor
+```
+
+---
+
+## Summary
+
+| True in New Long-Run | Not True in New Long-Run |
+|---------------------|--------------------------|
+| Y = Ȳ (output gap = 0) | π = π* (inflation at target) |
+| Economy on LAS | Return to Point A |
+| Higher inflation than period 0 | AD curve returning to original AD |
+| Economy at Point E | Inflation being controlled by policy |
+
+The **critical answer** is that **inflation returning to π*** will **NOT** be true, because the fixed exchange rate eliminates monetary policy tools needed to re-anchor inflation, and backward-looking expectations permanently embed the higher inflation rate into the new long-run equilibrium at **Point E**.
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================
+
+========================================================================
+sample_id: test_Economics_2
+split: test
+ground_truth: B
+question: It is a hot day, and Bert is thirsty. Here is the value he places on a bottle of water:<image 1> If the price of a bottle of water is $2, how many bottles does Bert buy?
+------------------------------------------------------------------------
+prediction:
+## Analysis
+
+**1. Chart Type:** Table
+
+**2. Title:** None explicitly stated; shows Bert's value for bottles of water
+
+**3. Axes Labels:** N/A (table format)
+
+**4. Data Points:**
+- Value of first bottle: $7
+- Value of second bottle: $5
+- Value of third bottle: $3
+- Value of fourth bottle: $1
+
+**5. Trends:**
+- Diminishing marginal utility pattern — each additional bottle provides less value than the previous one
+- Values decrease by $2 with each additional bottle ($7, $5, $3, $1)
+
+**6. Key Insights:**
+- Bert will purchase a bottle as long as the **value ≥ price**
+- At a price of **$2**, we compare each bottle's value to the price:
+  - 1st bottle: $7 ≥ $2 ✅ → Buy
+  - 2nd bottle: $5 ≥ $2 ✅ → Buy
+  - 3rd bottle: $3 ≥ $2 ✅ → Buy
+  - 4th bottle: $1 < $2 ❌ → Do NOT buy
+
+Bert buys **3 bottles** because the value of the third bottle ($3) still exceeds the price ($2), but the fourth bottle ($1) does not.
+
+**B**
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================

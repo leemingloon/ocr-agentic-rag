@@ -1,0 +1,15 @@
+{
+  "sample_id": "dev_Finance_4",
+  "question": "For case E in the following table: <image 1>. Calculate the present value of the annuity, assuming that it is an ordinary annuity",
+  "ground_truth": "C",
+  "options_list": [
+    "$2,822",
+    "$374,598",
+    "$85,293",
+    "$31,492",
+    "$810,092"
+  ],
+  "options_present": true,
+  "split": "dev",
+  "dataset": "MMMU_Finance"
+}

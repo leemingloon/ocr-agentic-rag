@@ -1,0 +1,46 @@
+{
+  "baseline": {
+    "full": {
+      "f1": 0.8854141016170073,
+      "n": 112
+    },
+    "negation": {
+      "f1": 1.0,
+      "n": 9
+    },
+    "conditional": {
+      "f1": 1.0,
+      "n": 6
+    },
+    "numeric_comparison": {
+      "f1": 0.0,
+      "n": 0
+    },
+    "hedged": {
+      "f1": 0.0,
+      "n": 0
+    }
+  },
+  "with_fixes": {
+    "full": {
+      "f1": 0.8854141016170073,
+      "n": 112
+    },
+    "negation": {
+      "f1": 1.0,
+      "n": 9
+    },
+    "conditional": {
+      "f1": 1.0,
+      "n": 6
+    },
+    "numeric_comparison": {
+      "f1": 0.0,
+      "n": 0
+    },
+    "hedged": {
+      "f1": 0.0,
+      "n": 0
+    }
+  }
+}

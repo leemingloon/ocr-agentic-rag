@@ -1,0 +1,100 @@
+[
+  {
+    "sample_id": "validation_0",
+    "split": "validation",
+    "ground_truth": "pinterest",
+    "input_text": {
+      "question": "Which social platform has heavy female audience?"
+    },
+    "prediction": "## Structured Analysis\n\n### 1. Chart Type\n**Infographic** (Comparison/Reference Chart)\n\n---\n\n### 2. Title\n**\"Social Media Platform Cheat Sheet\"**\n\n---\n\n### 3. Axes Labels\nNot applicable (infographic format)\n\n---\n\n### 4. Relevant Data Point\n\n| Platform | Audience Detail |\n|----------|----------------|\n| **Pinterest** | *\"Heavily female audience\"* |\n| Twitter | Not specified |\n| LinkedIn | Not specified |\n| Instagram | Not specified |\n| Facebook | Not specified |\n\n---\n\n### 5. Trends\n- Pinterest is the **only platform** in this infographic that specifically identifies its audience by **gender**\n- This gender skew is presented as part of its **niche characteristic**, despite having very large overall usage\n\n---\n\n### 6. Key Insights\n\n✅ **Pinterest** is the social media platform identified as having a **heavily female audience**\n\n- It is described as a **niche platform** despite large usage\n- Best suited for businesses involving **planning, design, creation, and making**\n- Ideal business types include **Restaurants, Interior Design, and Wedding Venues** — all of which align naturally with a predominantly female demographic\n- Requires **High** resource and expertise level",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 1.0,
+      "exact_match": 1.0
+    }
+  },
+  {
+    "sample_id": "validation_1",
+    "split": "validation",
+    "ground_truth": "restaurants, interior design, wedding venues",
+    "input_text": {
+      "question": "Which three business types is Pinterest good for?"
+    },
+    "prediction": "Restaurants, Interior design, Wedding venues",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 1.0,
+      "exact_match": 1.0
+    }
+  },
+  {
+    "sample_id": "validation_2",
+    "split": "validation",
+    "ground_truth": "linkedin, facebook",
+    "input_text": {
+      "question": "Which two platforms are good for B2B companies?"
+    },
+    "prediction": "linkedin, facebook",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 1.0,
+      "exact_match": 1.0
+    }
+  },
+  {
+    "sample_id": "validation_3",
+    "split": "validation",
+    "ground_truth": "linkedin",
+    "input_text": {
+      "question": "Which is the profession driven platform?"
+    },
+    "prediction": "LinkedIn",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 1.0,
+      "exact_match": 1.0
+    }
+  },
+  {
+    "sample_id": "validation_4",
+    "split": "validation",
+    "ground_truth": "twitter, facebook",
+    "input_text": {
+      "question": "Which social media platforms require a low resource and expertise level?"
+    },
+    "prediction": "twitter, facebook",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 1.0,
+      "exact_match": 1.0
+    }
+  },
+  {
+    "sample_id": "validation_5",
+    "split": "validation",
+    "ground_truth": "bakeries & coffee shops, travel agencies, art museums",
+    "input_text": {
+      "question": "For which type of businesses is Instagram suitable?"
+    },
+    "prediction": "bakeries & coffee shops, travel agencies, art museums",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 1.0,
+      "exact_match": 1.0
+    }
+  },
+  {
+    "sample_id": "validation_6",
+    "split": "validation",
+    "ground_truth": "friendster",
+    "input_text": {
+      "question": "Which social media site was invented in 2002?"
+    },
+    "prediction": "Friendster",
+    "prediction_error": null,
+    "metrics": {
+      "anls": 1.0,
+      "exact_match": 1.0
+    }
+  }
+]

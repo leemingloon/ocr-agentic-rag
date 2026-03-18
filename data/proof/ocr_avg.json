@@ -1,0 +1,131 @@
+{
+  "category": "ocr",
+  "sample_count": 350,
+  "sample_count_by_dataset": {
+    "FUNSD": 150,
+    "SROIE": 200
+  },
+  "datasets": [
+    "FUNSD",
+    "SROIE"
+  ],
+  "datasets_breakdown": [
+    {
+      "dataset": "FUNSD",
+      "sample_count": 150,
+      "splits_breakdown": [
+        {
+          "split": "test",
+          "sample_count": 50,
+          "metrics": {
+            "word_recall_mean": 0.0,
+            "words_gt_mean": 0.0,
+            "words_matched_mean": 0.0
+          },
+          "gt_override_count": 0
+        },
+        {
+          "split": "train",
+          "sample_count": 100,
+          "metrics": {
+            "word_recall_mean": 0.0,
+            "words_gt_mean": 0.0,
+            "words_matched_mean": 0.0
+          },
+          "gt_override_count": 0
+        }
+      ],
+      "weighted_metrics": {
+        "word_recall_mean": 0.0,
+        "words_gt_mean": 0.0,
+        "words_matched_mean": 0.0
+      }
+    },
+    {
+      "dataset": "SROIE",
+      "sample_count": 200,
+      "splits_breakdown": [
+        {
+          "split": "test",
+          "sample_count": 100,
+          "metrics": {
+            "entity_match_mean": 0.0,
+            "entity_matched_mean": 0.0,
+            "entity_total_mean": 0.0
+          },
+          "gt_override_count": 0
+        },
+        {
+          "split": "train",
+          "sample_count": 100,
+          "metrics": {
+            "entity_match_mean": 0.0,
+            "entity_matched_mean": 0.0,
+            "entity_total_mean": 0.0
+          },
+          "gt_override_count": 0
+        }
+      ],
+      "weighted_metrics": {
+        "entity_match_mean": 0.0,
+        "entity_matched_mean": 0.0,
+        "entity_total_mean": 0.0
+      }
+    }
+  ],
+  "weighted_metrics": {
+    "entity_match_mean": 0.0,
+    "entity_matched_mean": 0.0,
+    "entity_total_mean": 0.0,
+    "word_recall_mean": 0.0,
+    "words_gt_mean": 0.0,
+    "words_matched_mean": 0.0
+  },
+  "metrics_breakdown": {
+    "entity_match_mean": {
+      "value": 0.0,
+      "n_samples": 200,
+      "datasets": [
+        "SROIE"
+      ]
+    },
+    "entity_matched_mean": {
+      "value": 0.0,
+      "n_samples": 200,
+      "datasets": [
+        "SROIE"
+      ]
+    },
+    "entity_total_mean": {
+      "value": 0.0,
+      "n_samples": 200,
+      "datasets": [
+        "SROIE"
+      ]
+    },
+    "word_recall_mean": {
+      "value": 0.0,
+      "n_samples": 150,
+      "datasets": [
+        "FUNSD"
+      ]
+    },
+    "words_gt_mean": {
+      "value": 0.0,
+      "n_samples": 150,
+      "datasets": [
+        "FUNSD"
+      ]
+    },
+    "words_matched_mean": {
+      "value": 0.0,
+      "n_samples": 150,
+      "datasets": [
+        "FUNSD"
+      ]
+    }
+  },
+  "model_class": "HybridOCR",
+  "backbone": "paddleocr_tesseract",
+  "timestamp": "2026-03-07T18:24:44.764272+08:00"
+}

@@ -1,0 +1,41 @@
+{
+  "dataset": "FUNSD",
+  "sample_count": 150,
+  "splits": [
+    "test",
+    "train"
+  ],
+  "splits_breakdown": [
+    {
+      "split": "test",
+      "sample_count": 50,
+      "metrics": {
+        "word_recall_mean": 0.0,
+        "words_gt_mean": 0.0,
+        "words_matched_mean": 0.0
+      },
+      "gt_override_count": 0
+    },
+    {
+      "split": "train",
+      "sample_count": 100,
+      "metrics": {
+        "word_recall_mean": 0.0,
+        "words_gt_mean": 0.0,
+        "words_matched_mean": 0.0
+      },
+      "gt_override_count": 0
+    }
+  ],
+  "gt_override_count": 0,
+  "skipped_no_ground_truth": 0,
+  "prediction_error_counts": {},
+  "model_class": "HybridOCR",
+  "backbone": "paddleocr_tesseract",
+  "timestamp": "2026-03-07T18:24:44.589788+08:00",
+  "weighted_metrics": {
+    "word_recall_mean": 0.0,
+    "words_gt_mean": 0.0,
+    "words_matched_mean": 0.0
+  }
+}

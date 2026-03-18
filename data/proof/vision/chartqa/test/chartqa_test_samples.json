@@ -1,0 +1,98 @@
+[
+  {
+    "sample_id": "test_0",
+    "split": "test",
+    "ground_truth": [
+      "14"
+    ],
+    "input_text": {
+      "question": "How many food item is shown in the bar graph?"
+    },
+    "prediction": "# Structured Analysis of the Bar Graph\n\n## 1. Chart Type\n**Horizontal Bar Chart**\n\n## 2. Title\n**\"Long-term price index in food commodities, 1850-2015, World, 1934\"**\n- Subtitle: Commodity price index in food items dating 1850-2015, measured relative to real prices in 1900 (i.e., 1900 = 100)\n\n## 3. Axes Labels\n- **X-axis:** Price Index values (0 to 100+)\n- **Y-axis:** Food commodity names\n\n## 4. Data Points (All Visible)\n| Food Item | Price Index |\n|-----------|-------------|\n| Lamb | 103.7 |\n| Corn | 103.13 |\n| Barley | 102.46 |\n| Rye | 87.37 |\n| Beef | 85.27 |\n| Wheat | 83.73 |\n| Coffee | 82.2 |\n| Tea | 68.48 |\n| Peanuts | 64.71 |\n| Palm Oil | 57.6 |\n| Pork | 55.36 |\n| Rice | 42.48 |\n| Sugar | 25.56 |\n| Cocoa | 18.81 |\n\n## 5. Trends\n- Top 3 items (Lamb, Corn, Barley) are **near or above 100** (baseline)\n- Sharp **decline** from mid-range to bottom commodities\n- Sugar and Cocoa are significantly **below average**\n\n## 6. Key Insights\n\n### ✅ Direct Answer: **14 food items** are shown in the bar graph\n\n### Additional Insights:\n- **Lamb** has the highest price index (103.7)\n- **Cocoa** has the lowest price index (18.81)\n- Only **3 items** (Lamb, Corn, Barley) meet or exceed the 1900 baseline of 100\n- Most commodities show **lower prices** relative to 1900 levels",
+    "prediction_error": null,
+    "metrics": {
+      "strict_accuracy": 1.0,
+      "relaxed_accuracy": 1.0
+    }
+  },
+  {
+    "sample_id": "test_1",
+    "split": "test",
+    "ground_truth": [
+      "0.57"
+    ],
+    "input_text": {
+      "question": "What is the difference in value between Lamb and Corn?"
+    },
+    "prediction": "# Structured Analysis of the Chart\n\n## 1. Chart Type\n**Horizontal Bar Chart**\n\n## 2. Title\n**\"Long-term price index in food commodities, 1850-2015, World, 1934\"**\n- Subtitle: Commodity price index in food items dating 1850-2015, measured relative to real prices in 1900 (i.e., 1900 = 100)\n\n## 3. Axes Labels\n- **X-axis:** Price Index Value (0 to ~100+)\n- **Y-axis:** Food Commodity Categories (14 items)\n\n## 4. Data Points (All Values)\n| Commodity | Index Value |\n|-----------|-------------|\n| Lamb | 103.7 |\n| Corn | 103.13 |\n| Barley | 102.46 |\n| Rye | 87.37 |\n| Beef | 85.27 |\n| Wheat | 83.73 |\n| Coffee | 82.2 |\n| Tea | 68.48 |\n| Peanuts | 64.71 |\n| Palm Oil | 57.6 |\n| Pork | 55.36 |\n| Rice | 42.48 |\n| Sugar | 25.56 |\n| Cocoa | 18.81 |\n\n## 5. Trends\n- **Top tier** (>100): Lamb, Corn, Barley cluster near/above baseline\n- **Sharp decline** visible between Coffee (82.2) and Tea (68.48)\n- **Steep drop** at the bottom between Rice and Sugar/Cocoa\n\n## 6. Key Insights\n- Animal products (Lamb, Beef) maintain relatively high price indices\n- Cocoa and Sugar have dramatically **lost value** relative to 1900\n- Most grains remain near or above the 1900 baseline\n\n---\n\n## 🎯 Answer to Specific Question\n\n**Difference between Lamb and Corn:**\n\n$$103.7 - 103.13 = \\boxed{0.57}$$\n\nThe difference is **0.57 index points**, making them nearly identical in value in 1934.",
+    "prediction_error": null,
+    "metrics": {
+      "strict_accuracy": 1.0,
+      "relaxed_accuracy": 1.0
+    }
+  },
+  {
+    "sample_id": "test_2",
+    "split": "test",
+    "ground_truth": [
+      "3"
+    ],
+    "input_text": {
+      "question": "How many bars are shown in the chart?"
+    },
+    "prediction": "## Structured Analysis\n\n### 1. Chart Type\n**Horizontal Bar Chart**\n\n### 2. Title\n**\"Armed forces personnel as share of total population, 1985\"**\n\n### 3. Axes Labels\n- **Y-axis (vertical):** Country names (Mauritania, Fiji, Madagascar)\n- **X-axis (horizontal):** Percentage scale (0% to 0.4%+)\n\n### 4. Data Points\n| Country | Value |\n|---------|-------|\n| Mauritania | 0.48% |\n| Fiji | 0.38% |\n| Madagascar | 0.21% |\n\n### 5. Trends\n- Clear **descending order** from top to bottom\n- Mauritania leads significantly, with nearly **double** Madagascar's share\n- The gap between Mauritania and Fiji (~0.10%) is smaller than the gap between Fiji and Madagascar (~0.17%)\n\n### 6. Key Insights\n- **Mauritania** had the highest military personnel share at **0.48%**\n- **Fiji** ranked second at **0.38%**, despite being a much smaller island nation\n- **Madagascar** had the lowest share at **0.21%**\n- All three values are relatively **small fractions** of total population\n\n---\n\n### Answer to Question:\n**3 bars** are shown in the chart — one each for Mauritania, Fiji, and Madagascar.",
+    "prediction_error": null,
+    "metrics": {
+      "strict_accuracy": 1.0,
+      "relaxed_accuracy": 1.0
+    }
+  },
+  {
+    "sample_id": "test_3",
+    "split": "test",
+    "ground_truth": [
+      "No"
+    ],
+    "input_text": {
+      "question": "Is the sum value of Madagascar more then Fiji?"
+    },
+    "prediction": "# Structured Analysis\n\n## 1. Chart Type\n**Horizontal Bar Chart**\n\n## 2. Title\n**\"Armed forces personnel as share of total population, 1985\"**\n\n## 3. Axes Labels\n- **Y-axis (vertical):** Country names (Mauritania, Fiji, Madagascar)\n- **X-axis (horizontal):** Percentage share (0% to 0.4%+)\n\n## 4. Data Points\n| Country | Value |\n|---------|-------|\n| Mauritania | 0.48% |\n| Fiji | 0.38% |\n| Madagascar | 0.21% |\n\n## 5. Trends\n- **Descending order** from top to bottom\n- Mauritania leads significantly, followed by Fiji, with Madagascar notably lower\n- The gap between Mauritania and Fiji (~0.10%) is smaller than between Fiji and Madagascar (~0.17%)\n\n## 6. Key Insights\n- Mauritania had the **highest military personnel ratio** in 1985\n- Madagascar had the **lowest** share among the three nations\n- All values are **below 0.5%**, indicating relatively small military forces relative to total population\n\n---\n\n## ❓ Answer to Question: Is Madagascar's value more than Fiji's?\n\n**No.** Madagascar (0.21%) is **less than** Fiji (0.38%).\n\n- Fiji is **0.17 percentage points higher** than Madagascar\n- Madagascar's value is only about **55% of Fiji's value**",
+    "prediction_error": null,
+    "metrics": {
+      "strict_accuracy": 1.0,
+      "relaxed_accuracy": 1.0
+    }
+  },
+  {
+    "sample_id": "test_4",
+    "split": "test",
+    "ground_truth": [
+      "23"
+    ],
+    "input_text": {
+      "question": "What's the value of the lowest bar?"
+    },
+    "prediction": "## Structured Analysis\n\n### 1. Chart Type\nHorizontal stacked bar chart\n\n### 2. Title\n\"Slight increase in Japanese support for more active military role in the region\"\n\n### 3. Axes Labels\n- **Statement:** \"Japan should ___ in the Asia-Pacific region\"\n- **Categories:** \"Limit its military role\" (blue) | \"Play a more active military role\" (green)\n- **Years:** 2016 and 2015\n\n### 4. Data Points\n| Year | Limit Military Role | Play More Active Role |\n|------|-------------------|----------------------|\n| 2016 | 62% | 29% |\n| 2015 | 68% | 23% |\n\n### 5. Trends\n- Support for **limiting** military role **decreased** from 68% → 62% (-6 points)\n- Support for a **more active** military role **increased** from 23% → 29% (+6 points)\n- A consistent shift toward more military engagement between 2015 and 2016\n\n### 6. Key Insights\n- The majority still favors limiting Japan's military role\n- There is a notable but gradual shift in public opinion toward greater military activity\n\n---\n\n## Answer to the Question\n\nThe **lowest bar value is 23%** — representing the 2015 support for Japan playing a \"more active military role\" in the Asia-Pacific region.",
+    "prediction_error": null,
+    "metrics": {
+      "strict_accuracy": 1.0,
+      "relaxed_accuracy": 1.0
+    }
+  },
+  {
+    "sample_id": "test_5",
+    "split": "test",
+    "ground_truth": [
+      "6"
+    ],
+    "input_text": {
+      "question": "What is the difference between the highest and the lowest green bar??"
+    },
+    "prediction": "## Structured Analysis\n\n### 1. Chart Type\nHorizontal stacked bar chart\n\n### 2. Title\n\"Slight increase in Japanese support for more active military role in the region\"\n\n### 3. Axes Labels\n- **Topic:** \"Japan should ___ in the Asia-Pacific region\"\n- **Categories:** \"Limit its military role\" (blue) vs \"Play a more active military role\" (green)\n- **Years:** 2016 and 2015\n\n### 4. Data Points\n| Year | Limit Military Role (Blue) | More Active Role (Green) |\n|------|---------------------------|--------------------------|\n| 2016 | 62% | 29% |\n| 2015 | 68% | 23% |\n\n### 5. Trends\n- Support for a **more active military role increased** from 23% (2015) to 29% (2016)\n- Support for **limiting military role decreased** from 68% (2015) to 62% (2016)\n- A gradual shift toward favoring more military engagement\n\n### 6. Key Insights\n- The majority still prefer Japan to **limit its military role**\n- There was a **6-percentage-point shift** in both directions between 2015 and 2016\n\n---\n\n## Answer to the Question\n\n**Highest green bar:** 29% (2016)\n**Lowest green bar:** 23% (2015)\n\n> **Difference = 29% - 23% = 6 percentage points**",
+    "prediction_error": null,
+    "metrics": {
+      "strict_accuracy": 1.0,
+      "relaxed_accuracy": 1.0
+    }
+  }
+]

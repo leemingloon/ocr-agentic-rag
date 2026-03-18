@@ -1,0 +1,9 @@
+{
+  "exact_match_mean": 0.94,
+  "f1_mean": 0.9485476686874289,
+  "relaxed_match_mean": 0.94,
+  "conclusion_match_mean_typed": 0.7241379310344828,
+  "conclusion_match_typed_count": 29,
+  "sample_count": 100,
+  "gt_override_count": 0
+}

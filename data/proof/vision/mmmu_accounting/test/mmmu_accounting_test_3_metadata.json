@@ -1,0 +1,13 @@
+{
+  "sample_id": "test_Accounting_3",
+  "question": "Tsuji is reviewing the price of a 3-month Japanese yen/U.S. dollar currency futures contract, using the currency and interest rate data shown below. Because the 3-month Japanese interest rate has just increased to .50%, Itsuji recognizes that an arbitrage opportunity exists nd decides to borrow $1 million U.S. dollars to purchase Japanese yen. Calculate the yen arbitrage profit from Itsuji's strategy, using the following data: <image 1> ",
+  "ground_truth": "C",
+  "options_list": [
+    "¥118,763.90",
+    "¥121,337.29",
+    "¥129,928.61"
+  ],
+  "options_present": true,
+  "split": "test",
+  "dataset": "MMMU_Accounting"
+}

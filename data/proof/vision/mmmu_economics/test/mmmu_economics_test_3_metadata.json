@@ -1,0 +1,14 @@
+{
+  "sample_id": "test_Economics_3",
+  "question": "The many identical residents of Whoville love drinking Zlurp. Each resident has the following willingness to pay for the tasty refreshment:<image 1>The cost of producing Zlurp is $1.50, and the competitive suppliers sell it at this price. (The supply curve is horizontal.) Cindy Lou Who, one of the residents of Whoville, decides on her own to reduce her consumption of Zlurp by one bottle. How does Cindy's decision affect total surplus in Whoville?",
+  "ground_truth": "A",
+  "options_list": [
+    "increases the total surplus in Whoville by $0.5",
+    "decreases the total surplus in Whoville by $1",
+    "increases the total surplus in Whoville by $0.5",
+    "decreases the total surplus in Whoville by $1"
+  ],
+  "options_present": true,
+  "split": "test",
+  "dataset": "MMMU_Economics"
+}

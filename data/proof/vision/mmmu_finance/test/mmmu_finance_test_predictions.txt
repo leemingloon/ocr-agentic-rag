@@ -1,0 +1,242 @@
+gt_override_count: 0
+
+========================================================================
+sample_id: test_Finance_1
+split: test
+ground_truth: D
+question: A firm wishing to evaluate interest rate behavior has gathered data on the nominal rate of interest and on inflationary expectations for five U.S. Treasury securities, each having a different maturity and each measured at a different point in time during the year just ended. (Note: Assume that the risk that future interest rate movements will affect longer maturities more than shorter maturities is zero; that is, assume that there is no maturity risk.) These data are summarized in the following table. <image 1> Using the preceding data, find the real rate of interest at each point in time
+------------------------------------------------------------------------
+prediction:
+## Structured Analysis
+
+### 1. Chart Type
+Table
+
+### 2. Title
+U.S. Treasury Securities - Nominal Rate of Interest and Inflationary Expectations
+
+### 3. Column Headers
+- U.S. Treasury Security (A–E)
+- Point in Time
+- Maturity
+- Nominal Rate of Interest
+- Inflationary Expectation
+
+### 4. Data Points Extracted
+
+| Security | Date | Maturity | Nominal Rate | Inflation Expectation |
+|----------|------|----------|-------------|----------------------|
+| A | Jan. 7 | 2 years | 12.6% | 9.5% |
+| B | Mar. 12 | 10 years | 11.2% | 8.2% |
+| C | May 30 | 6 months | 13.0% | 10.0% |
+| D | Aug. 15 | 20 years | 11.0% | 8.1% |
+| E | Dec. 30 | 5 years | 11.4% | 8.3% |
+
+---
+
+### 5. Calculating the Real Rate of Interest
+
+Using the **Fisher Equation** (simplified):
+> **Real Rate = Nominal Rate − Inflationary Expectation**
+
+| Security | Nominal Rate | Inflation | Real Rate |
+|----------|-------------|-----------|-----------|
+| A | 12.6% | 9.5% | **3.1%** |
+| B | 11.2% | 8.2% | **3.0%** |→ Wait: 11.2 − 8.2 = **3.0%**
+| C | 13.0% | 10.0% | **3.0%** |→ 13.0 − 10.0 = **3.0%**
+| D | 11.0% | 8.1% | **2.9%** |
+| E | 11.4% | 8.3% | **3.1%** |
+
+### 6. Key Insights
+
+- The **real rate of interest remains relatively stable** across all five points in time (~2.9%–3.1%), which is consistent with theory suggesting the real rate is driven by broader economic forces
+- **Security D** has the slightly lowest real rate (2.9%)
+- The **nominal rate variation** is largely explained by **differences in inflationary expectations**, not the real rate
+- This confirms that the **real rate is approximately constant** throughout the year
+
+### Answer Matching to Options
+
+- A: 3.1%, B: 3.0%, C: 3.0%, D: 2.9%, E: 3.1% → **Matches Option D**
+
+D
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================
+
+========================================================================
+sample_id: test_Finance_2
+split: test
+ground_truth: 9.26
+question: A newly issued bond has the following characteristics: <image 1> Calculate modified duration using the information above (in years).
+------------------------------------------------------------------------
+prediction:
+# Bond Duration Analysis
+
+## 1. Chart Type
+**Table** - displaying bond characteristics
+
+## 2. Title
+No explicit title (implied: "Bond Characteristics")
+
+## 3. Axes Labels
+| Column | Value |
+|--------|-------|
+| Coupon | 8% |
+| Yield to Maturity | 8% |
+| Maturity | 15 years |
+| Macaulay Duration | 10 years |
+
+## 4. Data Points
+- **Coupon Rate:** 8%
+- **YTM:** 8%
+- **Maturity:** 15 years
+- **Macaulay Duration:** 10 years
+
+---
+
+## Modified Duration Calculation
+
+### Formula:
+$$\text{Modified Duration} = \frac{\text{Macaulay Duration}}{1 + \frac{YTM}{m}}$$
+
+Where:
+- Macaulay Duration = **10 years**
+- YTM = **8% = 0.08**
+- m = **1** (assuming annual compounding)
+
+### Calculation:
+$$\text{Modified Duration} = \frac{10}{1 + \frac{0.08}{1}} = \frac{10}{1.08}$$
+
+$$\boxed{\text{Modified Duration} = 9.26 \text{ years}}$$
+
+---
+
+## Key Insights
+1. **Coupon = YTM** → Bond is priced **at par**
+2. Modified Duration (**9.26**) < Macaulay Duration (**10**) — always true
+3. A 1% rise in yields → bond price falls ≈ **9.26%**
+4. The bond has significant **interest rate sensitivity** given the long duration
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================
+
+========================================================================
+sample_id: test_Finance_3
+split: test
+ground_truth: 2000
+question: The Raattama Corporation had sales of $3.5 million last year, and it earned a 5% return (after taxes) on sales. Recently, the company has fallen behind in its accounts payable. Although its terms of purchase are net 30 days, its accounts payable represent 60 days' purchases. The company's treasurer is seeking to increase bank borrowings in order to become current in meeting its trade obligations (that is, to have 30 days' payables outstanding). The company's balance sheet is as follows (in thousands of dollars): <image 1>  Assume that the bank will lend the firm the amount calculated in part a. The terms of the loan offered are 8%, simple interest, and the bank uses a 360-day year for the interest calculation. What is the interest charge for one month? (Assume there are 30 days in a month.)
+------------------------------------------------------------------------
+prediction:
+## Structured Analysis
+
+### 1. Chart Type
+**Table** – Balance Sheet format
+
+### 2. Title
+**Raattama Corporation Balance Sheet** (in thousands of dollars)
+
+### 3. Axes Labels
+Not applicable (financial statement format)
+- **Left side:** Assets
+- **Right side:** Liabilities & Equity
+
+### 4. Data Points Extracted
+
+| **Assets** | **$000s** | **Liabilities & Equity** | **$000s** |
+|---|---|---|---|
+| Cash | $100 | Accounts Payable | $600 |
+| Accounts Receivable | $300 | Bank Loans | $700 |
+| Inventory | $1,400 | Accruals | $200 |
+| **Current Assets** | **$1,800** | **Current Liabilities** | **$1,500** |
+| Land & Buildings | $600 | Mortgage on Real Estate | $700 |
+| Equipment | $600 | Common Stock ($0.10 par) | $300 |
+| | | Retained Earnings | $500 |
+| **Total Assets** | **$3,000** | **Total Liabilities & Equity** | **$3,000** |
+
+---
+
+## 📊 Solution
+
+### Step 1: Calculate Daily Purchases
+$$\text{Daily Purchases} = \frac{\text{Annual Sales} \times \text{Cost Ratio}}{360}$$
+
+Using accounts payable relationship:
+$$\text{Daily Purchases} = \frac{\$600,000}{60 \text{ days}} = \$10,000/\text{day}$$
+
+### Step 2: Calculate Required Loan (Part a)
+| Current Payables (60 days) | $600,000 |
+|---|---|
+| Target Payables (30 days) | $300,000 |
+| **Required Borrowing** | **$300,000** |
+
+### Step 3: Calculate Monthly Interest Charge
+
+$$\text{Interest} = \text{Principal} \times \text{Rate} \times \frac{\text{Days}}{360}$$
+
+$$\text{Interest} = \$300,000 \times 0.08 \times \frac{30}{360}$$
+
+$$\boxed{\text{Interest} = \$2,000}$$
+
+---
+
+### Key Insights
+- The company needs **$300,000** in additional bank borrowing
+- Monthly interest cost = **$2,000**
+- Annualized interest = $24,000 vs. net income of $175,000 (5% × $3.5M) — **manageable burden**
+- The loan reduces AP from 60 to 30 days, restoring **trade creditworthiness**
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================
+
+========================================================================
+sample_id: test_Finance_4
+split: test
+ground_truth: B
+question: Here are returns and standard deviations for four investments. <image 1>. Calculate the standard deviations of the following portfolio: 50% in Treasury bills, 50% in stock P
+------------------------------------------------------------------------
+prediction:
+## Chart Analysis
+
+**1. Chart Type:** Table
+
+**2. Title:** None explicitly stated
+
+**3. Axes Labels:** Return (%) and Standard Deviation (%)
+
+**4. Data Points:**
+- Treasury bills: Return = 6%, Std Dev = 0%
+- Stock P: Return = 10%, Std Dev = 14%
+- Stock Q: Return = 14.5%, Std Dev = 28%
+- Stock R: Return = 21%, Std Dev = 26%
+
+**5. Trends:** Higher returns generally associated with higher standard deviations (risk-return tradeoff)
+
+**6. Key Insights:** Treasury bills are risk-free (σ = 0%), while stocks carry varying levels of risk
+
+---
+
+## Calculation: 50% Treasury Bills + 50% Stock P
+
+**Formula for portfolio standard deviation:**
+$$\sigma_p = \sqrt{w_1^2\sigma_1^2 + w_2^2\sigma_2^2 + 2w_1w_2\sigma_1\sigma_2\rho_{12}}$$
+
+**Key values:**
+- w₁ = 0.50 (T-bills), σ₁ = 0%
+- w₂ = 0.50 (Stock P), σ₂ = 14%
+- Since T-bills have σ = 0, the correlation term drops out
+
+**Calculation:**
+$$\sigma_p = \sqrt{(0.50)^2(0)^2 + (0.50)^2(14)^2 + 0}$$
+$$\sigma_p = \sqrt{0 + (0.25)(196)}$$
+$$\sigma_p = \sqrt{49} = 7\%$$
+
+---
+
+## Answer
+
+The standard deviation = **7%**
+
+**B**
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================

@@ -1,0 +1,285 @@
+gt_override_count: 0
+
+========================================================================
+sample_id: dev_Finance_1
+split: dev
+ground_truth: 0.8638
+question: Without referring to the preprogrammed function on your financial calculator, use the basic formula for present value, along with the given opportunity cost, r, and the number of periods, n, to calculate the present value of $1 in case C shown in the following table. <image 1>
+------------------------------------------------------------------------
+prediction:
+# Structured Analysis
+
+## 1. Chart Type
+**Table** – A structured data table with financial variables.
+
+## 2. Title
+No explicit title provided (contextually related to **Present Value calculations**).
+
+## 3. Axes Labels (Column Headers)
+| Column | Description |
+|--------|-------------|
+| **Case** | Identifier (A, B, C, D) |
+| **Opportunity Cost, r** | Discount/interest rate (%) |
+| **Number of Periods, n** | Time periods |
+
+## 4. Data Points Extracted
+| Case | r (%) | n |
+|------|-------|---|
+| A | 2% | 4 |
+| B | 10% | 2 |
+| **C** | **5%** | **3** |
+| D | 13% | 2 |
+
+---
+
+## 5. **Case C – Present Value Calculation**
+
+### Formula:
+$$PV = \frac{FV}{(1 + r)^n}$$
+
+### Given Values (Case C):
+- **FV** = $1.00
+- **r** = 5% = 0.05
+- **n** = 3
+
+### Step-by-Step Solution:
+$$PV = \frac{\$1}{(1 + 0.05)^3}$$
+
+$$PV = \frac{\$1}{(1.05)^3}$$
+
+$$PV = \frac{\$1}{1.157625}$$
+
+$$\boxed{PV = \$0.8638}$$
+
+---
+
+## 6. Trends & Key Insights
+
+| Insight | Explanation |
+|---------|-------------|
+| **Higher r → Lower PV** | Case D (13%) will yield the lowest PV |
+| **More periods → Lower PV** | Longer time discounts value more heavily |
+| **Case C result** | $1 received in 3 years is worth only **$0.8638 today** at 5% |
+| **Time Value of Money** | Money today is worth more than the same amount in the future |
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================
+
+========================================================================
+sample_id: dev_Finance_2
+split: dev
+ground_truth: 6.38
+question: Upton Computers makes bulk purchases of small computers, stocks them in conveniently located warehouses, ships them to its chain of retail stores, and has a staff to advise customers and help them set up their new computers. Upton's balance sheet as of December 31, 2010, is shown here (millions of dollars): <image 1> Sales for 2010 were $350 million and net income for the year was $10.5 million, so the firm's profit margin was 3.0%. Upton paid dividends of $4.2 million to common stockholders, so its payout ratio was 40%. Its tax rate is 40%, and it operated at full capacity. Assume that all assets/sales ratios, spontaneous liabilities/sales ratios, the profit margin, and the payout ratio remain constant in 2011. Using the AFN equation, determine Upton's self-supporting growth rate. That is, what is the maximum growth rate the firm can achieve without having to employ nonspontaneous external funds?
+------------------------------------------------------------------------
+prediction:
+# Structured Analysis of Upton Computers Balance Sheet & Self-Supporting Growth Rate
+
+## 1. Chart Analysis
+
+| Category | Detail |
+|----------|---------|
+| **Chart Type** | Financial Balance Sheet Table |
+| **Title** | Upton Computers Balance Sheet (December 31, 2010) |
+| **Axes Labels** | N/A (Balance Sheet Format) |
+
+### Data Points Extracted (millions $):
+
+| **ASSETS** | | **LIABILITIES & EQUITY** | |
+|------------|---|--------------------------|---|
+| Cash | $3.5 | Accounts Payable | $9.0 |
+| Receivables | $26.0 | Notes Payable | $18.0 |
+| Inventories | $58.0 | Accruals | $8.5 |
+| **Total Current Assets** | **$87.5** | **Total Current Liabilities** | **$35.5** |
+| Net Fixed Assets | $35.0 | Mortgage Loan | $6.0 |
+| | | Common Stock | $15.0 |
+| | | Retained Earnings | $66.0 |
+| **Total Assets** | **$122.5** | **Total L&E** | **$122.5** |
+
+---
+
+## 2. AFN Equation Framework
+
+### The Self-Supporting Growth Rate Formula:
+
+$$g^* = \frac{M \times b \times S_0}{A_0 - L_0 - M \times b \times S_0}$$
+
+Where:
+- **M** = Profit Margin
+- **b** = Retention Ratio (plowback ratio)
+- **S₀** = Current Sales
+- **A₀** = Total Assets
+- **L₀** = Spontaneous Liabilities
+
+---
+
+## 3. Key Variable Identification
+
+| Variable | Calculation | Value |
+|----------|-------------|-------|
+| **S₀** (Sales) | Given | $350M |
+| **M** (Profit Margin) | $10.5/$350 | **3.0%** |
+| **b** (Retention Ratio) | 1 - 0.40 payout | **60%** |
+| **A₀** (Total Assets) | Given | $122.5M |
+| **L₀** (Spontaneous Liabilities) | AP + Accruals only* | **$17.5M** |
+
+> ⚠️ **Important Note:** Spontaneous liabilities = Accounts Payable ($9.0) + Accruals ($8.5) = **$17.5M**
+> Notes Payable ($18.0) and Mortgage Loan ($6.0) are **NOT** spontaneous
+
+---
+
+## 4. Self-Supporting Growth Rate Calculation
+
+### Step 1: Calculate Numerator
+$$M \times b \times S_0 = 0.03 \times 0.60 \times \$350 = \$6.3M$$
+
+### Step 2: Calculate Denominator
+$$A_0 - L_0 - (M \times b \times S_0) = \$122.5 - \$17.5 - \$6.3 = \$98.7M$$
+
+### Step 3: Calculate g*
+$$g^* = \frac{\$6.3}{\$98.7} = \boxed{6.38\%}$$
+
+---
+
+## 5. Verification via AFN Equation
+
+At g* = 6.38%, ΔS = $350 × 0.0638 = $22.33M
+
+| Component | Formula | Value |
+|-----------|---------|-------|
+| Required Asset Increase | (A₀/S₀) × ΔS = (122.5/350) × 22.33 | +$7.82M |
+| Spontaneous Liability Increase | (L₀/S₀) × ΔS = (17.5/350) × 22.33 | -$1.12M |
+| Addition to Retained Earnings | M × b × S₁ = 0.03 × 0.60 × 372.33 | -$6.70M |
+| **AFN** | | **≈ $0** ✓ |
+
+---
+
+## 6. Key Insights & Trends
+
+| Insight | Analysis |
+|---------|----------|
+| 📊 **Asset-Heavy Model** | Asset/Sales ratio = 35% (high for distribution) |
+| 💰 **Low Profit Margin** | Only 3% — typical for bulk computer distribution |
+| 🔄 **Conservative Retention** | Retaining 60% of earnings supports growth |
+| ⚡ **Self-Supporting Rate** | **6.38%** maximum growth without external funding |
+| ⚠️ **Growth Constraint** | High asset intensity limits self-sustainable growth |
+| 📈 **Inventory Risk** | Inventories = 47% of total assets — significant exposure |
+
+---
+
+## 7. Conclusion
+
+> **Upton Computers can grow at a maximum rate of ~6.38% without needing nonspontaneous external financing.** Growth beyond this rate would require the company to raise additional external capital through debt issuance or equity offerings, given its thin profit margins and asset-intensive business model.
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================
+
+========================================================================
+sample_id: dev_Finance_3
+split: dev
+ground_truth: C
+question: Clare Jaccard has $5,000 to invest. Because she is only 25 years old, she is not concerned about the length of the investment's life. What she is sensitive to is the rate of return she will earn on the investment. With the help of her financial advisor, Clare has isolated four equally risky investments, each providing a single amount at the end of its life, as shown in the following table. All the investments require an initial $5,000 payment. <image 1> Calculate, to the nearest 1%, the rate of return on investment D available to Clare.
+------------------------------------------------------------------------
+prediction:
+## Structured Analysis
+
+### 1. Chart Type
+Table
+
+### 2. Title
+Investment comparison table showing single amounts and investment lives
+
+### 3. Axes Labels
+- Column 1: Investment (A, B, C, D)
+- Column 2: Single amount (future value received)
+- Column 3: Investment life (years)
+
+### 4. Data Points
+- Investment A: $8,400, 6 years
+- Investment B: $15,900, 15 years
+- Investment C: $7,600, 4 years
+- Investment D: $13,000, 10 years
+
+### 5. Trends
+All investments require an initial $5,000 investment and return varying single amounts over different time horizons.
+
+### 6. Key Insights
+The rate of return can be calculated using the Present Value Interest Factor (PVIF):
+
+**For Investment D:**
+- Initial investment (PV) = $5,000
+- Future value (FV) = $13,000
+- Life = 10 years
+
+**PVIF = PV/FV = 5,000/13,000 = 0.3846**
+
+Using PVIF tables for 10 years, find the interest rate where PVIF ≈ 0.3846:
+- At 9%: PVIF = 0.4224
+- At 10%: PVIF = 0.3855 ✓
+- At 11%: PVIF = 0.3522
+
+**PVIF at 10% for 10 years = 0.3855**, which is closest to **0.3846**
+
+Therefore, the rate of return on Investment D ≈ **10%**
+
+This matches **Option C**.
+
+C
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================
+
+========================================================================
+sample_id: dev_Finance_4
+split: dev
+ground_truth: C
+question: For case E in the following table: <image 1>. Calculate the present value of the annuity, assuming that it is an ordinary annuity
+------------------------------------------------------------------------
+prediction:
+## Structured Analysis
+
+### 1. Chart Type
+Table
+
+### 2. Title
+Not explicitly stated — shows annuity cases with financial parameters
+
+### 3. Axes Labels
+Columns: Case, Amount of annuity, Interest rate, Period (years)
+
+### 4. Data Points
+- Case A: $12,000, 7%, 3 years
+- Case B: $55,000, 12%, 15 years
+- Case C: $700, 20%, 9 years
+- Case D: $140,000, 5%, 7 years
+- **Case E: $22,500, 10%, 5 years**
+
+### 5. Trends
+Each case presents different combinations of annuity amounts, interest rates, and periods for time-value-of-money calculations.
+
+### 6. Key Insights / Calculation for Case E
+
+**Formula for Present Value of Ordinary Annuity:**
+$$PV = PMT \times \frac{1-(1+r)^{-n}}{r}$$
+
+**Given:**
+- PMT = $22,500
+- r = 10% = 0.10
+- n = 5 years
+
+**Step-by-step:**
+$$PV = 22,500 \times \frac{1-(1.10)^{-5}}{0.10}$$
+
+$$(1.10)^5 = 1.61051$$
+
+$$1 - \frac{1}{1.61051} = 1 - 0.62092 = 0.37908$$
+
+$$\frac{0.37908}{0.10} = 3.79079$$
+
+$$PV = 22,500 \times 3.79079 = \mathbf{\$85,293}$$
+
+This matches **Option C**.
+
+C
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================

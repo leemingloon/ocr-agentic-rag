@@ -1,0 +1,199 @@
+gt_override_count: 0
+
+========================================================================
+sample_id: dev_Economics_1
+split: dev
+ground_truth: D
+question: The graph below shows the AD-AS diagram for Spain. All numbers are in billions. <image 1> What is the price level in the short-run equilibrium?
+------------------------------------------------------------------------
+prediction:
+# AD-AS Diagram Analysis for Spain
+
+## 1. Chart Type
+**Other** – Economic model diagram (AD-AS: Aggregate Demand-Aggregate Supply)
+
+---
+
+## 2. Title
+No explicit title (described as "AD-AS diagram for Spain")
+
+---
+
+## 3. Axes Labels
+- **Y-axis:** Price Level (0–1100)
+- **X-axis:** Real GDP in billions (0–1100)
+
+---
+
+## 4. Data Points & Curves
+
+| Curve | Description | Key Coordinates |
+|-------|-------------|-----------------|
+| **AD** | Downward sloping | Starts ~(0, 1000), ends ~(1000, 0) |
+| **SRAS** | Upward sloping | Starts ~(0, 200), ends ~(1000, 1100) |
+| **LRAS** | Vertical line | Fixed at Real GDP = **500** |
+
+---
+
+## 5. Short-Run Equilibrium
+
+The **short-run equilibrium** occurs where **AD intersects SRAS**:
+
+- Tracing both lines, they intersect at approximately:
+  - **Real GDP = 600 billion**
+  - **Price Level = 650**
+
+> ### ✅ Answer: The Price Level in Short-Run Equilibrium ≈ **650**
+
+---
+
+## 6. Key Insights
+
+- **Output Gap:** Short-run equilibrium GDP (600) **exceeds** LRAS (500) → **Inflationary gap**
+- The economy is **overheating** relative to its long-run potential
+- Long-run adjustment would require prices to rise, shifting SRAS **leftward** until equilibrium returns to LRAS at GDP = 500
+- This suggests **contractionary** pressure in the long run
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================
+
+========================================================================
+sample_id: dev_Economics_2
+split: dev
+ground_truth: A
+question: The table below describes production possibilities for Mexico and Nigeria. Each number in the table shows the number of workers needed to produce one unit of the product. <image 1> Suppose that both countries have 90 workers. What is the opportunity cost of producing Glasses in Mexico?
+------------------------------------------------------------------------
+prediction:
+## Structured Analysis
+
+### 1. Chart Type
+Table
+
+### 2. Title
+Production Possibilities for Mexico and Nigeria
+
+### 3. Axes Labels
+- Columns: Country, Shoes, Glasses
+- Rows: Mexico, Nigeria
+
+### 4. Data Points
+| Country | Shoes (workers/unit) | Glasses (workers/unit) |
+|---------|---------------------|----------------------|
+| Mexico | 10 | 12 |
+| Nigeria | 18 | 5 |
+
+### 5. Trends
+- Mexico is more efficient at producing Shoes (10 workers vs 18)
+- Nigeria is more efficient at producing Glasses (5 workers vs 10... wait, 12 vs 5)
+
+### 6. Key Insights
+- Mexico has a comparative advantage in Shoes
+- Nigeria has a comparative advantage in Glasses
+
+---
+
+## Opportunity Cost Calculation
+
+**Question:** What is the opportunity cost of producing **1 unit of Glasses in Mexico**?
+
+**Method:** Opportunity cost = What you give up / What you get
+
+In Mexico:
+- 1 unit of Glasses requires **12 workers**
+- 1 unit of Shoes requires **10 workers**
+- With 12 workers, Mexico could produce: 12/10 = **1.20 units of Shoes**
+
+**Therefore, the opportunity cost of 1 unit of Glasses in Mexico = 1.20 Shoes**
+
+A
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================
+
+========================================================================
+sample_id: dev_Economics_3
+split: dev
+ground_truth: C
+question: The table below describes production possibilities for Mexico and Nigeria. Each number in the table shows the number of workers needed to produce one unit of the product. <image 1> Suppose that both countries have 90 workers. Which country should be specializing in the production of Shoes?
+------------------------------------------------------------------------
+prediction:
+## Structured Analysis
+
+### 1. Chart Type
+Table
+
+### 2. Title
+Production Possibilities for Mexico and Nigeria
+
+### 3. Axes Labels
+- Columns: Country, Shoes, Glasses
+- Rows: Mexico, Nigeria
+
+### 4. Data Points
+| Country | Shoes (workers/unit) | Glasses (workers/unit) |
+|---------|---------------------|----------------------|
+| Mexico | 10 | 12 |
+| Nigeria | 18 | 5 |
+
+### 5. Trends
+- Mexico requires **fewer workers** to produce Shoes (10 vs 18)
+- Nigeria requires **fewer workers** to produce Glasses (5 vs 12)
+
+### 6. Key Insights — Comparative Advantage Analysis
+
+**Opportunity Cost Calculation:**
+
+**Mexico:**
+- 1 unit of Shoes costs: 10/12 = **0.83 units of Glasses**
+- 1 unit of Glasses costs: 12/10 = 1.2 units of Shoes
+
+**Nigeria:**
+- 1 unit of Shoes costs: 18/5 = **3.6 units of Glasses**
+- 1 unit of Glasses costs: 5/18 = 0.28 units of Shoes
+
+**Mexico has the lower opportunity cost for Shoes** (0.83 < 3.6), meaning Mexico holds the **comparative advantage in Shoes**.
+
+Nigeria has comparative advantage in Glasses and should specialize there.
+
+## Final Answer
+
+**C**
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================
+
+========================================================================
+sample_id: dev_Economics_4
+split: dev
+ground_truth: B
+question: The graph below shows the supply and demand curves and the world price for bagels. <image 1> What is the equilibrium quantity if this country does not trade?
+------------------------------------------------------------------------
+prediction:
+## Chart Analysis
+
+1. **Chart Type:** Line graph
+2. **Title:** None explicitly stated
+3. **Axes Labels:**
+ - Y-axis: Price of Bagels ($), ranging from $0 to $12
+ - X-axis: Quantity of Bagels, ranging from 0 to 12
+4. **Data Points:**
+ - **Supply curve:** Starts at ~$4 (y-intercept) and slopes upward
+ - **Demand curve:** Starts at ~$12 (y-intercept) and slopes downward
+ - **World Price (Free Trade):** Horizontal dashed line at **$6**
+ - **Intersection of Supply & Demand:** Occurs at approximately **Price = $8, Quantity = 4**
+5. **Trends:**
+ - Supply increases with price (positive slope)
+ - Demand decreases with price (negative slope)
+ - The world price ($6) is **below** the domestic equilibrium price ($8), indicating this country is a **net importer**
+6. **Key Insights:**
+ - Without trade, equilibrium is where supply meets demand: **Price = $8, Quantity = 4**
+ - With free trade at $6: domestic quantity supplied < domestic quantity demanded, creating an import gap
+
+## Answer
+
+The equilibrium quantity **without trade** is where the supply and demand curves intersect — at a price of **$8** and quantity of **4**.
+
+**B**
+------------------------------------------------------------------------
+metrics: {"accuracy": 1.0}
+========================================================================

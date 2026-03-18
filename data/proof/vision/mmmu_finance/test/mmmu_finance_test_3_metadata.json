@@ -1,0 +1,9 @@
+{
+  "sample_id": "test_Finance_3",
+  "question": "The Raattama Corporation had sales of $3.5 million last year, and it earned a 5% return (after taxes) on sales. Recently, the company has fallen behind in its accounts payable. Although its terms of purchase are net 30 days, its accounts payable represent 60 days' purchases. The company's treasurer is seeking to increase bank borrowings in order to become current in meeting its trade obligations (that is, to have 30 days' payables outstanding). The company's balance sheet is as follows (in thousands of dollars): <image 1>  Assume that the bank will lend the firm the amount calculated in part a. The terms of the loan offered are 8%, simple interest, and the bank uses a 360-day year for the interest calculation. What is the interest charge for one month? (Assume there are 30 days in a month.)",
+  "ground_truth": "2000",
+  "options_list": null,
+  "options_present": false,
+  "split": "test",
+  "dataset": "MMMU_Finance"
+}

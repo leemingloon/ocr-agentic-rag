@@ -1,0 +1,56 @@
+[
+  {
+    "sample_id": "7d4bdeda7b114d51fa835e7bad363056",
+    "split": "test",
+    "ground_truth": {
+      "answer": "-1657",
+      "scale": "million",
+      "derivation": "375-2,032",
+      "corpus_id": "eb68753385d270d4b17f5b370691851a",
+      "answer_type": "arithmetic",
+      "answer_from": "table"
+    },
+    "input_text": {
+      "query": "How much did the level 2 OFA change by from 2018 year end to 2019 year end?"
+    },
+    "prediction": "",
+    "prediction_error": "rag_inference_failed:name 'q' is not defined",
+    "metrics": {}
+  },
+  {
+    "sample_id": "121bb93b555953a400fa69759f06e298",
+    "split": "test",
+    "ground_truth": {
+      "answer": "3977",
+      "scale": "thousand",
+      "derivation": "($4,905 + $3,049)/2 ",
+      "corpus_id": "bf3bb2fe848111c6f1370b66cdd8da3e",
+      "answer_type": "arithmetic",
+      "answer_from": "table-text"
+    },
+    "input_text": {
+      "query": "What is the average revenue from Asia Pacific in 2018 and 2019?"
+    },
+    "prediction": "",
+    "prediction_error": "rag_inference_failed:'NoneType' object has no attribute 'get'",
+    "metrics": {}
+  },
+  {
+    "sample_id": "82d14c3d4fe3414597b638431b2eeffc",
+    "split": "test",
+    "ground_truth": {
+      "answer": "2017",
+      "scale": "",
+      "derivation": "locate and analyze net loss in row 5",
+      "corpus_id": "4bf6297fe4aaf51d58b160a778fadc6f",
+      "answer_type": "span",
+      "answer_from": "table"
+    },
+    "input_text": {
+      "query": "In which year was the net loss less -10,000?"
+    },
+    "prediction": "",
+    "prediction_error": "rag_inference_failed:name 'needs_loss_comparison' is not defined",
+    "metrics": {}
+  }
+]

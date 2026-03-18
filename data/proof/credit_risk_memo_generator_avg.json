@@ -1,0 +1,66 @@
+{
+  "category": "credit_risk_memo_generator",
+  "sample_count": 100,
+  "sample_count_by_dataset": {
+    "FinanceBench": 100
+  },
+  "datasets": [
+    "FinanceBench"
+  ],
+  "datasets_breakdown": [
+    {
+      "dataset": "FinanceBench",
+      "sample_count": 100,
+      "splits_breakdown": [
+        {
+          "split": "train",
+          "sample_count": 100,
+          "metrics": {
+            "exact_match_mean": 0.94,
+            "f1_mean": 0.9485476686874289,
+            "relaxed_match_mean": 0.94,
+            "conclusion_match_mean_typed": 0.7241379310344828,
+            "conclusion_match_typed_count": 29
+          },
+          "gt_override_count": 0
+        }
+      ],
+      "weighted_metrics": {
+        "exact_match_mean": 0.94,
+        "f1_mean": 0.9485476686874289,
+        "relaxed_match_mean": 0.94
+      }
+    }
+  ],
+  "weighted_metrics": {
+    "exact_match_mean": 0.94,
+    "f1_mean": 0.9485476686874289,
+    "relaxed_match_mean": 0.94
+  },
+  "metrics_breakdown": {
+    "exact_match_mean": {
+      "value": 0.94,
+      "n_samples": 100,
+      "datasets": [
+        "FinanceBench"
+      ]
+    },
+    "f1_mean": {
+      "value": 0.948548,
+      "n_samples": 100,
+      "datasets": [
+        "FinanceBench"
+      ]
+    },
+    "relaxed_match_mean": {
+      "value": 0.94,
+      "n_samples": 100,
+      "datasets": [
+        "FinanceBench"
+      ]
+    }
+  },
+  "model_class": "RiskMemoGenerator",
+  "backbone": "claude_sonnet",
+  "timestamp": "2026-03-10T13:18:44.533477+08:00"
+}

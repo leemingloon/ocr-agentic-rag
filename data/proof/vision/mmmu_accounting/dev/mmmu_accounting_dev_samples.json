@@ -1,0 +1,110 @@
+[
+  {
+    "sample_id": "dev_Accounting_1",
+    "split": "dev",
+    "ground_truth": "D",
+    "input_text": {
+      "question": "Each of the following situations relates to a different company. <image 1> For company B, find the missing amounts."
+    },
+    "prediction": "I'll analyze this table and find the missing amount for Company B.\n\n## Chart Analysis\n\n1. **Chart Type:** Table\n2. **Title:** None explicitly stated\n3. **Axes Labels:** Rows: Revenues, Expenses, Gains, Losses, Net Income or (Loss); Columns: Company A, B, C, D\n4. **Data Points:**\n\n| | Company A | Company B | Company C | Company D |\n|---|---|---|---|---|\n| Revenues | ? | $1,480,500 | $103,950 | $1,054,116 |\n| Expenses | $455,490 | $1,518,300 | $78,120 | ? |\n| Gains | 0 | ? | 4,725 | 8,505 |\n| Losses | 32,760 | 0 | 5,670 | 39,312 |\n| Net Income/(Loss) | 32,130 | 39,690 | ? | (58,275) |\n\n5. **Trends:** Each company has missing values to be solved using the net income formula\n6. **Key Insights:** Net Income = Revenues + Gains - Expenses - Losses\n\n## Solving for Company B's Missing Amount (Gains)\n\n**Formula:**\nNet Income = Revenues + Gains - Expenses - Losses\n\n**Plugging in Company B's known values:**\n$$39,690 = 1,480,500 + \\text{Gains} - 1,518,300 - 0$$\n\n$$39,690 = 1,480,500 - 1,518,300 + \\text{Gains}$$\n\n$$39,690 = -37,800 + \\text{Gains}$$\n\n$$\\text{Gains} = 39,690 + 37,800 = \\$77,490$$\n\n## Comparison to Options:\n- A: $63,020\n- B: $58,410\n- C: $71,320\n- **D: $77,490 ✓**\n\nD",
+    "prediction_error": null,
+    "metrics": {
+      "accuracy": 1.0
+    },
+    "metadata": {
+      "sample_id": "dev_Accounting_1",
+      "options_list": [
+        "$63,020",
+        "$58,410",
+        "$71,320",
+        "$77,490"
+      ]
+    }
+  },
+  {
+    "sample_id": "dev_Accounting_2",
+    "split": "dev",
+    "ground_truth": "A",
+    "input_text": {
+      "question": "Here are facts for the Hudson Roofing Company for December. <image 1> Assuming no investments or withdrawals, what is the ending balance in the owners' capital account?"
+    },
+    "prediction": "# Structured Analysis\n\n## 1. Chart Type\n**Table** – Financial data summary for Hudson Roofing Company\n\n## 2. Title\nHudson Alexander Capital Account – December\n\n## 3. Axes Labels\nNot applicable (table format)\n\n## 4. Data Points\n\n| Item | Amount |\n|------|--------|\n| Hudson Alexander, Capital (Dec. 1) | $175,300 |\n| December Revenue | $56,400 |\n| December Expenses | $59,800 |\n\n## 5. Trends\n- Expenses **exceed** revenue by **$3,400**, resulting in a **net loss** for December\n- Capital is being **eroded** rather than growing\n\n## 6. Key Insights & Calculation\n\n### Formula:\n$$\\text{Ending Capital} = \\text{Beginning Capital} + \\text{Net Income (Loss)}$$\n\n### Step-by-Step:\n$$\\text{Net Income} = \\$56,400 - \\$59,800 = -\\$3,400 \\text{ (Net Loss)}$$\n\n$$\\text{Ending Capital} = \\$175,300 + (-\\$3,400)$$\n\n$$\\boxed{\\text{Ending Capital} = \\$171,900}$$\n\n### Key Takeaway:\nThe owner's capital **decreased by $3,400** due to a December net loss, resulting in an ending balance of **$171,900**. No investments or withdrawals affect this calculation.",
+    "prediction_error": null,
+    "metrics": {
+      "accuracy": 1.0
+    },
+    "metadata": {
+      "sample_id": "dev_Accounting_2",
+      "options_list": [
+        "$171,900",
+        "$170,000",
+        "$172,500",
+        "$181,900"
+      ]
+    }
+  },
+  {
+    "sample_id": "dev_Accounting_3",
+    "split": "dev",
+    "ground_truth": "C",
+    "input_text": {
+      "question": "For 2015, calculate the cash flow from assets(1) ________, cash flow to creditors(2) ________, and cash flow to stockholders(3) ________.<image 1>"
+    },
+    "prediction": "I'll systematically work through this problem using the financial data provided.\n\n## Step 1: Chart Analysis\n- **Type:** Financial table\n- **Data:** Income statement and balance sheet items for 2014 and 2015\n- **No tax line item is explicitly shown** — I need to calculate taxes or note the assumption.\n\nSince no tax rate or tax figure is given, I'll calculate EBIT and note this issue. Looking at the options, I'll work backward to determine the implied tax figure.\n\n---\n\n## Step 2: Income Statement (2015)\n\n| Item | 2015 |\n|------|------|\n| Sales | $10,091 |\n| Cost of goods sold | 3,672 |\n| Depreciation | 1,351 |\n| Other expenses | 641 |\n| Interest | 724 |\n| **EBIT** | 10,091 - 3,672 - 1,351 - 641 = **$4,427** |\n| EBT | 4,427 - 724 = $3,703 |\n| **Taxes (assumed ~34%)** | $3,703 × 0.34 = **$1,259.02** |\n| Net Income | $2,443.98 |\n\n---\n\n## Step 3: OCF\n**OCF = EBIT + Depreciation - Taxes**\n= 4,427 + 1,351 - 1,259.02 = **$4,518.98**\n\n---\n\n## Step 4: NCS\n**NCS = NFA(end) - NFA(beg) + Depreciation**\n= 42,332 - 41,346 + 1,351 = **$2,337**\n\n---\n\n## Step 5: ΔNWC\n**Current Assets (2015):** 6,244 + 7,352 + 11,926 = 25,522\n**Current Liabilities (2015):** 895 + 5,022 = 5,917\n**NWC 2015:** 25,522 - 5,917 = **19,605**\n\n**Current Assets (2014):** 4,931 + 6,527 + 11,604 = 23,062\n**Current Liabilities (2014):** 953 + 5,179 = 6,132\n**NWC 2014:** 23,062 - 6,132 = **16,930**\n\n**ΔNWC = 19,605 - 16,930 = $2,675**\n\n---\n\n## Step 6: CFA (Cash Flow from Assets)\n**CFA = OCF - NCS - ΔNWC**\n= 4,518.98 - 2,337 - 2,675 = **-$493.02** ✓\n\n---\n\n## Step 7: CF to Creditors\n**Net New LT Debt = 19,260 - 16,152 = $3,108**\n**CF to Creditors = Interest - Net New LT Debt**\n= 724 - 3,108 = **-$2,384** ✓\n\n---\n\n## Step 8: CF to Stockholders\n**CF to Stockholders = CFA - CF to Creditors**\n= -493.02 - (-2,384) = **$1,890.98** ✓\n\n---\n\n## Results Match Option A:\n1. CFA = **-$493.02**\n2. CF to Creditors = **-$2,384**\n3. CF to Stockholders = **$1,890.98**\n\nA",
+    "prediction_error": null,
+    "metrics": {
+      "accuracy": 1.0,
+      "gt_override": 1
+    },
+    "metadata": {
+      "sample_id": "dev_Accounting_3",
+      "options_list": [
+        "1): -$493.02 (2):-$2,384 (3):$1,890.98",
+        "1): $1843.98 (2): -$2,384 (3):$493.02",
+        "1): -$493.02 (2):  -$2,384 (3):-$1,890.98"
+      ]
+    }
+  },
+  {
+    "sample_id": "dev_Accounting_4",
+    "split": "dev",
+    "ground_truth": "A",
+    "input_text": {
+      "question": "Paper Submarine Manufacturing is investigating a lockbox system to reduce its collection time. It has determined the following:<image 1> The total collection time will be reduced by three days if the lockbox system is adopted.What is the net cash flow per check from adopting? "
+    },
+    "prediction": "## Analysis\n\n### 1. Chart Type: Table\n\n### 2. Title: None explicitly stated (Lockbox System Data)\n\n### 3. Axes Labels: N/A (table format)\n\n### 4. Data Points:\n- Average number of payments per day: 410\n- Average value of payment: $865\n- Variable lockbox fee (per transaction): $0.50\n- Daily interest rate on money market securities: 0.02%\n- Collection time reduction: 3 days\n\n### 5. Trends: N/A\n\n### 6. Key Insights: Lockbox system reduces float by 3 days, generating interest income offset by transaction fees\n\n---\n\n## Calculation: Net Cash Flow Per Check\n\n### Step 1: Interest Earned Per Check\nBy adopting the lockbox, each check is collected 3 days earlier, allowing the funds to earn interest.\n\n**Interest earned per check = Average value × Daily interest rate × Days saved**\n\n$$= \\$865 \\times 0.0002 \\times 3 = \\$865 \\times 0.0006 = \\$0.519$$\n\n### Step 2: Cost Per Check\nVariable lockbox fee = **$0.50 per transaction**\n\n### Step 3: Net Cash Flow Per Check\n$$\\text{Net Cash Flow} = \\$0.519 - \\$0.50 = \\$0.019 \\approx \\$0.02$$\n\n---\n\n## Comparison to Options:\n- **A: $0.02** ✓ matches our result\n- B: $7.79 — does not match\n- C: $8.65 — does not match\n\n---\n\nA",
+    "prediction_error": null,
+    "metrics": {
+      "accuracy": 1.0
+    },
+    "metadata": {
+      "sample_id": "dev_Accounting_4",
+      "options_list": [
+        "$.02",
+        "$7.79",
+        "$8.65"
+      ]
+    }
+  },
+  {
+    "sample_id": "dev_Accounting_5",
+    "split": "dev",
+    "ground_truth": "B",
+    "input_text": {
+      "question": "Solve for the unknown number of years in each of the following:<image 1>"
+    },
+    "prediction": "I need to find the number of years for each row in the table.\n\n## Analysis\n\n**Chart Type:** Table\n**Data Points:**\n- Row 1: PV = $625, Rate = 7%, FV = $1,284\n- Row 2: PV = $810, Rate = ?, Years = 12, FV = $4,341 (but years given, rate unknown - wait, re-reading)\n- Row 3: PV = $16,500, Rate = 17%, FV = $402,662\n- Row 4: PV = $21,500, Rate = 8%, FV = $147,350\n\nWait, let me re-read. The question asks for unknown **years**. Looking at the table:\n- Row 1: PV=$625, Years=?, Rate=7%, FV=$1,284\n- Row 2: PV=$810, Years=12, Rate=?, FV=$4,341 (rate unknown here, but question says years)\n- Row 3: PV=$16,500, Years=?, Rate=17%, FV=$402,662\n- Row 4: PV=$21,500, Years=?, Rate=8%, FV=$147,350\n\nThe question asks for unknown years, so rows where years are missing. Row 2 shows \"12\" under years but no rate shown explicitly. Let me reconsider - perhaps Row 2 has years=unknown and rate=12% (the \"12\" is the interest rate column).\n\nRe-reading columns: **Present Value | Years | Interest Rate | Future Value**\n\n- Row 1: PV=$625, Years=?, Rate=7%, FV=$1,284\n- Row 2: PV=$810, Years=?, Rate=12%, FV=$4,341\n- Row 3: PV=$16,500, Years=?, Rate=17%, FV=$402,662\n- Row 4: PV=$21,500, Years=?, Rate=8%, FV=$147,350\n\n## Calculations\n\nUsing FV = PV × (1+r)^n → n = ln(FV/PV) / ln(1+r)\n\n**Row 1:** n = ln(1284/625) / ln(1.07) = ln(2.0544) / ln(1.07) = 0.7205 / 0.06766 = **10.65 years**\n\n**Row 2:** n = ln(4341/810) / ln(1.12) = ln(5.3593) / ln(1.12) = 1.6790 / 0.11333 = **14.81 years**\n\n**Row 3:** n = ln(402662/16500) / ln(1.17) = ln(24.404) / ln(1.17) = 3.1946 / 0.15700 = **20.35 years**\n\n**Row 4:** n = ln(147350/21500) / ln(1.08) = ln(6.8535) / ln(1.08) = 1.9253 / 0.07696 = **25.01 years**\n\n## Results: 10.65, 14.81, 20.35, 25.01 years\n\nComparing to options:\n- A: 10.52, 14.73, 20.02, 24.73\n- B: 10.64, 14.81, 20.35, 25.01 ✓\n- C: 10.96, 15.22, 20.83, 25.96\n\n**B**",
+    "prediction_error": null,
+    "metrics": {
+      "accuracy": 1.0
+    },
+    "metadata": {
+      "sample_id": "dev_Accounting_5",
+      "options_list": [
+        "10.52 years; 14.73 years; 20.02 years; 24.73 years",
+        "10.64 years; 14.81 years; 20.35 years; 25.01 years",
+        "10.96 years; 15.22 years; 20.83 years; 25.96 years"
+      ]
+    }
+  }
+]

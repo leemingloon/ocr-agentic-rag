@@ -1,0 +1,7 @@
+{
+  "word_recall_mean": 0.0,
+  "words_gt_mean": 0.0,
+  "words_matched_mean": 0.0,
+  "sample_count": 50,
+  "gt_override_count": 0
+}

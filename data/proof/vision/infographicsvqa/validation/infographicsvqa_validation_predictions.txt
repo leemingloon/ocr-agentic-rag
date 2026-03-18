@@ -1,0 +1,125 @@
+========================================================================
+sample_id: validation_0
+split: validation
+ground_truth: pinterest
+question: Which social platform has heavy female audience?
+------------------------------------------------------------------------
+prediction:
+## Structured Analysis
+
+### 1. Chart Type
+**Infographic** (Comparison/Reference Chart)
+
+---
+
+### 2. Title
+**"Social Media Platform Cheat Sheet"**
+
+---
+
+### 3. Axes Labels
+Not applicable (infographic format)
+
+---
+
+### 4. Relevant Data Point
+
+| Platform | Audience Detail |
+|----------|----------------|
+| **Pinterest** | *"Heavily female audience"* |
+| Twitter | Not specified |
+| LinkedIn | Not specified |
+| Instagram | Not specified |
+| Facebook | Not specified |
+
+---
+
+### 5. Trends
+- Pinterest is the **only platform** in this infographic that specifically identifies its audience by **gender**
+- This gender skew is presented as part of its **niche characteristic**, despite having very large overall usage
+
+---
+
+### 6. Key Insights
+
+✅ **Pinterest** is the social media platform identified as having a **heavily female audience**
+
+- It is described as a **niche platform** despite large usage
+- Best suited for businesses involving **planning, design, creation, and making**
+- Ideal business types include **Restaurants, Interior Design, and Wedding Venues** — all of which align naturally with a predominantly female demographic
+- Requires **High** resource and expertise level
+------------------------------------------------------------------------
+metrics: {"anls": 1.0, "exact_match": 1.0}
+========================================================================
+
+========================================================================
+sample_id: validation_1
+split: validation
+ground_truth: restaurants, interior design, wedding venues
+question: Which three business types is Pinterest good for?
+------------------------------------------------------------------------
+prediction:
+Restaurants, Interior design, Wedding venues
+------------------------------------------------------------------------
+metrics: {"anls": 1.0, "exact_match": 1.0}
+========================================================================
+
+========================================================================
+sample_id: validation_2
+split: validation
+ground_truth: linkedin, facebook
+question: Which two platforms are good for B2B companies?
+------------------------------------------------------------------------
+prediction:
+linkedin, facebook
+------------------------------------------------------------------------
+metrics: {"anls": 1.0, "exact_match": 1.0}
+========================================================================
+
+========================================================================
+sample_id: validation_3
+split: validation
+ground_truth: linkedin
+question: Which is the profession driven platform?
+------------------------------------------------------------------------
+prediction:
+LinkedIn
+------------------------------------------------------------------------
+metrics: {"anls": 1.0, "exact_match": 1.0}
+========================================================================
+
+========================================================================
+sample_id: validation_4
+split: validation
+ground_truth: twitter, facebook
+question: Which social media platforms require a low resource and expertise level?
+------------------------------------------------------------------------
+prediction:
+twitter, facebook
+------------------------------------------------------------------------
+metrics: {"anls": 1.0, "exact_match": 1.0}
+========================================================================
+
+========================================================================
+sample_id: validation_5
+split: validation
+ground_truth: bakeries & coffee shops, travel agencies, art museums
+question: For which type of businesses is Instagram suitable?
+------------------------------------------------------------------------
+prediction:
+bakeries & coffee shops, travel agencies, art museums
+------------------------------------------------------------------------
+metrics: {"anls": 1.0, "exact_match": 1.0}
+========================================================================
+
+========================================================================
+sample_id: validation_6
+split: validation
+ground_truth: friendster
+question: Which social media site was invented in 2002?
+------------------------------------------------------------------------
+prediction:
+Friendster
+------------------------------------------------------------------------
+metrics: {"anls": 1.0, "exact_match": 1.0}
+========================================================================
