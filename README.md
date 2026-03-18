@@ -116,7 +116,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) and [EVALUATION_RESULTS.md](EVALUATION_RE
 |----------|-----------|
 | **Hybrid retrieval (BM25 + BGE-M3)** | Handles both numeric tables and text-heavy financial documents; sparse + dense covers different query patterns. |
 | **Agentic orchestration (LangGraph)** | Dynamically selects tools instead of static pipelines; adapts to multi-step QA and reasoning. |
-| **3-tier OCR fallback** | Balances cost, speed, and accuracy: cache → classical → DL -> Vision-Language. Classical for text recognition, PaddleOCR for table recognition, Vision (multi-modal) fallback for charts or complex diagrams understanding. |
+| **3-tier OCR fallback** | Balances cost, speed, and accuracy: cache → classical → DL -> Vision-Language. Classical for text recognition, Deep Learning for table recognition, Vision (multi-modal) fallback for charts or complex diagrams understanding. |
 | **LLM + structured features fusion for credit risk** | Not pure black-box models; interpretable PD models (LR, XGBoost, LSTM) plus LLM for memos and explanations. |
 | **Governance layer (prompt registry + safety filters)** | Production readiness: to add versioning, audit trail, and safety filters for LLM outputs. |
 
