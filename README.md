@@ -1,4 +1,4 @@
-### Quick look at my work and results (for developers)
+### Quick look at my work and results
 
 OCR → RAG → Credit Risk platform for financial documents<br>
 
