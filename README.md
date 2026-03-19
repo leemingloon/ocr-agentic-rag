@@ -6,7 +6,7 @@ OCR → RAG → Credit Risk platform for financial documents<br>
 
 - **Credit risk:** ipynb files in [notebooks/](notebooks/) [Completed]
   - [demo_credit_risk_pd_business_impact.ipynb](notebooks/demo_credit_risk_pd_business_impact.ipynb)
-  - [paper_lstm_stream_ablation.ipynb](notebooks/kaggle-kernels/paper_lstm_stream_ablation/paper_lstm_stream_ablation.ipynb)
+  - [paper_lstm_stream_selection_by_ablation.ipynb](notebooks/kaggle-kernels/paper_lstm_stream_ablation/paper_lstm_stream_selection_by_ablation.ipynb)
   - [00_pd_homecredit_lstm_kaggle.ipynb](notebooks/00_pd_homecredit_lstm_kaggle.ipynb)
   - [01_pd_lendingclub_feature_engineering.ipynb](notebooks/01_pd_lendingclub_feature_engineering.ipynb)
   - [02a_pd_xgboost_training.ipynb](notebooks/02a_pd_xgboost_training.ipynb)
@@ -38,6 +38,7 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 
 ### Key Results (benchmarks)
 
+In this table, `OOT` means an out-of-time (future-period) holdout for generalization; `PD` is probability of default, `AUC-ROC` measures discrimination (ranking quality), and `Brier` measures calibration error, while `VLM` (vision-language), `QNLP` (quantum NLP sentiment), and `Quantum VQC` are model-type tags and `Relaxed/Exact` (and `Exact match`) specify the strictness of answer scoring on the QA datasets.
 <small>
 
 | Layer | Dataset | Metric | Value | Total population | OOT test sample size | Notes |
