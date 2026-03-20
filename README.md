@@ -38,14 +38,14 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 
 ### Key Results (benchmarks)
 
-`OOT`: out-of-time (future-period) holdout set  
+`OOT`: out-of-time (future-period) holdout set during test evaluation
 `PD`: probability of default  
-`AUC-ROC`: ROC area under curve (ranking quality)  
+`AUC-ROC`: area under the ROC curve (ranking quality), where ROC = Receiver Operating Characteristic (true positive rate versus false positive rate as you sweep the approval threshold)  
 `KS`: Kolmogorov-Smirnov statistic (max separation between default/non-default score CDFs)  
 `Brier`: mean squared error of predicted probabilities (calibration)  
 `VLM`: vision-language model  
-`QNLP`: quantum natural language processing  
-`Quantum VQC`: variational quantum classifier tag  
+`QNLP`: quantum NLP (quantum computing for text; a nascent and growing area in quantum machine learning). Used here as a future-facing text-classifier baseline to generate credit-risk sentiment signals that can feed PD features.  
+`Quantum VQC`: variational quantum classifier (hybrid quantum–classical classifier; a nascent quantum ML approach). Used here as a future-facing quantum benchmark on the same credit-risk text task, alongside classical baselines.  
 `Relaxed/Exact`: QA scoring strictness on the benchmark datasets.
 <small>
 
