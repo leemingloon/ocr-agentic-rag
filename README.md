@@ -1,4 +1,4 @@
-### Quick look at my work and results for technical readers (else skip ahead to the next section)
+### My work & results for technical readers (else skip ahead to the next section)
 
 OCR → RAG → Credit Risk platform for financial documents<br>
 
@@ -49,23 +49,23 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 `Relaxed/Exact`: QA scoring strictness on the benchmark datasets.
 <small>
 
-| Layer | Dataset | Metric | Value | Total population | OOT test sample size | Notes |
-|-------|---------|--------|-------|-----------------|----------------------|------|
-| **Credit risk PD (LSTM)** | Home Credit (full population) | OOT AUC-ROC, KS | 0.756, 0.380 | 307,511 | 61,502 | |
-| **Credit risk PD (LSTM)** | Home Credit (has_repayment_bureau) | OOT AUC-ROC, KS | 0.749, 0.373 | 88,816 | 17,763 | |
-| **Credit risk PD (LSTM)** | Home Credit (has_bureau) | OOT AUC-ROC, KS | 0.753, 0.375 | 295,058 | 58,829 | |
-| **Credit risk PD (LSTM)** | Home Credit (no_bureau) | OOT AUC-ROC, KS | 0.814, 0.508 | 12,453 | 2,673 | |
-| **Credit risk PD (Logistic Regression)** | LendingClub | OOT AUC-ROC, Brier, KS | 0.660, 0.236, 0.234 | — | 21,721 | Preferred for rank-ordering |
-| **Credit risk PD (Optuna-tuned XGBoost/LightGBM stack)** | LendingClub | OOT AUC-ROC, Brier, KS | 0.636, 0.145, 0.205 | — | 21,721 | Preferred for PD calibration/estimation |
-| **Credit risk PD (ANN)** | LendingClub | OOT AUC-ROC, KS | 0.616, 0.178 | — | 21,721 | |
-| **RAG** | FinQA (out-of-sample) | Relaxed / Exact | 77.5% / 71.5% | — | 200 | |
-| **RAG** | FinQA (in-sample) | Relaxed / Exact | 92% / 90.5% | — | 200 | |
-| **RAG** | TAT-QA (out-of-sample) | Relaxed / Exact | 89.5% / 77% | — | 200 | |
-| **RAG** | TAT-QA (in-sample) | Relaxed / Exact | 98.5% / 81% | — | 200 | |
-| **Vision-Language model (VLM)** | DocVQA, ChartQA, InfographicsVQA, MMMU | In-sample accuracy | 90% | — | 56 | |
-| **Credit risk memo generator** | FinanceBench | Exact match | 94% | — | 100 | |
-| **Credit risk PD (Quantum VQC)** | LendingClub | OOT AUC-ROC, KS | 0.540, — | — | 21,721 | |
-| **Credit Risk Sentiment (QNLP)** | Financial PhraseBank & FiQA | Test F1 macro | 0.40 | — | 112 | |
+| Layer | Dataset | Metric | Value | OOT test sample size | Total population size | Notes |
+|-------|---------|--------|-------|----------------------|------------------------|------|
+| **Credit risk PD (LSTM)** | Home Credit (full population) | OOT AUC-ROC, KS | 0.756, 0.380 | 61,502 | 307,511 | |
+| **Credit risk PD (LSTM)** | Home Credit (has_repayment_bureau) | OOT AUC-ROC, KS | 0.749, 0.373 | 17,763 | 88,816 | |
+| **Credit risk PD (LSTM)** | Home Credit (has_bureau) | OOT AUC-ROC, KS | 0.753, 0.375 | 58,829 | 295,058 | |
+| **Credit risk PD (LSTM)** | Home Credit (no_bureau) | OOT AUC-ROC, KS | 0.814, 0.508 | 2,673 | 12,453 | |
+| **Credit risk PD (Logistic Regression)** | LendingClub | OOT AUC-ROC, KS, Brier | 0.660, 0.234, 0.236 | 21,721 | — | Preferred for rank-ordering |
+| **Credit risk PD (Optuna-tuned XGBoost/LightGBM stack)** | LendingClub | OOT AUC-ROC, Brier, KS | 0.636, 0.145, 0.205 | 21,721 | — | Preferred for PD calibration/estimation |
+| **Credit risk PD (ANN)** | LendingClub | OOT AUC-ROC, KS | 0.616, 0.178 | 21,721 | — | |
+| **RAG** | FinQA (out-of-sample) | Relaxed / Exact | 77.5% / 71.5% | 200 | — | |
+| **RAG** | FinQA (in-sample) | Relaxed / Exact | 92% / 90.5% | 200 | — | |
+| **RAG** | TAT-QA (out-of-sample) | Relaxed / Exact | 89.5% / 77% | 200 | — | |
+| **RAG** | TAT-QA (in-sample) | Relaxed / Exact | 98.5% / 81% | 200 | — | |
+| **Vision-Language model (VLM)** | DocVQA, ChartQA, InfographicsVQA, MMMU | In-sample accuracy | 90% | 56 | — | |
+| **Credit risk memo generator** | FinanceBench | Exact match | 94% | 100 | — | |
+| **Credit risk PD (Quantum VQC)** | LendingClub | OOT AUC-ROC, KS | 0.540, — | 21,721 | — | |
+| **Credit Risk Sentiment (QNLP)** | Financial PhraseBank & FiQA | Test F1 macro | 0.40 | 112 | — | |
 
 </small>
 
