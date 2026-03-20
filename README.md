@@ -46,7 +46,7 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 `VLM`: vision-language model  
 `Quantum VQC`: variational quantum classifier (hybrid quantum–classical supervised learning). Used here as a future-facing quantum benchmark for **PD modelling on tabular LendingClub features**.<br>
 `QNLP`: quantum NLP (quantum computing for text; a nascent and growing area in quantum machine learning). Used here to build **credit-risk sentiment signals from financial text** that can feed PD feature sets.<br>
-`Relaxed/Exact`: QA scoring strictness on the benchmark datasets.
+`Relaxed/Exact Match`: QuestionAnswer scoring metrics of prediction's match with ground truth.
 <small>
 
 | Layer | Dataset | Metric | Value | OOT test sample size | Total population size | Notes |
