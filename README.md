@@ -38,7 +38,7 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 
 ### Key Results (benchmarks)
 
-`OOT`: out-of-time (future-period) holdout set during test evaluation
+`OOT`: out-of-time (future-period) holdout set during test evaluation<br>
 `PD`: probability of default  
 `AUC-ROC`: area under the ROC curve (ranking quality), where ROC = Receiver Operating Characteristic (true positive rate versus false positive rate as you sweep the approval threshold)  
 `KS`: Kolmogorov-Smirnov statistic (max separation between default/non-default score CDFs)  
