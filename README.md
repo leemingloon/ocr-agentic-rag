@@ -1,4 +1,4 @@
-### Quick look at my work and results
+### Quick look at my work and results (technical readers, else skip ahead to the next section)
 
 OCR → RAG → Credit Risk platform for financial documents<br>
 
@@ -44,8 +44,8 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 `KS`: Kolmogorov-Smirnov statistic (max separation between default/non-default score CDFs)  
 `Brier`: mean squared error of predicted probabilities (calibration)  
 `VLM`: vision-language model  
-`QNLP`: quantum NLP (quantum computing for text; a nascent and growing area in quantum machine learning). Used here as a future-facing text-classifier baseline to generate credit-risk sentiment signals that can feed PD features.  
-`Quantum VQC`: variational quantum classifier (hybrid quantum–classical classifier; a nascent quantum ML approach). Used here as a future-facing quantum benchmark on the same credit-risk text task, alongside classical baselines.  
+`Quantum VQC`: variational quantum classifier (hybrid quantum–classical supervised learning). Used here as a future-facing quantum benchmark for **PD modelling on tabular LendingClub features**.
+`QNLP`: quantum NLP (quantum computing for text; a nascent and growing area in quantum machine learning). Used here to build **credit-risk sentiment signals from financial text** that can feed PD feature sets.
 `Relaxed/Exact`: QA scoring strictness on the benchmark datasets.
 <small>
 
