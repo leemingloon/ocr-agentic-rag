@@ -62,10 +62,10 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 | **RAG** | FinQA (in-sample) | Relaxed / Exact | 92% / 90.5% | — | 200 | |
 | **RAG** | TAT-QA (out-of-sample) | Relaxed / Exact | 89.5% / 77% | — | 200 | |
 | **RAG** | TAT-QA (in-sample) | Relaxed / Exact | 98.5% / 81% | — | 200 | |
-| **Vision-Language model (VLM)** | DocVQA, ChartQA, InfographicsVQA, MMMU | In-sample accuracy | ~90% | — | 56 | |
-| **Credit risk memo generator** | FinanceBench | Exact match | ~94% | — | 100 | |
+| **Vision-Language model (VLM)** | DocVQA, ChartQA, InfographicsVQA, MMMU | In-sample accuracy | 90% | — | 56 | |
+| **Credit risk memo generator** | FinanceBench | Exact match | 94% | — | 100 | |
 | **Credit risk PD (Quantum VQC)** | LendingClub | OOT AUC-ROC, KS | 0.540, — | — | 21,721 | |
-| **Credit Risk Sentiment (QNLP)** | Financial PhraseBank & FiQA | Test F1 macro | ~0.40 | — | 112 | |
+| **Credit Risk Sentiment (QNLP)** | Financial PhraseBank & FiQA | Test F1 macro | 0.40 | — | 112 | |
 
 </small>
 
