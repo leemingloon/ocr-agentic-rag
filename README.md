@@ -17,7 +17,7 @@ OCR → RAG → Credit Risk platform for financial documents<br>
   - [04a_sentiment_finbert_training.ipynb](notebooks/04a_sentiment_finbert_training.ipynb)
   - [04b_sentiment_qnlp_training.ipynb](notebooks/04b_sentiment_qnlp_training.ipynb)
   - [04z_sentiment_model_comparison.ipynb](notebooks/04z_sentiment_model_comparison.ipynb)
-  - PD predictions in [data/proof/credit_risk_pd/](data/proof/credit_risk_pd/) on Hugging Face pre-defined splits (train/valid/test). Evaluation AUC across different models:
+  - PD predictions in [data/proof/credit_risk_pd/](data/proof/credit_risk_pd/) on Hugging Face pre-defined splits (train/valid/test) with AUC scores across different models:
     - [tuned-XGB/untuned-LGB stack](data/proof/credit_risk_pd/lendingclub/lendingclub_avg.json) (Selected stack),
     - [untuned-XGB/untuned-LGB stack](data/proof/credit_risk_pd/lendingclub_untuned_xgb/lendingclub_untuned_xgb_avg.json),
     - [tuned-LR](data/proof/credit_risk_pd/lendingclub_lr_tuned/lendingclub_lr_tuned_avg.json).
