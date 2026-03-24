@@ -18,7 +18,7 @@ OCR → RAG → Credit Risk platform for financial documents<br>
   - [04b_sentiment_qnlp_training.ipynb](notebooks/04b_sentiment_qnlp_training.ipynb)
   - [04z_sentiment_model_comparison.ipynb](notebooks/04z_sentiment_model_comparison.ipynb)
   - PD predictions in [data/proof/credit_risk_pd/](data/proof/credit_risk_pd/) on Hugging Face pre-defined splits (train/valid/test). 
-    - Evaluation AUC across different models: [tuned-XGB/untuned-LGB stack](data/proof/credit_risk_pd/lendingclub/lendingclub_avg.json), [untuned-XGB/untuned-LGB stack](data/proof/credit_risk_pd/lendingclub_untuned_xgb/lendingclub_untuned_xgb_avg.json), [tuned-LR](data/proof/credit_risk_pd/lendingclub_lr_tuned/lendingclub_lr_tuned_avg.json).
+    - Evaluation AUC across different models: [tuned-XGB/untuned-LGB stack](data/proof/credit_risk_pd/lendingclub/lendingclub_avg.json) (Selected stack), [untuned-XGB/untuned-LGB stack](data/proof/credit_risk_pd/lendingclub_untuned_xgb/lendingclub_untuned_xgb_avg.json), [tuned-LR](data/proof/credit_risk_pd/lendingclub_lr_tuned/lendingclub_lr_tuned_avg.json).
   - Credit risk memo generator on [FinanceBench](data/proof/credit_risk_memo_generator/financebench/train/financebench_train_predictions.txt).
 - **RAG (model predictions):** Under [data/proof/rag/](data/proof/rag/). [Completed]
   - **FinQA:** [in-sample (train)](data/proof/rag/finqa/train/finqa_train_predictions.txt), [out-of-sample (test)](data/proof/rag/finqa/test/finqa_test_predictions.txt)
