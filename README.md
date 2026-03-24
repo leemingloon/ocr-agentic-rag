@@ -25,8 +25,8 @@ OCR → RAG → Credit Risk platform for financial documents<br>
 - **RAG (model predictions):** Under [data/proof/rag/](data/proof/rag/). [Completed]
   - **FinQA:** [in-sample (train)](data/proof/rag/finqa/train/finqa_train_predictions.txt), [out-of-sample (test)](data/proof/rag/finqa/test/finqa_test_predictions.txt)
   - **TAT-QA:** [in-sample (test)](data/proof/rag/tatqa/test/tatqa_test_predictions.txt), [out-of-sample (dev)](data/proof/rag/tatqa/dev/tatqa_dev_predictions.txt)
-- **Vision (model predictions):** [`*_predictions.txt`](data/proof/vision/docvqa/validation/docvqa_validation_predictions.txt) files under [data/proof/vision/](data/proof/vision/). [in-sample evaluation only]
-- **OCR (model predictions):** [`*_avg.json`](data/proof/ocr/funsd/funsd_avg.json) files under [data/proof/ocr/](data/proof/ocr/). [in-sample evaluation only]
+- **Vision (model predictions):** [`*_predictions.txt`](data/proof/vision/docvqa/validation/docvqa_validation_predictions.txt) files under [data/proof/vision/](data/proof/vision/). [in-sample evaluation thus far]
+- **OCR (model predictions):** [`*_avg.json`](data/proof/ocr/funsd/funsd_avg.json) files under [data/proof/ocr/](data/proof/ocr/). [in-sample evaluation thus far]
 
 ---
 
