@@ -3063,6 +3063,8 @@ def evaluate_dataset(
                 f1_prec_rec = pd_utils.f1_precision_recall(y_true, y_pred)
                 split_avg = {
                     "auc_roc_mean": pd_utils.auc_roc(y_true, y_score),
+                    # Discriminative KS for default vs non-default score separation.
+                    "ks_mean": pd_utils.ks_discriminative(y_true, y_score),
                     "f1_mean": f1_prec_rec["f1"],
                     "precision_mean": f1_prec_rec["precision"],
                     "recall_mean": f1_prec_rec["recall"],
@@ -3791,6 +3793,25 @@ def run_reevaluate_only(
         split_metric_rows = [r.get("metrics") or {} for r in rows_for_agg]
         if category.lower() == "rag" and dataset_name.upper() in ("TATQA", "FINQA"):
             split_avg = aggregate_rag_split_metrics(rows_for_agg)
+        elif category.lower() in ("credit_risk_pd", "credit_risk_pd_quantum") and split_metric_rows:
+            pd_utils = CreditRiskPDUtils()
+            y_true = [r["gt_binary"] for r in split_metric_rows if r.get("gt_binary") is not None]
+            y_score = [r["pd_prob"] for r in split_metric_rows if r.get("pd_prob") is not None]
+            y_pred = [r["binary_pred"] for r in split_metric_rows if r.get("binary_pred") is not None]
+            if len(y_true) == len(y_score) == len(y_pred) and y_true:
+                f1_prec_rec = pd_utils.f1_precision_recall(y_true, y_pred)
+                split_avg = {
+                    "auc_roc_mean": pd_utils.auc_roc(y_true, y_score),
+                    # Discriminative KS for default vs non-default score separation.
+                    "ks_mean": pd_utils.ks_discriminative(y_true, y_score),
+                    "f1_mean": f1_prec_rec["f1"],
+                    "precision_mean": f1_prec_rec["precision"],
+                    "recall_mean": f1_prec_rec["recall"],
+                    "sample_count": len(rows_for_agg),
+                }
+            else:
+                split_avg = aggregate_metrics(split_metric_rows)
+                split_avg["sample_count"] = len(rows_for_agg)
         else:
                 split_avg = aggregate_metrics(split_metric_rows)
                 split_avg["sample_count"] = len(rows_for_agg)

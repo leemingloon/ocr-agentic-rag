@@ -1,12 +1,12 @@
 {
-  "xgb_stack_tuning_sec": 217.61640389999957,
+  "xgb_stack_tuning_sec": 283.92691750000006,
   "ann_training_sec": 19.091616700003215,
-  "stack_oot_auc": 0.6445553866717346,
-  "stack_oot_ks": 0.21237161350513917,
-  "best_threshold": 0.2899999999999999,
+  "stack_oot_auc": 0.646503317994187,
+  "stack_oot_ks": 0.21480117321355974,
+  "best_threshold": 0.2799999999999999,
   "threshold_source": "val_set_max_f1",
-  "threshold_f1_val": 0.5748320097739767,
-  "val_auc": 0.892019822439649,
+  "threshold_f1_val": 0.5758030621435004,
+  "val_auc": 0.8920116580069029,
   "ann_brier": 0.2425796389579773,
   "ann_oot_auc": 0.6162961753148397,
   "ann_oot_ks": 0.17778227973666771
