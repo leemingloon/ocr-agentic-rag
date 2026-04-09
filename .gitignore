@@ -80,6 +80,7 @@ logs/*
 # OS
 .DS_Store
 Thumbs.db
+*.lnk
 
 # Temporary files
 *.tmp
