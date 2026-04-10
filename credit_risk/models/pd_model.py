@@ -47,6 +47,10 @@ Usage:
 import numpy as np
 import pandas as pd
 from typing import Dict, List, Optional, Literal
+from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.exceptions import NotFittedError
+from sklearn.isotonic import IsotonicRegression
+from sklearn.utils.validation import check_is_fitted
 import joblib
 from pathlib import Path
 import json
@@ -68,7 +72,7 @@ except ImportError:
     print("Warning: boto3 not available (S3 disabled)")
 
 
-class _StackedPDWrapper:
+class _StackedPDWrapper(ClassifierMixin, BaseEstimator):
     """Wrapper for notebook-trained XGB+LightGBM(+CatBoost) stacked model so pkl can be loaded from eval_runner (not just __main__).
     Supports 2-way (xgb, lgb) or 3-way (xgb, lgb, catboost) stacking."""
     def __init__(self, xgb_model, lgb_model, meta, catboost_model=None):
@@ -76,6 +80,17 @@ class _StackedPDWrapper:
         self.lgb_model = lgb_model
         self.meta = meta
         self.catboost_model = catboost_model
+
+    def __sklearn_is_fitted__(self):
+        try:
+            check_is_fitted(self.xgb_model)
+            return True
+        except NotFittedError:
+            return False
+
+    @property
+    def classes_(self):
+        return self.meta.classes_
 
     def predict_proba(self, X):
         X_arr = X.values if hasattr(X, "values") else X
@@ -94,8 +109,42 @@ class _StackedPDWrapper:
     def predict(self, X):
         return (self.predict_proba(X)[:, 1] >= 0.5).astype(int)
 
+    def fit(self, X=None, y=None, **kwargs):
+        """No-op for sklearn meta-estimators (e.g. CalibratedClassifierCV + FrozenEstimator)."""
+        return self
 
-class _LRWithScaler:
+
+class _PrecomputedBinaryIsotonicCalibrator(ClassifierMixin, BaseEstimator):
+    """Isotonic calibration on a fixed, pre-fit base classifier (no CV).
+
+    Used when validation labels are too sparse for stratified CV (e.g. one class count < 2).
+    """
+
+    def __init__(self, base_estimator, X_cal, y_cal):
+        self.base_estimator = base_estimator
+        self.X_cal = X_cal
+        self.y_cal = y_cal
+        self.classes_ = np.array([0, 1])
+        p = base_estimator.predict_proba(X_cal)[:, 1]
+        self._iso = IsotonicRegression(out_of_bounds="clip")
+        self._iso.fit(p, np.asarray(y_cal).ravel())
+
+    def __sklearn_is_fitted__(self):
+        return hasattr(self, "_iso")
+
+    def predict_proba(self, X):
+        p = self.base_estimator.predict_proba(X)[:, 1]
+        pc = self._iso.predict(p)
+        return np.column_stack([1.0 - pc, pc])
+
+    def fit(self, X=None, y=None, **kwargs):
+        return self
+
+    def predict(self, X):
+        return (self.predict_proba(X)[:, 1] >= 0.5).astype(int)
+
+
+class _LRWithScaler(ClassifierMixin, BaseEstimator):
     """Thin wrapper: StandardScaler + LogisticRegression with predict_proba
     interface compatible with eval_runner PDModel loader.
     Bundles the scaler inside predict_proba so no separate scaling step is
@@ -105,6 +154,17 @@ class _LRWithScaler:
         self.scaler = scaler
         self.lr_model = lr_model
         self.feature_names = feature_names
+
+    def __sklearn_is_fitted__(self):
+        try:
+            check_is_fitted(self.lr_model)
+            return True
+        except NotFittedError:
+            return False
+
+    @property
+    def classes_(self):
+        return self.lr_model.classes_
 
     def predict_proba(self, X):
         import pandas as pd
@@ -118,6 +178,16 @@ class _LRWithScaler:
         X_arr = np.array(X)
         X_scaled = self.scaler.transform(X_arr)
         return self.lr_model.predict_proba(X_scaled)
+
+    def fit(self, X=None, y=None, **kwargs):
+        """No-op for sklearn meta-estimators (e.g. CalibratedClassifierCV + FrozenEstimator)."""
+        return self
+
+    def predict(self, X):
+        return (self.predict_proba(X)[:, 1] >= 0.5).astype(int)
+
+
+from credit_risk.models.pd_joblib_compat import rebind_sklearn_pd_wrappers  # noqa: E402
 
 
 class PDModel:
@@ -397,8 +467,15 @@ class PDModel:
                 setattr(main_module, "_StackedPDWrapper", _StackedPDWrapper)
             if not hasattr(main_module, "_LRWithScaler"):
                 setattr(main_module, "_LRWithScaler", _LRWithScaler)
+            if not hasattr(main_module, "_PrecomputedBinaryIsotonicCalibrator"):
+                setattr(
+                    main_module,
+                    "_PrecomputedBinaryIsotonicCalibrator",
+                    _PrecomputedBinaryIsotonicCalibrator,
+                )
         model_data = joblib.load(filepath)
-        
+        rebind_sklearn_pd_wrappers(model_data)
+
         self.model = model_data["model"]
         self.feature_names = model_data["feature_names"]
         self.params = model_data.get("params", self.params)

@@ -1,14 +1,15 @@
 {
-  "xgb_stack_tuning_sec": 211.71134190000157,
-  "ann_training_sec": 16.944449200003874,
-  "stack_oot_auc": 0.6380740968875112,
-  "stack_oot_ks": 0.20482837395698217,
-  "best_threshold": 0.32999999999999985,
-  "threshold_source": "val_set_max_f1",
-  "threshold_f1_val": 0.5818534065224411,
-  "val_auc": 0.89551781342036,
+  "xgb_stack_tuning_sec": 271.86522510000214,
+  "ann_training_sec": 16.546592300001066,
+  "stack_oot_auc": 0.6068310399683077,
+  "stack_oot_ks": 0.16372014993827866,
+  "best_threshold": 0.74,
+  "threshold_source": "policy_constrained",
+  "threshold_f1_val": 0.6543865126443958,
+  "val_auc": 0.9344106280034824,
   "ann_brier": 0.2425796389579773,
   "ann_oot_auc": 0.6162961753148397,
   "ann_oot_ks": 0.17778227973666771,
-  "stack_brier": 0.14409607109502326
+  "stack_brier": 0.1492839729711995,
+  "stack_brier_calibrated": 0.15217273262221354
 }
