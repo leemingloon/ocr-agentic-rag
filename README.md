@@ -57,7 +57,7 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 | **Credit risk PD (LSTM)** | Home Credit (full population) | OOT AUC-ROC, KS | 0.756, 0.380 | 61,502 | 307,511 | |
 | **Credit risk PD (LSTM)** | Home Credit (has_repayment_bureau) | OOT AUC-ROC, KS | 0.749, 0.373 | 17,763 | 88,816 | |
 | **Credit risk PD (LSTM)** | Home Credit (has_bureau) | OOT AUC-ROC, KS | 0.753, 0.375 | 58,829 | 295,058 | |
-| **Credit risk PD (LSTM)** | Home Credit (no_bureau) | OOT AUC-ROC, KS | 0.814, 0.508 | 2,673 | 12,453 | |
+| **Credit risk PD (LSTM)** | Home Credit (no_bureau_stream) | OOT AUC-ROC, KS | 0.814, 0.508 | 2,673 | 12,453 | |
 | **Credit risk PD (Logistic Regression)** | LendingClub | OOT AUC-ROC, KS, Brier | 0.660, 0.234, 0.236 | 21,721 | — | Preferred for rank-ordering |
 | **Credit risk PD (Optuna-tuned XGBoost/LightGBM stack)** | LendingClub | OOT AUC-ROC, KS, Brier | 0.636, 0.205, 0.145 | 21,721 | — | Preferred for PD calibration/estimation |
 | **Credit risk PD (ANN)** | LendingClub | OOT AUC-ROC, KS | 0.616, 0.178 | 21,721 | — | |
