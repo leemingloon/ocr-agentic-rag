@@ -1,4 +1,4 @@
-### Methodology & findings for technical readers (else skip ahead to the next section for results)
+### Methodology & findings for technical readers (else skip ahead to the next section)
 
 OCR → RAG → Credit Risk platform for financial documents<br>
 
