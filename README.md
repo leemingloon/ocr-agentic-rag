@@ -5,14 +5,14 @@ OCR → RAG → Credit Risk platform for financial documents<br>
 **Status:** Deployed to Amazon Web Services (AWS) Sagemaker. Evaluated using Local / Google Colabs / Kaggle.
 
 - **Credit risk:** ipynb files in [notebooks/](notebooks/) [Completed]
-  - [demo_credit_risk_pd_business_impact.ipynb](notebooks/demo_credit_risk_pd_business_impact.ipynb) [Policy]
+  - [demo_credit_risk_pd_business_impact.ipynb](notebooks/demo_credit_risk_pd_business_impact.ipynb) (Policy)
   - [paper_lstm_stream_selection_by_ablation.ipynb](notebooks/kaggle-kernels/paper_lstm_stream_ablation/paper_lstm_stream_selection_by_ablation.ipynb)
   - [00_pd_homecredit_lstm_kaggle.ipynb](notebooks/00_pd_homecredit_lstm_kaggle.ipynb)
   - [01_pd_lendingclub_feature_engineering.ipynb](notebooks/01_pd_lendingclub_feature_engineering.ipynb)
   - [02a_pd_xgboost_training.ipynb](notebooks/02a_pd_xgboost_training.ipynb)
   - [02b_pd_ann_training.ipynb](notebooks/02b_pd_ann_training.ipynb)
   - [02c_pd_quantum_qvc_training.ipynb](notebooks/02c_pd_quantum_qvc_training.ipynb)
-  - [02z_pd_model_comparison.ipynb](notebooks/02z_pd_model_comparison.ipynb) [Policy]
+  - [02z_pd_model_comparison.ipynb](notebooks/02z_pd_model_comparison.ipynb) (Policy)
   - [03_sentiment_FP_FiQA_feature_engineering.ipynb](notebooks/03_sentiment_FP_FiQA_feature_engineering.ipynb)
   - [04a_sentiment_finbert_training.ipynb](notebooks/04a_sentiment_finbert_training.ipynb)
   - [04b_sentiment_qnlp_training.ipynb](notebooks/04b_sentiment_qnlp_training.ipynb)
