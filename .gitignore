@@ -246,6 +246,10 @@ data/rag/**/tatqa_retriever_index_b4_dedup/
 **/train_qa.json
 **/test.json
 
+# Root-level scratch / local maintenance (not for CI or collaborators by default)
+/tools/
+/_tmp_pos.py
+
 # Backup LSTM notebooks
 notebooks/00-pd-homecredit-lstm-kaggle.ipynb
 notebooks/00_pd_homecredit_lstm_kaggle_slim.ipynb

@@ -31,7 +31,20 @@ from typing import Any
 
 # Root for proof outputs (category avg, eval_summary). Dataset outputs go under PROOF_ROOT/<category>/<dataset>/ unless --model_output_path (or default when --model) is used.
 PROOF_ROOT = Path("data/proof")
+_REPO_ROOT = Path(__file__).resolve().parent
 from zoneinfo import ZoneInfo
+
+
+def _path_for_log(path: Path | str) -> str:
+    """Log path relative to repo root when possible (avoids embedding user home dirs in stdout)."""
+    p = Path(path).resolve()
+    try:
+        return p.relative_to(_REPO_ROOT).as_posix()
+    except ValueError:
+        try:
+            return p.relative_to(Path.cwd().resolve()).as_posix()
+        except ValueError:
+            return p.as_posix()
 
 
 def _safe_print(*args: Any, **kwargs: Any) -> None:
@@ -4675,7 +4688,7 @@ def export_predictions_txt(
                 lines.append("=" * 72)
             with open(out_path, "w", encoding="utf-8") as f:
                 f.write("\n".join(lines))
-            print(f"[export_predictions_txt] Wrote {out_path}")
+            print(f"[export_predictions_txt] Wrote {_path_for_log(out_path)}")
             continue
         elif len(rel.parts) >= 1 and rel.parts[0] == "rag" and header_dataset.upper() == "FINQA":
             all_met = [r.get("metrics") or {} for r in rows_for_header]
@@ -4840,7 +4853,7 @@ def export_predictions_txt(
         with open(out_path, "w", encoding="utf-8") as f:
             f.write("\n".join(lines))
 
-        print(f"[export_predictions_txt] Wrote {out_path}")
+        print(f"[export_predictions_txt] Wrote {_path_for_log(out_path)}")
 
 
 if __name__ == "__main__":

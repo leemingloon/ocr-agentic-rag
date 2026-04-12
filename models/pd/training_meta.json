@@ -1,15 +1,16 @@
 {
-  "xgb_stack_tuning_sec": 271.86522510000214,
-  "ann_training_sec": 16.546592300001066,
-  "stack_oot_auc": 0.6068310399683077,
-  "stack_oot_ks": 0.16372014993827866,
+  "xgb_stack_tuning_sec": 268.7178816999949,
+  "ann_training_sec": 5.863188000002992,
+  "stack_oot_auc": 0.6015331771103114,
+  "stack_oot_ks": 0.15864461382872702,
   "best_threshold": 0.74,
   "threshold_source": "policy_constrained",
-  "threshold_f1_val": 0.6543865126443958,
-  "val_auc": 0.9344106280034824,
-  "ann_brier": 0.2425796389579773,
-  "ann_oot_auc": 0.6162961753148397,
-  "ann_oot_ks": 0.17778227973666771,
-  "stack_brier": 0.1492839729711995,
-  "stack_brier_calibrated": 0.15217273262221354
+  "threshold_f1_val": 0.6775818639798489,
+  "val_auc": 0.9375930837350245,
+  "ann_brier": 0.24867364764213562,
+  "ann_oot_auc": 0.6265383677525761,
+  "ann_oot_ks": 0.19116358428450664,
+  "stack_brier": 0.1484696312043693,
+  "stack_brier_calibrated": 0.15212896018342284,
+  "ann_brier_cal": 0.1260569542646408
 }

@@ -102,7 +102,7 @@ Implemented in **`credit_risk/`**: feature engineering, PD/sentiment/memo models
 
 - **PD (Probability of Default):**
   - **LendingClub:** Origination-only features; train-time feature selection (missingness, KS, correlation); OOT split (e.g. train 2007–2009, test 2011). Models: Logistic Regression, XGBoost/LightGBM (Optuna-tuned), ANN. Brier score, isotonic calibration. Evaluated via TheFinAI/lendingclub-benchmark; proof under `data/proof/credit_risk_pd/`.
-  - **Home Credit:** Triple-stream LSTM (installments, bureau, credit card); bureau vs no-bureau segments; OOT AUC, decile capture, PSI, origination-feature importance. Training and eval in notebooks (e.g. `notebooks/00_pd_homecredit_lstm_kaggle*.ipynb`, `02a_pd_xgboost_training.ipynb`, `02b_pd_ann_training.ipynb`). Data in `data/home_credit/`.
+  - **Home Credit:** Default **four-stream (quad) LSTM** (installments, bureau, credit card, POS/cash) plus static features; stream retention is justified by leave-one-out (LOO) evidence in `paper_lstm_stream_selection_by_loo.ipynb` (disabled legacy sequential-addition blocks in `00_pd_homecredit_lstm_kaggle.ipynb` are not used for model selection). Bureau vs no-bureau segments; OOT AUC, decile capture, PSI, origination-feature importance. Training and eval in notebooks (e.g. `notebooks/00_pd_homecredit_lstm_kaggle*.ipynb`, `02a_pd_xgboost_training.ipynb`, `02b_pd_ann_training.ipynb`). Data in `data/home_credit/`.
 - **Sentiment:** FinBERT fine-tuned on Financial PhraseBank + FiQA; TF-IDF + LogReg baseline; post-inference fixes (negation, hedged language). Benchmarks: Financial PhraseBank, FiQA.
 - **Risk memo:** LLM-generated memos from structured features; evaluated on **FinanceBench** (proof under `data/proof/credit_risk_memo_generator/`).
 

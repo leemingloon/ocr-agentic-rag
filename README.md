@@ -4,10 +4,10 @@ OCR → RAG → Credit Risk platform for financial documents<br>
 
 **Status:** Deployed to Amazon Web Services (AWS) Sagemaker. Evaluated using Local / Google Colabs / Kaggle.
 
-- **Credit risk:** ipynb files in [notebooks/](notebooks/) [Completed]
+- **Credit risk:** ipynb files in [notebooks/](notebooks/) [Completed] — **logical reading order:** feature engineering → train models → comparison → business impact → Home Credit LSTM → LOO stream-selection paper.
   - [demo_credit_risk_pd_business_impact.ipynb](notebooks/demo_credit_risk_pd_business_impact.ipynb) (Policy)
-  - [paper_lstm_stream_selection_by_ablation.ipynb](notebooks/kaggle-kernels/paper_lstm_stream_ablation/paper_lstm_stream_selection_by_ablation.ipynb)
-  - [00_pd_homecredit_lstm_kaggle.ipynb](notebooks/00_pd_homecredit_lstm_kaggle.ipynb)
+  - [paper_lstm_stream_selection_by_loo.ipynb](notebooks/kaggle-kernels/paper_lstm_stream_ablation/paper_lstm_stream_selection_by_loo.ipynb) (LSTM stream selection)
+  - [00_pd_homecredit_lstm_kaggle.ipynb](notebooks/00_pd_homecredit_lstm_kaggle.ipynb)  
   - [01_pd_lendingclub_feature_engineering.ipynb](notebooks/01_pd_lendingclub_feature_engineering.ipynb)
   - [02a_pd_xgboost_training.ipynb](notebooks/02a_pd_xgboost_training.ipynb)
   - [02b_pd_ann_training.ipynb](notebooks/02b_pd_ann_training.ipynb)
@@ -57,17 +57,17 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 | **Credit risk PD (LSTM)** | Home Credit (full population) | OOT AUC-ROC, KS | 0.756, 0.380 | 61,502 | 307,511 | |
 | **Credit risk PD (LSTM)** | Home Credit (has_repayment_bureau) | OOT AUC-ROC, KS | 0.749, 0.373 | 17,763 | 88,816 | |
 | **Credit risk PD (LSTM)** | Home Credit (has_bureau) | OOT AUC-ROC, KS | 0.753, 0.375 | 58,829 | 295,058 | |
-| **Credit risk PD (LSTM)** | Home Credit (no_bureau_stream) | OOT AUC-ROC, KS | 0.814, 0.508 | 2,673 | 12,453 | |
-| **Credit risk PD (Logistic Regression)** | LendingClub | OOT AUC-ROC, KS, Brier | 0.660, 0.234, 0.236 | 21,721 | — | Preferred for rank-ordering |
-| **Credit risk PD (Optuna-tuned XGBoost/LightGBM stack)** | LendingClub | OOT AUC-ROC, KS, Brier | 0.636, 0.205, 0.145 | 21,721 | — | Preferred for PD calibration/estimation |
-| **Credit risk PD (ANN)** | LendingClub | OOT AUC-ROC, KS | 0.616, 0.178 | 21,721 | — | |
+| **Credit risk PD (LSTM)** | Home Credit (no_bureau) | OOT AUC-ROC, KS | 0.814, 0.508 | 2,673 | 12,453 | |
+| **Credit risk PD (Logistic Regression)** | LendingClub | OOT AUC-ROC, KS, Brier | 0.660, 0.234, 0.236 | 21,721 | — | Rank-ordering preferred; calibrated Brier 0.124 (isotonic). Raw Brier 0.236 reflects `class_weight='balanced'` scaling. |
+| **Credit risk PD (Optuna-tuned XGBoost/LightGBM stack)** | LendingClub | OOT AUC-ROC, KS, Brier | 0.606, 0.163, 0.148 | 21,721 | — | Preferred for PD calibration/estimation. CV uses StratifiedGroupKFold so HF-augmentation twins stay in-fold (avoids cross-fold leakage that previously inflated OOT). |
+| **Credit risk PD (ANN)** | LendingClub | OOT AUC-ROC, KS | 0.616, 0.178 | 21,721 | — | Negative val→OOT gap (−0.009) indicates no temporal degradation on this static dataset. |
 | **RAG** | FinQA (out-of-sample) | Relaxed / Exact | 77.5% / 71.5% | 200 | — | |
 | **RAG** | FinQA (in-sample) | Relaxed / Exact | 92% / 90.5% | 200 | — | |
 | **RAG** | TAT-QA (out-of-sample) | Relaxed / Exact | 89.5% / 77% | 200 | — | |
 | **RAG** | TAT-QA (in-sample) | Relaxed / Exact | 98.5% / 81% | 200 | — | |
 | **Vision-Language model (VLM)** | DocVQA, ChartQA, InfographicsVQA, MMMU | In-sample accuracy | 90% | 56 | — | |
 | **Credit risk memo generator** | FinanceBench | Exact match | 94% | 100 | — | |
-| **Credit risk PD (Quantum VQC)** | LendingClub | OOT AUC-ROC, KS | 0.540, — | 21,721 | — | |
+| **Credit risk PD (Quantum VQC)** | LendingClub | OOT AUC-ROC, KS | 0.540, 0.078 | 21,721 | — | Baseline VQC only (near-random AUC); improved VQC skipped by default for runtime. |
 | **Credit Risk Sentiment (QNLP)** | Financial PhraseBank & FiQA | Test F1 macro | 0.40 | 112 | — | |
 
 </small>
@@ -144,7 +144,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) and [EVALUATION_RESULTS.md](EVALUATION_RE
 | **Agentic orchestration (LangGraph)** | Dynamically selects tools instead of static pipelines; adapts to multi-step QA and reasoning. |
 | **3-tier OCR fallback** | Balances cost, speed, and accuracy: cache → classical → DL -> Vision-Language. Cache for detected known document templates, Classical for text recognition, Deep Learning for table recognition, Vision (multi-modal) fallback for charts or complex diagrams understanding. |
 | **LLM + structured features fusion for credit risk** | Not pure black-box models; interpretable PD models (LR, XGBoost, LSTM) plus LLM for memos and explanations. |
-| **Governance layer (prompt registry + safety filters)** | Production readiness: to add versioning, audit trail, and safety filters for LLM outputs. |
+| **Governance layer (prompt registry + safety filters)** | Production readiness: to add versioning, provenance tracking, and safety filters for LLM outputs. |
 
 ---
 
@@ -159,7 +159,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) and [EVALUATION_RESULTS.md](EVALUATION_RE
 - LLM usage (risk memos) is constrained by safety filters and prompt registry policies.
 
 ### Accountability
-- Full audit trail from data → features → model → decision, including prompt/version for LLM calls.
+- Full provenance from data → features → model → decision, including prompt/version for LLM calls.
 - Prompt registry in `credit_risk/governance/` tracks versions, approvers, and status for all production prompts.
 
 ### Transparency
