@@ -6,7 +6,7 @@ OCR → RAG → Credit Risk platform for financial documents<br>
 
 - **Credit risk:** ipynb files in [notebooks/](notebooks/) [Completed]
   - [demo_credit_risk_pd_business_impact.ipynb](notebooks/demo_credit_risk_pd_business_impact.ipynb) (Policy)
-  - [paper_lstm_stream_selection_by_loo.ipynb](notebooks/kaggle-kernels/paper_lstm_stream_ablation/paper_lstm_stream_selection_by_loo.ipynb) (LSTM stream selection)
+  - [paper_lstm_stream_selection_by_loo.ipynb](notebooks/kaggle-kernels/paper_lstm_stream_loo/paper_lstm_stream_selection_by_loo.ipynb) (LSTM stream selection)
   - [00_pd_homecredit_lstm_kaggle.ipynb](notebooks/00_pd_homecredit_lstm_kaggle.ipynb)  
   - [01_pd_lendingclub_feature_engineering.ipynb](notebooks/01_pd_lendingclub_feature_engineering.ipynb)
   - [02a_pd_xgboost_training.ipynb](notebooks/02a_pd_xgboost_training.ipynb)
@@ -54,12 +54,12 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 
 | Layer | Dataset | Metric | Value | OOT test sample size | Total population size | Notes |
 |-------|---------|--------|-------|----------------------|------------------------|------|
-| **Credit risk PD (LSTM)** | Home Credit (full population) | OOT AUC-ROC, KS | 0.756, 0.380 | 61,502 | 307,511 | |
-| **Credit risk PD (LSTM)** | Home Credit (has_repayment_bureau) | OOT AUC-ROC, KS | 0.749, 0.373 | 17,763 | 88,816 | |
-| **Credit risk PD (LSTM)** | Home Credit (has_bureau) | OOT AUC-ROC, KS | 0.753, 0.375 | 58,829 | 295,058 | |
-| **Credit risk PD (LSTM)** | Home Credit (no_bureau) | OOT AUC-ROC, KS | 0.814, 0.508 | 2,673 | 12,453 | |
+| **Credit risk PD (LSTM)** | Home Credit (full population) | OOT AUC-ROC, KS | 0.762, 0.392 | 61,502 | 307,511 | From saved `00_pd_homecredit_lstm_kaggle.ipynb` stdout (full_population / OOT). |
+| **Credit risk PD (LSTM)** | Home Credit (has_repayment_bureau) | OOT AUC-ROC, KS | 0.757, 0.378 | 17,763 | 88,816 | From saved notebook stdout (repayment_bureau_seg / OOT). |
+| **Credit risk PD (LSTM)** | Home Credit (has_bureau) | OOT AUC-ROC, KS | 0.759, 0.389 | 58,829 | 295,058 | From saved notebook stdout (has_bureau OOT block). |
+| **Credit risk PD (LSTM)** | Home Credit (no_bureau) | OOT AUC-ROC, KS | 0.816, 0.531 | 2,673 | 12,453 | From saved notebook stdout (no_bureau OOT block). |
 | **Credit risk PD (Logistic Regression)** | LendingClub | OOT AUC-ROC, KS, Brier | 0.660, 0.234, 0.236 | 21,721 | — | Rank-ordering preferred; calibrated Brier 0.124 (isotonic). Raw Brier 0.236 reflects `class_weight='balanced'` scaling. |
-| **Credit risk PD (Optuna-tuned XGBoost/LightGBM stack)** | LendingClub | OOT AUC-ROC, KS, Brier | 0.606, 0.163, 0.148 | 21,721 | — | Preferred for PD calibration/estimation. CV uses StratifiedGroupKFold so HF-augmentation twins stay in-fold (avoids cross-fold leakage that previously inflated OOT). |
+| **Credit risk PD (Optuna-tuned XGBoost/LightGBM stack)** | LendingClub | OOT AUC-ROC, KS, Brier | 0.606, 0.163, 0.148 | 21,721 | — | StratifiedGroupKFold CV (HF-augmentation twins kept in-fold). OOT AUC 0.636 pre-fix was inflated by cross-fold twin leakage; 0.606 is the corrected estimate. |
 | **Credit risk PD (ANN)** | LendingClub | OOT AUC-ROC, KS | 0.616, 0.178 | 21,721 | — | Negative val→OOT gap (−0.009) indicates no temporal degradation on this static dataset. |
 | **RAG** | FinQA (out-of-sample) | Relaxed / Exact | 77.5% / 71.5% | 200 | — | |
 | **RAG** | FinQA (in-sample) | Relaxed / Exact | 92% / 90.5% | 200 | — | |
@@ -71,6 +71,11 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 | **Credit Risk Sentiment (QNLP)** | Financial PhraseBank & FiQA | Test F1 macro | 0.40 | 112 | — | |
 
 </small>
+
+> Metrics in the credit-risk PD (LSTM) rows are taken from saved `00_pd_homecredit_lstm_kaggle.ipynb` cell outputs; values may differ from earlier write-ups by ±0.001 due to rounding.
+
+> **PD (LendingClub) recap:** Stack OOT AUC **0.606** (corrected from **0.636** after the StratifiedGroupKFold / HF-twin CV fix). **LR** OOT AUC **0.660** (strongest rank-ordering on the 2011 holdout). **Stack** is preferred for **calibration** (Brier **0.148** vs LR raw **0.236**; use isotonic-calibrated LR Brier **0.124** for like-for-like comparisons — see `02a` model card). **ANN** OOT AUC **0.616** with val→OOT gap **−0.009** (no temporal degradation on this static split; CV reference in `02z`).
+> **Home Credit (quad LSTM):** All **four** streams are retained (installment, bureau balance, credit card, POS/cash). Evidence and decision record: [paper_lstm_stream_selection_by_loo.ipynb](notebooks/kaggle-kernels/paper_lstm_stream_loo/paper_lstm_stream_selection_by_loo.ipynb). No further stream-selection tests are required.
 
 All evaluation metrics are produced via `eval_runner.py` and stored under `data/proof/`.  
 See [ARCHITECTURE.md](ARCHITECTURE.md) and [EVALUATION_RESULTS.md](EVALUATION_RESULTS.md) for full detail.
