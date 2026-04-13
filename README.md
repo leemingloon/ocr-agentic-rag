@@ -4,7 +4,7 @@ OCR → RAG → Credit Risk platform for financial documents<br>
 
 **Status:** Deployed to Amazon Web Services (AWS) Sagemaker. Evaluated using Local / Google Colabs / Kaggle.
 
-- **Credit risk:** ipynb files in [notebooks/](notebooks/) [Completed] — **logical reading order:** feature engineering → train models → comparison → business impact → Home Credit LSTM → LOO stream-selection paper.
+- **Credit risk:** ipynb files in [notebooks/](notebooks/) [Completed]
   - [demo_credit_risk_pd_business_impact.ipynb](notebooks/demo_credit_risk_pd_business_impact.ipynb) (Policy)
   - [paper_lstm_stream_selection_by_loo.ipynb](notebooks/kaggle-kernels/paper_lstm_stream_ablation/paper_lstm_stream_selection_by_loo.ipynb) (LSTM stream selection)
   - [00_pd_homecredit_lstm_kaggle.ipynb](notebooks/00_pd_homecredit_lstm_kaggle.ipynb)  
