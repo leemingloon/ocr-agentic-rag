@@ -1,6 +1,6 @@
 {
-  "id": "leemingloon/paper-lstm-stream-ablation",
-  "title": "paper-lstm-stream-loo",
+  "id": "leemingloon/paper-lstm-stream-loo",
+  "title": "Paper LSTM stream LOO",
   "code_file": "paper_lstm_stream_selection_by_loo.ipynb",
   "language": "python",
   "kernel_type": "notebook",

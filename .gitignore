@@ -249,6 +249,10 @@ data/rag/**/tatqa_retriever_index_b4_dedup/
 # Root-level scratch / local maintenance (not for CI or collaborators by default)
 /tools/
 /_tmp_pos.py
+# Notebook cell-source dumps (e.g. editor/agent extract to _01c14.txt, _z6.txt)
+/_01c*.txt
+/_02a*.txt
+/_z*.txt
 
 # Backup LSTM notebooks
 notebooks/00-pd-homecredit-lstm-kaggle.ipynb

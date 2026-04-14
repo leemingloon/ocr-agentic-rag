@@ -2,28 +2,28 @@ PD XGBoost training - overall report
 ============================================================
 
 Validation metrics:
-  auc_roc: 0.9382193358796103
-  f1: 0.6284367635506677
-  precision: 0.7554296506137866
-  recall: 0.5379959650302623
+  auc_roc: 0.9363139446570581
+  f1: 0.6211523283346487
+  precision: 0.7516714422158548
+  recall: 0.5292535305985205
   n_val: 11536
 
 Best Optuna params:
   max_depth: 3
-  learning_rate: 0.019899147941534592
-  n_estimators: 356
-  min_child_weight: 6
-  subsample: 0.7763794152201265
-  colsample_bytree: 0.756935996754112
-  reg_alpha: 1.450364614252386
-  reg_lambda: 0.34342121365525785
+  learning_rate: 0.016084276154642946
+  n_estimators: 385
+  min_child_weight: 8
+  subsample: 0.8166212827828759
+  colsample_bytree: 0.7814902072524791
+  reg_alpha: 1.1669308801592089
+  reg_lambda: 0.2533647700676103
   objective: binary:logistic
   scale_pos_weight: 6.3690744920993225
   eval_metric: auc
   random_state: 42
   tree_method: hist
 
-Optimal threshold (max F1): 0.34
+Optimal threshold (max F1): 0.36000000000000004
 
 Data: LoanStats3a -> lendingclub_engineered.parquet
 Model snapshot: pd_model_local_v2.pkl (download from Save cell on Colab)

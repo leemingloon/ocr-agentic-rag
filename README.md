@@ -58,7 +58,7 @@ End-to-end platform for **financial document intelligence and credit risk**, com
 | **Credit risk PD (LSTM)** | Home Credit (has_repayment_bureau) | OOT AUC-ROC, KS | 0.757, 0.378 | 17,763 | 88,816 | From saved notebook stdout (repayment_bureau_seg / OOT). |
 | **Credit risk PD (LSTM)** | Home Credit (has_bureau) | OOT AUC-ROC, KS | 0.759, 0.389 | 58,829 | 295,058 | From saved notebook stdout (has_bureau OOT block). |
 | **Credit risk PD (LSTM)** | Home Credit (no_bureau) | OOT AUC-ROC, KS | 0.816, 0.531 | 2,673 | 12,453 | From saved notebook stdout (no_bureau OOT block). |
-| **Credit risk PD (Logistic Regression)** | LendingClub | OOT AUC-ROC, KS, Brier | 0.660, 0.234, 0.236 | 21,721 | — | Rank-ordering preferred; calibrated Brier 0.124 (isotonic). Raw Brier 0.236 reflects `class_weight='balanced'` scaling. |
+| **Credit risk PD (Logistic Regression)** | LendingClub | OOT AUC-ROC, KS, Brier | 0.660, 0.234, 0.236 (raw); calibrated Brier 0.124 (isotonic) | 21,721 | — | Rank-ordering preferred. Raw Brier 0.236 reflects `class_weight='balanced'` scaling. |
 | **Credit risk PD (Optuna-tuned XGBoost/LightGBM stack)** | LendingClub | OOT AUC-ROC, KS, Brier | 0.606, 0.163, 0.148 | 21,721 | — | StratifiedGroupKFold CV (HF-augmentation twins kept in-fold). OOT AUC 0.636 pre-fix was inflated by cross-fold twin leakage; 0.606 is the corrected estimate. |
 | **Credit risk PD (ANN)** | LendingClub | OOT AUC-ROC, KS | 0.616, 0.178 | 21,721 | — | Negative val→OOT gap (−0.009) indicates no temporal degradation on this static dataset. |
 | **RAG** | FinQA (out-of-sample) | Relaxed / Exact | 77.5% / 71.5% | 200 | — | |
