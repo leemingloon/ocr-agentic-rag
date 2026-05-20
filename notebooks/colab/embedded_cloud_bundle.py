@@ -277,36 +277,12 @@ def _paddle_use_gpu() -> bool:
 def build_native_paddle_ocr(*, show_log: bool = False):
     if not PADDLEOCR_AVAILABLE or PaddleOCR is None:
         raise RuntimeError(f"PaddleOCR is not available: {_PADDLE_IMPORT_ERR}")
-    import logging
-
     try:
-        from ocr_pipeline.ocr_eval_config import paddle_rec_batch_num, paddle_use_angle_cls
+        from ocr_pipeline.paddle_gpu_check import build_paddle_ocr_engine
     except ImportError:
-        from ..ocr_eval_config import paddle_rec_batch_num, paddle_use_angle_cls
+        from ..paddle_gpu_check import build_paddle_ocr_engine
 
-    logging.getLogger("ppocr").setLevel(logging.ERROR)
-    use_gpu = _paddle_use_gpu()
-    use_cls = paddle_use_angle_cls()
-    rec_batch = paddle_rec_batch_num()
-    base_kw: dict = {
-        "lang": "en",
-        "use_gpu": use_gpu,
-        "use_angle_cls": use_cls,
-        "rec_batch_num": rec_batch,
-    }
-    attempts: list[dict] = []
-    if show_log:
-        attempts.append({**base_kw, "show_log": True})
-    attempts.extend([dict(base_kw), {"lang": "en", "use_gpu": use_gpu}, {"lang": "en"}, {}])
-    last_err: Exception | None = None
-    for kw in attempts:
-        try:
-            return PaddleOCR(**kw)
-        except (TypeError, ValueError, Exception) as e:
-            last_err = e
-            continue
-    assert last_err is not None
-    raise last_err
+    return build_paddle_ocr_engine(show_log=show_log)
 
 
 _CACHED_NATIVE_FULL_PADDLE: Any = None
@@ -548,12 +524,15 @@ def write_cloud_bundle(root: Path) -> None:
     if not cfg.is_file():
         cfg.write_text(OCR_EVAL_CONFIG, encoding="utf-8")
         print("bundled ocr_pipeline/ocr_eval_config.py (notebook)")
+    for _rel in (
+        "ocr_pipeline/paddle_gpu_check.py",
+        "ocr_pipeline/detection/paddle_cloud_api.py",
+        "ocr_pipeline/detection/paddleocr_detector.py",
+    ):
+        _bundle_repo_file(root, _rel)
     ensure_eval_runner_ocr_api(root)
     ensure_paddleocr_detector_cloud_api(root)
     ensure_cloud_audit_script(root)
-    _bundle_repo_file(root, "ocr_pipeline/paddle_gpu_check.py")
-    _bundle_repo_file(root, "ocr_pipeline/detection/paddle_cloud_api.py")
-    _bundle_repo_file(root, "ocr_pipeline/detection/paddleocr_detector.py")
     _ensure_script = root / "scripts" / "ensure_ocr_parquet_from_hf.py"
     try:
         src = Path(__file__).resolve().parents[2] / "scripts" / "ensure_ocr_parquet_from_hf.py"
