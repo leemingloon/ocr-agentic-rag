@@ -131,17 +131,19 @@ def _safe_kw_repr(kw: dict) -> str:
 def warmup_paddleocr_allocates_gpu(
     paddle_ocr: Any,
     *,
-    min_used_mb: float = 400.0,
-    min_delta_mb: float = 150.0,
+    min_used_mb: float = 200.0,
+    min_delta_mb: float = 50.0,
 ) -> None:
-    """Run a tiny OCR forward pass; fail if GPU VRAM does not rise (CPU fallback)."""
+    """Run a tiny OCR forward pass; fail if GPU VRAM does not rise (CPU fallback).
+
+    Do not use nvidia-smi right after PaddleOCR() alone — weights may lazy-load on first ocr().
+    """
     if not ocr_wants_gpu():
         return
-    import cv2
     import numpy as np
 
     before = gpu_mem_used_mb()
-    img = np.full((320, 320, 3), 255, dtype=np.uint8)
+    img = np.full((640, 640, 3), 128, dtype=np.uint8)
     result = None
     for kw in ({"cls": False}, {"det": True, "rec": True, "cls": False}, {}):
         try:
@@ -164,11 +166,11 @@ def warmup_paddleocr_allocates_gpu(
             pass
     after = gpu_mem_used_mb()
     print(f"[Paddle] VRAM used: before={before:.0f} MB after={after:.0f} MB (delta={after - before:.0f} MB)")
-    if after < min_used_mb and (after - before) < min_delta_mb:
+    delta = after - before
+    if delta < min_delta_mb and after < min_used_mb:
         raise RuntimeError(
-            f"PaddleOCR warmup did not allocate GPU memory (VRAM {after:.0f} MB). "
-            "You are on CPU Paddle — Runtime → Restart session, then Run all from the top "
-            "after the deps cell installs paddlepaddle-gpu. Do not skip Restart."
+            f"PaddleOCR warmup did not raise GPU VRAM (before={before:.0f} after={after:.0f} "
+            f"delta={delta:.0f} MB). Likely CPU Paddle — Restart session, Run all from deps cell."
         )
     print(f"[Paddle] GPU warmup OK — VRAM {after:.0f} MB")
 

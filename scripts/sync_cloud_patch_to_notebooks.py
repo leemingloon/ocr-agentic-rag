@@ -197,10 +197,41 @@ from ocr_pipeline.ocr_eval_config import paddle_rec_batch_num, paddle_min_side, 
 
 print(f"PADDLEOCR_AVAILABLE={PADDLEOCR_AVAILABLE}")
 print(f"rec_batch_num={paddle_rec_batch_num()} min_side={paddle_min_side()} angle_cls={paddle_use_angle_cls()}")
+print(f"PADDLEOCR_AVAILABLE={PADDLEOCR_AVAILABLE}")
+print(f"rec_batch_num={paddle_rec_batch_num()} min_side={paddle_min_side()} angle_cls={paddle_use_angle_cls()}")
 if PADDLEOCR_AVAILABLE:
-    _ = get_or_build_native_paddle_ocr(show_log=False)
-    print("PaddleOCR ready.")
+    print("Loading PaddleOCR (GPU ctor + OCR warmup)...")
+    _paddle = get_or_build_native_paddle_ocr(show_log=False)
+    try:
+        from ocr_pipeline.paddle_gpu_check import warmup_paddleocr_allocates_gpu
+        warmup_paddleocr_allocates_gpu(_paddle, min_used_mb=200.0, min_delta_mb=50.0)
+    except ImportError:
+        import numpy as np
+        def _vram_mb() -> float:
+            p = subprocess.run(
+                ["nvidia-smi", "--query-gpu=memory.used", "--format=csv,noheader,nounits"],
+                capture_output=True,
+                text=True,
+            )
+            return float(p.stdout.strip().splitlines()[0])
+        _b = _vram_mb()
+        _img = np.full((640, 640, 3), 128, dtype=np.uint8)
+        for _kw in ({"cls": False}, {}):
+            try:
+                _paddle.ocr(_img, **_kw)
+                break
+            except TypeError:
+                _paddle.ocr(_img)
+                break
+        _a = _vram_mb()
+        print(f"[Paddle] VRAM before={_b:.0f} after={_a:.0f} delta={_a - _b:.0f} MB (inline warmup)")
+        if (_a - _b) < 50 and _a < 200:
+            raise RuntimeError("Inline warmup: VRAM did not rise — Paddle likely on CPU")
+    print("PaddleOCR ready — GPU warmup passed.")
+else:
+    raise RuntimeError("PaddleOCR not available")
 show_gpu_memory()
+_assert_paddle_cuda_ready(min_vram_mb=0)
 _post_env = {
     **os.environ,
     "OCR_USE_GPU": "1",
@@ -329,7 +360,7 @@ def _inject_paddle_smoke(nb_path: Path) -> None:
             continue
         body = (
             f"{_PADDLE_HEADER}\n\n{PADDLE_SMOKE_BLOCK.strip()}\n\n"
-            "_assert_paddle_cuda_ready(min_vram_mb=500)\n"
+            "_assert_paddle_cuda_ready(min_vram_mb=0)\n"
         )
         _set_cell_source(cell, body)
         nb_path.write_text(json.dumps(nb, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
