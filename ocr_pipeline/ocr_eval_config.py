@@ -55,6 +55,28 @@ def paddle_min_side() -> int:
         return 900
 
 
+def ocr_max_samples_per_split() -> int | None:
+    """Cap new OCR samples per split (cloud time budget). None = full split."""
+    raw = os.environ.get("OCR_MAX_SAMPLES_PER_SPLIT", "").strip()
+    if not raw:
+        return None
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        return None
+
+
+def ocr_max_runtime_sec() -> float | None:
+    """Stop OCR eval after this many seconds (wall clock, all splits). None = no limit."""
+    raw = os.environ.get("OCR_MAX_RUNTIME_SEC", "").strip()
+    if not raw:
+        return None
+    try:
+        return max(60.0, float(raw))
+    except ValueError:
+        return None
+
+
 def paddle_rec_batch_num() -> int:
     """PaddleOCR rec_batch_num: larger uses more GPU VRAM, faster on dense pages (SROIE)."""
     raw = os.environ.get("OCR_REC_BATCH_NUM", "").strip()

@@ -1174,14 +1174,45 @@ def warmup_ocr_pipeline(dataset_name: str = "FUNSD") -> None:
         print(f"[OCR] Warmup skipped: {exc}", flush=True)
 
 
+def _ocr_wall_clock_exceeded(deadline_mono: float | None) -> bool:
+    if deadline_mono is None:
+        return False
+    import time
+
+    return time.perf_counter() >= deadline_mono
+
+
 def run_ocr_all_splits(
     *,
     datasets: list[str] | None = None,
     force_reeval: bool = False,
     proof_dir: str | Path = "data/proof",
     debug: bool = False,
+    max_samples_per_split: int | None = None,
+    max_runtime_sec: float | None = None,
 ) -> None:
     """Run full OCR eval for FUNSD + SROIE splits in one Python process (faster than 4 subprocesses)."""
+    import time
+
+    try:
+        from ocr_pipeline.ocr_eval_config import ocr_max_runtime_sec, ocr_max_samples_per_split
+    except ImportError:
+        from ocr_pipeline.ocr_eval_config import ocr_max_runtime_sec, ocr_max_samples_per_split
+
+    if max_samples_per_split is None:
+        max_samples_per_split = ocr_max_samples_per_split()
+    if max_runtime_sec is None:
+        max_runtime_sec = ocr_max_runtime_sec()
+
+    deadline_mono: float | None = None
+    if max_runtime_sec is not None:
+        deadline_mono = time.perf_counter() + float(max_runtime_sec)
+        print(
+            f"[OCR] Wall-clock budget: {max_runtime_sec:.0f}s "
+            f"(max_samples_per_split={max_samples_per_split})",
+            flush=True,
+        )
+
     warmup_ocr_pipeline()
     splits_plan = [
         ("FUNSD", "train"),
@@ -1193,6 +1224,9 @@ def run_ocr_all_splits(
     for ds_name, split in splits_plan:
         if ds_name.upper() not in want:
             continue
+        if _ocr_wall_clock_exceeded(deadline_mono):
+            print(f"[OCR] Stopping before {ds_name}/{split}: wall-clock budget reached", flush=True)
+            break
         adapter_cls = ADAPTER_REGISTRY.get(ds_name)
         if adapter_cls is None:
             continue
@@ -1219,6 +1253,8 @@ def run_ocr_all_splits(
             force_reeval=force_reeval,
             proof_dir=proof_dir,
             debug=debug,
+            max_samples_per_split=max_samples_per_split,
+            ocr_deadline_mono=deadline_mono,
         )
 
 # Cache for PD (XGBoost) model: load once per process for overnight sample-by-sample evaluation (CPU-only)
@@ -2834,6 +2870,7 @@ def evaluate_dataset(
     proof_dir: str | Path = "data/proof",
     dataset_proof_dir_override: Path | None = None,
     output_suffix: str = "",
+    ocr_deadline_mono: float | None = None,
 ):
     """Streamed evaluation over adapter.load_split(...), row-by-row.
 
@@ -2922,6 +2959,14 @@ def evaluate_dataset(
     any_sample = False
 
     for sample in dataset_iter:
+        if category == "ocr" and _ocr_wall_clock_exceeded(ocr_deadline_mono):
+            print(
+                f"[OCR] Stopping {dataset_name}: wall-clock budget reached "
+                f"(partial proof will still be saved)",
+                flush=True,
+            )
+            break
+
         any_sample = True
 
         if debug:
