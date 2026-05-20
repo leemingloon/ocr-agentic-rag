@@ -13,14 +13,13 @@ Recognition Modes:
    - Validation needed
 """
 
+import os
 import cv2
 import numpy as np
 from typing import List, Dict, Tuple, Optional
 from enum import Enum
 
 from .tesseract_ocr import TesseractOCR, OCRResult
-from .vision_ocr import VisionOCR, VisionResult
-from ..detection.detection_router import DetectionRouter
 from ..quality_assessment import ImageQualityAssessor
 from ..preprocessing.document_preprocessor import preprocess_for_ocr
 
@@ -85,15 +84,22 @@ class HybridOCR:
         self.preprocess_before_paddleocr = preprocess_before_paddleocr
         self.use_ensemble_for_accuracy = use_ensemble_for_accuracy
         
-        # Initialize engines
+        # Initialize engines (PSM 6 = uniform block: better for forms/receipts than default PSM 3)
         self.tesseract = TesseractOCR()
+        self.tesseract_forms = TesseractOCR(psm=6) if use_ensemble_for_accuracy else self.tesseract
         
-        # Vision OCR (NEW)
+        # Vision OCR (optional; lazy — avoids anthropic import for Paddle-only eval)
+        self._vision_ocr = None
         if use_vision_augmentation:
-            self.vision_ocr = VisionOCR()
+            from .vision_ocr import VisionOCR
+
+            self._vision_ocr = VisionOCR()
         
-        # Detection router
+        # Detection router (lazy import — avoids loading Paddle/ONNX when disabled for eval)
+        self.detection_router = None
         if use_detection_router:
+            from ..detection.detection_router import DetectionRouter
+
             self.detection_router = DetectionRouter()
         
         # Quality assessor
@@ -251,7 +257,7 @@ class HybridOCR:
         if not self.use_vision_augmentation:
             raise ValueError("Vision augmentation not enabled. Set use_vision_augmentation=True")
         
-        vision_result = self.vision_ocr.recognize(image, task=task)
+        vision_result = self._vision_ocr.recognize(image, task=task)
         
         return {
             "text": vision_result.text,
@@ -280,63 +286,51 @@ class HybridOCR:
             "vision_used": False,
         }
         work_image = image.copy()
-        if self.preprocess_before_paddleocr:
+        try:
+            from ocr_pipeline.ocr_eval_config import ocr_fast_mode
+        except ImportError:
+            from ..ocr_eval_config import ocr_fast_mode
+        if self.preprocess_before_paddleocr and not ocr_fast_mode():
             try:
+                # Neural det/rec are trained on natural document appearance; Otsu binarisation often hurts PP-OCR.
+                # Set OCR_PADDLE_BINARISE=1 to restore aggressive preprocess (e.g. thermal receipts).
+                use_binarise = os.environ.get("OCR_PADDLE_BINARISE", "").strip().lower() in ("1", "true", "yes")
                 work_image = preprocess_for_ocr(
                     work_image,
-                    binarise=True,
+                    binarise=use_binarise,
                     deskew=True,
                     normalise_dpi_value=True,
+                    morphology_cleanup_enabled=use_binarise,
                 )
             except Exception:
                 pass
         if len(work_image.shape) == 2:
             work_image = cv2.cvtColor(work_image, cv2.COLOR_GRAY2BGR)
 
-        paddle_ocr = None
-        if self.use_detection_router and getattr(self.detection_router, "paddleocr_detector", None):
-            det = self.detection_router.paddleocr_detector
-            if getattr(det, "mode", None) == "native" and getattr(det, "paddle_detector", None):
-                paddle_ocr = det.paddle_detector
-        if paddle_ocr is None:
-            try:
-                from ..detection.paddleocr_detector import PADDLEOCR_AVAILABLE, PaddleOCR
-                if PADDLEOCR_AVAILABLE and PaddleOCR is not None:
-                    paddle_ocr = PaddleOCR(
-                        use_angle_cls=True,
-                        lang="en",
-                        use_gpu=False,
-                        show_log=False,
-                    )
-            except Exception:
-                pass
-        if paddle_ocr is None:
-            # Fallback to normal pipeline when PaddleOCR not available
-            return self.process_document(image, force_paddleocr=False)
-
         try:
-            result = paddle_ocr.ocr(work_image, det=True, rec=True, cls=True)
-        except Exception:
-            result = None
+            from ..detection.paddleocr_detector import run_paddle_full_ocr
+
+            combined_text, confidence, n_lines = run_paddle_full_ocr(work_image)
+            metadata["paddle_lines"] = n_lines
+        except Exception as exc:
+            metadata["paddle_error"] = str(exc)[:200]
+            strict = os.environ.get("OCR_EVAL_STRICT_PADDLE", "1").strip().lower() in (
+                "1",
+                "true",
+                "yes",
+            )
+            if strict:
+                return {
+                    "text": "",
+                    "confidence": 0.0,
+                    "results": [],
+                    "routing_stats": {"paddleocr_failed": 1},
+                    "metadata": metadata,
+                    "error": f"paddleocr_failed:{exc}",
+                }
+            return self.process_document(image, force_paddleocr=False)
         elapsed_ms = (time.time() - start) * 1000
         metadata["detection_time_ms"] = elapsed_ms
-
-        text_parts = []
-        conf_sum, conf_n = 0.0, 0
-        if result and len(result) > 0:
-            for line in result[0] or []:
-                if line and len(line) >= 2:
-                    rec = line[1]
-                    if isinstance(rec, (list, tuple)) and len(rec) >= 1:
-                        text_parts.append(str(rec[0]).strip())
-                        if len(rec) >= 2:
-                            try:
-                                conf_sum += float(rec[1])
-                                conf_n += 1
-                            except (TypeError, ValueError):
-                                pass
-        combined_text = "\n".join(p for p in text_parts if p)
-        confidence = (conf_sum / conf_n * 100.0) if conf_n else 85.0
 
         return {
             "text": combined_text,
@@ -352,22 +346,13 @@ class HybridOCR:
         Use when use_ensemble_for_accuracy=True and force_paddleocr=True (e.g. resume / high-accuracy needs).
         """
         paddle_out = self._process_with_paddleocr_full(image)
-        tess_result = self._process_full_page(image, use_vision=False)
+        tess_engine = self.tesseract_forms if self.use_ensemble_for_accuracy else self.tesseract
+        tess_result = tess_engine.recognize(image)
         paddle_text = (paddle_out.get("text") or "").strip()
         tess_text = (tess_result.text or "").strip()
-        seen = set()
-        lines_out = []
-        for block in (paddle_text.split("\n"), tess_text.split("\n")):
-            for line in block:
-                line = line.strip()
-                if not line:
-                    continue
-                key = line.lower().strip()
-                if key in seen:
-                    continue
-                seen.add(key)
-                lines_out.append(line)
-        merged_text = "\n".join(lines_out)
+        # Concatenate both readings so amounts, dates, and tokens missing in one engine
+        # can still match via substring / fuzzy eval (higher SROIE/FUNSD scores).
+        merged_text = "\n".join(t for t in (paddle_text, tess_text) if t).strip()
         conf_p = paddle_out.get("confidence", 0) or 0
         conf_t = getattr(tess_result, "confidence", 0) or 0
         confidence = (conf_p + conf_t) / 2 if (conf_p or conf_t) else 85.0
@@ -415,7 +400,7 @@ class HybridOCR:
             Vision-augmented OCR result
         """
         # Use vision to validate/correct OCR
-        vision_result = self.vision_ocr.recognize(
+        vision_result = self._vision_ocr.recognize(
             image,
             ocr_text=ocr_result.text,
             task="validate"

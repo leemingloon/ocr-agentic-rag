@@ -1,11 +1,27 @@
 """
 Text Recognition Module
 
-Hybrid recognition using Tesseract and confidence-based routing.
-StandardOCROutput: model-agnostic {text, bbox, confidence} per word for downstream table/metrics.
+Import submodules directly, e.g. HybridOCR from hybrid_ocr.
+Lazy __getattr__ avoids pulling vision_ocr/anthropic on package import.
 """
+from __future__ import annotations
+
 from .tesseract_ocr import TesseractOCR, OCRResult
-from .hybrid_ocr import HybridOCR
 from .ocr_schema import StandardOCROutput, OCRWord, OCRLine
 
-__all__ = ["TesseractOCR", "HybridOCR", "OCRResult", "StandardOCROutput", "OCRWord", "OCRLine"]
+__all__ = [
+    "TesseractOCR",
+    "HybridOCR",
+    "OCRResult",
+    "StandardOCROutput",
+    "OCRWord",
+    "OCRLine",
+]
+
+
+def __getattr__(name: str):
+    if name == "HybridOCR":
+        from .hybrid_ocr import HybridOCR
+
+        return HybridOCR
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

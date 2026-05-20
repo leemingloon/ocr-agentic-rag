@@ -26,7 +26,7 @@ try:
     PADDLEOCR_AVAILABLE = True
 except Exception as e:
     PADDLEOCR_AVAILABLE = False
-    print(f"⚠ PaddleOCR detector unavailable in router: {e}")
+    print(f"[WARN] PaddleOCR detector unavailable in router: {e}")
     
     # Dummy class for when PaddleOCR is unavailable
     class PaddleOCRDetector:
@@ -95,12 +95,12 @@ class DetectionRouter:
             try:
                 self.paddleocr_detector = PaddleOCRDetector()
                 if self.paddleocr_detector.mode == "unavailable":
-                    print("⚠ PaddleOCR detector initialized but unavailable")
+                    print("[WARN] PaddleOCR detector initialized but unavailable")
                     self.paddleocr_available = False
                 else:
                     self.paddleocr_available = True
             except Exception as e:
-                print(f"⚠ PaddleOCR initialization failed: {e}")
+                print(f"[WARN] PaddleOCR initialization failed: {e}")
                 self.paddleocr_detector = PaddleOCRDetector()  # Dummy
                 self.paddleocr_available = False
         else:

@@ -32,7 +32,61 @@ from typing import Any
 # Root for proof outputs (category avg, eval_summary). Dataset outputs go under PROOF_ROOT/<category>/<dataset>/ unless --model_output_path (or default when --model) is used.
 PROOF_ROOT = Path("data/proof")
 _REPO_ROOT = Path(__file__).resolve().parent
+# Avoid blocking Paddle OCR eval on optional model-registry connectivity checks.
+os.environ.setdefault("PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK", "True")
+import logging
+
+logging.getLogger("ppocr").setLevel(logging.WARNING)
 from zoneinfo import ZoneInfo
+
+_FUNSD_WORDS_BY_ID_CACHE: dict[str, dict[str, list]] = {}
+
+
+def _funsd_words_lookup_for_split(split_name: str) -> dict[str, list]:
+    """Map FUNSD sample id -> words list from local data/ocr/FUNSD/<split>/*.parquet (for proof backfill)."""
+    if split_name in _FUNSD_WORDS_BY_ID_CACHE:
+        return _FUNSD_WORDS_BY_ID_CACHE[split_name]
+    lookup: dict[str, list] = {}
+    folder = _REPO_ROOT / "data" / "ocr" / "FUNSD" / split_name
+    if folder.is_dir():
+        try:
+            import pyarrow.parquet as pq
+        except ImportError:
+            _FUNSD_WORDS_BY_ID_CACHE[split_name] = lookup
+            return lookup
+        for pf in sorted(folder.glob("*.parquet")):
+            try:
+                t = pq.read_table(pf, columns=["id", "words"])
+            except Exception:
+                continue
+            for i in range(t.num_rows):
+                rid = str(t["id"][i].as_py())
+                w = t["words"][i].as_py()
+                if w is not None:
+                    lookup[rid] = list(w)
+    _FUNSD_WORDS_BY_ID_CACHE[split_name] = lookup
+    return lookup
+
+
+def _backfill_funsd_gt_words(rows: list[dict], split_name: str) -> int:
+    """Mutate rows: set ground_truth.words from parquet when missing. Returns count of rows updated."""
+    if not rows:
+        return 0
+    lookup = _funsd_words_lookup_for_split(split_name)
+    if not lookup:
+        return 0
+    n = 0
+    for r in rows:
+        gt = r.get("ground_truth")
+        if not isinstance(gt, dict) or gt.get("words"):
+            continue
+        if gt.get("token_labels") is None:
+            continue
+        sid = str(r.get("sample_id", ""))
+        if sid in lookup:
+            gt["words"] = lookup[sid]
+            n += 1
+    return n
 
 
 def _path_for_log(path: Path | str) -> str:
@@ -1047,6 +1101,125 @@ _RAG_RETRIEVER_CACHE: dict[str, Any] = {}
 
 # Cache for HybridOCR (one instance per process for OCR eval)
 _OCR_HYBRID_CACHE: dict[str, Any] = {}
+_OCR_WARMED_UP = False
+
+
+def _ocr_use_ensemble(dataset_name: str) -> bool:
+    try:
+        from ocr_pipeline.ocr_eval_config import ocr_skip_tesseract_ensemble
+    except ImportError:
+        ocr_skip_tesseract_ensemble = lambda: os.environ.get(  # type: ignore[misc]
+            "OCR_SKIP_TESSERACT_ENSEMBLE", ""
+        ).strip().lower() in ("1", "true", "yes")
+    if ocr_skip_tesseract_ensemble():
+        return False
+    return str(dataset_name).upper() in ("SROIE", "FUNSD")
+
+
+def _prefetch_sample_iterator(iterator, *, bufsize: int = 4):
+    """Background thread fills a queue while OCR runs on the main thread."""
+    from queue import Empty, Queue
+    from threading import Thread
+
+    q: Queue = Queue(maxsize=max(1, bufsize))
+    sentinel = object()
+
+    def _producer() -> None:
+        for item in iterator:
+            q.put(item)
+        q.put(sentinel)
+
+    Thread(target=_producer, daemon=True).start()
+    while True:
+        try:
+            item = q.get(timeout=3600)
+        except Empty:
+            break
+        if item is sentinel:
+            break
+        yield item
+
+
+def warmup_ocr_pipeline(dataset_name: str = "FUNSD") -> None:
+    """Load PaddleOCR once per process (avoids per-split cold start)."""
+    global _OCR_WARMED_UP
+    if _OCR_WARMED_UP:
+        return
+    try:
+        from ocr_pipeline.compat.paddle_langchain_shim import install_paddle_langchain_shim
+        from ocr_pipeline.detection.paddleocr_detector import (
+            PADDLEOCR_AVAILABLE,
+            get_or_build_native_paddle_ocr,
+        )
+
+        install_paddle_langchain_shim()
+        if PADDLEOCR_AVAILABLE:
+            _paddle = get_or_build_native_paddle_ocr(show_log=False)
+            if os.environ.get("OCR_USE_GPU", "").strip().lower() in ("1", "true", "yes"):
+                from ocr_pipeline.paddle_gpu_check import warmup_paddleocr_allocates_gpu
+
+                warmup_paddleocr_allocates_gpu(_paddle)
+        cache_key = "ocr_ensemble" if _ocr_use_ensemble(dataset_name) else "ocr"
+        if cache_key not in _OCR_HYBRID_CACHE:
+            from ocr_pipeline.recognition.hybrid_ocr import HybridOCR
+
+            _OCR_HYBRID_CACHE[cache_key] = HybridOCR(
+                use_detection_router=False,
+                use_vision_augmentation=False,
+                use_ensemble_for_accuracy=_ocr_use_ensemble(dataset_name),
+            )
+        _OCR_WARMED_UP = True
+        print("[OCR] Pipeline warmed up.", flush=True)
+    except Exception as exc:
+        print(f"[OCR] Warmup skipped: {exc}", flush=True)
+
+
+def run_ocr_all_splits(
+    *,
+    datasets: list[str] | None = None,
+    force_reeval: bool = False,
+    proof_dir: str | Path = "data/proof",
+    debug: bool = False,
+) -> None:
+    """Run full OCR eval for FUNSD + SROIE splits in one Python process (faster than 4 subprocesses)."""
+    warmup_ocr_pipeline()
+    splits_plan = [
+        ("FUNSD", "train"),
+        ("FUNSD", "test"),
+        ("SROIE", "train"),
+        ("SROIE", "test"),
+    ]
+    want = {d.upper() for d in (datasets or ["FUNSD", "SROIE"])}
+    for ds_name, split in splits_plan:
+        if ds_name.upper() not in want:
+            continue
+        adapter_cls = ADAPTER_REGISTRY.get(ds_name)
+        if adapter_cls is None:
+            continue
+        meta = AUTO_DATASETS.get("ocr", [])
+        src = "hf"
+        hf_repo = None
+        for entry in meta:
+            if entry[0].upper() == ds_name.upper():
+                src = entry[1]
+                hf_repo = entry[2]
+                break
+        adapter = adapter_cls(
+            category="ocr",
+            dataset_name=ds_name,
+            data_source_from_hf_or_manual=src,
+            hf_repo_name=hf_repo,
+        )
+        print(f"\n=== OCR eval {ds_name}/{split} ===", flush=True)
+        evaluate_dataset(
+            adapter,
+            "ocr",
+            ds_name,
+            dataset_split=split,
+            force_reeval=force_reeval,
+            proof_dir=proof_dir,
+            debug=debug,
+        )
 
 # Cache for PD (XGBoost) model: load once per process for overnight sample-by-sample evaluation (CPU-only)
 _PD_MODEL_CACHE: dict[str, Any] = {}
@@ -1232,19 +1405,28 @@ def run_model(sample: dict, category: str, dataset_name: str, debug: bool = Fals
         image, image_error = _extract_image_for_vision(sample, debug=debug)
         if image is None:
             return {"answer": "", "error": f"missing_image:{image_error}", "metadata": {}}
+        # PIL / datasets yield RGB numpy arrays; OpenCV and PaddleOCR expect BGR (cv2.COLOR_* and det/rec training).
+        try:
+            import numpy as np
+            import cv2
+
+            if isinstance(image, np.ndarray) and image.ndim == 3 and image.shape[2] >= 3:
+                image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        except Exception:
+            pass
         try:
             from ocr_pipeline.recognition.hybrid_ocr import HybridOCR
-            # SROIE (receipts): use ensemble (Tesseract + PaddleOCR merged) for better company/date/total coverage.
-            use_sroie_ensemble = dataset_name and str(dataset_name).upper() == "SROIE"
-            cache_key = "ocr_sroie" if use_sroie_ensemble else "ocr"
+            ds_u = str(dataset_name).upper() if dataset_name else ""
+            use_ocr_ensemble = _ocr_use_ensemble(ds_u)
+            cache_key = "ocr_ensemble" if use_ocr_ensemble else "ocr"
             if cache_key not in _OCR_HYBRID_CACHE:
                 _OCR_HYBRID_CACHE[cache_key] = HybridOCR(
-                    use_detection_router=True,
+                    use_detection_router=False,
                     use_vision_augmentation=False,
-                    use_ensemble_for_accuracy=use_sroie_ensemble,
+                    use_ensemble_for_accuracy=use_ocr_ensemble,
                 )
             ocr = _OCR_HYBRID_CACHE[cache_key]
-            # OCR_EVAL_USE_TESSERACT=1: use Tesseract path only; default: PaddleOCR (or ensemble for SROIE).
+            # OCR_EVAL_USE_TESSERACT=1: Tesseract-only; default PaddleOCR (ensemble uses Tesseract+Paddle for SROIE/FUNSD).
             force_paddle = os.environ.get("OCR_EVAL_USE_TESSERACT", "").strip().lower() not in ("1", "true", "yes")
             out = ocr.process_document(image, force_paddleocr=force_paddle)
             text = out.get("text", "")
@@ -2665,12 +2847,12 @@ def evaluate_dataset(
     When run_sample_id is set: only run that one sample (must exist in an existing *_samples.json);
     result is merged in-place (same position in JSON/txt, no duplicate). Requires dataset_split to be set.
     """
-    # For OCR: adapters load all requested images into memory at once. Pass bounded limits when
-    # None to avoid MemoryError (e.g. on Windows). Other categories can use None for resume logic.
-    ocr_load_limit_split = max_samples_per_split if max_samples_per_split is not None else 100
-    ocr_load_limit_category = max_samples_per_category if max_samples_per_category is not None else 200
-    load_max_split = ocr_load_limit_split if category == "ocr" else None
-    load_max_category = ocr_load_limit_category if category == "ocr" else None
+    # OCR: when max_samples_per_split/category are None, load the full local parquet split (no 500 cap).
+    load_max_split = max_samples_per_split if category == "ocr" else None
+    load_max_category = max_samples_per_category if category == "ocr" else None
+
+    if category == "ocr":
+        warmup_ocr_pipeline(dataset_name)
 
     dataset_iter = adapter.load_split(
         dataset_split=dataset_split,
@@ -2678,6 +2860,13 @@ def evaluate_dataset(
         max_samples_per_category=load_max_category,
         only_splits_with_gt=only_gt,
     )
+    if category == "ocr":
+        try:
+            from ocr_pipeline.ocr_eval_config import ocr_prefetch_enabled
+        except ImportError:
+            ocr_prefetch_enabled = lambda: True  # type: ignore[misc, assignment]
+        if ocr_prefetch_enabled():
+            dataset_iter = _prefetch_sample_iterator(dataset_iter, bufsize=4)
 
     model_meta = dict(MODEL_META.get(
         category,
@@ -2951,8 +3140,16 @@ def evaluate_dataset(
             break
 
     if not any_sample:
-        print(f"Warning: Dataset {dataset_name} skipped (empty).")
-        return None
+        if category != "ocr":
+            print(f"Warning: Dataset {dataset_name} skipped (empty).")
+            return None
+        if not dataset_proof_dir.exists() or not any(dataset_proof_dir.iterdir()):
+            print(f"Warning: Dataset {dataset_name} skipped (empty OCR stream and no proof directory).")
+            return None
+        print(
+            f"[OCR] No samples streamed for {dataset_name}; refreshing stored proof metrics "
+            f"and split averages from {dataset_proof_dir}."
+        )
 
     if debug:
         print(
@@ -3065,6 +3262,26 @@ def evaluate_dataset(
                 rows_from_file = json.load(f)
         except Exception:
             continue
+        if category == "ocr":
+            if dataset_name.upper() == "FUNSD":
+                bf = _backfill_funsd_gt_words(rows_from_file, split_name)
+                if bf and debug:
+                    print(f"[DEBUG] FUNSD backfilled ground_truth.words for {bf} rows ({split_name})")
+            stub_sample: dict = {"input": {}}
+            for r in rows_from_file:
+                if r.get("prediction_error"):
+                    continue
+                pred = (r.get("prediction") or "").strip()
+                gt = r.get("ground_truth")
+                stub_sample["ground_truth"] = gt
+                r["metrics"] = compute_ocr_metrics(
+                    pred, gt, dataset_name, sample=stub_sample
+                )
+            try:
+                with open(per_sample_path, "w", encoding="utf-8") as f:
+                    json.dump(rows_from_file, f, ensure_ascii=False, indent=2)
+            except Exception as e:
+                print(f"[WARN] OCR metrics refresh write failed {per_sample_path}: {e}")
         rows_for_agg = [r for r in rows_from_file if r.get("metrics")]
         split_metric_rows = [r.get("metrics") or {} for r in rows_for_agg]
         if category in ("credit_risk_PD", "credit_risk_PD_quantum") and split_metric_rows:
@@ -4858,8 +5075,8 @@ def export_predictions_txt(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Unified evaluation runner for OCR/Vision/RAG/Credit Risk")
-    parser.add_argument("--max_split", type=int, default=None, help="Maximum samples per dataset split (e.g. 5 for quick OCR runs)")
-    parser.add_argument("--max_category", type=int, default=None, help="Maximum samples per category (e.g. 20 for quick OCR runs)")
+    parser.add_argument("--max_split", type=int, default=None, help="Max samples per split (OCR: unset = full split from parquet)")
+    parser.add_argument("--max_category", type=int, default=None, help="Max samples per category (OCR: unset = no cap)")
     parser.add_argument("--category", type=str, default=None, help="Only run this category")
     parser.add_argument("--dataset", type=str, default=None, help="Only run this dataset")
     parser.add_argument(
@@ -4898,6 +5115,11 @@ if __name__ == "__main__":
         "--force_reeval",
         action="store_true",
         help="Re-run model/API for every sample (ignore already-evaluated). Use after changing prompts or index to get new predictions.",
+    )
+    parser.add_argument(
+        "--all_ocr_splits",
+        action="store_true",
+        help="Run FUNSD+SROIE train/test in one process (warm Paddle once). Implies --category ocr.",
     )
     parser.add_argument(
         "--sample_id",
@@ -4989,6 +5211,16 @@ if __name__ == "__main__":
             dataset=args.dataset,
             split=args.split,
             export_txt=args.export_predictions_txt,
+        )
+        raise SystemExit(0)
+
+    if args.all_ocr_splits:
+        ds_filter = [args.dataset] if args.dataset else None
+        run_ocr_all_splits(
+            datasets=ds_filter,
+            force_reeval=args.force_reeval,
+            proof_dir=PROOF_ROOT,
+            debug=args.debug,
         )
         raise SystemExit(0)
 

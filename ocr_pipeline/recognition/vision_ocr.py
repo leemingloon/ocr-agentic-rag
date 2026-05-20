@@ -21,7 +21,6 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 import numpy as np
 import cv2
-from anthropic import Anthropic
 
 
 @dataclass
@@ -76,7 +75,13 @@ class VisionOCR:
         self.model = env_model or model or "claude-sonnet-4-6"
         self.max_tokens = max_tokens
 
-        # Initialize Anthropic client
+        try:
+            from anthropic import Anthropic
+        except ImportError as exc:
+            raise ImportError(
+                "Vision OCR requires the anthropic package (pip install anthropic). "
+                "For FUNSD/SROIE proof eval use HybridOCR(use_vision_augmentation=False)."
+            ) from exc
         self.client = Anthropic(api_key=self.api_key)
 
     @classmethod

@@ -1,0 +1,13 @@
+{
+  "id": "leemingloon/ocr-funsd-sroie-eval-kaggle",
+  "title": "OCR FUNSD SROIE eval Kaggle",
+  "code_file": "ocr_funsd_sroie_eval_kaggle.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

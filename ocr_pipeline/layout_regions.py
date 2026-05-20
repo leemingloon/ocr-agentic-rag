@@ -12,9 +12,9 @@ from typing import Any
 # Region definitions: (y_frac_start, y_frac_end) = fraction of lines from top (0) to bottom (1).
 # Lines are assigned by order: first N% of lines = header, last M% = footer, etc.
 SROIE_REGIONS = {
-    "header": (0.0, 0.40),   # company, address, date typically in top 40% of lines
-    "body": (0.40, 0.65),    # line items
-    "footer": (0.65, 1.0),   # total, cash, change
+    "header": (0.0, 0.42),
+    "body": (0.42, 0.55),
+    "footer": (0.50, 1.0),
 }
 FUNSD_REGIONS = {
     "header": (0.0, 0.25),   # title / form header

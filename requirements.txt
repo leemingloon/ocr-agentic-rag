@@ -4,9 +4,11 @@ python-dotenv
 # OCR
 opencv-python
 pytesseract
-# PaddleOCR: pin for stable CPU (2.6.1.3 + paddlepaddle 2.5.2); see data/proof/OCR_LESSONS.md
-paddleocr==2.6.1.3
-paddlepaddle==2.5.2
+# PaddleOCR: CPU eval stack (see scripts/diagnose_paddleocr_env.py, ocr_pipeline/compat/paddle_langchain_shim.py).
+# Windows: paddleocr 2.7.x + paddlepaddle 2.6.2 works; paddleocr 3.x + paddle 3.x may hit oneDNN errors on infer.
+# If `from paddleocr import PaddleOCR` fails with langchain.docstore, the shim in eval_runner handles it.
+paddleocr>=2.7.3,<3.0
+paddlepaddle>=2.6.2,<3.0
 onnxruntime
 
 # Multimodal Vision

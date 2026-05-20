@@ -1,0 +1,14 @@
+# OCR FUNSD/SROIE proof eval — pip install -r this file on Kaggle/Colab
+paddlepaddle-gpu>=2.6.2
+paddleocr>=2.7.3,<3.0
+opencv-python-headless
+pytesseract
+pillow
+pyarrow
+datasets
+scipy
+numpy
+pandas
+tqdm
+python-dotenv
+requests

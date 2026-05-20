@@ -686,8 +686,9 @@ class OCRDatasetAdapter(BaseDatasetAdapter):
         if not words or not bboxes:
             return None
 
-        for i, box in enumerate(bboxes):
-            print(f"DEBUG box[{i}]:", box, type(box))
+        if os.environ.get("DEBUG_OCR_ADAPTER", "").strip().lower() in ("1", "true", "yes"):
+            for i, box in enumerate(bboxes):
+                print(f"DEBUG box[{i}]:", box, type(box))
 
         # Normalize bboxes if needed
         norm_bboxes = []
@@ -727,8 +728,18 @@ class OCRDatasetAdapter(BaseDatasetAdapter):
         words = [t["text"] for t in ocr_tokens]
         bboxes = [t["bbox"] for t in ocr_tokens]
 
-        for idx, (text, b) in enumerate(zip(words, bboxes)):
-            print(f"[DEBUG OCR TOKEN] {idx}: {b} -> '{text}'")
+        if os.environ.get("DEBUG_OCR_ADAPTER", "").strip().lower() in ("1", "true", "yes"):
+            for idx, (text, b) in enumerate(zip(words, bboxes)):
+                print(f"[DEBUG OCR TOKEN] {idx}: {b} -> '{text}'")
+
+        gt: dict = {
+            "token_labels": token_labels,  # FUNSD only
+            "document_entities": document_entities,  # SROIE only
+        }
+        # FUNSD: keep token-aligned words on ground_truth so proof JSON can recompute word_recall
+        # without input.ocr (eval_runner stores only string fields in input_text).
+        if token_labels is not None and words:
+            gt["words"] = list(words)
 
         return {
             "input": {
@@ -738,10 +749,7 @@ class OCRDatasetAdapter(BaseDatasetAdapter):
                     "bboxes": bboxes
                 }
             },
-            "ground_truth": {
-                "token_labels": token_labels,          # FUNSD only
-                "document_entities": document_entities # SROIE only
-            },
+            "ground_truth": gt,
             "metadata": {
                 "dataset": self.dataset_name,
                 "split": split,
@@ -1153,10 +1161,11 @@ class SROIEAdapter(OCRDatasetAdapter):
                 )
 
             split_path = Path().cwd() / self.FILE_MAPPING[split]["dataset_path"]
-            use_hf = self.data_source_from_hf_or_manual == "hf" or not split_path.exists()
+            has_local_parquet = split_path.is_dir() and any(split_path.glob("*.parquet"))
+            use_hf = not has_local_parquet and self.data_source_from_hf_or_manual == "hf"
 
             if use_hf:
-                # Load from HuggingFace when repo is HF or local path missing (e.g. notebook/Colab)
+                # Load from HuggingFace when local parquet is missing (e.g. notebook/Colab)
                 ds = load_dataset(self.hf_repo_name, split=split)
                 n = min(len(ds), max_samples_per_split or len(ds))
                 for idx in range(n):
@@ -1407,7 +1416,8 @@ class FUNSDAdapter(OCRDatasetAdapter):
 
             split_info = self.FILE_MAPPING[split]
             split_dir = Path().cwd() / split_info["dataset_path"]
-            use_hf = self.data_source_from_hf_or_manual == "hf" or not split_dir.exists()
+            has_local_parquet = split_dir.is_dir() and any(split_dir.glob("*.parquet"))
+            use_hf = not has_local_parquet and self.data_source_from_hf_or_manual == "hf"
 
             if use_hf:
                 ds = load_dataset(self.hf_repo_name, split=split)
