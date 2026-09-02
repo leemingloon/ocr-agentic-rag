@@ -698,5 +698,3687 @@
     "dataset": "SROIE",
     "cache_hit": 0,
     "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005663276",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005663277",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005663278",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005663279",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005663280",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005663293",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005663297",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005663298",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005663301",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005663311",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005663317",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005663324",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005675095",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005676536",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005676538",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005676539",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005676540",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005676541",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005676543",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005676544",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005676545",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005676546",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005676547",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005676549",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005677328",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005677329",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005677331",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005677332",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005677334",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005677335",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005677339",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005685355",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005685357",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005705722",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005705760",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005705804",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005711401",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005711403",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005711404",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005711441",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005711442",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005711445",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005711447",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005711451",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005711452",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005711453",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005711454",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005711456",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005712017",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005712021",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005712038",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005712039",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005715010",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005715451",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005715456",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005717526",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719814",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719856",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719862",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719864",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719873",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719874",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719882",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719883",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719886",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719893",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719896",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719899",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719902",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719904",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719906",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719912",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719914",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005719917",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005722668",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005722699",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005724554",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005724621",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005724627",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005724629",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005741944",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005742068",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005745183",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005745187",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005745188",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005745190",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005745214",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005745249",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005745296",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005746140",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005749895",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005749905",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005749912",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005757199",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005757201",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005757235",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005757243",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005757248",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005757273",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005757286",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005757290",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005757294",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005757304",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005757323",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005757324",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005757346",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005757349",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005757351",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005757353",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005763940",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005806678",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005806679",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005806685",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005806698",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005806702",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005806703",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005806716",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51005889296",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006008057",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006008073",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006008074",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006008086",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006008089",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006008091",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006008095",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006008197",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006311758",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006311764",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006311767",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006311778",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006311779",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006311780",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006327976",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006327978",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006328913",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006328919",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006328920",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006329395",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006329399",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006329402",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006332575",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006332649",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006334699",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006334741",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006334926",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006335314",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006335547",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006335552",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006349086",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006350750",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006350763",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006387740",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006387812",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006387813",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006387847",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006387850",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006387932",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006387951",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006387953",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006387971",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006388044",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006388064",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006388065",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006388066",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006388069",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006388082",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006389865",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006389884",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006389888",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006389893",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006389963",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006392122",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006392273",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006392299",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006392313",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006393376",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006393377",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006401723",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006401836",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006401869",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006401978",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414392",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414394",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414429",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414431",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414470",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414483",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414485",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414519",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414533",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414599",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414631",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414633",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414636",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414638",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414671",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414674",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414675",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414677",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414679",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414680",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414700",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414703",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414711",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414712",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414713",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414714",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414718",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414719",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414720",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414721",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006414733",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006441473",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006441474",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006466055",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006466056",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006466060",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006466062",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006466065",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006466066",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006466778",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006502529",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006502531",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006502533",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006554833",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006555072",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006555125",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006555570",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006555780",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006555784",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006555806",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006555814",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006555817",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006555818",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556591",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556596",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556604",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556646",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556650",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556656",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556726",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556730",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556732",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556738",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556815",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556818",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556823",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556824",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556825",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556828",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556830",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556831",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556838",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556839",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556840",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556841",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556852",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006556861",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557117",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557119",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557161",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557164",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557168",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557170",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557178",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557179",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557184",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557185",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557188",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557193",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557195",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557198",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557199",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557202",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557210",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557213",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006557508",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619341",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619342",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619343",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619496",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619545",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619550",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619561",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619563",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619566",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619694",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619696",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619697",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619698",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619709",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619758",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619765",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619772",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619777",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619780",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619783",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619785",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619854",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006619862",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006620161",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006620176",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006620181",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006620186",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006620187",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006620189",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006620190",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006620191",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006620414",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006647932",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006679216",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006679222",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006713996",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006714065",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006733494",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006828217",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006856981",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006857071",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006857265",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006857660",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006867435",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006867436",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006882603",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006912960",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006912972",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006912974",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006913007",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006913019",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006913023",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006913024",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006913028",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006913030",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006913031",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006913051",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006913054",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006913055",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006913059",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006913068",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006913070",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006913073",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51006913074",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007103578",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007103599",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007103639",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007103641",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007103643",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007103675",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007103681",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007103688",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007103691",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007103692",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007103702",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007135037",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007135247",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007225398",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007225399",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007225417",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007225442",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007228448",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007231336",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007231338",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007231344",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007231361",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007231365",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007231370",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007231374",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007262315",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007262328",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007262330",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339094",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339095",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339097",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339098",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339100",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339106",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339107",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339110",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339111",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339112",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339113",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339114",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339115",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339117",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339118",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339120",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339126",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339130",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339131",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339132",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339133",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339135",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339136",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339139",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339146",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339150",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339151",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339152",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339156",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339157",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339158",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339162",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339164",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339165",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339166",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339167",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339639",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339642",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339643",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339647",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339648",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339650",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339651",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339653",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339656",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339657",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007339658",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007391372",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007419197",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007579726",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007843145",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846269",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846270",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846286",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846301",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846302",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846305",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846307",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846309",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846325",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846326",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846350",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846353",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846357",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846366",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846368",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846370",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846388",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846391",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846393",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846395",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846398",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846410",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846412",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51007846451",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008030560",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008030565",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008030566",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008042777",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008042778",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008042782",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008042783",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008042791",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008042792",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008042793",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008063849",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008064061",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008099041",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008099043",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008099044",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008099046",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008099048",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008099049",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008099054",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008099071",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008099073",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008099081",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008099083",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008099084",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008099085",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008099087",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008099089",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008099102",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008114216",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008114217",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008114260",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008114262",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008114266",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008114281",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008114282",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008114283",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008114284",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008114321",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008122920",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008123446",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008123447",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008123450",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008123451",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008123476",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008123580",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008123586",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008123599",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008123604",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008128052",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008128062",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008128065",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008142005",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008142030",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008142031",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008142032",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008142033",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008142034",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008142038",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008142058",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008142059",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008142060",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008142061",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008142062",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008142063",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008142065",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008142068",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008145450",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008145504",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008145505",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008164420",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008164510",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008164524",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008164525",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008164969",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008164991",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008164992",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008164996",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008164997",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008164998",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51008164999",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51009453801",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
+  },
+  {
+    "sample_id": "X51009453804",
+    "split": "train",
+    "dataset": "SROIE",
+    "cache_hit": 0,
+    "detection_method": "paddleocr"
   }
 ]

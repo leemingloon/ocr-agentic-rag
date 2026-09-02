@@ -1257,6 +1257,16 @@ def run_ocr_all_splits(
             ocr_deadline_mono=deadline_mono,
         )
 
+    proof_root = Path(proof_dir)
+    refresh_category_weighted_avg_from_files("ocr", proof_root=proof_root)
+    write_eval_summary(proof_root)
+    try:
+        from eval_monitoring_metrics import write_monitoring_proof
+
+        write_monitoring_proof(proof_root)
+    except Exception as e:
+        print(f"[OCR] write_monitoring_proof skipped: {e}", flush=True)
+
 # Cache for PD (XGBoost) model: load once per process for overnight sample-by-sample evaluation (CPU-only)
 _PD_MODEL_CACHE: dict[str, Any] = {}
 _PD_MODEL_PATH_OVERRIDE: str | None = None  # Set by main() when --model is passed; used for credit_risk_PD
@@ -1450,6 +1460,30 @@ def run_model(sample: dict, category: str, dataset_name: str, debug: bool = Fals
                 image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         except Exception:
             pass
+        # OCR_EVAL_VISION_ESCALATE=1: escalation path for the loop-engineering regression guard
+        # (scripts/ocr_eval_improve_loop.py) — re-runs only the worst-scoring samples (via
+        # --sample_id) through Claude vision directly instead of classical OCR. Calls VisionOCR
+        # standalone rather than through HybridOCR's confidence-gated router: that router path
+        # (use_detection_router=True / force_paddleocr=False) has independent bugs in the
+        # det-only PaddleOCR call and OCRResult construction (see paddleocr_detector.py fix
+        # notes) that are out of scope for this escalation feature. Off by default: eval stays
+        # classical-only for cost control.
+        vision_escalate = os.environ.get("OCR_EVAL_VISION_ESCALATE", "").strip().lower() in ("1", "true", "yes")
+        if vision_escalate:
+            try:
+                from ocr_pipeline.recognition.vision_ocr import VisionOCR
+
+                if "vision_ocr" not in _OCR_HYBRID_CACHE:
+                    _OCR_HYBRID_CACHE["vision_ocr"] = VisionOCR()
+                vision_result = _OCR_HYBRID_CACHE["vision_ocr"].recognize(image, task="extract")
+                return {
+                    "answer": vision_result.text or "",
+                    "metadata": {"recognition_engine": "vision", "confidence": vision_result.confidence},
+                }
+            except Exception as e:
+                if debug:
+                    print(f"[DEBUG] Vision escalation failed: {e}")
+                return {"answer": "", "error": f"vision_escalation_failed:{e}", "metadata": {}}
         try:
             from ocr_pipeline.recognition.hybrid_ocr import HybridOCR
             ds_u = str(dataset_name).upper() if dataset_name else ""
@@ -2884,6 +2918,8 @@ def evaluate_dataset(
     When run_sample_id is set: only run that one sample (must exist in an existing *_samples.json);
     result is merged in-place (same position in JSON/txt, no duplicate). Requires dataset_split to be set.
     """
+    import time
+
     # OCR: when max_samples_per_split/category are None, load the full local parquet split (no 500 cap).
     load_max_split = max_samples_per_split if category == "ocr" else None
     load_max_category = max_samples_per_category if category == "ocr" else None
@@ -3071,9 +3107,18 @@ def evaluate_dataset(
                 if debug:
                     print(f"[DEBUG] generate_metadata failed {meta_path}: {e}")
 
+        _sample_t0: float | None = None
+        _sample_sec: float | None = None
         if category == "ocr":
+            _sample_t0 = time.perf_counter()
             print(f"[OCR] Processing sample_id={sample_id} ({dataset_name}/{split_name}) ...", flush=True)
         prediction = run_model(sample, category=category, dataset_name=dataset_name, debug=debug)
+        if category == "ocr" and _sample_t0 is not None:
+            _sample_sec = time.perf_counter() - _sample_t0
+            print(
+                f"[OCR] sample_id={sample_id} done in {_sample_sec:.1f}s ({dataset_name}/{split_name})",
+                flush=True,
+            )
         prediction_error = prediction.get("error")
         metric_row: dict[str, float] = {}
 
@@ -3150,6 +3195,8 @@ def evaluate_dataset(
             "prediction_error": prediction.get("error"),
             "metrics": metric_row,
         }
+        if category == "ocr" and _sample_sec is not None:
+            row["processing_sec"] = round(_sample_sec, 3)
         # Persist metadata for vision so --reevaluate_only can recompute metrics (e.g. options_list for MMMU MC)
         if category == "vision":
             meta = sample.get("metadata") or {}

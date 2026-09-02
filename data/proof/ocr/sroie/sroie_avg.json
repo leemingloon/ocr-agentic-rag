@@ -1,6 +1,6 @@
 {
   "dataset": "SROIE",
-  "sample_count": 200,
+  "sample_count": 987,
   "splits": [
     "test",
     "train"
@@ -8,34 +8,27 @@
   "splits_breakdown": [
     {
       "split": "test",
-      "sample_count": 100,
+      "sample_count": 361,
       "metrics": {
-        "entity_match_mean": 0.0,
-        "entity_matched_mean": 0.0,
-        "entity_total_mean": 0.0
-      },
-      "gt_override_count": 0
+        "entity_match_mean": 0.953601108033241,
+        "entity_matched_mean": 3.814404432132964,
+        "entity_total_mean": 4.0
+      }
     },
     {
       "split": "train",
-      "sample_count": 100,
+      "sample_count": 626,
       "metrics": {
-        "entity_match_mean": 0.0,
-        "entity_matched_mean": 0.0,
-        "entity_total_mean": 0.0
-      },
-      "gt_override_count": 0
+        "entity_match_mean": 0.9640575079872205,
+        "entity_matched_mean": 3.853035143769968,
+        "entity_total_mean": 3.9968051118210863
+      }
     }
   ],
-  "gt_override_count": 0,
-  "skipped_no_ground_truth": 0,
-  "prediction_error_counts": {},
-  "model_class": "HybridOCR",
-  "backbone": "paddleocr_tesseract",
-  "timestamp": "2026-03-07T18:16:19.420767+08:00",
+  "timestamp": "2026-09-02T12:38:42.756696+08:00",
   "weighted_metrics": {
-    "entity_match_mean": 0.0,
-    "entity_matched_mean": 0.0,
-    "entity_total_mean": 0.0
+    "entity_match_mean": 0.9602330293819655,
+    "entity_matched_mean": 3.838905775075988,
+    "entity_total_mean": 3.9979736575481257
   }
 }

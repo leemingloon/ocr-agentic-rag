@@ -2,6 +2,8 @@
 
 **Purpose:** This document is a concise, factual outline of the current state and known problems with OCR evaluation under `data/proof`. It is intended for another agent (e.g. a large language model) to diagnose root causes and recommend concrete fixes.
 
+**Resolved 2026-09-02.** P1–P3 (aggregation) and the FUNSD ground-truth-words gap were both fixed in the code paths this doc points to (`_build_universal_ocr_sample` already writes `gt["words"]`; `eval_runner`'s OCR backfill pass recomputes `*_mean` from per-sample metrics). What was still stale was the **committed proof itself** — samples written by an older pipeline run before those fixes existed. `python eval_runner.py --all_ocr_splits --force_reeval` regenerated it: **FUNSD word_recall_mean 0.971, SROIE entity_match_mean 0.960** (`EVALUATION_RESULTS.md`). Diagnosing P7/short-prediction cases also turned up a real bug in `PaddleOCRDetector._detect_native` (det-only PaddleOCR call crashes on paddleocr 2.7.3, silently returning near-empty text) — fixed in `ocr_pipeline/detection/paddleocr_detector.py`. `scripts/ocr_eval_improve_loop.py` now runs as a regression guard: re-check the weighted metric after any change, escalate worst samples to vision only if a dataset drops below 0.70. Kept below for historical diagnosis context and because P4/P6 (address extraction) and P10 (table reconstruction) are still open, lower-priority items.
+
 ---
 
 ## 1. Intended design (what should happen)

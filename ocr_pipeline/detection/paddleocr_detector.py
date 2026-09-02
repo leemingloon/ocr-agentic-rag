@@ -395,33 +395,46 @@ class PaddleOCRDetector:
     # ========================================
     
     def _detect_native(self, image: np.ndarray) -> List[Tuple[int, int, int, int]]:
-        """Native PaddleOCR detection (slower)"""
+        """Native PaddleOCR detection (slower).
+
+        Note: det=True, rec=False crashes inside some paddleocr/paddlepaddle version
+        combos (observed: "truth value of an array with more than one element is
+        ambiguous" on paddleocr 2.7.3) and was silently swallowed by the except below,
+        returning zero boxes and starving downstream recognition of any text. Run
+        det+rec instead (same call shape as the proven-working run_paddle_full_ocr)
+        and just discard the recognized text here — this function only returns boxes.
+        """
         try:
             if len(image.shape) == 2:
                 image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-            
-            result = self.paddle_detector.ocr(image, det=True, rec=False, cls=False)
-            
+
+            result = self.paddle_detector.ocr(image, det=True, rec=True, cls=False)
+
             if result is None or len(result) == 0:
                 return []
-            
+
             boxes = []
             for line in result[0]:
                 if line is None:
                     continue
-                
-                points = np.array(line[0])
-                
+
+                # rec=True lines are [box_points, (text, score)]; be defensive in case
+                # a paddle build returns bare box_points instead.
+                box_points = line[0] if len(line) == 2 and isinstance(line[1], (tuple, list)) else line
+                points = np.array(box_points)
+                if points.ndim != 2 or points.shape[0] < 2:
+                    continue
+
                 x_min = int(points[:, 0].min())
                 y_min = int(points[:, 1].min())
                 x_max = int(points[:, 0].max())
                 y_max = int(points[:, 1].max())
-                
+
                 w = x_max - x_min
                 h = y_max - y_min
-                
+
                 boxes.append((x_min, y_min, w, h))
-            
+
             return boxes
             
         except Exception as e:

@@ -92,7 +92,16 @@ Model: VisionOCR (Claude Sonnet 4.6). Proof: `data/proof/vision/<dataset>/`.
 
 ### OCR (SROIE, FUNSD)
 
-Proof under `data/proof/ocr/` (FUNSD, SROIE). Entity and word-level metrics are in `eval_summary.json`; current summary may show placeholder zeros until metrics are fully wired. Sample counts: FUNSD 150, SROIE 200.
+| Dataset | Split | Sample count | Primary metric | Value |
+|---------|--------|--------------|-----------------|-------|
+| FUNSD | test | 50 | word_recall_mean | 0.975 |
+| FUNSD | train | 149 | word_recall_mean | 0.970 |
+| SROIE | test | 361 | entity_match_mean | 0.954 |
+| SROIE | train | 626 | entity_match_mean | 0.964 |
+
+Weighted: FUNSD word_recall_mean **0.971** (entity_recall_mean 0.957); SROIE entity_match_mean **0.960**. Model: HybridOCR (PaddleOCR + Tesseract ensemble merge, `use_ensemble_for_accuracy=True`). Proof: `data/proof/ocr/<dataset>/`.
+
+These numbers required a `--force_reeval` run: the previously committed proof under `data/proof/ocr/` held stale predictions from an older pipeline revision (some samples had almost no recognized text), which a metrics-aggregation bug also masked as literal `0.0` in `*_avg.json` and `eval_summary.json`. Both the stale predictions and the aggregation bug are fixed — see `data/proof/OCR_EVAL_PROBLEMS_OUTLINE.md` for the diagnosis and `scripts/ocr_eval_improve_loop.py` for the regression-guard loop that reruns eval and escalates on any split that drops below a 0.70 floor.
 
 ---
 

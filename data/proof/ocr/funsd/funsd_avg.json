@@ -1,6 +1,6 @@
 {
   "dataset": "FUNSD",
-  "sample_count": 150,
+  "sample_count": 199,
   "splits": [
     "test",
     "train"
@@ -10,32 +10,34 @@
       "split": "test",
       "sample_count": 50,
       "metrics": {
-        "word_recall_mean": 0.0,
-        "words_gt_mean": 0.0,
-        "words_matched_mean": 0.0
-      },
-      "gt_override_count": 0
+        "entity_matched_mean": 12.74,
+        "entity_recall_mean": 0.9451485908312534,
+        "entity_total_mean": 13.64,
+        "word_recall_mean": 0.9747528848939487,
+        "words_gt_mean": 126.44,
+        "words_matched_mean": 122.92
+      }
     },
     {
       "split": "train",
-      "sample_count": 100,
+      "sample_count": 149,
       "metrics": {
-        "word_recall_mean": 0.0,
-        "words_gt_mean": 0.0,
-        "words_matched_mean": 0.0
-      },
-      "gt_override_count": 0
+        "entity_matched_mean": 15.778523489932885,
+        "entity_recall_mean": 0.9609368727417593,
+        "entity_total_mean": 16.44295302013423,
+        "word_recall_mean": 0.9703242431974588,
+        "words_gt_mean": 122.52348993288591,
+        "words_matched_mean": 119.08053691275168
+      }
     }
   ],
-  "gt_override_count": 0,
-  "skipped_no_ground_truth": 0,
-  "prediction_error_counts": {},
-  "model_class": "HybridOCR",
-  "backbone": "paddleocr_tesseract",
-  "timestamp": "2026-03-07T18:24:44.589788+08:00",
+  "timestamp": "2026-09-02T13:00:29.414738+08:00",
   "weighted_metrics": {
-    "word_recall_mean": 0.0,
-    "words_gt_mean": 0.0,
-    "words_matched_mean": 0.0
+    "entity_matched_mean": 15.015075376884422,
+    "entity_recall_mean": 0.9569699677391196,
+    "entity_total_mean": 15.738693467336683,
+    "word_recall_mean": 0.9714369672418031,
+    "words_gt_mean": 123.50753768844221,
+    "words_matched_mean": 120.04522613065326
   }
 }

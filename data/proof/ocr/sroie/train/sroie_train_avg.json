@@ -1,7 +1,6 @@
 {
-  "entity_match_mean": 0.0,
-  "entity_matched_mean": 0.0,
-  "entity_total_mean": 0.0,
-  "sample_count": 100,
-  "gt_override_count": 0
+  "entity_match_mean": 0.9640575079872205,
+  "entity_matched_mean": 3.853035143769968,
+  "entity_total_mean": 3.9968051118210863,
+  "sample_count": 626
 }

@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-03-07T18:24:44.873586+08:00",
+  "timestamp": "2026-09-02T13:00:29.457569+08:00",
   "bias_testing": {
     "phrase": "bias testing <10% gap",
-    "bias_gap": 0.153846,
-    "bias_gap_pct": 15.38,
+    "bias_gap": 0.111111,
+    "bias_gap_pct": 11.11,
     "mas_feat_compliant": false,
     "target_gap_pct": 10
   },
@@ -23,7 +23,7 @@
   },
   "completeness_heuristics": {
     "phrase": "completeness heuristics catching 90% of false negatives",
-    "fn_caught_rate_actual": 0.9886,
+    "fn_caught_rate_actual": 1.0,
     "fn_caught_rate_target": 0.9,
     "meets_target": true,
     "note": "Run OCR eval to populate monitoring_metrics/completeness_heuristics/<dataset>_<split>_samples.json."

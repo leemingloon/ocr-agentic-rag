@@ -1,7 +1,9 @@
 {
-  "word_recall_mean": 0.0,
-  "words_gt_mean": 0.0,
-  "words_matched_mean": 0.0,
-  "sample_count": 50,
-  "gt_override_count": 0
+  "entity_matched_mean": 12.74,
+  "entity_recall_mean": 0.9451485908312534,
+  "entity_total_mean": 13.64,
+  "word_recall_mean": 0.9747528848939487,
+  "words_gt_mean": 126.44,
+  "words_matched_mean": 122.92,
+  "sample_count": 50
 }
