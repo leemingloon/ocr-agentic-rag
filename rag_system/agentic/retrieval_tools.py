@@ -241,8 +241,20 @@ class ToolRegistry:
                 "error": "Could not parse as math expression. Provide numbers and operators (e.g. 100 + 50)."
             }
     
-    def _rag_retrieval(self, query: str, top_k: int = 15, corpus_id: Optional[str] = None) -> Dict:
-        """Retrieve, optionally rerank, apply bookends, and abstain if relevance below threshold."""
+    def _rag_retrieval(
+        self,
+        query: str,
+        top_k: int = 15,
+        corpus_id: Optional[str] = None,
+        _retry_depth: int = 0,
+    ) -> Dict:
+        """Retrieve, optionally rerank, apply bookends, and abstain if relevance below threshold.
+
+        Simple retry loop engineering: if the first pass comes back with too few chunks or
+        weak relevance, retry once with a larger top_k before generating or abstaining (more
+        candidates for BM25+dense+RRF to surface the right chunk from). Bounded to one retry
+        via _retry_depth so this can never loop more than twice total.
+        """
         if not self.retriever:
             return {
                 "query": query,
@@ -251,11 +263,15 @@ class ToolRegistry:
                 "success": False,
             }
         # Env override for retrieval depth (table rows often chunk separately; 15 improves recall).
-        env_k = os.environ.get("RAG_TOP_K", "").strip()
-        if env_k.isdigit():
-            top_k = int(env_k)
-        # Use larger k for corpus-scoped retrieval (50) so table/year chunks are not missed; otherwise use top_k (default 15)
-        k = 50 if corpus_id else (top_k or 15)
+        # Only applied on the initial call — a retry's explicit larger top_k should not be
+        # clobbered back down to the env default.
+        if _retry_depth == 0:
+            env_k = os.environ.get("RAG_TOP_K", "").strip()
+            if env_k.isdigit():
+                top_k = int(env_k)
+        # Use larger k for corpus-scoped retrieval (50) so table/year chunks are not missed; otherwise use top_k (default 15).
+        # max(...) so a retry's larger top_k still widens the net even when corpus_id forces a 50 floor.
+        k = max(top_k or 15, 50) if corpus_id else (top_k or 15)
         section_types = _infer_section_types_for_query(query)
         # Query rewriting: for "percent change" + "adjusted", append table keywords to improve recall (As Reported / Topic 606 chunks).
         retrieval_query = query
@@ -376,6 +392,33 @@ class ToolRegistry:
                         if len(c.get("text") or "") > 200:
                             text_preview += "…"
                         print(f"[DEBUG]   {rank} score={c.get('score')} preview={text_preview!r}")
+
+            # Simple retry: weak first pass (few chunks or low relevance) -> fetch more before
+            # generating or abstaining. One retry max (_retry_depth), doubling k up to 100.
+            retry_enabled = os.environ.get("RAG_DISABLE_RETRY", "").strip().lower() not in ("1", "true", "yes")
+            if retry_enabled and _retry_depth < 1 and k < 100:
+                retry_relevance_threshold = float(os.environ.get("RAG_RETRY_RELEVANCE_THRESHOLD", "0.5") or 0.5)
+                retry_min_chunks = int(os.environ.get("RAG_RETRY_MIN_CHUNKS", "3") or 3)
+                weak_result = len(chunks) < retry_min_chunks or (
+                    max_relevance_score is not None and max_relevance_score < retry_relevance_threshold
+                )
+                if weak_result:
+                    retry_k = min(k * 2, 100)
+                    if os.environ.get("RAG_DEBUG") == "1":
+                        print(
+                            f"[DEBUG] _rag_retrieval: weak result (max_score={max_relevance_score}, "
+                            f"n_chunks={len(chunks)}) at k={k}; retrying with k={retry_k}"
+                        )
+                    retried = self._rag_retrieval(
+                        query, top_k=retry_k, corpus_id=corpus_id, _retry_depth=_retry_depth + 1
+                    )
+                    retried_score = retried.get("max_relevance_score")
+                    retried_chunks = retried.get("chunks") or []
+                    if retried.get("success") and retried_chunks and (
+                        (retried_score is not None and (max_relevance_score is None or retried_score > max_relevance_score))
+                        or len(retried_chunks) > len(chunks)
+                    ):
+                        return retried
 
             # Negative retrieval: abstain if max relevance below threshold
             if self.relevance_threshold > 0 and max_relevance_score is not None and max_relevance_score < self.relevance_threshold:
