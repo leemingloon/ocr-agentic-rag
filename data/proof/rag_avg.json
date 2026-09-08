@@ -29,14 +29,14 @@
           "metrics": {
             "relaxed_exact_match": "0.9200 (184/200)",
             "exact_match": "0.9050 (181/200)",
-            "f1": 0.0225
+            "f1": 0.0227
           }
         }
       ],
       "weighted_metrics": {
         "relaxed_exact_match": "0.8475 (339/400)",
         "exact_match": "0.8100 (324/400)",
-        "f1": 0.0191
+        "f1": 0.0192
       }
     },
     {
@@ -73,5 +73,5 @@
   "metrics_breakdown": {},
   "model_class": "AgenticRAG",
   "backbone": "langgraph_hybrid_retriever_bge_reranker",
-  "timestamp": "2026-03-15T08:37:21.266741+08:00"
+  "timestamp": "2026-09-02T22:35:13.733335+08:00"
 }

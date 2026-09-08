@@ -6,21 +6,18 @@
       "answer": "3.8",
       "score": null,
       "query_id": 0,
-      "corpus_id": "ADI/2009/page_49.pdf-1"
+      "corpus_id": "ADI/2009/page_49.pdf-1",
+      "program": "divide(100, 100), divide(3.8, #0)"
     },
     "input_text": {
       "query": "what is the the interest expense in 2009?"
     },
-    "prediction": "Looking through the documents for information about interest expense in 2009, I can see that Document 1 mentions:\n\n\"if libor changes by 100 basis points, our annual interest expense would change by $3.8 million\"\n\nThis is the only specific dollar amount related to interest expense mentioned in the documents for 2009. While this is presented in the context of a sensitivity analysis showing how interest expense would change, this $3.8 million figure represents the interest expense impact.\n\n3.8",
+    "prediction": "The documents mention that \"if libor changes by 100 basis points, our annual interest expense would change by $3.8 million.\" This is a sensitivity figure, not the actual interest expense for 2009.\n\nThe retrieved documents do not contain the actual interest expense figure for 2009. The only interest-related number mentioned is the $3.8 million sensitivity to a 100 basis point change in LIBOR.\n\n**INSUFFICIENT_DATA**\n\nThe documents do not provide the actual interest expense for 2009; they only state that a 100 basis point change in LIBOR would change annual interest expense by **$3.8 million**.",
     "prediction_error": null,
     "metrics": {
       "relaxed_exact_match": 1.0,
       "exact_match": 1.0,
-      "f1": 0.0273972602739726
-    },
-    "scorer": {
-      "label": "PASS",
-      "note": ""
+      "f1": 0.023255813953488372
     },
     "scorer_label": "PASS",
     "scorer_note": ""
@@ -32,21 +29,18 @@
       "answer": "yes",
       "score": null,
       "query_id": 1,
-      "corpus_id": "ABMD/2012/page_75.pdf-1"
+      "corpus_id": "ABMD/2012/page_75.pdf-1",
+      "program": "multiply(607, 18.13), multiply(#0, const_1000), multiply(3.3, const_1000000), greater(#1, #2)"
     },
     "input_text": {
       "query": "during the 2012 year , did the equity awards in which the prescribed performance milestones were achieved exceed the equity award compensation expense for equity granted during the year?"
     },
-    "prediction": "Looking at the 2012 data from the documents:\n\n**Left side (A): Equity awards where prescribed performance milestones were achieved**\nFrom Document 1: \"During the year ended March 31, 2012, the company has recorded $3.3 million in stock-based compensation expense for equity awards in which the prescribed performance milestones have been achieved or are probable of being achieved.\"\n\nSo A = $3.3 million\n\n**Right side (B): Compensation expense for equity granted during 2012**\nFrom the documents, I can see that 607,000 shares were granted during fiscal 2012 with a weighted average grant-date fair value of $18.13 per share.\n\nTotal grant-date fair value = 607,000 × $18.13 ≈ $11.0 million\n\nHowever, following the domain note guidance, the compensation expense recognized in 2012 for these new grants would only be a portion of this total fair value, since equity awards typically vest over 3-4 years. Using a conservative estimate of fair value ÷ 4:\n\nYear-1 recognized expense ≈ $11.0 million ÷ 4 = $2.75 million\n\n**Comparison:**\n$3.3 million (achieved milestones) vs ~$2.75 million (conservative estimate for new grant expense)\n\nSince $3.3 million exceeds the conservative estimate of ~$2.75 million for the expense recognized on new grants during 2012:\n\nyes",
+    "prediction": "**Left side (A):** The document explicitly states: \"during the year ended march 31, 2012, the company has recorded **$3.3 million** in stock-based compensation expense for equity awards in which the prescribed performance milestones have been achieved or are probable of being achieved.\"\n\n**Right side (B):** Equity granted during the year: 607,000 shares at $18.13 per share grant-date fair value.\n\nTotal grant-date fair value = 607 × $18.13 thousand = multiply(607, 18.13) = $11,004.91 thousand ≈ **$11.0 million**\n\nYear-1 recognized expense (conservative estimate using ÷4): divide(11.0049, 4) ≈ **$2.75 million**\n\n**Comparison:**\n- A = $3.3 million (milestones achieved/probable)\n- B ≈ $2.75 million (conservative year-1 recognized expense for grants during the year)\n\n$3.3 million > $2.75 million → A exceeds B.\n\nyes",
     "prediction_error": null,
     "metrics": {
       "relaxed_exact_match": 1.0,
       "exact_match": 1.0,
-      "f1": 0.010989010989010988
-    },
-    "scorer": {
-      "label": "PASS",
-      "note": ""
+      "f1": 0.01785714285714286
     },
     "scorer_label": "PASS",
     "scorer_note": ""
@@ -58,21 +52,18 @@
       "answer": "41932.20339",
       "score": null,
       "query_id": 2,
-      "corpus_id": "AAL/2018/page_13.pdf-2"
+      "corpus_id": "AAL/2018/page_13.pdf-2",
+      "program": "divide(9896, 23.6%)"
     },
     "input_text": {
       "query": "what was the total operating expenses in 2018 in millions"
     },
-    "prediction": "Looking at the documents, I need to find the total operating expenses for 2018. I don't see a direct \"Total operating expenses\" line item in the provided context.\n\nHowever, I can see from the table that in 2018:\n- Aircraft fuel expense was $9,896 million\n- This represented 23.6% of total operating expenses\n\nUsing the formula: total = component / (percent/100)\n\ndivide(9896, 23.6%)\n\n**Numerical answer (from program execution): 41932.20338983051**",
+    "prediction": "From Document 6, for 2018:\n- Aircraft fuel expense: $9,896 million\n- Percent of total operating expenses: 23.6%\n\nSince no direct \"Total operating expenses\" line is provided in the context, I'll back-calculate:\n\ndivide(9896, 23.6%)\n\nTotal operating expenses in 2018 = 9896 / 0.236 = **$41,932.2 million**\n\n**Numerical answer (from program execution): 41932.20339**",
     "prediction_error": null,
     "metrics": {
       "relaxed_exact_match": 1.0,
       "exact_match": 1.0,
-      "f1": 0.0
-    },
-    "scorer": {
-      "label": "PASS",
-      "note": ""
+      "f1": 0.039999999999999994
     },
     "scorer_label": "PASS",
     "scorer_note": ""

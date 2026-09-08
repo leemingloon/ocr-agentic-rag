@@ -50,5 +50,31 @@
         ]
       }
     }
+  },
+  {
+    "timestamp": "2026-09-02T14:35:07.007234+00:00",
+    "threshold": 0.7,
+    "datasets": {
+      "FUNSD": {
+        "final_metric": 0.9714369672418031,
+        "passed": true,
+        "history": [
+          {
+            "iteration": 0,
+            "word_recall_mean": 0.9714369672418031
+          }
+        ]
+      },
+      "SROIE": {
+        "final_metric": 0.9602330293819655,
+        "passed": true,
+        "history": [
+          {
+            "iteration": 0,
+            "entity_match_mean": 0.9602330293819655
+          }
+        ]
+      }
+    }
   }
 ]

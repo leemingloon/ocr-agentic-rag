@@ -4,9 +4,9 @@
   "weighted_metrics": {
     "relaxed_exact_match": "0.8475 (339/400)",
     "exact_match": "0.8100 (324/400)",
-    "f1": 0.0191
+    "f1": 0.0192
   },
-  "timestamp": "2026-03-15T01:35:41.198842+08:00",
+  "timestamp": "2026-09-02T22:35:13.647203+08:00",
   "splits": [
     "test",
     "train"
@@ -27,7 +27,7 @@
       "metrics": {
         "relaxed_exact_match": "0.9200 (184/200)",
         "exact_match": "0.9050 (181/200)",
-        "f1": 0.0225
+        "f1": 0.0227
       }
     }
   ]
